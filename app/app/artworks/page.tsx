@@ -9,6 +9,8 @@ export const metadata: Metadata = {
     "Browse all public domain artworks in our searchable, SEO-optimized gallery.",
 };
 
+export const dynamic = "force-dynamic";
+
 export default async function ArtworksPage() {
   const artworks = await getArtworks();
 
