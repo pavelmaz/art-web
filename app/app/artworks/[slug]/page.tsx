@@ -1,17 +1,14 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
-import { getArtworkBySlug, getArtworks } from "@/lib/artworks";
+import { getArtworkBySlug } from "@/lib/artworks";
 import { absoluteUrl } from "@/lib/utils";
 
 type ArtworkPageProps = {
   params: Promise<{ slug: string }>;
 };
 
-export async function generateStaticParams() {
-  const artworks = await getArtworks();
-  return artworks.map((artwork) => ({ slug: artwork.slug }));
-}
+export const dynamic = "force-dynamic";
 
 export async function generateMetadata({ params }: ArtworkPageProps): Promise<Metadata> {
   const { slug } = await params;
