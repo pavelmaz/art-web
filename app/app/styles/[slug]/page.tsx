@@ -3,17 +3,14 @@ import { notFound } from "next/navigation";
 
 import { ArtworkGrid } from "@/components/ArtworkGrid";
 import { getArtworksByStyle } from "@/lib/artworks";
-import { getStyleBySlug, getStyles } from "@/lib/styles";
+import { getStyleBySlug } from "@/lib/styles";
 import { absoluteUrl } from "@/lib/utils";
 
 type StylePageProps = {
   params: Promise<{ slug: string }>;
 };
 
-export async function generateStaticParams() {
-  const styles = await getStyles();
-  return styles.map((style) => ({ slug: style.slug }));
-}
+export const dynamic = "force-dynamic";
 
 export async function generateMetadata({ params }: StylePageProps): Promise<Metadata> {
   const { slug } = await params;

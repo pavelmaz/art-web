@@ -10,6 +10,8 @@ export const metadata: Metadata = {
     "Discover iconic public domain paintings and illustrations in a fast, SEO-focused online gallery.",
 };
 
+export const dynamic = "force-dynamic";
+
 export default async function HomePage() {
   const artworks = await getArtworks();
   const featuredArtworks = artworks.slice(0, 6);
