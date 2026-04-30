@@ -5,7 +5,7 @@ export async function getArtworks(): Promise<Artwork[]> {
   const { data, error } = await supabase
     .from("artworks")
     .select(
-      "id, slug, title, artist_name, year, image_url, style_slug, style_name, description, source_url"
+      "id, slug, title, artist_display, year, image_url, style_slug, style_name, description, source_url"
     )
     .order("title", { ascending: true });
 
@@ -17,7 +17,7 @@ export async function getArtworks(): Promise<Artwork[]> {
     id: item.id,
     slug: item.slug,
     title: item.title,
-    artistName: item.artist_name,
+    artistName: item.artist_display,
     year: item.year,
     imageUrl: item.image_url,
     styleSlug: item.style_slug,
@@ -31,7 +31,7 @@ export async function getArtworkBySlug(slug: string): Promise<Artwork | null> {
   const { data, error } = await supabase
     .from("artworks")
     .select(
-      "id, slug, title, artist_name, year, image_url, style_slug, style_name, description, source_url"
+      "id, slug, title, artist_display, year, image_url, style_slug, style_name, description, source_url"
     )
     .eq("slug", slug)
     .single();
@@ -48,7 +48,7 @@ export async function getArtworkBySlug(slug: string): Promise<Artwork | null> {
     id: data.id,
     slug: data.slug,
     title: data.title,
-    artistName: data.artist_name,
+    artistName: data.artist_display,
     year: data.year,
     imageUrl: data.image_url,
     styleSlug: data.style_slug,
@@ -62,7 +62,7 @@ export async function getArtworksByStyle(styleSlug: string): Promise<Artwork[]> 
   const { data, error } = await supabase
     .from("artworks")
     .select(
-      "id, slug, title, artist_name, year, image_url, style_slug, style_name, description, source_url"
+      "id, slug, title, artist_display, year, image_url, style_slug, style_name, description, source_url"
     )
     .eq("style_slug", styleSlug)
     .order("title", { ascending: true });
@@ -75,7 +75,7 @@ export async function getArtworksByStyle(styleSlug: string): Promise<Artwork[]> 
     id: item.id,
     slug: item.slug,
     title: item.title,
-    artistName: item.artist_name,
+    artistName: item.artist_display,
     year: item.year,
     imageUrl: item.image_url,
     styleSlug: item.style_slug,
