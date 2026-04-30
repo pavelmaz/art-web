@@ -5,7 +5,7 @@ export async function getArtworks(): Promise<Artwork[]> {
   const { data, error } = await supabase
     .from("artworks")
     .select(
-      "id, slug, title, artist_display, year, image_url, style_slug, style_name, description, source_url"
+      "id, slug, title, artist_display, date_display, image_url, style_slug, style_name, description, source_url"
     )
     .order("title", { ascending: true });
 
@@ -18,7 +18,7 @@ export async function getArtworks(): Promise<Artwork[]> {
     slug: item.slug,
     title: item.title,
     artistName: item.artist_display,
-    year: item.year,
+    dateDisplay: item.date_display,
     imageUrl: item.image_url,
     styleSlug: item.style_slug,
     styleName: item.style_name,
@@ -31,7 +31,7 @@ export async function getArtworkBySlug(slug: string): Promise<Artwork | null> {
   const { data, error } = await supabase
     .from("artworks")
     .select(
-      "id, slug, title, artist_display, year, image_url, style_slug, style_name, description, source_url"
+      "id, slug, title, artist_display, date_display, image_url, style_slug, style_name, description, source_url"
     )
     .eq("slug", slug)
     .single();
@@ -49,7 +49,7 @@ export async function getArtworkBySlug(slug: string): Promise<Artwork | null> {
     slug: data.slug,
     title: data.title,
     artistName: data.artist_display,
-    year: data.year,
+    dateDisplay: data.date_display,
     imageUrl: data.image_url,
     styleSlug: data.style_slug,
     styleName: data.style_name,
@@ -62,7 +62,7 @@ export async function getArtworksByStyle(styleSlug: string): Promise<Artwork[]> 
   const { data, error } = await supabase
     .from("artworks")
     .select(
-      "id, slug, title, artist_display, year, image_url, style_slug, style_name, description, source_url"
+      "id, slug, title, artist_display, date_display, image_url, style_slug, style_name, description, source_url"
     )
     .eq("style_slug", styleSlug)
     .order("title", { ascending: true });
@@ -76,7 +76,7 @@ export async function getArtworksByStyle(styleSlug: string): Promise<Artwork[]> 
     slug: item.slug,
     title: item.title,
     artistName: item.artist_display,
-    year: item.year,
+    dateDisplay: item.date_display,
     imageUrl: item.image_url,
     styleSlug: item.style_slug,
     styleName: item.style_name,

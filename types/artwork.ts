@@ -4,7 +4,7 @@ export type Artwork = {
   title: string;
   artistName: string;
   artistDisplay?: string;
-  year?: number;
+  dateDisplay?: string | null;
   imageUrl: string;
   imageId?: string | null;
   museum?: string | null;
