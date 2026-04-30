@@ -5,7 +5,7 @@ export async function getArtworks(): Promise<Artwork[]> {
   const { data, error } = await supabase
     .from("artworks")
     .select(
-      "id, slug, title, artist_display, date_display, image_url, style_slug, style_name, description, source_url"
+      "id, slug, title, artist_display, date_display, image_id, url, style_slug, style_name, description, source_url"
     )
     .order("title", { ascending: true });
 
@@ -19,7 +19,7 @@ export async function getArtworks(): Promise<Artwork[]> {
     title: item.title,
     artistName: item.artist_display,
     dateDisplay: item.date_display,
-    imageUrl: item.image_url,
+    imageUrl: item.url || item.image_id,
     styleSlug: item.style_slug,
     styleName: item.style_name,
     description: item.description,
@@ -31,7 +31,7 @@ export async function getArtworkBySlug(slug: string): Promise<Artwork | null> {
   const { data, error } = await supabase
     .from("artworks")
     .select(
-      "id, slug, title, artist_display, date_display, image_url, style_slug, style_name, description, source_url"
+      "id, slug, title, artist_display, date_display, image_id, url, style_slug, style_name, description, source_url"
     )
     .eq("slug", slug)
     .single();
@@ -50,7 +50,7 @@ export async function getArtworkBySlug(slug: string): Promise<Artwork | null> {
     title: data.title,
     artistName: data.artist_display,
     dateDisplay: data.date_display,
-    imageUrl: data.image_url,
+    imageUrl: data.url || data.image_id,
     styleSlug: data.style_slug,
     styleName: data.style_name,
     description: data.description,
@@ -62,7 +62,7 @@ export async function getArtworksByStyle(styleSlug: string): Promise<Artwork[]> 
   const { data, error } = await supabase
     .from("artworks")
     .select(
-      "id, slug, title, artist_display, date_display, image_url, style_slug, style_name, description, source_url"
+      "id, slug, title, artist_display, date_display, image_id, url, style_slug, style_name, description, source_url"
     )
     .eq("style_slug", styleSlug)
     .order("title", { ascending: true });
@@ -77,7 +77,7 @@ export async function getArtworksByStyle(styleSlug: string): Promise<Artwork[]> 
     title: item.title,
     artistName: item.artist_display,
     dateDisplay: item.date_display,
-    imageUrl: item.image_url,
+    imageUrl: item.url || item.image_id,
     styleSlug: item.style_slug,
     styleName: item.style_name,
     description: item.description,
