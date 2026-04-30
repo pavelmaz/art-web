@@ -1,65 +1,99 @@
-import Image from "next/image";
+import Link from "next/link";
 
-export default function Home() {
+import { ArtworkGrid } from "@/components/ArtworkGrid";
+import { supabase } from "@/lib/supabase";
+import type { Artwork } from "@/types/artwork";
+
+function toImageUrl(imageId: string | null): string {
+  if (!imageId) {
+    return "";
+  }
+
+  if (imageId.startsWith("http://") || imageId.startsWith("https://")) {
+    return imageId;
+  }
+
+  return `https://www.artic.edu/iiif/2/${imageId}/full/843,/0/default.jpg`;
+}
+
+export default async function HomePage() {
+  const orderedQuery = await supabase
+    .from("artworks")
+    .select("id, title, slug, artist_display, image_id, url, museum, style_title, genre_title, score")
+    .order("score", { ascending: false })
+    .limit(12);
+
+  let rows = orderedQuery.data ?? [];
+
+  if (orderedQuery.error?.code === "57014") {
+    const fallbackQuery = await supabase
+      .from("artworks")
+      .select("id, title, slug, artist_display, image_id, url, museum, style_title, genre_title, score")
+      .limit(300);
+
+    if (fallbackQuery.error) {
+      return <p>Error loading data</p>;
+    }
+
+    rows = (fallbackQuery.data ?? []).sort((a, b) => (b.score ?? 0) - (a.score ?? 0)).slice(0, 12);
+  } else if (orderedQuery.error) {
+    return <p>Error loading data</p>;
+  }
+
+  const artworks: Artwork[] = rows.map((item) => ({
+    id: item.id,
+    title: item.title,
+    slug: item.slug,
+    artistName: item.artist_display ?? "Unknown artist",
+    artistDisplay: item.artist_display ?? undefined,
+    imageUrl: toImageUrl(item.image_id),
+    imageId: item.image_id,
+    museum: item.museum,
+    styleTitle: item.style_title,
+    genreTitle: item.genre_title,
+    score: item.score,
+    url: item.url,
+    styleSlug: "unknown",
+    styleName: item.style_title ?? "Unknown style",
+    sourceUrl: item.url ?? undefined,
+  }));
+
+  if (!artworks.length) {
+    return <p>No artworks found</p>;
+  }
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
+    <div className="space-y-8">
+      <section className="space-y-3">
+        <h1 className="text-3xl font-bold tracking-tight">Free Public Domain Artworks</h1>
+        <p className="max-w-3xl text-neutral-700">
+          Explore timeless paintings, illustrations, and museum masterpieces available in the
+          public domain.
+        </p>
+      </section>
+
+      <section className="flex flex-wrap gap-4">
+        <Link href="/artworks" className="underline">
+          Artworks
+        </Link>
+        <Link href="/styles" className="underline">
+          Styles
+        </Link>
+        <Link href="/genres" className="underline">
+          Genres
+        </Link>
+        <Link href="/artists" className="underline">
+          Artists
+        </Link>
+        <Link href="/museums" className="underline">
+          Museums
+        </Link>
+      </section>
+
+      <section className="space-y-3">
+        <h2 className="text-2xl font-semibold tracking-tight">Featured Artworks</h2>
+        <ArtworkGrid artworks={artworks} />
+      </section>
     </div>
   );
 }
