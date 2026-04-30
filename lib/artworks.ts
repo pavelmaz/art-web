@@ -6,7 +6,7 @@ export async function getArtworks(): Promise<Artwork[]> {
   const { data, error } = await supabase
     .from("artworks")
     .select(
-      "id, slug, title, artist_display, date_display, image_id, url, style_title, description, source_url"
+      "id, slug, title, artist_display, date_display, image_id, url, style_title, description, source"
     )
     .order("title", { ascending: true });
 
@@ -24,7 +24,7 @@ export async function getArtworks(): Promise<Artwork[]> {
     styleSlug: slugify(item.style_title ?? "unknown-style"),
     styleName: item.style_title ?? "Unknown style",
     description: item.description,
-    sourceUrl: item.source_url,
+    sourceUrl: item.source,
   })) as Artwork[];
 }
 
@@ -32,7 +32,7 @@ export async function getArtworkBySlug(slug: string): Promise<Artwork | null> {
   const { data, error } = await supabase
     .from("artworks")
     .select(
-      "id, slug, title, artist_display, date_display, image_id, url, style_title, description, source_url"
+      "id, slug, title, artist_display, date_display, image_id, url, style_title, description, source"
     )
     .eq("slug", slug)
     .single();
@@ -55,7 +55,7 @@ export async function getArtworkBySlug(slug: string): Promise<Artwork | null> {
     styleSlug: slugify(data.style_title ?? "unknown-style"),
     styleName: data.style_title ?? "Unknown style",
     description: data.description,
-    sourceUrl: data.source_url,
+    sourceUrl: data.source,
   };
 }
 
@@ -63,7 +63,7 @@ export async function getArtworksByStyle(styleSlug: string): Promise<Artwork[]> 
   const { data, error } = await supabase
     .from("artworks")
     .select(
-      "id, slug, title, artist_display, date_display, image_id, url, style_title, description, source_url"
+      "id, slug, title, artist_display, date_display, image_id, url, style_title, description, source"
     )
     .order("title", { ascending: true });
 
@@ -81,7 +81,7 @@ export async function getArtworksByStyle(styleSlug: string): Promise<Artwork[]> 
     styleSlug: slugify(item.style_title ?? "unknown-style"),
     styleName: item.style_title ?? "Unknown style",
     description: item.description,
-    sourceUrl: item.source_url,
+    sourceUrl: item.source,
   })) as Artwork[];
 
   return artworks.filter((artwork) => artwork.styleSlug === styleSlug);

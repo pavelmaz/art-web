@@ -4,7 +4,7 @@ import type { Style } from "@/types/style";
 export async function getStyles(): Promise<Style[]> {
   const { data, error } = await supabase
     .from("styles")
-    .select("id, slug, name, description")
+    .select("name, slug, description")
     .order("name", { ascending: true });
 
   if (error) {
@@ -17,7 +17,7 @@ export async function getStyles(): Promise<Style[]> {
 export async function getStyleBySlug(slug: string): Promise<Style | null> {
   const { data, error } = await supabase
     .from("styles")
-    .select("id, slug, name, description")
+    .select("name, slug, description")
     .eq("slug", slug)
     .single();
 

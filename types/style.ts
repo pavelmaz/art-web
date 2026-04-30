@@ -1,6 +1,5 @@
 export type Style = {
-  id: string;
-  slug: string;
   name: string;
+  slug: string;
   description?: string;
 };

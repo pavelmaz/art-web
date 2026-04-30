@@ -7,9 +7,8 @@ import { supabase } from "@/lib/supabase";
 import type { Artwork } from "@/types/artwork";
 
 type StyleRow = {
-  id: string;
-  slug: string;
   name: string;
+  slug: string;
   description: string | null;
 };
 
@@ -64,7 +63,11 @@ function toImageUrl(imageId: string | null): string {
 }
 
 async function getStyleBySlug(slug: string): Promise<StyleRow | null> {
-  const { data, error } = await supabase.from("styles").select("*").eq("slug", slug).single();
+  const { data, error } = await supabase
+    .from("styles")
+    .select("name, slug, description")
+    .eq("slug", slug)
+    .single();
 
   if (error) {
     if (error.code === "PGRST116") {
