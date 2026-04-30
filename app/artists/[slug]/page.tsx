@@ -56,17 +56,32 @@ export async function generateMetadata({ params }: ArtistPageProps): Promise<Met
 export default async function ArtistPage({ params }: ArtistPageProps) {
   const { slug } = await params;
 
-  const { data, error } = await supabase
+  const primaryQuery = await supabase
     .from("artworks")
     .select("id, title, slug, artist_display, image_id, url, museum, style_title, genre_title, score")
     .not("artist_display", "is", null)
-    .limit(5000);
+    .order("score", { ascending: false })
+    .limit(3000);
 
-  if (error) {
+  let rows = (primaryQuery.data as ArtworkRow[] | null) ?? [];
+
+  if (primaryQuery.error?.code === "57014") {
+    const fallbackQuery = await supabase
+      .from("artworks")
+      .select("id, title, slug, artist_display, image_id, url, museum, style_title, genre_title, score")
+      .not("artist_display", "is", null)
+      .limit(8000);
+
+    if (fallbackQuery.error) {
+      return <p>Error loading data</p>;
+    }
+
+    rows = (fallbackQuery.data as ArtworkRow[] | null) ?? [];
+  } else if (primaryQuery.error) {
     return <p>Error loading data</p>;
   }
 
-  const matchedRows = ((data as ArtworkRow[] | null) ?? [])
+  const matchedRows = rows
     .filter((item) => item.artist_display && slugify(item.artist_display) === slug)
     .sort((a, b) => (b.score ?? 0) - (a.score ?? 0))
     .slice(0, 30);

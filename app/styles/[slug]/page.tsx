@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 
 import { ArtworkGrid } from "@/components/ArtworkGrid";
 import { supabase } from "@/lib/supabase";
+import { slugify } from "@/lib/utils";
 import type { Artwork } from "@/types/artwork";
 
 type StyleRow = {
@@ -144,6 +145,21 @@ export default async function StyleDetailPage({ params, searchParams }: StylePag
     }
   } else if (orderedQuery.error) {
     return <p>Error loading data</p>;
+  }
+
+  if (!rows.length) {
+    const slugFallbackQuery = await supabase
+      .from("artworks")
+      .select("id, title, slug, artist_display, image_id, url, museum, style_title, genre_title, score")
+      .not("style_title", "is", null)
+      .limit(5000);
+
+    if (!slugFallbackQuery.error) {
+      rows = ((slugFallbackQuery.data as ArtworkRow[] | null) ?? [])
+        .filter((item) => item.style_title && slugify(item.style_title) === slug)
+        .sort((a, b) => (b.score ?? 0) - (a.score ?? 0))
+        .slice(from, to + 1);
+    }
   }
 
   const artworks: Artwork[] = rows.map((item) => ({
