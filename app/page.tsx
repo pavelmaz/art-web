@@ -1,5 +1,3 @@
-import Link from "next/link";
-
 import { ArtworkGrid } from "@/components/ArtworkGrid";
 import { supabase } from "@/lib/supabase";
 import type { Artwork } from "@/types/artwork";
@@ -18,7 +16,7 @@ function toImageUrl(imageId: string | null): string {
 
 export default async function HomePage() {
   const orderedQuery = await supabase
-    .from("artworks")
+    .from("daily_artworks")
     .select("id, title, slug, artist_display, image_id, url, museum, style_title, genre_title, score")
     .order("score", { ascending: false })
     .limit(12);
@@ -27,7 +25,7 @@ export default async function HomePage() {
 
   if (orderedQuery.error?.code === "57014") {
     const fallbackQuery = await supabase
-      .from("artworks")
+      .from("daily_artworks")
       .select("id, title, slug, artist_display, image_id, url, museum, style_title, genre_title, score")
       .limit(300);
 
@@ -69,34 +67,14 @@ export default async function HomePage() {
         style={{ backgroundImage: "url('/hero-bg.png')" }}
       >
         <div className="absolute inset-0 bg-black/45" />
-        <div className="relative mx-auto max-w-7xl px-6 text-center">
-          <h1 className="text-5xl font-bold tracking-tight text-white">Discover Public Domain Art</h1>
-          <p className="mx-auto mt-4 max-w-2xl text-lg text-[#d0d0d0]">
-            Browse and download thousands of museum masterpieces, free for personal and commercial
-            use
+        <div className="relative mx-auto max-w-7xl px-6 text-left">
+          <h1 className="text-5xl font-bold tracking-tight text-white">
+            Free Public Domain Art — Classic Paintings &amp; Illustrations
+          </h1>
+          <p className="mt-4 max-w-2xl text-lg text-[#d0d0d0]">
+            Browse thousands of museum masterpieces free to download, share, and use for personal
+            or commercial projects.
           </p>
-        </div>
-      </section>
-
-      <section className="w-full border-b border-[#e8e6e1] bg-white">
-        <div className="mx-auto max-w-7xl px-6">
-          <div className="flex flex-wrap">
-            <Link href="/artworks" className="inline-block px-5 py-4 text-sm text-[#6b6b6b] hover:text-[#1a1a1a]">
-              Artworks
-            </Link>
-            <Link href="/styles" className="inline-block px-5 py-4 text-sm text-[#6b6b6b] hover:text-[#1a1a1a]">
-              Styles
-            </Link>
-            <Link href="/genres" className="inline-block px-5 py-4 text-sm text-[#6b6b6b] hover:text-[#1a1a1a]">
-              Genres
-            </Link>
-            <Link href="/artists" className="inline-block px-5 py-4 text-sm text-[#6b6b6b] hover:text-[#1a1a1a]">
-              Artists
-            </Link>
-            <Link href="/museums" className="inline-block px-5 py-4 text-sm text-[#6b6b6b] hover:text-[#1a1a1a]">
-              Museums
-            </Link>
-          </div>
         </div>
       </section>
 
