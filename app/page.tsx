@@ -63,20 +63,52 @@ export default async function HomePage() {
     return <p>No artworks found</p>;
   }
 
+  type FeaturedArtistRow = {
+    display_artists?: unknown;
+    artist_display: string | null;
+    image_id: string | null;
+    url: string | null;
+  };
+
   const featuredArtistsQuery = await supabase
     .from("daily_artworks")
     .select("display_artists, artist_display, image_id, url")
     .limit(500);
 
-  const featuredArtistRows =
-    (featuredArtistsQuery.data as
-      | Array<{
-          display_artists: string[] | string | null;
-          artist_display: string | null;
-          image_id: string | null;
-          url: string | null;
-        }>
-      | null) ?? [];
+  let featuredArtistRows =
+    (featuredArtistsQuery.data as FeaturedArtistRow[] | null) ?? [];
+
+  // Fallback 1: some datasets may not expose display_artists.
+  if (!featuredArtistRows.length || featuredArtistsQuery.error) {
+    const fallbackDailyQuery = await supabase
+      .from("daily_artworks")
+      .select("artist_display, image_id, url")
+      .not("artist_display", "is", null)
+      .limit(1000);
+
+    if (!fallbackDailyQuery.error) {
+      featuredArtistRows =
+        ((fallbackDailyQuery.data as
+          | Array<{ artist_display: string | null; image_id: string | null; url: string | null }>
+          | null) ?? []).map((row) => ({ ...row, display_artists: null }));
+    }
+  }
+
+  // Fallback 2: ensure section still shows if daily_artworks is empty.
+  if (!featuredArtistRows.length) {
+    const fallbackArtworksQuery = await supabase
+      .from("artworks")
+      .select("artist_display, image_id, url")
+      .not("artist_display", "is", null)
+      .limit(1000);
+
+    if (!fallbackArtworksQuery.error) {
+      featuredArtistRows =
+        ((fallbackArtworksQuery.data as
+          | Array<{ artist_display: string | null; image_id: string | null; url: string | null }>
+          | null) ?? []).map((row) => ({ ...row, display_artists: null }));
+    }
+  }
 
   const featuredArtistsMap = new Map<
     string,
@@ -86,9 +118,14 @@ export default async function HomePage() {
   for (const row of featuredArtistRows) {
     const names =
       Array.isArray(row.display_artists)
-        ? row.display_artists
+        ? row.display_artists.filter((value): value is string => typeof value === "string")
         : typeof row.display_artists === "string"
           ? row.display_artists.split(",")
+          : typeof row.display_artists === "object" &&
+              row.display_artists !== null &&
+              "name" in row.display_artists &&
+              typeof (row.display_artists as { name?: unknown }).name === "string"
+            ? [(row.display_artists as { name: string }).name]
           : row.artist_display
             ? [row.artist_display]
             : [];
@@ -124,6 +161,41 @@ export default async function HomePage() {
   const featuredArtists = Array.from(featuredArtistsMap.values())
     .sort((a, b) => b.count - a.count)
     .slice(0, 10);
+  const safeFeaturedArtists =
+    featuredArtists.length > 0
+      ? featuredArtists
+      : Array.from(
+          rows.reduce(
+            (map, item) => {
+              const name = item.artist_display?.trim();
+              if (!name) {
+                return map;
+              }
+              const key = name.toLowerCase();
+              const existing = map.get(key);
+              if (!existing) {
+                map.set(key, {
+                  name,
+                  count: 1,
+                  image_id: item.image_id ?? null,
+                  url: item.url ?? null,
+                });
+              } else {
+                existing.count += 1;
+                if (!existing.url && item.url) {
+                  existing.url = item.url;
+                }
+                if (!existing.image_id && item.image_id) {
+                  existing.image_id = item.image_id;
+                }
+              }
+              return map;
+            },
+            new Map<string, { name: string; count: number; image_id: string | null; url: string | null }>()
+          ).values()
+        )
+          .sort((a, b) => b.count - a.count)
+          .slice(0, 10);
 
   return (
     <div>
@@ -145,12 +217,12 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {featuredArtists.length ? (
-        <section className="w-full bg-[#faf9f7] py-8">
-          <div className="mx-auto max-w-7xl px-6">
-            <h2 className="mb-4 text-sm font-medium text-[#4a4a4a]">Featured artists</h2>
+      <section className="w-full bg-[#faf9f7] py-8">
+        <div className="mx-auto max-w-7xl px-6">
+          <h2 className="mb-4 text-sm font-medium text-[#4a4a4a]">Featured artists</h2>
+          {safeFeaturedArtists.length ? (
             <div className="flex gap-3 overflow-x-auto pb-2">
-              {featuredArtists.map((artist) => {
+              {safeFeaturedArtists.map((artist) => {
                 const backgroundImageUrl = artworkImageUrl({
                   url: artist.url,
                   image_id: artist.image_id,
@@ -180,9 +252,11 @@ export default async function HomePage() {
                 );
               })}
             </div>
-          </div>
-        </section>
-      ) : null}
+          ) : (
+            <p className="text-sm text-[#6b6b6b]">No featured artists available yet.</p>
+          )}
+        </div>
+      </section>
 
       <section className="w-full bg-[#faf9f7] py-12">
         <div className="mx-auto max-w-7xl px-6">
