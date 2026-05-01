@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import { ArtworkGrid } from "@/components/ArtworkGrid";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { supabase } from "@/lib/supabase";
-import { slugify } from "@/lib/utils";
+import { absoluteUrl, artworkImageUrl, slugify } from "@/lib/utils";
 import type { Artwork } from "@/types/artwork";
 
 type ArtistPageProps = {
@@ -46,11 +46,35 @@ function unslugifyArtist(slug: string): string {
 
 export async function generateMetadata({ params }: ArtistPageProps): Promise<Metadata> {
   const { slug } = await params;
-  const fallbackName = unslugifyArtist(slug);
+  const artistName = unslugifyArtist(slug);
+  const siteName = process.env.NEXT_PUBLIC_SITE_NAME ?? "Art Gallery";
+
+  const ogQuery = await supabase
+    .from("artworks")
+    .select("url, image_id, artist_display")
+    .not("artist_display", "is", null)
+    .limit(5000);
+
+  const ogImageSource =
+    ((ogQuery.data as Array<{ url: string | null; image_id: string | null; artist_display: string | null }> | null) ?? [])
+      .find((item) => item.artist_display && slugify(item.artist_display) === slug) ?? null;
+  const ogImage = ogImageSource ? artworkImageUrl(ogImageSource) : "";
+
+  const title = `${artistName} — Artworks & Biography | ${siteName}`;
+  const description = `Explore all public domain artworks by ${artistName}. Free to download, share, and use commercially.`;
 
   return {
-    title: `${fallbackName} Artworks – Public Domain Art`,
-    description: `Browse public domain artworks by ${fallbackName}.`,
+    title,
+    description,
+    alternates: {
+      canonical: absoluteUrl(`/artists/${slug}`),
+    },
+    openGraph: {
+      title,
+      description,
+      type: "profile",
+      images: ogImage ? [ogImage] : undefined,
+    },
   };
 }
 

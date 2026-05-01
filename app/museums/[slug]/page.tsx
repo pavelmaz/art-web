@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 import { ArtworkGrid } from "@/components/ArtworkGrid";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { supabase } from "@/lib/supabase";
+import { absoluteUrl, artworkImageUrl } from "@/lib/utils";
 import type { Artwork } from "@/types/artwork";
 
 type MuseumPageProps = {
@@ -61,10 +62,30 @@ function getSeoDescription(museumName: string): string {
 export async function generateMetadata({ params }: MuseumPageProps): Promise<Metadata> {
   const { slug } = await params;
   const museumName = unslugifyMuseum(slug);
+  const siteName = process.env.NEXT_PUBLIC_SITE_NAME ?? "Art Gallery";
+
+  const ogQuery = await supabase
+    .from("artworks")
+    .select("url, image_id")
+    .eq("museum", museumName)
+    .limit(1);
+  const ogImageSource = ((ogQuery.data as Array<{ url: string | null; image_id: string | null }> | null) ?? [])[0] ?? null;
+  const ogImage = ogImageSource ? artworkImageUrl(ogImageSource) : "";
+
+  const title = `Artworks from ${museumName} — Public Domain Collection | ${siteName}`;
+  const description = `Browse public domain artworks from ${museumName}. Free to download and use commercially.`;
 
   return {
-    title: `${museumName} Artworks – Free Public Domain Art`,
-    description: getSeoDescription(museumName),
+    title,
+    description,
+    alternates: {
+      canonical: absoluteUrl(`/museums/${slug}`),
+    },
+    openGraph: {
+      title,
+      description,
+      images: ogImage ? [ogImage] : undefined,
+    },
   };
 }
 

@@ -3,11 +3,15 @@ import Link from "next/link";
 
 import { ArtworkGrid } from "@/components/ArtworkGrid";
 import { supabase } from "@/lib/supabase";
+import { absoluteUrl } from "@/lib/utils";
 import type { Artwork } from "@/types/artwork";
 
 export const metadata: Metadata = {
   title: "Artworks",
   description: "Browse top-ranked public domain artworks.",
+  alternates: {
+    canonical: absoluteUrl("/artworks"),
+  },
 };
 
 function toImageUrl(imageId: string | null): string {

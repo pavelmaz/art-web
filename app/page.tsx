@@ -63,36 +63,44 @@ export default async function HomePage() {
   }
 
   return (
-    <div className="space-y-8">
-      <section className="space-y-3">
-        <h1 className="text-3xl font-bold tracking-tight">Free Public Domain Artworks</h1>
-        <p className="max-w-3xl text-neutral-700">
-          Explore timeless paintings, illustrations, and museum masterpieces available in the
-          public domain.
-        </p>
+    <div>
+      <section className="w-full bg-[#1a1a1a] py-24">
+        <div className="mx-auto max-w-7xl px-6 text-center">
+          <h1 className="text-5xl font-bold tracking-tight text-white">Discover Public Domain Art</h1>
+          <p className="mx-auto mt-4 max-w-2xl text-lg text-[#999]">
+            Browse and download thousands of museum masterpieces, free for personal and commercial
+            use
+          </p>
+        </div>
       </section>
 
-      <section className="flex flex-wrap gap-4">
-        <Link href="/artworks" className="underline">
-          Artworks
-        </Link>
-        <Link href="/styles" className="underline">
-          Styles
-        </Link>
-        <Link href="/genres" className="underline">
-          Genres
-        </Link>
-        <Link href="/artists" className="underline">
-          Artists
-        </Link>
-        <Link href="/museums" className="underline">
-          Museums
-        </Link>
+      <section className="w-full border-b border-[#e8e6e1] bg-white">
+        <div className="mx-auto max-w-7xl px-6">
+          <div className="flex flex-wrap">
+            <Link href="/artworks" className="inline-block px-5 py-4 text-sm text-[#6b6b6b] hover:text-[#1a1a1a]">
+              Artworks
+            </Link>
+            <Link href="/styles" className="inline-block px-5 py-4 text-sm text-[#6b6b6b] hover:text-[#1a1a1a]">
+              Styles
+            </Link>
+            <Link href="/genres" className="inline-block px-5 py-4 text-sm text-[#6b6b6b] hover:text-[#1a1a1a]">
+              Genres
+            </Link>
+            <Link href="/artists" className="inline-block px-5 py-4 text-sm text-[#6b6b6b] hover:text-[#1a1a1a]">
+              Artists
+            </Link>
+            <Link href="/museums" className="inline-block px-5 py-4 text-sm text-[#6b6b6b] hover:text-[#1a1a1a]">
+              Museums
+            </Link>
+          </div>
+        </div>
       </section>
 
-      <section className="space-y-3">
-        <h2 className="text-2xl font-semibold tracking-tight">Featured Artworks</h2>
-        <ArtworkGrid artworks={artworks} />
+      <section className="w-full bg-[#faf9f7] py-12">
+        <div className="mx-auto max-w-7xl px-6">
+          <h2 className="mb-8 text-xl font-semibold text-[#1a1a1a]">Featured Artworks</h2>
+          <ArtworkGrid artworks={artworks} />
+        </div>
       </section>
     </div>
   );

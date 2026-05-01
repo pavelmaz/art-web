@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { Breadcrumbs } from "@/components/Breadcrumbs";
+import { ArtworkJsonLd } from "@/components/ArtworkJsonLd";
 import { supabase } from "@/lib/supabase";
-import { absoluteUrl, slugify } from "@/lib/utils";
+import { absoluteUrl, artworkImageUrl, generateAltText, slugify } from "@/lib/utils";
 
 type ArtworkRow = {
   id: string;
@@ -25,26 +27,6 @@ type ArtworkRow = {
 type ArtworkPageProps = {
   params: Promise<{ slug: string }>;
 };
-
-function toImageUrl(imageId: string | null): string {
-  if (!imageId) {
-    return "";
-  }
-
-  if (imageId.startsWith("http://") || imageId.startsWith("https://")) {
-    return imageId;
-  }
-
-  return `https://www.artic.edu/iiif/2/${imageId}/full/1200,/0/default.jpg`;
-}
-
-function artworkImageUrl(artwork: Pick<ArtworkRow, "url" | "image_id">): string {
-  const rawUrl = artwork.url?.trim();
-  if (rawUrl) {
-    return rawUrl;
-  }
-  return toImageUrl(artwork.image_id);
-}
 
 function truncateDescription(text: string | null): string {
   if (!text) {
@@ -108,7 +90,7 @@ export async function generateMetadata({ params }: ArtworkPageProps): Promise<Me
     title,
     description,
     alternates: {
-      canonical: absoluteUrl(`/artworks/${artwork.slug}`),
+      canonical: absoluteUrl(`/artworks/${slug}`),
     },
     openGraph: {
       title,
@@ -145,11 +127,16 @@ export default async function ArtworkDetailPage({ params }: ArtworkPageProps) {
       <h1 className="text-3xl font-bold tracking-tight">{artwork.title}</h1>
 
       <Breadcrumbs items={breadcrumbItems} currentPath={`/artworks/${artwork.slug}`} />
+      <ArtworkJsonLd artwork={artwork} />
 
       {imageUrl ? (
-        <img
+        <Image
           src={imageUrl}
-          alt={`${artwork.title} by ${artist}`}
+          alt={generateAltText(artwork)}
+          width={1200}
+          height={900}
+          priority={true}
+          unoptimized
           className="w-full max-w-4xl rounded-lg border border-neutral-200 object-cover"
         />
       ) : (
@@ -206,6 +193,13 @@ export default async function ArtworkDetailPage({ params }: ArtworkPageProps) {
       <section className="max-w-4xl space-y-2">
         <h2 className="text-xl font-semibold">Description</h2>
         <p className="leading-7 text-neutral-700">{artwork.description ?? "-"}</p>
+        {artwork.artist_display?.trim() ? (
+          <p>
+            <Link href={`/artists/${slugify(artwork.artist_display)}`} className="underline">
+              More works by {artwork.artist_display}
+            </Link>
+          </p>
+        ) : null}
       </section>
     </article>
   );

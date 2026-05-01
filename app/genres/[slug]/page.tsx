@@ -5,7 +5,7 @@ import { notFound } from "next/navigation";
 import { ArtworkGrid } from "@/components/ArtworkGrid";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { supabase } from "@/lib/supabase";
-import { slugify } from "@/lib/utils";
+import { absoluteUrl, artworkImageUrl, slugify } from "@/lib/utils";
 import type { Artwork } from "@/types/artwork";
 
 type GenrePageProps = {
@@ -61,10 +61,47 @@ function getSeoDescription(genreName: string): string {
 export async function generateMetadata({ params }: GenrePageProps): Promise<Metadata> {
   const { slug } = await params;
   const genreName = unslugifyGenre(slug);
+  const siteName = process.env.NEXT_PUBLIC_SITE_NAME ?? "Art Gallery";
+  const genreQueryValue = slugToGenreQueryValue(slug);
+
+  const ogQuery = await supabase
+    .from("artworks")
+    .select("url, image_id, genre_title, score")
+    .eq("genre_title", genreQueryValue)
+    .order("score", { ascending: false })
+    .limit(1);
+
+  let ogImageSource: { url: string | null; image_id: string | null; genre_title: string | null } | null =
+    ((ogQuery.data as Array<{ url: string | null; image_id: string | null; genre_title: string | null }> | null) ?? [])[0] ??
+    null;
+
+  if (!ogImageSource) {
+    const fallbackQuery = await supabase
+      .from("artworks")
+      .select("url, image_id, genre_title")
+      .not("genre_title", "is", null)
+      .limit(5000);
+
+    ogImageSource =
+      ((fallbackQuery.data as Array<{ url: string | null; image_id: string | null; genre_title: string | null }> | null) ??
+        []).find((item) => item.genre_title && slugify(item.genre_title) === slug) ?? null;
+  }
+
+  const ogImage = ogImageSource ? artworkImageUrl(ogImageSource) : "";
+  const title = `${genreName} Paintings — Free Public Domain Art | ${siteName}`;
+  const description = `Browse ${genreName} public domain artworks. Free to download, share, and use.`;
 
   return {
-    title: `${genreName} Artworks – Free Public Domain Art`,
-    description: getSeoDescription(genreName),
+    title,
+    description,
+    alternates: {
+      canonical: absoluteUrl(`/genres/${slug}`),
+    },
+    openGraph: {
+      title,
+      description,
+      images: ogImage ? [ogImage] : undefined,
+    },
   };
 }
 
