@@ -1,6 +1,9 @@
 import type { MetadataRoute } from "next";
 
 import { supabase } from "@/lib/supabase";
+
+/** Avoid build-time prerender: paginated Supabase reads exceed statement timeout. */
+export const dynamic = "force-dynamic";
 import { slugify } from "@/lib/utils";
 
 type ArtworkSlugRow = {
@@ -11,11 +14,9 @@ type StyleSlugRow = {
   slug: string | null;
 };
 
-type ValueRow = {
-  genre_title?: string | null;
-  artist_display?: string | null;
-  museum?: string | null;
-};
+const PAGE_SIZE = 1000;
+
+const STATIC_PATHS = ["/", "/artworks", "/styles", "/genres", "/artists", "/museums"] as const;
 
 function getBaseUrl(): string {
   return process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
@@ -25,44 +26,167 @@ function toAbsolute(baseUrl: string, path: string): string {
   return new URL(path, baseUrl).toString();
 }
 
-function uniqueNonEmpty(values: Array<string | null | undefined>): string[] {
-  return Array.from(new Set(values.map((value) => value?.trim()).filter((value): value is string => Boolean(value))));
+async function fetchAllArtworkSlugs(): Promise<string[]> {
+  const slugs: string[] = [];
+  let from = 0;
+
+  while (true) {
+    const { data, error } = await supabase
+      .from("artworks")
+      .select("slug")
+      .not("slug", "is", null)
+      .range(from, from + PAGE_SIZE - 1);
+
+    if (error) {
+      throw error;
+    }
+
+    const rows = (data as ArtworkSlugRow[] | null) ?? [];
+    for (const row of rows) {
+      if (row.slug?.trim()) {
+        slugs.push(row.slug.trim());
+      }
+    }
+
+    if (rows.length < PAGE_SIZE) {
+      break;
+    }
+    from += PAGE_SIZE;
+  }
+
+  return Array.from(new Set(slugs));
+}
+
+async function fetchAllStyleSlugs(): Promise<string[]> {
+  const slugs: string[] = [];
+  let from = 0;
+
+  while (true) {
+    const { data, error } = await supabase
+      .from("styles")
+      .select("slug")
+      .not("slug", "is", null)
+      .range(from, from + PAGE_SIZE - 1);
+
+    if (error) {
+      throw error;
+    }
+
+    const rows = (data as StyleSlugRow[] | null) ?? [];
+    for (const row of rows) {
+      if (row.slug?.trim()) {
+        slugs.push(row.slug.trim());
+      }
+    }
+
+    if (rows.length < PAGE_SIZE) {
+      break;
+    }
+    from += PAGE_SIZE;
+  }
+
+  return Array.from(new Set(slugs));
+}
+
+async function fetchAllArtworkColumnValues(column: "genre_title" | "artist_display" | "museum"): Promise<string[]> {
+  const values: string[] = [];
+  let from = 0;
+
+  while (true) {
+    const { data, error } = await supabase
+      .from("artworks")
+      .select(column)
+      .not(column, "is", null)
+      .range(from, from + PAGE_SIZE - 1);
+
+    if (error) {
+      throw error;
+    }
+
+    const rows = (data as Record<string, string | null>[] | null) ?? [];
+    for (const row of rows) {
+      const value = row[column];
+      if (typeof value === "string" && value.trim()) {
+        values.push(value.trim());
+      }
+    }
+
+    if (rows.length < PAGE_SIZE) {
+      break;
+    }
+    from += PAGE_SIZE;
+  }
+
+  return Array.from(new Set(values));
 }
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = getBaseUrl();
+  const now = new Date();
 
-  const staticPaths = ["/", "/artworks", "/styles", "/genres", "/artists", "/museums"];
-
-  const [artworksResult, stylesResult, genresResult, artistsResult, museumsResult] = await Promise.all([
-    supabase.from("artworks").select("slug").not("slug", "is", null),
-    supabase.from("styles").select("slug").not("slug", "is", null),
-    supabase.from("artworks").select("genre_title").not("genre_title", "is", null),
-    supabase.from("artworks").select("artist_display").not("artist_display", "is", null),
-    supabase.from("artworks").select("museum").not("museum", "is", null),
+  const [artworkSlugs, styleSlugs, genreTitles, artistDisplays, museums] = await Promise.all([
+    fetchAllArtworkSlugs(),
+    fetchAllStyleSlugs(),
+    fetchAllArtworkColumnValues("genre_title"),
+    fetchAllArtworkColumnValues("artist_display"),
+    fetchAllArtworkColumnValues("museum"),
   ]);
 
-  const artworkPaths = uniqueNonEmpty(((artworksResult.data as ArtworkSlugRow[] | null) ?? []).map((item) => item.slug)).map(
-    (slug) => `/artworks/${slug}`
-  );
+  const entries: MetadataRoute.Sitemap = [];
 
-  const stylePaths = uniqueNonEmpty(((stylesResult.data as StyleSlugRow[] | null) ?? []).map((item) => item.slug)).map(
-    (slug) => `/styles/${slug}`
-  );
+  for (const path of STATIC_PATHS) {
+    entries.push({
+      url: toAbsolute(baseUrl, path),
+      lastModified: now,
+      changeFrequency: "daily",
+      priority: 1,
+    });
+  }
 
-  const genrePaths = uniqueNonEmpty(((genresResult.data as ValueRow[] | null) ?? []).map((item) => item.genre_title)).map(
-    (genre) => `/genres/${slugify(genre)}`
-  );
+  for (const slug of artworkSlugs) {
+    entries.push({
+      url: toAbsolute(baseUrl, `/artworks/${slug}`),
+      lastModified: new Date(),
+      changeFrequency: "weekly",
+      priority: 0.8,
+    });
+  }
 
-  const artistPaths = uniqueNonEmpty(
-    ((artistsResult.data as ValueRow[] | null) ?? []).map((item) => item.artist_display)
-  ).map((artist) => `/artists/${slugify(artist)}`);
+  for (const artist of artistDisplays) {
+    entries.push({
+      url: toAbsolute(baseUrl, `/artists/${slugify(artist)}`),
+      lastModified: now,
+      changeFrequency: "monthly",
+      priority: 0.9,
+    });
+  }
 
-  const museumPaths = uniqueNonEmpty(((museumsResult.data as ValueRow[] | null) ?? []).map((item) => item.museum)).map(
-    (museum) => `/museums/${slugify(museum)}`
-  );
+  for (const slug of styleSlugs) {
+    entries.push({
+      url: toAbsolute(baseUrl, `/styles/${slug}`),
+      lastModified: now,
+      changeFrequency: "monthly",
+      priority: 0.7,
+    });
+  }
 
-  return [...staticPaths, ...artworkPaths, ...stylePaths, ...genrePaths, ...artistPaths, ...museumPaths].map((path) => ({
-    url: toAbsolute(baseUrl, path),
-  }));
+  for (const genre of genreTitles) {
+    entries.push({
+      url: toAbsolute(baseUrl, `/genres/${slugify(genre)}`),
+      lastModified: now,
+      changeFrequency: "monthly",
+      priority: 0.7,
+    });
+  }
+
+  for (const museum of museums) {
+    entries.push({
+      url: toAbsolute(baseUrl, `/museums/${slugify(museum)}`),
+      lastModified: now,
+      changeFrequency: "monthly",
+      priority: 0.7,
+    });
+  }
+
+  return entries;
 }

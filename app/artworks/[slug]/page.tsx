@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
+import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { supabase } from "@/lib/supabase";
 import { absoluteUrl, slugify } from "@/lib/utils";
 
@@ -10,6 +11,7 @@ type ArtworkRow = {
   slug: string;
   title: string;
   artist_display: string | null;
+  url: string | null;
   image_id: string | null;
   museum: string | null;
   style_title: string | null;
@@ -36,6 +38,14 @@ function toImageUrl(imageId: string | null): string {
   return `https://www.artic.edu/iiif/2/${imageId}/full/1200,/0/default.jpg`;
 }
 
+function artworkImageUrl(artwork: Pick<ArtworkRow, "url" | "image_id">): string {
+  const rawUrl = artwork.url?.trim();
+  if (rawUrl) {
+    return rawUrl;
+  }
+  return toImageUrl(artwork.image_id);
+}
+
 function truncateDescription(text: string | null): string {
   if (!text) {
     return "";
@@ -51,7 +61,9 @@ function truncateDescription(text: string | null): string {
 async function getArtworkBySlug(slug: string): Promise<ArtworkRow | null> {
   const { data, error } = await supabase
     .from("artworks")
-    .select("*")
+    .select(
+      "id, slug, title, artist_display, url, image_id, museum, style_title, genre_title, medium_display, date_display, dimensions, description"
+    )
     .eq("slug", slug)
     .single();
 
@@ -75,19 +87,32 @@ export async function generateMetadata({ params }: ArtworkPageProps): Promise<Me
     };
   }
 
-  const imageUrl = toImageUrl(artwork.image_id);
-  const seoDescription = truncateDescription(artwork.description);
   const artist = artwork.artist_display ?? "Unknown artist";
+  const title = `${artwork.title} by ${artist} — Free Public Domain Art`;
+
+  const descriptionParts = [
+    artwork.medium_display,
+    artwork.date_display,
+    artwork.museum,
+    artwork.dimensions,
+  ].filter((part): part is string => Boolean(part?.trim()));
+
+  const description =
+    descriptionParts.length > 0
+      ? truncateDescription(descriptionParts.join(" · "))
+      : `${artwork.title} by ${artist}.`;
+
+  const imageUrl = artworkImageUrl(artwork);
 
   return {
-    title: `${artwork.title} by ${artist}`,
-    description: seoDescription || `${artwork.title} by ${artist}`,
+    title,
+    description,
     alternates: {
       canonical: absoluteUrl(`/artworks/${artwork.slug}`),
     },
     openGraph: {
-      title: `${artwork.title} by ${artist}`,
-      description: seoDescription || `${artwork.title} by ${artist}`,
+      title,
+      description,
       images: imageUrl ? [imageUrl] : undefined,
     },
   };
@@ -101,12 +126,25 @@ export default async function ArtworkDetailPage({ params }: ArtworkPageProps) {
     notFound();
   }
 
-  const imageUrl = toImageUrl(artwork.image_id);
+  const imageUrl = artworkImageUrl(artwork);
   const artist = artwork.artist_display ?? "Unknown artist";
+
+  const breadcrumbItems = [
+    { label: "Home", href: "/" },
+    ...(artwork.genre_title?.trim()
+      ? [{ label: artwork.genre_title.trim(), href: `/genres/${slugify(artwork.genre_title)}` }]
+      : []),
+    ...(artwork.artist_display?.trim()
+      ? [{ label: artwork.artist_display.trim(), href: `/artists/${slugify(artwork.artist_display)}` }]
+      : []),
+    { label: artwork.title },
+  ];
 
   return (
     <article className="space-y-6">
       <h1 className="text-3xl font-bold tracking-tight">{artwork.title}</h1>
+
+      <Breadcrumbs items={breadcrumbItems} currentPath={`/artworks/${artwork.slug}`} />
 
       {imageUrl ? (
         <img

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { ArtworkGrid } from "@/components/ArtworkGrid";
+import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { supabase } from "@/lib/supabase";
 import { slugify } from "@/lib/utils";
 import type { Artwork } from "@/types/artwork";
@@ -112,6 +113,10 @@ export default async function ArtistPage({ params }: ArtistPageProps) {
 
   return (
     <div className="space-y-6">
+      <Breadcrumbs
+        items={[{ label: "Home", href: "/" }, { label: "Artists", href: "/artists" }, { label: artistName }]}
+        currentPath={`/artists/${slug}`}
+      />
       <h1 className="text-3xl font-bold tracking-tight">{artistName}</h1>
       <ArtworkGrid artworks={artworks} />
     </div>

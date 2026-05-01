@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { ArtworkGrid } from "@/components/ArtworkGrid";
+import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { supabase } from "@/lib/supabase";
 import { slugify } from "@/lib/utils";
 import type { Artwork } from "@/types/artwork";
@@ -144,6 +145,10 @@ export default async function GenrePage({ params, searchParams }: GenrePageProps
 
   return (
     <div className="space-y-6">
+      <Breadcrumbs
+        items={[{ label: "Home", href: "/" }, { label: "Genres", href: "/genres" }, { label: genreName }]}
+        currentPath={`/genres/${slug}`}
+      />
       <h1 className="text-3xl font-bold tracking-tight">{genreName} Artworks</h1>
       <p className="max-w-3xl text-neutral-700">{getSeoDescription(genreName)}</p>
       <ArtworkGrid artworks={artworks} />
