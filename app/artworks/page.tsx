@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 
 import { ArtworkGrid } from "@/components/ArtworkGrid";
+import { Pagination } from "@/components/Pagination";
+import { getPaginationParams, getTotalPages } from "@/lib/pagination";
 import { supabase } from "@/lib/supabase";
 import { absoluteUrl } from "@/lib/utils";
 import type { Artwork } from "@/types/artwork";
@@ -32,20 +33,16 @@ type ArtworksPageProps = {
 
 export default async function ArtworksPage({ searchParams }: ArtworksPageProps) {
   const resolvedSearchParams = await searchParams;
-  const parsedPage = Number.parseInt(resolvedSearchParams.page ?? "1", 10);
-  const page = Number.isNaN(parsedPage) || parsedPage < 1 ? 1 : parsedPage;
-  const from = (page - 1) * 30;
-  const to = from + 29;
+  const { page, from, to } = getPaginationParams(resolvedSearchParams);
 
   const orderedQuery = await supabase
     .from("artworks")
-    .select(
-      "id, title, slug, artist_display, image_id, url, museum, style_title, genre_title, score"
-    )
+    .select("*", { count: "exact" })
     .order("score", { ascending: false })
     .range(from, to);
 
   let rows = orderedQuery.data ?? [];
+  let totalCount = orderedQuery.count ?? 0;
 
   if (orderedQuery.error?.code === "57014") {
     const fallbackQuery = await supabase
@@ -62,6 +59,7 @@ export default async function ArtworksPage({ searchParams }: ArtworksPageProps) 
     rows = (fallbackQuery.data ?? [])
       .sort((a, b) => (b.score ?? 0) - (a.score ?? 0))
       .slice(from, to + 1);
+    totalCount = fallbackQuery.data?.length ?? totalCount;
   } else if (orderedQuery.error) {
     return <p>Error loading data</p>;
   }
@@ -92,10 +90,11 @@ export default async function ArtworksPage({ searchParams }: ArtworksPageProps) 
     <div className="space-y-6">
       <h1 className="text-3xl font-bold tracking-tight">Artworks</h1>
       <ArtworkGrid artworks={artworks} />
-      <div className="flex gap-4">
-        {page > 1 ? <Link href={`/artworks?page=${page - 1}`}>Previous</Link> : null}
-        <Link href={`/artworks?page=${page + 1}`}>Next</Link>
-      </div>
+      <Pagination
+        currentPage={page}
+        totalPages={Math.max(1, getTotalPages(totalCount))}
+        basePath="/artworks"
+      />
     </div>
   );
 }

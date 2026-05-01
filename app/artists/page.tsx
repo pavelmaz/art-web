@@ -1,6 +1,8 @@
 import Link from "next/link";
 import Image from "next/image";
 
+import { Pagination } from "@/components/Pagination";
+import { getPaginationParams, getTotalPages } from "@/lib/pagination";
 import { supabase } from "@/lib/supabase";
 import { artworkImageUrl, slugify } from "@/lib/utils";
 
@@ -11,7 +13,14 @@ type ArtistRow = {
   slug: string;
 };
 
-export default async function ArtistsPage() {
+type ArtistsPageProps = {
+  searchParams: Promise<{ page?: string }>;
+};
+
+export default async function ArtistsPage({ searchParams }: ArtistsPageProps) {
+  const resolvedSearchParams = await searchParams;
+  const { page, from, to } = getPaginationParams(resolvedSearchParams);
+
   const primaryQuery = await supabase
     .from("artworks")
     .select("artist_display, image_id, url, slug")
@@ -71,6 +80,8 @@ export default async function ArtistsPage() {
     }
     return a.artistName.localeCompare(b.artistName);
   });
+  const totalPages = Math.max(1, getTotalPages(artists.length));
+  const paginatedArtists = artists.slice(from, to + 1);
 
   return (
     <div className="space-y-8">
@@ -80,7 +91,7 @@ export default async function ArtistsPage() {
       </div>
 
       <div className="grid grid-cols-2 gap-4 md:grid-cols-4 lg:grid-cols-6">
-        {artists.map((artist) => {
+        {paginatedArtists.map((artist) => {
           const imageUrl = artworkImageUrl({ url: artist.url, image_id: artist.image_id });
 
           return (
@@ -111,6 +122,8 @@ export default async function ArtistsPage() {
           );
         })}
       </div>
+
+      <Pagination currentPage={page} totalPages={totalPages} basePath="/artists" />
     </div>
   );
 }

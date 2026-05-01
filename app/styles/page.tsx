@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 
+import { Pagination } from "@/components/Pagination";
+import { getPaginationParams, getTotalPages } from "@/lib/pagination";
 import { supabase } from "@/lib/supabase";
 import { slugify } from "@/lib/utils";
 
@@ -27,10 +29,17 @@ function previewDescription(text: string | null): string {
   return `${text.slice(0, 117)}...`;
 }
 
-export default async function StylesPage() {
+type StylesPageProps = {
+  searchParams: Promise<{ page?: string }>;
+};
+
+export default async function StylesPage({ searchParams }: StylesPageProps) {
+  const resolvedSearchParams = await searchParams;
+  const { page, from, to } = getPaginationParams(resolvedSearchParams);
+
   const stylesQuery = await supabase
     .from("styles")
-    .select("name, slug, description")
+    .select("name, slug, description", { count: "exact" })
     .order("name", { ascending: true });
 
   if (stylesQuery.error) {
@@ -38,6 +47,7 @@ export default async function StylesPage() {
   }
 
   let styles = (stylesQuery.data as StyleRow[] | null) ?? [];
+  let totalCount = stylesQuery.count ?? 0;
 
   // If styles table is empty, derive styles from real artworks data.
   if (!styles.length) {
@@ -64,7 +74,10 @@ export default async function StylesPage() {
       slug: slugify(name),
       description: null,
     }));
+    totalCount = styles.length;
   }
+  const paginatedStyles = styles.slice(from, to + 1);
+  const totalPages = Math.max(1, getTotalPages(totalCount || styles.length));
 
   return (
     <div className="space-y-6">
@@ -76,19 +89,22 @@ export default async function StylesPage() {
       {!styles.length ? (
         <p>No styles found.</p>
       ) : (
-        <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {styles.map((style) => (
-            <article key={style.slug} className="rounded-lg border border-neutral-200 p-4">
-              <h2 className="text-lg font-semibold">
-                <Link href={`/styles/${style.slug}`} className="underline">
-                  {style.name}
-                </Link>
-              </h2>
-              {style.description ? (
-                <p className="mt-2 text-sm text-neutral-700">{previewDescription(style.description)}</p>
-              ) : null}
-            </article>
-          ))}
+        <section className="space-y-6">
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {paginatedStyles.map((style) => (
+              <article key={style.slug} className="rounded-lg border border-neutral-200 p-4">
+                <h2 className="text-lg font-semibold">
+                  <Link href={`/styles/${style.slug}`} className="underline">
+                    {style.name}
+                  </Link>
+                </h2>
+                {style.description ? (
+                  <p className="mt-2 text-sm text-neutral-700">{previewDescription(style.description)}</p>
+                ) : null}
+              </article>
+            ))}
+          </div>
+          <Pagination currentPage={page} totalPages={totalPages} basePath="/styles" />
         </section>
       )}
     </div>

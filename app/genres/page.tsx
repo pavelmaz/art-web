@@ -1,5 +1,7 @@
 import Link from "next/link";
 
+import { Pagination } from "@/components/Pagination";
+import { getPaginationParams, getTotalPages } from "@/lib/pagination";
 import { supabase } from "@/lib/supabase";
 import { slugify } from "@/lib/utils";
 
@@ -7,7 +9,14 @@ type GenreRow = {
   genre_title: string | null;
 };
 
-export default async function GenresPage() {
+type GenresPageProps = {
+  searchParams: Promise<{ page?: string }>;
+};
+
+export default async function GenresPage({ searchParams }: GenresPageProps) {
+  const resolvedSearchParams = await searchParams;
+  const { page, from, to } = getPaginationParams(resolvedSearchParams);
+
   const primaryQuery = await supabase
     .from("artworks")
     .select("genre_title")
@@ -40,12 +49,14 @@ export default async function GenresPage() {
         .filter((genre): genre is string => Boolean(genre))
     )
   ).sort((a, b) => a.localeCompare(b));
+  const totalPages = Math.max(1, getTotalPages(genres.length));
+  const paginatedGenres = genres.slice(from, to + 1);
 
   return (
     <div className="space-y-4">
       <h1 className="text-3xl font-bold tracking-tight">Genres</h1>
       <ul className="space-y-1">
-        {genres.map((genre) => (
+        {paginatedGenres.map((genre) => (
           <li key={genre}>
             <Link href={`/genres/${slugify(genre)}`} className="underline">
               {genre}
@@ -53,6 +64,7 @@ export default async function GenresPage() {
           </li>
         ))}
       </ul>
+      <Pagination currentPage={page} totalPages={totalPages} basePath="/genres" />
     </div>
   );
 }

@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { ArtworkGrid } from "@/components/ArtworkGrid";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
+import { Pagination } from "@/components/Pagination";
+import { getPaginationParams, getTotalPages } from "@/lib/pagination";
 import { supabase } from "@/lib/supabase";
 import { absoluteUrl, artworkImageUrl, slugify } from "@/lib/utils";
 import type { Artwork } from "@/types/artwork";
@@ -108,21 +109,21 @@ export async function generateMetadata({ params }: GenrePageProps): Promise<Meta
 export default async function GenrePage({ params, searchParams }: GenrePageProps) {
   const { slug } = await params;
   const resolvedSearchParams = await searchParams;
-  const parsedPage = Number.parseInt(resolvedSearchParams.page ?? "1", 10);
-  const page = Number.isNaN(parsedPage) || parsedPage < 1 ? 1 : parsedPage;
-  const from = (page - 1) * 30;
-  const to = from + 29;
+  const { page, from, to } = getPaginationParams(resolvedSearchParams);
   const genreName = unslugifyGenre(slug);
   const genreQueryValue = slugToGenreQueryValue(slug);
 
   const orderedQuery = await supabase
     .from("artworks")
-    .select("id, title, slug, artist_display, image_id, url, museum, style_title, genre_title, score")
+    .select("id, title, slug, artist_display, image_id, url, museum, style_title, genre_title, score", {
+      count: "exact",
+    })
     .eq("genre_title", genreQueryValue)
     .order("score", { ascending: false })
     .range(from, to);
 
   let rows = (orderedQuery.data as ArtworkRow[] | null) ?? [];
+  let totalCount = orderedQuery.count ?? 0;
 
   // Keep requested DB ordering, but gracefully recover if DB sort times out.
   if (orderedQuery.error?.code === "57014") {
@@ -139,6 +140,7 @@ export default async function GenrePage({ params, searchParams }: GenrePageProps
     rows = ((fallbackQuery.data as ArtworkRow[] | null) ?? [])
       .sort((a, b) => (b.score ?? 0) - (a.score ?? 0))
       .slice(from, to + 1);
+    totalCount = fallbackQuery.data?.length ?? totalCount;
   } else if (orderedQuery.error) {
     return <p>Error loading data</p>;
   }
@@ -155,6 +157,9 @@ export default async function GenrePage({ params, searchParams }: GenrePageProps
         .filter((item) => item.genre_title && slugify(item.genre_title) === slug)
         .sort((a, b) => (b.score ?? 0) - (a.score ?? 0))
         .slice(from, to + 1);
+      totalCount = ((slugFallbackQuery.data as ArtworkRow[] | null) ?? []).filter(
+        (item) => item.genre_title && slugify(item.genre_title) === slug
+      ).length;
     }
   }
 
@@ -189,10 +194,11 @@ export default async function GenrePage({ params, searchParams }: GenrePageProps
       <h1 className="text-3xl font-bold tracking-tight">{genreName} Artworks</h1>
       <p className="max-w-3xl text-neutral-700">{getSeoDescription(genreName)}</p>
       <ArtworkGrid artworks={artworks} />
-      <div>
-        {page > 1 ? <Link href={`/genres/${slug}?page=${page - 1}`}>Previous</Link> : null}{" "}
-        <Link href={`/genres/${slug}?page=${page + 1}`}>Next</Link>
-      </div>
+      <Pagination
+        currentPage={page}
+        totalPages={Math.max(1, getTotalPages(totalCount || artworks.length))}
+        basePath={`/genres/${slug}`}
+      />
     </div>
   );
 }

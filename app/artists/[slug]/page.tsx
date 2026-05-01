@@ -3,12 +3,15 @@ import { notFound } from "next/navigation";
 
 import { ArtworkGrid } from "@/components/ArtworkGrid";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
+import { Pagination } from "@/components/Pagination";
+import { getPaginationParams, getTotalPages } from "@/lib/pagination";
 import { supabase } from "@/lib/supabase";
 import { absoluteUrl, artworkImageUrl, slugify } from "@/lib/utils";
 import type { Artwork } from "@/types/artwork";
 
 type ArtistPageProps = {
   params: Promise<{ slug: string }>;
+  searchParams: Promise<{ page?: string }>;
 };
 
 type ArtworkRow = {
@@ -78,15 +81,35 @@ export async function generateMetadata({ params }: ArtistPageProps): Promise<Met
   };
 }
 
-export default async function ArtistPage({ params }: ArtistPageProps) {
+export default async function ArtistPage({ params, searchParams }: ArtistPageProps) {
   const { slug } = await params;
+  const resolvedSearchParams = await searchParams;
+  const { page, from, to } = getPaginationParams(resolvedSearchParams);
+  const fallbackName = unslugifyArtist(slug);
+
+  const artistLookupQuery = await supabase
+    .from("artworks")
+    .select("artist_display")
+    .not("artist_display", "is", null)
+    .limit(5000);
+
+  const artistName =
+    ((artistLookupQuery.data as Array<{ artist_display: string | null }> | null) ?? []).find(
+      (item) => item.artist_display && slugify(item.artist_display) === slug
+    )?.artist_display ?? fallbackName;
+
+  const countQuery = await supabase
+    .from("artworks")
+    .select("id", { count: "exact", head: true })
+    .eq("artist_display", artistName);
+  const totalCount = countQuery.count ?? 0;
 
   const primaryQuery = await supabase
     .from("artworks")
     .select("id, title, slug, artist_display, image_id, url, museum, style_title, genre_title, score")
-    .not("artist_display", "is", null)
+    .eq("artist_display", artistName)
     .order("score", { ascending: false })
-    .limit(3000);
+    .range(from, to);
 
   let rows = (primaryQuery.data as ArtworkRow[] | null) ?? [];
 
@@ -94,30 +117,25 @@ export default async function ArtistPage({ params }: ArtistPageProps) {
     const fallbackQuery = await supabase
       .from("artworks")
       .select("id, title, slug, artist_display, image_id, url, museum, style_title, genre_title, score")
-      .not("artist_display", "is", null)
+      .eq("artist_display", artistName)
       .limit(8000);
 
     if (fallbackQuery.error) {
       return <p>Error loading data</p>;
     }
 
-    rows = (fallbackQuery.data as ArtworkRow[] | null) ?? [];
+    rows = ((fallbackQuery.data as ArtworkRow[] | null) ?? [])
+      .sort((a, b) => (b.score ?? 0) - (a.score ?? 0))
+      .slice(from, to + 1);
   } else if (primaryQuery.error) {
     return <p>Error loading data</p>;
   }
 
-  const matchedRows = rows
-    .filter((item) => item.artist_display && slugify(item.artist_display) === slug)
-    .sort((a, b) => (b.score ?? 0) - (a.score ?? 0))
-    .slice(0, 30);
-
-  if (!matchedRows.length) {
+  if (!rows.length) {
     notFound();
   }
 
-  const artistName = matchedRows[0].artist_display ?? unslugifyArtist(slug);
-
-  const artworks: Artwork[] = matchedRows.map((item) => ({
+  const artworks: Artwork[] = rows.map((item) => ({
     id: item.id,
     title: item.title,
     slug: item.slug,
@@ -146,6 +164,11 @@ export default async function ArtistPage({ params }: ArtistPageProps) {
         <p className="text-sm text-[#6b6b6b]">Browse artworks by this artist</p>
       </div>
       <ArtworkGrid artworks={artworks} />
+      <Pagination
+        currentPage={page}
+        totalPages={Math.max(1, getTotalPages(totalCount || artworks.length))}
+        basePath={`/artists/${slug}`}
+      />
     </div>
   );
 }
