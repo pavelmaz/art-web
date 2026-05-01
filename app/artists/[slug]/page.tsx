@@ -141,7 +141,10 @@ export default async function ArtistPage({ params }: ArtistPageProps) {
         items={[{ label: "Home", href: "/" }, { label: "Artists", href: "/artists" }, { label: artistName }]}
         currentPath={`/artists/${slug}`}
       />
-      <h1 className="text-3xl font-bold tracking-tight">{artistName}</h1>
+      <div>
+        <h1 className="mb-2 text-2xl font-semibold">{artistName}</h1>
+        <p className="text-sm text-[#6b6b6b]">Browse artworks by this artist</p>
+      </div>
       <ArtworkGrid artworks={artworks} />
     </div>
   );

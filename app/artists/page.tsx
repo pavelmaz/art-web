@@ -1,27 +1,32 @@
 import Link from "next/link";
+import Image from "next/image";
 
 import { supabase } from "@/lib/supabase";
-import { slugify } from "@/lib/utils";
+import { artworkImageUrl, slugify } from "@/lib/utils";
 
 type ArtistRow = {
   artist_display: string | null;
+  image_id: string | null;
+  url: string | null;
+  slug: string;
 };
 
 export default async function ArtistsPage() {
   const primaryQuery = await supabase
     .from("artworks")
-    .select("artist_display")
+    .select("artist_display, image_id, url, slug")
     .not("artist_display", "is", null)
     .neq("artist_display", "")
-    .order("artist_display", { ascending: true });
+    .limit(10000);
 
   let rows = (primaryQuery.data as ArtistRow[] | null) ?? [];
 
   if (primaryQuery.error?.code === "57014") {
     const fallbackQuery = await supabase
       .from("artworks")
-      .select("artist_display")
+      .select("artist_display, image_id, url, slug")
       .not("artist_display", "is", null)
+      .neq("artist_display", "")
       .limit(5000);
 
     if (fallbackQuery.error) {
@@ -33,26 +38,79 @@ export default async function ArtistsPage() {
     return <p>Error loading data</p>;
   }
 
-  const uniqueArtists = Array.from(
-    new Set(
-      rows
-        .map((item) => item.artist_display?.trim())
-        .filter((artist): artist is string => Boolean(artist))
-    )
-  ).sort((a, b) => a.localeCompare(b));
+  const grouped = new Map<
+    string,
+    { artistName: string; count: number; image_id: string | null; url: string | null; slug: string }
+  >();
+
+  for (const row of rows) {
+    const artistName = row.artist_display?.trim();
+    if (!artistName) {
+      continue;
+    }
+
+    const key = artistName.toLowerCase();
+    const existing = grouped.get(key);
+    if (!existing) {
+      grouped.set(key, {
+        artistName,
+        count: 1,
+        image_id: row.image_id,
+        url: row.url,
+        slug: row.slug,
+      });
+      continue;
+    }
+
+    existing.count += 1;
+  }
+
+  const artists = Array.from(grouped.values()).sort((a, b) => {
+    if (b.count !== a.count) {
+      return b.count - a.count;
+    }
+    return a.artistName.localeCompare(b.artistName);
+  });
 
   return (
-    <div className="space-y-4">
-      <h1 className="text-3xl font-bold tracking-tight">Artists</h1>
-      <ul className="space-y-1">
-        {uniqueArtists.map((artist) => (
-          <li key={artist}>
-            <Link href={`/artists/${slugify(artist)}`} className="underline">
-              {artist}
+    <div className="space-y-8">
+      <div>
+        <h1 className="mb-2 text-2xl font-semibold">Artists</h1>
+        <p className="mb-8 text-sm text-[#6b6b6b]">Browse artworks by artist</p>
+      </div>
+
+      <div className="grid grid-cols-2 gap-4 md:grid-cols-4 lg:grid-cols-6">
+        {artists.map((artist) => {
+          const imageUrl = artworkImageUrl({ url: artist.url, image_id: artist.image_id });
+
+          return (
+            <Link key={artist.artistName} href={`/artists/${slugify(artist.artistName)}`}>
+              <div className="group relative aspect-square cursor-pointer overflow-hidden">
+                {imageUrl ? (
+                  <Image
+                    src={imageUrl}
+                    alt={artist.artistName}
+                    fill={true}
+                    unoptimized
+                    className="object-cover transition-transform duration-300 ease-in-out group-hover:scale-105"
+                  />
+                ) : (
+                  <div className="h-full w-full bg-[#f0ede8]" />
+                )}
+
+                <div className="absolute inset-0 bg-[linear-gradient(to_top,rgba(0,0,0,0.75)_0%,rgba(0,0,0,0.1)_60%)]" />
+
+                <div className="absolute bottom-0 left-0 p-3">
+                  <p className="text-sm font-semibold text-white">{artist.artistName}</p>
+                  <p className="mt-0.5 text-xs text-white/70">
+                    {artist.count} {artist.count === 1 ? "artwork" : "artworks"}
+                  </p>
+                </div>
+              </div>
             </Link>
-          </li>
-        ))}
-      </ul>
+          );
+        })}
+      </div>
     </div>
   );
 }

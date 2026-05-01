@@ -13,7 +13,7 @@ export function ArtworkCard({ artwork }: ArtworkCardProps) {
 
   return (
     <Link href={`/artworks/${artwork.slug}`} className="group block">
-      <div className="relative aspect-[3/4] overflow-hidden bg-[#f0ede8]">
+      <div className="overflow-hidden bg-[#f0ede8]">
         {hasImage ? (
           <img
             src={artwork.imageUrl}
@@ -23,11 +23,11 @@ export function ArtworkCard({ artwork }: ArtworkCardProps) {
               artist_display: artwork.artistDisplay ?? artwork.artistName ?? null,
               medium_display: null,
             })}
-            className="h-full w-full object-contain transition-transform duration-300 ease-in-out group-hover:scale-[1.03]"
+            className="h-auto w-full object-contain transition-transform duration-300 ease-in-out group-hover:scale-[1.03]"
             loading="lazy"
           />
         ) : (
-          <div className="flex h-full w-full items-center justify-center text-sm text-neutral-600">
+          <div className="flex min-h-40 w-full items-center justify-center text-sm text-neutral-600">
             No image
           </div>
         )}
