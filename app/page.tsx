@@ -66,7 +66,7 @@ export default async function HomePage() {
     <div>
       <section
         className="relative w-full bg-[#1a1a1a] bg-cover bg-center py-24"
-        style={{ backgroundImage: "url('/hero-bg.jpg')" }}
+        style={{ backgroundImage: "url('/hero-bg.png')" }}
       >
         <div className="absolute inset-0 bg-black/45" />
         <div className="relative mx-auto max-w-7xl px-6 text-center">

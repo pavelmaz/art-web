@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 
 import { ArtworkCard } from "@/components/ArtworkCard";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
+import { DownloadButton } from "@/components/DownloadButton";
 import { ArtworkJsonLd } from "@/components/ArtworkJsonLd";
 import { supabase } from "@/lib/supabase";
 import { absoluteUrl, artworkImageUrl, generateAltText, slugify } from "@/lib/utils";
@@ -113,6 +114,15 @@ export default async function ArtworkDetailPage({ params }: ArtworkPageProps) {
   const imageUrl = artworkImageUrl(artwork);
   const artist = artwork.artist_display ?? "Unknown artist";
   const artistSlug = artwork.artist_display?.trim() ? slugify(artwork.artist_display) : null;
+  let artistArtworkCount = 0;
+
+  if (artwork.artist_display?.trim()) {
+    const countQuery = await supabase
+      .from("artworks")
+      .select("id", { count: "exact", head: true })
+      .eq("artist_display", artwork.artist_display);
+    artistArtworkCount = countQuery.count ?? 0;
+  }
 
   const breadcrumbItems = [
     { label: "Home", href: "/" },
@@ -221,7 +231,47 @@ export default async function ArtworkDetailPage({ params }: ArtworkPageProps) {
                 )}
               </div>
 
-              <div className="border-t border-[#e8e6e1]" />
+              <p className="text-sm text-[#6b6b6b]">{artistArtworkCount} Artworks</p>
+
+              <div className="my-4 border-t border-[#e8e6e1]" />
+
+              <div className="space-y-3">
+                <div className="flex items-center justify-between gap-4">
+                  <div>
+                    <p className="text-sm font-medium text-[#1a1a1a]">Standard</p>
+                    <p className="text-xs text-[#999]">JPG</p>
+                  </div>
+                  <DownloadButton imageUrl={imageUrl} />
+                </div>
+
+                <div className="flex items-center justify-between gap-4">
+                  <div>
+                    <p className="text-sm font-medium text-[#1a1a1a]">🔒 Max Size</p>
+                    <p className="text-xs text-[#999]">JPG</p>
+                  </div>
+                  <button
+                    type="button"
+                    disabled
+                    className="cursor-not-allowed rounded-md bg-[#9e9e9e] px-4 py-2 text-sm text-white opacity-60"
+                  >
+                    Download
+                  </button>
+                </div>
+              </div>
+
+              <div className="my-4 border-t border-[#e8e6e1]" />
+
+              <div className="rounded-lg bg-[#f5f5f5] p-3">
+                <p className="text-xs leading-relaxed text-[#4a4a4a]">
+                  License: All public domain files can be freely used for personal and commercial
+                  projects.
+                </p>
+                <p className="mt-2 cursor-pointer text-xs text-[#6b6b6b]">
+                  ⓘ Why is this image in the public domain?
+                </p>
+              </div>
+
+              <div className="my-4 border-t border-[#e8e6e1]" />
 
               <div className="space-y-3">
                 {artwork.medium_display?.trim() ? (
