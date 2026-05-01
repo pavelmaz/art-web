@@ -64,10 +64,14 @@ export default async function HomePage() {
 
   return (
     <div>
-      <section className="w-full bg-[#1a1a1a] py-24">
-        <div className="mx-auto max-w-7xl px-6 text-center">
+      <section
+        className="relative w-full bg-[#1a1a1a] bg-cover bg-center py-24"
+        style={{ backgroundImage: "url('/hero-bg.jpg')" }}
+      >
+        <div className="absolute inset-0 bg-black/45" />
+        <div className="relative mx-auto max-w-7xl px-6 text-center">
           <h1 className="text-5xl font-bold tracking-tight text-white">Discover Public Domain Art</h1>
-          <p className="mx-auto mt-4 max-w-2xl text-lg text-[#999]">
+          <p className="mx-auto mt-4 max-w-2xl text-lg text-[#d0d0d0]">
             Browse and download thousands of museum masterpieces, free for personal and commercial
             use
           </p>
