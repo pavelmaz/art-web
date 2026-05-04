@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 import Link from "next/link";
 
 import { ArtworkGrid } from "@/components/ArtworkGrid";
@@ -59,27 +58,11 @@ export default async function HomePage() {
     styleName: item.style_title ?? "Unknown style",
     sourceUrl: item.url ?? undefined,
   }));
-=======
-import { supabase } from "@/lib/supabase";
-
-export default async function HomePage() {
-  const { data, error } = await supabase
-    .from("artworks")
-    .select("id, title")
-    .limit(5);
-
-  if (error) {
-    return <p>Error loading data</p>;
-  }
-
-  const artworks = data ?? [];
->>>>>>> 42d7ea5 (initial commit)
 
   if (!artworks.length) {
     return <p>No artworks found</p>;
   }
 
-<<<<<<< HEAD
   const featuredArtistsMap = new Map<
     string,
     { name: string; count: number; image_id: string | null; url: string | null }
@@ -197,16 +180,6 @@ export default async function HomePage() {
           <ArtworkGrid artworks={artworks} />
         </div>
       </section>
-=======
-  return (
-    <div>
-      <h1>Artworks</h1>
-      <ul>
-        {artworks.map((artwork) => (
-          <li key={artwork.id}>{artwork.title}</li>
-        ))}
-      </ul>
->>>>>>> 42d7ea5 (initial commit)
     </div>
   );
 }

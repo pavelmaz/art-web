@@ -6,7 +6,6 @@ export function absoluteUrl(path: string): string {
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
   return new URL(path, baseUrl).toString();
 }
-<<<<<<< HEAD
 
 export function slugify(value: string): string {
   return value
@@ -73,5 +72,3 @@ export function generateAltText(artwork: {
   ].filter(Boolean);
   return parts.join(", ");
 }
-=======
->>>>>>> 42d7ea5 (initial commit)

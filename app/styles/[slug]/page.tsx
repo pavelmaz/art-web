@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { ArtworkGrid } from "@/components/ArtworkGrid";
-<<<<<<< HEAD
 import { Pagination } from "@/components/Pagination";
 import { getPaginationParams, getTotalPages } from "@/lib/pagination";
 import { supabase } from "@/lib/supabase";
@@ -41,18 +40,6 @@ function unslugifyStyle(slug: string): string {
     .join(" ");
 }
 
-function truncateTo160(text: string | null): string {
-  if (!text) {
-    return "";
-  }
-
-  if (text.length <= 160) {
-    return text;
-  }
-
-  return `${text.slice(0, 157)}...`;
-}
-
 function toImageUrl(imageId: string | null): string {
   if (!imageId) {
     return "";
@@ -80,25 +67,11 @@ async function getStyleBySlug(slug: string): Promise<StyleRow | null> {
   }
 
   return data as StyleRow;
-=======
-import { getArtworksByStyle } from "@/lib/artworks";
-import { getStyleBySlug, getStyles } from "@/lib/styles";
-import { absoluteUrl } from "@/lib/utils";
-
-type StylePageProps = {
-  params: Promise<{ slug: string }>;
-};
-
-export async function generateStaticParams() {
-  const styles = await getStyles();
-  return styles.map((style) => ({ slug: style.slug }));
->>>>>>> 42d7ea5 (initial commit)
 }
 
 export async function generateMetadata({ params }: StylePageProps): Promise<Metadata> {
   const { slug } = await params;
   const style = await getStyleBySlug(slug);
-<<<<<<< HEAD
   const styleName = style?.name ?? unslugifyStyle(slug);
   const siteName = process.env.NEXT_PUBLIC_SITE_NAME ?? "Art Gallery";
 
@@ -107,7 +80,9 @@ export async function generateMetadata({ params }: StylePageProps): Promise<Meta
     .select("url, image_id")
     .eq("style_title", styleName)
     .limit(1);
-  const ogImageSource = ((ogQuery.data as Array<{ url: string | null; image_id: string | null }> | null) ?? [])[0] ?? null;
+  const ogImageSource =
+    ((ogQuery.data as Array<{ url: string | null; image_id: string | null }> | null) ?? [])[0] ??
+    null;
   const ogImage = ogImageSource ? artworkImageUrl(ogImageSource) : "";
 
   const title = `${styleName} Art — Free Public Domain Paintings | ${siteName}`;
@@ -123,24 +98,10 @@ export async function generateMetadata({ params }: StylePageProps): Promise<Meta
       title,
       description,
       images: ogImage ? [ogImage] : undefined,
-=======
-
-  if (!style) {
-    return { title: "Style Not Found" };
-  }
-
-  return {
-    title: `${style.name} Artworks`,
-    description:
-      style.description ?? `Browse public domain artworks in the ${style.name} style.`,
-    alternates: {
-      canonical: absoluteUrl(`/styles/${style.slug}`),
->>>>>>> 42d7ea5 (initial commit)
     },
   };
 }
 
-<<<<<<< HEAD
 export default async function StyleDetailPage({ params, searchParams }: StylePageProps) {
   const { slug } = await params;
   const resolvedSearchParams = await searchParams;
@@ -151,9 +112,10 @@ export default async function StyleDetailPage({ params, searchParams }: StylePag
 
   const orderedQuery = await supabase
     .from("artworks")
-    .select("id, title, slug, artist_display, image_id, url, museum, style_title, genre_title, score", {
-      count: "exact",
-    })
+    .select(
+      "id, title, slug, artist_display, image_id, url, museum, style_title, genre_title, score",
+      { count: "exact" }
+    )
     .eq("style_title", styleName)
     .order("score", { ascending: false })
     .range(from, to);
@@ -187,8 +149,7 @@ export default async function StyleDetailPage({ params, searchParams }: StylePag
       ).length;
     } else if (fallbackQuery.error) {
       return <p>Error loading data</p>;
-    }
-    else {
+    } else {
       rows = ((fallbackQuery.data as ArtworkRow[] | null) ?? [])
         .sort((a, b) => (b.score ?? 0) - (a.score ?? 0))
         .slice(from, to + 1);
@@ -248,23 +209,6 @@ export default async function StyleDetailPage({ params, searchParams }: StylePag
         totalPages={Math.max(1, getTotalPages(totalCount || artworks.length))}
         basePath={`/styles/${slug}`}
       />
-=======
-export default async function StylePage({ params }: StylePageProps) {
-  const { slug } = await params;
-  const style = await getStyleBySlug(slug);
-
-  if (!style) {
-    notFound();
-  }
-
-  const artworks = await getArtworksByStyle(slug);
-
-  return (
-    <div className="space-y-6">
-      <h1 className="text-3xl font-bold tracking-tight">{style.name}</h1>
-      {style.description ? <p className="max-w-3xl text-neutral-700">{style.description}</p> : null}
-      <ArtworkGrid artworks={artworks} />
->>>>>>> 42d7ea5 (initial commit)
     </div>
   );
 }
