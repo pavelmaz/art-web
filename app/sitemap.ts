@@ -16,10 +16,18 @@ type StyleSlugRow = {
 
 const PAGE_SIZE = 1000;
 
+/** Single-file sitemap must stay small enough for Vercel (huge XML → 500 / truncated). */
+const MAX_ARTWORK_URLS = 12_000;
+const MAX_LISTED_SLUGS = 4_000;
+
 const STATIC_PATHS = ["/", "/artworks", "/styles", "/genres", "/artists", "/museums"] as const;
 
 function getBaseUrl(): string {
-  return process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+  const raw = process.env.NEXT_PUBLIC_SITE_URL?.trim();
+  if (raw) {
+    return raw.replace(/\/$/, "");
+  }
+  return "https://fineartfree.com";
 }
 
 function toAbsolute(baseUrl: string, path: string): string {
@@ -30,11 +38,12 @@ async function fetchAllArtworkSlugs(): Promise<string[]> {
   const slugs: string[] = [];
   let from = 0;
 
-  while (true) {
+  while (slugs.length < MAX_ARTWORK_URLS) {
     const { data, error } = await supabase
       .from("artworks")
-      .select("slug")
+      .select("id, slug")
       .not("slug", "is", null)
+      .order("id", { ascending: true })
       .range(from, from + PAGE_SIZE - 1);
 
     if (error) {
@@ -45,6 +54,9 @@ async function fetchAllArtworkSlugs(): Promise<string[]> {
     for (const row of rows) {
       if (row.slug?.trim()) {
         slugs.push(row.slug.trim());
+        if (slugs.length >= MAX_ARTWORK_URLS) {
+          break;
+        }
       }
     }
 
@@ -61,11 +73,12 @@ async function fetchAllStyleSlugs(): Promise<string[]> {
   const slugs: string[] = [];
   let from = 0;
 
-  while (true) {
+  while (slugs.length < MAX_LISTED_SLUGS) {
     const { data, error } = await supabase
       .from("styles")
       .select("slug")
       .not("slug", "is", null)
+      .order("slug", { ascending: true })
       .range(from, from + PAGE_SIZE - 1);
 
     if (error) {
@@ -76,6 +89,9 @@ async function fetchAllStyleSlugs(): Promise<string[]> {
     for (const row of rows) {
       if (row.slug?.trim()) {
         slugs.push(row.slug.trim());
+        if (slugs.length >= MAX_LISTED_SLUGS) {
+          break;
+        }
       }
     }
 
@@ -94,11 +110,12 @@ async function fetchAllArtworkColumnValues(
   const values: string[] = [];
   let from = 0;
 
-  while (true) {
+  while (values.length < MAX_LISTED_SLUGS) {
     const { data, error } = await supabase
       .from("artworks")
-      .select(column)
+      .select(`id, ${column}`)
       .not(column, "is", null)
+      .order("id", { ascending: true })
       .range(from, from + PAGE_SIZE - 1);
 
     if (error) {
@@ -110,6 +127,9 @@ async function fetchAllArtworkColumnValues(
       const value = row[column];
       if (typeof value === "string" && value.trim()) {
         values.push(value.trim());
+        if (values.length >= MAX_LISTED_SLUGS) {
+          break;
+        }
       }
     }
 
@@ -123,72 +143,83 @@ async function fetchAllArtworkColumnValues(
 }
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = getBaseUrl();
-  const now = new Date();
+  try {
+    const baseUrl = getBaseUrl();
+    const now = new Date();
 
-  const [artworkSlugs, styleSlugs, genreTitles, artistDisplays, museums] = await Promise.all([
-    fetchAllArtworkSlugs(),
-    fetchAllStyleSlugs(),
-    fetchAllArtworkColumnValues("genre_title"),
-    fetchAllArtworkColumnValues("artist_display"),
-    fetchAllArtworkColumnValues("museum"),
-  ]);
+    const entries: MetadataRoute.Sitemap = [];
 
-  const entries: MetadataRoute.Sitemap = [];
+    for (const path of STATIC_PATHS) {
+      entries.push({
+        url: toAbsolute(baseUrl, path),
+        lastModified: now,
+        changeFrequency: "daily",
+        priority: 0.99,
+      });
+    }
 
-  for (const path of STATIC_PATHS) {
-    entries.push({
+    const [artworkSlugs, styleSlugs, genreTitles, artistDisplays, museums] = await Promise.all([
+      fetchAllArtworkSlugs(),
+      fetchAllStyleSlugs(),
+      fetchAllArtworkColumnValues("genre_title"),
+      fetchAllArtworkColumnValues("artist_display"),
+      fetchAllArtworkColumnValues("museum"),
+    ]);
+
+    for (const slug of artworkSlugs) {
+      entries.push({
+        url: toAbsolute(baseUrl, `/artworks/${slug}`),
+        lastModified: new Date(),
+        changeFrequency: "weekly",
+        priority: 0.8,
+      });
+    }
+
+    for (const artist of artistDisplays) {
+      entries.push({
+        url: toAbsolute(baseUrl, `/artists/${slugify(artist)}`),
+        lastModified: now,
+        changeFrequency: "monthly",
+        priority: 0.9,
+      });
+    }
+
+    for (const slug of styleSlugs) {
+      entries.push({
+        url: toAbsolute(baseUrl, `/styles/${slug}`),
+        lastModified: now,
+        changeFrequency: "monthly",
+        priority: 0.7,
+      });
+    }
+
+    for (const genre of genreTitles) {
+      entries.push({
+        url: toAbsolute(baseUrl, `/genres/${slugify(genre)}`),
+        lastModified: now,
+        changeFrequency: "monthly",
+        priority: 0.7,
+      });
+    }
+
+    for (const museum of museums) {
+      entries.push({
+        url: toAbsolute(baseUrl, `/museums/${slugify(museum)}`),
+        lastModified: now,
+        changeFrequency: "monthly",
+        priority: 0.7,
+      });
+    }
+
+    return entries;
+  } catch (err) {
+    console.error("[sitemap] error — returning minimal URLs:", err);
+    const baseUrl = getBaseUrl();
+    return STATIC_PATHS.map((path) => ({
       url: toAbsolute(baseUrl, path),
-      lastModified: now,
-      changeFrequency: "daily",
-      priority: 1,
-    });
-  }
-
-  for (const slug of artworkSlugs) {
-    entries.push({
-      url: toAbsolute(baseUrl, `/artworks/${slug}`),
       lastModified: new Date(),
-      changeFrequency: "weekly",
-      priority: 0.8,
-    });
+      changeFrequency: "daily" as const,
+      priority: 0.5,
+    }));
   }
-
-  for (const artist of artistDisplays) {
-    entries.push({
-      url: toAbsolute(baseUrl, `/artists/${slugify(artist)}`),
-      lastModified: now,
-      changeFrequency: "monthly",
-      priority: 0.9,
-    });
-  }
-
-  for (const slug of styleSlugs) {
-    entries.push({
-      url: toAbsolute(baseUrl, `/styles/${slug}`),
-      lastModified: now,
-      changeFrequency: "monthly",
-      priority: 0.7,
-    });
-  }
-
-  for (const genre of genreTitles) {
-    entries.push({
-      url: toAbsolute(baseUrl, `/genres/${slugify(genre)}`),
-      lastModified: now,
-      changeFrequency: "monthly",
-      priority: 0.7,
-    });
-  }
-
-  for (const museum of museums) {
-    entries.push({
-      url: toAbsolute(baseUrl, `/museums/${slugify(museum)}`),
-      lastModified: now,
-      changeFrequency: "monthly",
-      priority: 0.7,
-    });
-  }
-
-  return entries;
 }
