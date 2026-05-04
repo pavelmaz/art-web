@@ -28,6 +28,40 @@ type ArtworkRow = {
   description: string | null;
 };
 
+async function getArtistDeathYear(artistName: string | null): Promise<number | null> {
+  const normalized = artistName?.trim();
+  if (!normalized) {
+    return null;
+  }
+
+  const attempts = [
+    () => supabase.from("artists").select("death_year").eq("name", normalized).maybeSingle(),
+    () => supabase.from("artists").select("death_year").eq("artist_display", normalized).maybeSingle(),
+    () => supabase.from("artists").select("death_year").ilike("name", normalized).limit(1).maybeSingle(),
+    () => supabase.from("artists").select("death_year").ilike("artist_display", normalized).limit(1).maybeSingle(),
+  ] as const;
+
+  for (const query of attempts) {
+    const { data, error } = await query();
+    if (error || !data) {
+      continue;
+    }
+
+    const value = (data as { death_year?: unknown }).death_year;
+    if (typeof value === "number" && Number.isFinite(value)) {
+      return value;
+    }
+    if (typeof value === "string") {
+      const parsed = Number.parseInt(value, 10);
+      if (!Number.isNaN(parsed)) {
+        return parsed;
+      }
+    }
+  }
+
+  return null;
+}
+
 type ArtworkPageProps = {
   params: Promise<{ slug: string }>;
 };
@@ -131,6 +165,7 @@ export default async function ArtworkDetailPage({ params }: ArtworkPageProps) {
 
   const imageUrl = artworkImageUrl(artwork);
   const artist = artwork.artist_display ?? "Unknown artist";
+  const artistDeathYear = await getArtistDeathYear(artwork.artist_display);
   const artistSlug = artwork.artist_display?.trim() ? slugify(artwork.artist_display) : null;
   let artistArtworkCount = 0;
 
@@ -233,7 +268,7 @@ export default async function ArtworkDetailPage({ params }: ArtworkPageProps) {
           </div>
 
           <aside className="w-full lg:w-80">
-            <div className="space-y-4 lg:sticky lg:top-6">
+            <div className="space-y-4 rounded-2xl bg-[#f5f5f5] p-5 lg:sticky lg:top-6">
               <div>
                 <h1 className="mb-1 text-lg font-semibold text-[#1a1a1a]">{artwork.title}</h1>
                 {artistSlug ? (
@@ -250,7 +285,7 @@ export default async function ArtworkDetailPage({ params }: ArtworkPageProps) {
               <div className="my-4 border-t border-[#e8e6e1]" />
 
               <div className="space-y-3">
-                <div className="flex items-center justify-between gap-4">
+                <div className="flex items-center justify-between gap-4 rounded-lg bg-[#eceff3] p-3">
                   <div>
                     <p className="text-sm font-medium text-[#1a1a1a]">Standard</p>
                     <p className="text-xs text-[#999]">JPG</p>
@@ -258,7 +293,7 @@ export default async function ArtworkDetailPage({ params }: ArtworkPageProps) {
                   <DownloadButton imageUrl={imageUrl} />
                 </div>
 
-                <div className="flex items-center justify-between gap-4">
+                <div className="flex items-center justify-between gap-4 rounded-lg bg-[#eceff3] p-3">
                   <div>
                     <p className="text-sm font-medium text-[#1a1a1a]">🔒 Max Size</p>
                     <p className="text-xs text-[#999]">JPG</p>
@@ -275,19 +310,28 @@ export default async function ArtworkDetailPage({ params }: ArtworkPageProps) {
 
               <div className="my-4 border-t border-[#e8e6e1]" />
 
-              <div className="rounded-lg bg-[#f5f5f5] p-3">
+              <div className="rounded-lg bg-[#eceff3] p-3">
                 <p className="text-xs leading-relaxed text-[#4a4a4a]">
                   License: All public domain files can be freely used for personal and commercial
                   projects.
                 </p>
-                <p className="mt-2 cursor-pointer text-xs text-[#6b6b6b]">
-                  ⓘ Why is this image in the public domain?
-                </p>
+                <details className="mt-2 text-xs text-[#4a4a4a]">
+                  <summary className="inline-flex cursor-pointer list-none select-none items-center gap-1 text-[#6b6b6b] marker:content-none">
+                    ⓘ Why is this image in the public domain?
+                  </summary>
+                  <div className="mt-3 rounded-lg bg-white p-4">
+                    <p className="leading-relaxed text-[#4a4a4a]">
+                      The Artist died in {artistDeathYear ?? "an unknown year"}, so this work is in
+                      the public domain in its country of origin and other countries where the
+                      copyright term is the Artist&apos;s life plus 70 years or fewer.
+                    </p>
+                  </div>
+                </details>
               </div>
 
               <div className="my-4 border-t border-[#e8e6e1]" />
 
-              <div className="space-y-3">
+              <div className="space-y-3 rounded-lg bg-[#eceff3] p-3">
                 {artwork.medium_display?.trim() ? (
                   <div>
                     <p className="text-xs text-[#999]">Medium</p>
