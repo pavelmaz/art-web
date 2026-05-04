@@ -337,6 +337,9 @@ export default async function ArtworkDetailPage({ params }: ArtworkPageProps) {
 
         {artwork.description?.trim() ? (
           <section className="mt-10">
+            <h2 className="mb-4 text-base font-semibold text-[#1a1a1a]">
+              {artwork.title} — History & Analysis
+            </h2>
             <div className="overflow-hidden text-sm leading-relaxed text-[#4a4a4a]">
               {artistThumbnailUrl ? (
                 <Image
