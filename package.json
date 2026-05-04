@@ -1,5 +1,4 @@
 {
-<<<<<<< HEAD
   "name": "art-web-app",
   "version": "0.1.0",
   "private": true,
@@ -24,9 +23,5 @@
     "eslint-config-next": "16.2.4",
     "tailwindcss": "^4",
     "typescript": "^5"
-=======
-  "dependencies": {
-    "@supabase/supabase-js": "^2.105.1"
->>>>>>> 42d7ea5 (initial commit)
   }
 }
