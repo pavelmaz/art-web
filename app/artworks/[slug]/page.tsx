@@ -153,7 +153,6 @@ export default async function ArtworkDetailPage({ params }: ArtworkPageProps) {
     { label: artwork.title },
   ];
 
-  let artistThumbnailUrl = "";
   let relatedArtworks: Artwork[] = [];
 
   if (artwork.artist_display?.trim()) {
@@ -180,9 +179,6 @@ export default async function ArtworkDetailPage({ params }: ArtworkPageProps) {
               score: number | null;
             }>
           | null) ?? [];
-
-      const thumbnailSource = rows[0] ?? null;
-      artistThumbnailUrl = thumbnailSource ? artworkImageUrl(thumbnailSource) : "";
 
       relatedArtworks = rows
         .filter((item) => item.slug !== artwork.slug)
@@ -341,24 +337,10 @@ export default async function ArtworkDetailPage({ params }: ArtworkPageProps) {
             <h2 className="mb-4 text-base font-semibold text-[#1a1a1a]">
               {artwork.title} — History & Analysis
             </h2>
-            <div className="overflow-hidden">
-              <ArtworkDescriptionContent
-                description={artwork.description.trim()}
-                thumbnail={
-                  artistThumbnailUrl ? (
-                    <Image
-                      src={artistThumbnailUrl}
-                      alt={artist}
-                      width={48}
-                      height={48}
-                      unoptimized
-                      className="h-12 w-12 rounded-full object-cover"
-                    />
-                  ) : undefined
-                }
-              />
+            <div>
+              <ArtworkDescriptionContent description={artwork.description.trim()} />
             </div>
-            {artistSlug ? (
+            {artistSlug && relatedArtworks.length === 0 ? (
               <p className="mt-3">
                 <Link href={`/artists/${artistSlug}`} className="underline">
                   More works by {artist}
@@ -378,6 +360,11 @@ export default async function ArtworkDetailPage({ params }: ArtworkPageProps) {
                 </div>
               ))}
             </div>
+            <p className="clear-both mt-8 text-sm">
+              <Link href={`/artists/${artistSlug}`} className="underline">
+                More works by {artist}
+              </Link>
+            </p>
           </section>
         ) : null}
       </div>

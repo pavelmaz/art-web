@@ -186,31 +186,23 @@ function parseDescriptionInlines(text: string): ReactNode {
 
 type ArtworkDescriptionContentProps = {
   description: string;
-  /** Optional floated thumbnail rendered before the first paragraph */
-  thumbnail?: ReactNode;
 };
 
-export function ArtworkDescriptionContent({ description, thumbnail }: ArtworkDescriptionContentProps) {
+export function ArtworkDescriptionContent({ description }: ArtworkDescriptionContentProps) {
   const paragraphs = splitIntoThreeParagraphs(description);
 
   return (
     <div className="text-sm leading-relaxed text-[#4a4a4a]">
-      {thumbnail ? <div className="float-left mr-4 mb-2 shrink-0">{thumbnail}</div> : null}
-      <div className="space-y-5 min-w-0">
+      <div className="min-w-0">
         {paragraphs.map((block, index) => (
           <p
             key={index}
-            className={
-              thumbnail && index > 0
-                ? "clear-both m-0 text-pretty"
-                : "m-0 text-pretty"
-            }
+            className="m-0 text-pretty mb-[1.75em] last:mb-0"
           >
             {parseDescriptionInlines(block)}
           </p>
         ))}
       </div>
-      {thumbnail ? <div className="clear-both" aria-hidden /> : null}
     </div>
   );
 }
