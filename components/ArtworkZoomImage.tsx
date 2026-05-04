@@ -1,7 +1,8 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import type { PointerEvent as ReactPointerEvent } from "react";
 
 type ArtworkZoomImageProps = {
   src: string;
@@ -17,6 +18,17 @@ export function ArtworkZoomImage({ src, alt }: ArtworkZoomImageProps) {
   const [zoom, setZoom] = useState(1);
   const [magnifyMode, setMagnifyMode] = useState(false);
   const [origin, setOrigin] = useState("center center");
+  const [pan, setPan] = useState({ x: 0, y: 0 });
+  const [isDragging, setIsDragging] = useState(false);
+  const dragStateRef = useRef({
+    active: false,
+    pointerId: -1,
+    startX: 0,
+    startY: 0,
+    startPanX: 0,
+    startPanY: 0,
+    moved: false,
+  });
 
   useEffect(() => {
     if (!open) return;
@@ -34,6 +46,7 @@ export function ArtworkZoomImage({ src, alt }: ArtworkZoomImageProps) {
       if (event.key === "0") {
         setZoom(1);
         setOrigin("center center");
+        setPan({ x: 0, y: 0 });
       }
     };
 
@@ -45,7 +58,10 @@ export function ArtworkZoomImage({ src, alt }: ArtworkZoomImageProps) {
     if (open) return;
     setZoom(1);
     setOrigin("center center");
+    setPan({ x: 0, y: 0 });
     setMagnifyMode(false);
+    setIsDragging(false);
+    dragStateRef.current.active = false;
   }, [open]);
 
   const zoomIn = () => setZoom((z) => Math.min(MAX_ZOOM, +(z + ZOOM_STEP).toFixed(2)));
@@ -53,7 +69,9 @@ export function ArtworkZoomImage({ src, alt }: ArtworkZoomImageProps) {
   const resetZoom = () => {
     setZoom(1);
     setOrigin("center center");
+    setPan({ x: 0, y: 0 });
     setMagnifyMode(false);
+    setIsDragging(false);
   };
 
   const zoomAtPoint = (clientX: number, clientY: number, element: HTMLElement) => {
@@ -63,6 +81,49 @@ export function ArtworkZoomImage({ src, alt }: ArtworkZoomImageProps) {
     const y = ((clientY - rect.top) / rect.height) * 100;
     setOrigin(`${x.toFixed(2)}% ${y.toFixed(2)}%`);
     setZoom((z) => Math.min(MAX_ZOOM, +(z + ZOOM_STEP).toFixed(2)));
+  };
+
+  const beginPan = (event: ReactPointerEvent<HTMLDivElement>) => {
+    if (zoom <= 1 || magnifyMode) return;
+    dragStateRef.current = {
+      active: true,
+      pointerId: event.pointerId,
+      startX: event.clientX,
+      startY: event.clientY,
+      startPanX: pan.x,
+      startPanY: pan.y,
+      moved: false,
+    };
+    setIsDragging(true);
+    event.currentTarget.setPointerCapture(event.pointerId);
+  };
+
+  const updatePan = (event: ReactPointerEvent<HTMLDivElement>) => {
+    const d = dragStateRef.current;
+    if (!d.active || d.pointerId !== event.pointerId) return;
+    const dx = event.clientX - d.startX;
+    const dy = event.clientY - d.startY;
+    if (Math.abs(dx) > 2 || Math.abs(dy) > 2) {
+      d.moved = true;
+    }
+    setPan({
+      x: d.startPanX + dx,
+      y: d.startPanY + dy,
+    });
+  };
+
+  const endPan = (event: ReactPointerEvent<HTMLDivElement>) => {
+    const d = dragStateRef.current;
+    if (d.active && d.pointerId === event.pointerId) {
+      dragStateRef.current.active = false;
+      dragStateRef.current.pointerId = -1;
+      setIsDragging(false);
+      try {
+        event.currentTarget.releasePointerCapture(event.pointerId);
+      } catch {
+        // no-op if capture was already released
+      }
+    }
   };
 
   return (
@@ -149,10 +210,14 @@ export function ArtworkZoomImage({ src, alt }: ArtworkZoomImageProps) {
           <div className="relative z-[1] flex h-full w-full items-center justify-center overflow-auto p-8" onClick={(e) => e.stopPropagation()}>
             {/* keep transform on wrapper so Next image sizing remains predictable */}
             <div
-              style={{ transform: `scale(${zoom})`, transformOrigin: origin }}
-              className={magnifyMode ? "cursor-zoom-in" : ""}
+              style={{ transform: `translate3d(${pan.x}px, ${pan.y}px, 0) scale(${zoom})`, transformOrigin: origin }}
+              className={magnifyMode ? "cursor-zoom-in" : zoom > 1 ? (isDragging ? "cursor-grabbing" : "cursor-grab") : ""}
+              onPointerDown={beginPan}
+              onPointerMove={updatePan}
+              onPointerUp={endPan}
+              onPointerCancel={endPan}
               onClick={(event) => {
-                if (!magnifyMode) return;
+                if (!magnifyMode || dragStateRef.current.moved) return;
                 zoomAtPoint(event.clientX, event.clientY, event.currentTarget as HTMLElement);
               }}
             >
