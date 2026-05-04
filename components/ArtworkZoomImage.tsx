@@ -15,6 +15,8 @@ const ZOOM_STEP = 0.25;
 export function ArtworkZoomImage({ src, alt }: ArtworkZoomImageProps) {
   const [open, setOpen] = useState(false);
   const [zoom, setZoom] = useState(1);
+  const [magnifyMode, setMagnifyMode] = useState(false);
+  const [origin, setOrigin] = useState("center center");
 
   useEffect(() => {
     if (!open) return;
@@ -31,6 +33,7 @@ export function ArtworkZoomImage({ src, alt }: ArtworkZoomImageProps) {
       }
       if (event.key === "0") {
         setZoom(1);
+        setOrigin("center center");
       }
     };
 
@@ -38,8 +41,29 @@ export function ArtworkZoomImage({ src, alt }: ArtworkZoomImageProps) {
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [open]);
 
+  useEffect(() => {
+    if (open) return;
+    setZoom(1);
+    setOrigin("center center");
+    setMagnifyMode(false);
+  }, [open]);
+
   const zoomIn = () => setZoom((z) => Math.min(MAX_ZOOM, +(z + ZOOM_STEP).toFixed(2)));
   const zoomOut = () => setZoom((z) => Math.max(MIN_ZOOM, +(z - ZOOM_STEP).toFixed(2)));
+  const resetZoom = () => {
+    setZoom(1);
+    setOrigin("center center");
+    setMagnifyMode(false);
+  };
+
+  const zoomAtPoint = (clientX: number, clientY: number, element: HTMLElement) => {
+    const rect = element.getBoundingClientRect();
+    if (!rect.width || !rect.height) return;
+    const x = ((clientX - rect.left) / rect.width) * 100;
+    const y = ((clientY - rect.top) / rect.height) * 100;
+    setOrigin(`${x.toFixed(2)}% ${y.toFixed(2)}%`);
+    setZoom((z) => Math.min(MAX_ZOOM, +(z + ZOOM_STEP).toFixed(2)));
+  };
 
   return (
     <>
@@ -84,7 +108,31 @@ export function ArtworkZoomImage({ src, alt }: ArtworkZoomImageProps) {
             </button>
             <button
               type="button"
-              onClick={() => setZoom(1)}
+              onClick={() => setMagnifyMode((v) => !v)}
+              className={
+                magnifyMode
+                  ? "rounded-md bg-white px-3 py-2 text-sm text-black"
+                  : "rounded-md bg-white/15 px-3 py-2 text-sm text-white hover:bg-white/25"
+              }
+              aria-label="Toggle point zoom mode"
+              title="Magnify point mode"
+            >
+              <svg
+                viewBox="0 0 24 24"
+                width="16"
+                height="16"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+                aria-hidden
+              >
+                <circle cx="10.5" cy="10.5" r="6.5" stroke="currentColor" strokeWidth="2" />
+                <path d="M15.5 15.5L21 21" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                <path d="M10.5 7.5V13.5M7.5 10.5H13.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+              </svg>
+            </button>
+            <button
+              type="button"
+              onClick={resetZoom}
               className="rounded-md bg-white/15 px-3 py-2 text-sm text-white hover:bg-white/25"
             >
               {Math.round(zoom * 100)}%
@@ -98,12 +146,16 @@ export function ArtworkZoomImage({ src, alt }: ArtworkZoomImageProps) {
             </button>
           </div>
 
-          <div
-            className="relative z-[1] flex h-full w-full items-center justify-center overflow-auto p-8"
-            onClick={(e) => e.stopPropagation()}
-          >
+          <div className="relative z-[1] flex h-full w-full items-center justify-center overflow-auto p-8" onClick={(e) => e.stopPropagation()}>
             {/* keep transform on wrapper so Next image sizing remains predictable */}
-            <div style={{ transform: `scale(${zoom})`, transformOrigin: "center center" }}>
+            <div
+              style={{ transform: `scale(${zoom})`, transformOrigin: origin }}
+              className={magnifyMode ? "cursor-zoom-in" : ""}
+              onClick={(event) => {
+                if (!magnifyMode) return;
+                zoomAtPoint(event.clientX, event.clientY, event.currentTarget as HTMLElement);
+              }}
+            >
               <Image
                 src={src}
                 alt={alt}
