@@ -6,6 +6,7 @@ import { notFound } from "next/navigation";
 import { ArtworkCard } from "@/components/ArtworkCard";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { DownloadButton } from "@/components/DownloadButton";
+import { ArtworkDescriptionContent } from "@/components/ArtworkDescriptionContent";
 import { ArtworkJsonLd } from "@/components/ArtworkJsonLd";
 import { supabase } from "@/lib/supabase";
 import { absoluteUrl, artworkImageUrl, generateAltText, slugify } from "@/lib/utils";
@@ -340,18 +341,22 @@ export default async function ArtworkDetailPage({ params }: ArtworkPageProps) {
             <h2 className="mb-4 text-base font-semibold text-[#1a1a1a]">
               {artwork.title} — History & Analysis
             </h2>
-            <div className="overflow-hidden text-sm leading-relaxed text-[#4a4a4a]">
-              {artistThumbnailUrl ? (
-                <Image
-                  src={artistThumbnailUrl}
-                  alt={artist}
-                  width={48}
-                  height={48}
-                  unoptimized
-                  className="float-left mr-4 h-12 w-12 rounded-full object-cover"
-                />
-              ) : null}
-              <p>{artwork.description}</p>
+            <div className="overflow-hidden">
+              <ArtworkDescriptionContent
+                description={artwork.description.trim()}
+                thumbnail={
+                  artistThumbnailUrl ? (
+                    <Image
+                      src={artistThumbnailUrl}
+                      alt={artist}
+                      width={48}
+                      height={48}
+                      unoptimized
+                      className="h-12 w-12 rounded-full object-cover"
+                    />
+                  ) : undefined
+                }
+              />
             </div>
             {artistSlug ? (
               <p className="mt-3">
