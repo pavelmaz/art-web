@@ -1,18 +1,25 @@
 import type { Metadata } from "next";
 
 import { ArtworkGrid } from "@/components/ArtworkGrid";
+<<<<<<< HEAD
 import { Pagination } from "@/components/Pagination";
 import { getPaginationParams, getTotalPages } from "@/lib/pagination";
 import { supabase } from "@/lib/supabase";
 import { absoluteUrl } from "@/lib/utils";
+=======
+import { supabase } from "@/lib/supabase";
+>>>>>>> 42d7ea5 (initial commit)
 import type { Artwork } from "@/types/artwork";
 
 export const metadata: Metadata = {
   title: "Artworks",
   description: "Browse top-ranked public domain artworks.",
+<<<<<<< HEAD
   alternates: {
     canonical: absoluteUrl("/artworks"),
   },
+=======
+>>>>>>> 42d7ea5 (initial commit)
 };
 
 function toImageUrl(imageId: string | null): string {
@@ -27,32 +34,104 @@ function toImageUrl(imageId: string | null): string {
   return `https://www.artic.edu/iiif/2/${imageId}/full/843,/0/default.jpg`;
 }
 
+<<<<<<< HEAD
 type ArtworksPageProps = {
-  searchParams: Promise<{ page?: string }>;
+  searchParams: Promise<{ page?: string; q?: string }>;
 };
 
 export default async function ArtworksPage({ searchParams }: ArtworksPageProps) {
   const resolvedSearchParams = await searchParams;
+  const q = resolvedSearchParams.q?.trim() ?? "";
   const { page, from, to } = getPaginationParams(resolvedSearchParams);
 
-  const orderedQuery = await supabase
+  if (q) {
+    const { data, error } = await supabase
+      .from("artworks")
+      .select("id, title, slug, artist_display, image_id, museum")
+      .or(`title.ilike.%${q}%,artist_display.ilike.%${q}%`)
+      .limit(48);
+
+    if (error) {
+      console.error("Artworks search query error:", error);
+      return (
+        <div className="space-y-6">
+          <h1 className="text-3xl font-bold tracking-tight">Artworks</h1>
+          <p>Error loading data</p>
+        </div>
+      );
+    }
+
+    const artworks: Artwork[] = (((data as Array<{
+      id: string;
+      title: string;
+      slug: string;
+      artist_display: string | null;
+      image_id: string | null;
+      museum: string | null;
+    }> | null) ?? [])).map((item) => ({
+      id: item.id,
+      title: item.title,
+      slug: item.slug,
+      artistName: item.artist_display ?? "Unknown artist",
+      artistDisplay: item.artist_display ?? undefined,
+      imageUrl: toImageUrl(item.image_id),
+      imageId: item.image_id,
+      museum: item.museum,
+      styleTitle: null,
+      genreTitle: null,
+      score: null,
+      url: null,
+      styleSlug: "unknown",
+      styleName: "Unknown style",
+      sourceUrl: undefined,
+    }));
+
+    if (!artworks.length) {
+      return (
+        <div className="space-y-6">
+          <h1 className="text-3xl font-bold tracking-tight">Artworks</h1>
+          <p>No results found for {q}</p>
+        </div>
+      );
+    }
+
+    return (
+      <div className="space-y-6">
+        <h1 className="text-3xl font-bold tracking-tight">Artworks</h1>
+        <p className="text-sm text-[#6b6b6b]">Results for "{q}"</p>
+        <ArtworkGrid artworks={artworks} />
+      </div>
+    );
+  }
+
+  let orderedQueryBuilder = supabase
     .from("artworks")
     .select("*", { count: "exact" })
-    .order("score", { ascending: false })
-    .range(from, to);
+    .order("score", { ascending: false });
+
+  const orderedQuery = await orderedQueryBuilder.range(from, to);
 
   let rows = orderedQuery.data ?? [];
   let totalCount = orderedQuery.count ?? 0;
 
   if (orderedQuery.error?.code === "57014") {
-    const fallbackQuery = await supabase
+    let fallbackBuilder = supabase
       .from("artworks")
       .select(
         "id, title, slug, artist_display, image_id, url, museum, style_title, genre_title, score"
-      )
-      .limit(300);
+      );
+
+    if (q) {
+      const escaped = q.replace(/[%_]/g, "");
+      fallbackBuilder = fallbackBuilder.or(
+        `title.ilike.%${escaped}%,artist_display.ilike.%${escaped}%`
+      );
+    }
+
+    const fallbackQuery = await fallbackBuilder.limit(300);
 
     if (fallbackQuery.error) {
+      console.error("Artworks fallback query error:", fallbackQuery.error);
       return <p>Error loading data</p>;
     }
 
@@ -61,14 +140,32 @@ export default async function ArtworksPage({ searchParams }: ArtworksPageProps) 
       .slice(from, to + 1);
     totalCount = fallbackQuery.data?.length ?? totalCount;
   } else if (orderedQuery.error) {
+    console.error("Artworks primary query error:", orderedQuery.error);
     return <p>Error loading data</p>;
   }
 
   const artworks: Artwork[] = rows.map((item) => ({
+=======
+export default async function ArtworksPage() {
+  const { data, error } = await supabase
+    .from("artworks")
+    .select(
+      "id, title, slug, artist_display, image_id, url, museum, style_title, genre_title, score"
+    )
+    .order("score", { ascending: false })
+    .limit(30);
+
+  if (error) {
+    return <p>Error loading artworks</p>;
+  }
+
+  const artworks: Artwork[] = (data ?? []).map((item) => ({
+>>>>>>> 42d7ea5 (initial commit)
     id: item.id,
     title: item.title,
     slug: item.slug,
     artistName: item.artist_display ?? "Unknown artist",
+<<<<<<< HEAD
     artistDisplay: item.artist_display,
     imageUrl: toImageUrl(item.image_id),
     imageId: item.image_id,
@@ -77,24 +174,41 @@ export default async function ArtworksPage({ searchParams }: ArtworksPageProps) 
     genreTitle: item.genre_title,
     score: item.score,
     url: item.url,
+=======
+    imageUrl: toImageUrl(item.image_id),
+    museum: item.museum,
+    dateDisplay: undefined,
+>>>>>>> 42d7ea5 (initial commit)
     styleSlug: "unknown",
     styleName: item.style_title ?? "Unknown style",
     sourceUrl: item.url,
   }));
 
   if (!artworks.length) {
+<<<<<<< HEAD
+    return (
+      <div className="space-y-6">
+        <h1 className="text-3xl font-bold tracking-tight">Artworks</h1>
+        <p>No artworks found.</p>
+      </div>
+    );
+=======
     return <p>No artworks found</p>;
+>>>>>>> 42d7ea5 (initial commit)
   }
 
   return (
     <div className="space-y-6">
       <h1 className="text-3xl font-bold tracking-tight">Artworks</h1>
       <ArtworkGrid artworks={artworks} />
+<<<<<<< HEAD
       <Pagination
         currentPage={page}
         totalPages={Math.max(1, getTotalPages(totalCount))}
         basePath="/artworks"
       />
+=======
+>>>>>>> 42d7ea5 (initial commit)
     </div>
   );
 }

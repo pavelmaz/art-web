@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import type { MetadataRoute } from "next";
 
 import { supabase } from "@/lib/supabase";
@@ -189,4 +190,45 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   }
 
   return entries;
+=======
+import { MetadataRoute } from 'next'
+import { supabase } from '@/lib/supabase'
+
+export const dynamic = 'force-dynamic'
+
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://fineartfree.com'
+
+  // Fetch all artwork slugs
+  const { data: artworks } = await supabase
+    .from('artworks')
+    .select('slug, updated_at')
+    .not('image_id', 'like', '%artic.edu%')
+    .order('score', { ascending: false })
+    .limit(5000)
+
+  const artworkUrls = (artworks || []).map((artwork) => ({
+    url: `${siteUrl}/artworks/${artwork.slug}`,
+    lastModified: artwork.updated_at || new Date(),
+    changeFrequency: 'monthly' as const,
+    priority: 0.8,
+  }))
+
+  // Static pages
+  const staticPages = [
+    { url: siteUrl, priority: 1.0 },
+    { url: `${siteUrl}/artworks`, priority: 0.9 },
+    { url: `${siteUrl}/artists`, priority: 0.9 },
+    { url: `${siteUrl}/genres`, priority: 0.9 },
+    { url: `${siteUrl}/styles`, priority: 0.9 },
+    { url: `${siteUrl}/museums`, priority: 0.8 },
+  ].map((page) => ({
+    url: page.url,
+    lastModified: new Date(),
+    changeFrequency: 'weekly' as const,
+    priority: page.priority,
+  }))
+
+  return [...staticPages, ...artworkUrls]
+>>>>>>> 42d7ea5 (initial commit)
 }

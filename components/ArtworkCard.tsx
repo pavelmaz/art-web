@@ -1,6 +1,9 @@
 import Link from "next/link";
 
+<<<<<<< HEAD
 import { generateAltText } from "@/lib/utils";
+=======
+>>>>>>> 42d7ea5 (initial commit)
 import type { Artwork } from "@/types/artwork";
 
 type ArtworkCardProps = {
@@ -8,6 +11,7 @@ type ArtworkCardProps = {
 };
 
 export function ArtworkCard({ artwork }: ArtworkCardProps) {
+<<<<<<< HEAD
   const artist = artwork.artistDisplay ?? artwork.artistName;
   const hasImage = Boolean(artwork.imageUrl);
 
@@ -38,5 +42,38 @@ export function ArtworkCard({ artwork }: ArtworkCardProps) {
         <p className="mt-[2px] truncate text-[12px] font-normal leading-snug text-[#6b6b6b]">{artist}</p>
       </div>
     </Link>
+=======
+  const hasImage = Boolean(artwork.imageUrl);
+
+  return (
+    <article className="overflow-hidden rounded-xl border border-neutral-200 bg-white">
+      <Link href={`/artworks/${artwork.slug}`} className="block">
+        <div className="relative aspect-[4/3] bg-neutral-100">
+          {hasImage ? (
+            <img
+              src={artwork.imageUrl}
+              alt={`${artwork.title} by ${artwork.artistName}`}
+              className="h-full w-full object-cover"
+              loading="lazy"
+            />
+          ) : (
+            <div className="flex h-full w-full items-center justify-center bg-neutral-200 text-sm text-neutral-600">
+              No image
+            </div>
+          )}
+        </div>
+      </Link>
+
+      <div className="space-y-2 p-4">
+        <h2 className="text-base font-semibold text-neutral-900">
+          <Link href={`/artworks/${artwork.slug}`} className="hover:underline">
+            {artwork.title}
+          </Link>
+        </h2>
+        <p className="text-sm text-neutral-700">{artwork.artistName}</p>
+        {artwork.museum ? <p className="text-sm text-neutral-600">{artwork.museum}</p> : null}
+      </div>
+    </article>
+>>>>>>> 42d7ea5 (initial commit)
   );
 }

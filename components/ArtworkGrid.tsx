@@ -11,11 +11,17 @@ export function ArtworkGrid({ artworks }: ArtworkGridProps) {
   }
 
   return (
+<<<<<<< HEAD
     <section className="columns-2 md:columns-3 lg:columns-4 [column-gap:16px]">
       {artworks.map((artwork) => (
         <div key={artwork.id} className="mb-4 break-inside-avoid">
           <ArtworkCard artwork={artwork} />
         </div>
+=======
+    <section className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+      {artworks.map((artwork) => (
+        <ArtworkCard key={artwork.id} artwork={artwork} />
+>>>>>>> 42d7ea5 (initial commit)
       ))}
     </section>
   );

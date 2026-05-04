@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+<<<<<<< HEAD
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -26,11 +27,18 @@ type ArtworkRow = {
   dimensions: string | null;
   description: string | null;
 };
+=======
+import { notFound } from "next/navigation";
+
+import { getArtworkBySlug, getArtworks } from "@/lib/artworks";
+import { absoluteUrl } from "@/lib/utils";
+>>>>>>> 42d7ea5 (initial commit)
 
 type ArtworkPageProps = {
   params: Promise<{ slug: string }>;
 };
 
+<<<<<<< HEAD
 function truncateDescription(text: string | null): string {
   if (!text) {
     return "";
@@ -44,22 +52,44 @@ function truncateDescription(text: string | null): string {
 }
 
 async function getArtworkBySlug(slug: string): Promise<ArtworkRow | null> {
-  const { data, error } = await supabase
+  const selectColumns =
+    "id, slug, title, artist_display, url, image_id, museum, style_title, genre_title, medium_display, date_display, dimensions, description";
+
+  const primary = await supabase
     .from("artworks")
+    .select(selectColumns)
+    .eq("slug", slug)
+    .single();
+
+  if (!primary.error && primary.data) {
+    return primary.data as ArtworkRow;
+  }
+
+  if (primary.error && primary.error.code !== "PGRST116") {
+    throw primary.error;
+  }
+
+  const fallback = await supabase
+    .from("daily_artworks")
     .select(
-      "id, slug, title, artist_display, url, image_id, museum, style_title, genre_title, medium_display, date_display, dimensions, description"
+      selectColumns
     )
     .eq("slug", slug)
     .single();
 
-  if (error) {
-    if (error.code === "PGRST116") {
+  if (fallback.error) {
+    if (fallback.error.code === "PGRST116") {
       return null;
     }
-    throw error;
+    throw fallback.error;
   }
 
-  return data as ArtworkRow;
+  return fallback.data as ArtworkRow;
+=======
+export async function generateStaticParams() {
+  const artworks = await getArtworks();
+  return artworks.map((artwork) => ({ slug: artwork.slug }));
+>>>>>>> 42d7ea5 (initial commit)
 }
 
 export async function generateMetadata({ params }: ArtworkPageProps): Promise<Metadata> {
@@ -67,6 +97,7 @@ export async function generateMetadata({ params }: ArtworkPageProps): Promise<Me
   const artwork = await getArtworkBySlug(slug);
 
   if (!artwork) {
+<<<<<<< HEAD
     return {
       title: "Artwork not found",
     };
@@ -99,6 +130,18 @@ export async function generateMetadata({ params }: ArtworkPageProps): Promise<Me
       title,
       description,
       images: imageUrl ? [imageUrl] : undefined,
+=======
+    return { title: "Artwork Not Found" };
+  }
+
+  return {
+    title: artwork.title,
+    description:
+      artwork.description ??
+      `${artwork.title} by ${artwork.artistName} in the ${artwork.styleName} style.`,
+    alternates: {
+      canonical: absoluteUrl(`/artworks/${artwork.slug}`),
+>>>>>>> 42d7ea5 (initial commit)
     },
   };
 }
@@ -111,6 +154,7 @@ export default async function ArtworkDetailPage({ params }: ArtworkPageProps) {
     notFound();
   }
 
+<<<<<<< HEAD
   const imageUrl = artworkImageUrl(artwork);
   const artist = artwork.artist_display ?? "Unknown artist";
   const artistSlug = artwork.artist_display?.trim() ? slugify(artwork.artist_display) : null;
@@ -356,6 +400,15 @@ export default async function ArtworkDetailPage({ params }: ArtworkPageProps) {
           </section>
         ) : null}
       </div>
+=======
+  return (
+    <article className="space-y-4">
+      <h1 className="text-3xl font-bold tracking-tight">{artwork.title}</h1>
+      <p className="text-neutral-700">
+        {artwork.artistName} · {artwork.dateDisplay ?? "Unknown date"} · {artwork.styleName}
+      </p>
+      {artwork.description ? <p className="max-w-3xl text-neutral-800">{artwork.description}</p> : null}
+>>>>>>> 42d7ea5 (initial commit)
     </article>
   );
 }

@@ -3,6 +3,7 @@ export type Artwork = {
   slug: string;
   title: string;
   artistName: string;
+<<<<<<< HEAD
   artistDisplay?: string;
   dateDisplay?: string | null;
   imageUrl: string;
@@ -12,6 +13,11 @@ export type Artwork = {
   genreTitle?: string | null;
   score?: number | null;
   url?: string | null;
+=======
+  museum?: string | null;
+  dateDisplay?: string | null;
+  imageUrl: string;
+>>>>>>> 42d7ea5 (initial commit)
   styleSlug: string;
   styleName: string;
   description?: string;

@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
 # dependencies
@@ -9,6 +10,12 @@
 !.yarn/plugins
 !.yarn/releases
 !.yarn/versions
+=======
+# dependencies
+/node_modules
+/.pnp
+.pnp.js
+>>>>>>> 42d7ea5 (initial commit)
 
 # testing
 /coverage
@@ -23,15 +30,29 @@
 # misc
 .DS_Store
 *.pem
+<<<<<<< HEAD
+=======
+Thumbs.db
+>>>>>>> 42d7ea5 (initial commit)
 
 # debug
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+<<<<<<< HEAD
 .pnpm-debug.log*
 
 # env files (can opt-in for committing if needed)
 .env*
+=======
+
+# env files - never commit these
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+>>>>>>> 42d7ea5 (initial commit)
 
 # vercel
 .vercel
