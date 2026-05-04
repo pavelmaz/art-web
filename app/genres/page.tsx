@@ -1,13 +1,8 @@
-import Link from "next/link";
-
+import { BrowseHubGrid } from "@/components/BrowseHubGrid";
 import { Pagination } from "@/components/Pagination";
+import { aggregateArtworksByField } from "@/lib/aggregate-artworks";
 import { getPaginationParams, getTotalPages } from "@/lib/pagination";
-import { supabase } from "@/lib/supabase";
 import { slugify } from "@/lib/utils";
-
-type GenreRow = {
-  genre_title: string | null;
-};
 
 type GenresPageProps = {
   searchParams: Promise<{ page?: string }>;
@@ -17,53 +12,28 @@ export default async function GenresPage({ searchParams }: GenresPageProps) {
   const resolvedSearchParams = await searchParams;
   const { page, from, to } = getPaginationParams(resolvedSearchParams);
 
-  const primaryQuery = await supabase
-    .from("artworks")
-    .select("genre_title")
-    .not("genre_title", "is", null)
-    .neq("genre_title", "")
-    .order("genre_title", { ascending: true });
+  const aggregated = await aggregateArtworksByField("genre_title");
 
-  let rows = (primaryQuery.data as GenreRow[] | null) ?? [];
+  const items = aggregated.map((row) => ({
+    name: row.display,
+    href: `/genres/${slugify(row.display)}`,
+    count: row.count,
+    imageId: row.image_id,
+    url: row.url,
+  }));
 
-  if (primaryQuery.error?.code === "57014") {
-    const fallbackQuery = await supabase
-      .from("artworks")
-      .select("genre_title")
-      .not("genre_title", "is", null)
-      .limit(5000);
-
-    if (fallbackQuery.error) {
-      return <p>Error loading data</p>;
-    }
-
-    rows = (fallbackQuery.data as GenreRow[] | null) ?? [];
-  } else if (primaryQuery.error) {
-    return <p>Error loading data</p>;
-  }
-
-  const genres = Array.from(
-    new Set(
-      rows
-        .map((item) => item.genre_title?.trim())
-        .filter((genre): genre is string => Boolean(genre))
-    )
-  ).sort((a, b) => a.localeCompare(b));
-  const totalPages = Math.max(1, getTotalPages(genres.length));
-  const paginatedGenres = genres.slice(from, to + 1);
+  const totalPages = Math.max(1, getTotalPages(items.length));
+  const paginated = items.slice(from, to + 1);
 
   return (
-    <div className="space-y-4">
-      <h1 className="text-3xl font-bold tracking-tight">Genres</h1>
-      <ul className="space-y-1">
-        {paginatedGenres.map((genre) => (
-          <li key={genre}>
-            <Link href={`/genres/${slugify(genre)}`} className="underline">
-              {genre}
-            </Link>
-          </li>
-        ))}
-      </ul>
+    <div className="space-y-8">
+      <div>
+        <h1 className="mb-2 text-2xl font-semibold">Genres</h1>
+        <p className="mb-8 text-sm text-[#6b6b6b]">Browse artworks by genre</p>
+      </div>
+
+      {paginated.length ? <BrowseHubGrid items={paginated} /> : <p className="text-sm text-[#6b6b6b]">No genres found.</p>}
+
       <Pagination currentPage={page} totalPages={totalPages} basePath="/genres" />
     </div>
   );
