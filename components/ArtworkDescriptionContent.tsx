@@ -75,7 +75,24 @@ function splitRoughIntoThree(text: string): string[] {
   return parts.filter(Boolean);
 }
 
-/** Renders plain segments, `"quoted"` / `“curly”` as italic, `**bold**` as strong. */
+/** Index of a `*` that opens `*...*` (skips `**` pairs so `**bold**` stays one token). */
+function indexOfSingleStarOpen(text: string, from: number): number {
+  let j = from;
+  while (j < text.length) {
+    if (text[j] !== "*") {
+      j++;
+      continue;
+    }
+    if (j + 1 < text.length && text[j + 1] === "*") {
+      j += 2;
+      continue;
+    }
+    return j;
+  }
+  return -1;
+}
+
+/** Renders plain segments, `"quoted"` / `“curly”` as italic, `*bold*` and `**bold**` as strong. */
 function parseDescriptionInlines(text: string): ReactNode {
   if (!text) return null;
 
@@ -109,6 +126,22 @@ function parseDescriptionInlines(text: string): ReactNode {
       continue;
     }
 
+    // Single *...* → bold (common in CMS copy); ** handled above
+    if (text[i] === "*") {
+      const end = text.indexOf("*", i + 1);
+      if (end === -1) {
+        nodes.push(text.slice(i));
+        break;
+      }
+      nodes.push(
+        <strong key={`s-${key++}`} className="font-semibold text-[#1a1a1a]">
+          {text.slice(i + 1, end)}
+        </strong>
+      );
+      i = end + 1;
+      continue;
+    }
+
     if (openQuote(i)) {
       const open = text[i] === "\u201c" ? "\u201c" : '"';
       const end = closeQuoteIndex(i + 1, open);
@@ -128,7 +161,8 @@ function parseDescriptionInlines(text: string): ReactNode {
       continue;
     }
 
-    const nextStar = text.indexOf("**", i);
+    const nextDoubleStar = text.indexOf("**", i);
+    const nextSingleStar = indexOfSingleStarOpen(text, i);
     const nextStraight = text.indexOf('"', i);
     const nextCurly = text.indexOf("\u201c", i);
     let nextQuote = -1;
@@ -137,7 +171,8 @@ function parseDescriptionInlines(text: string): ReactNode {
     else nextQuote = Math.min(nextStraight, nextCurly);
 
     let next = text.length;
-    if (nextStar !== -1) next = Math.min(next, nextStar);
+    if (nextDoubleStar !== -1) next = Math.min(next, nextDoubleStar);
+    if (nextSingleStar !== -1) next = Math.min(next, nextSingleStar);
     if (nextQuote !== -1) next = Math.min(next, nextQuote);
 
     if (next > i) {
