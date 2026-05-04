@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { PointerEvent as ReactPointerEvent } from "react";
 
 type ArtworkZoomImageProps = {
@@ -20,6 +20,10 @@ export function ArtworkZoomImage({ src, alt }: ArtworkZoomImageProps) {
   const [origin, setOrigin] = useState("center center");
   const [pan, setPan] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
+  const viewportRef = useRef<HTMLDivElement | null>(null);
+  const zoomRef = useRef(zoom);
+  zoomRef.current = zoom;
+
   const dragStateRef = useRef({
     active: false,
     pointerId: -1,
@@ -30,6 +34,8 @@ export function ArtworkZoomImage({ src, alt }: ArtworkZoomImageProps) {
     moved: false,
   });
 
+  const clampZoom = useCallback((z: number) => Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, +z.toFixed(2))), []);
+
   useEffect(() => {
     if (!open) return;
 
@@ -38,10 +44,14 @@ export function ArtworkZoomImage({ src, alt }: ArtworkZoomImageProps) {
         setOpen(false);
       }
       if (event.key === "+" || event.key === "=") {
-        setZoom((z) => Math.min(MAX_ZOOM, +(z + ZOOM_STEP).toFixed(2)));
+        setZoom((z) => clampZoom(z + ZOOM_STEP));
       }
       if (event.key === "-") {
-        setZoom((z) => Math.max(MIN_ZOOM, +(z - ZOOM_STEP).toFixed(2)));
+        setZoom((z) => {
+          const nz = clampZoom(z - ZOOM_STEP);
+          if (nz === 1) setPan({ x: 0, y: 0 });
+          return nz;
+        });
       }
       if (event.key === "0") {
         setZoom(1);
@@ -52,7 +62,7 @@ export function ArtworkZoomImage({ src, alt }: ArtworkZoomImageProps) {
 
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [open]);
+  }, [open, clampZoom]);
 
   useEffect(() => {
     if (open) return;
@@ -64,15 +74,22 @@ export function ArtworkZoomImage({ src, alt }: ArtworkZoomImageProps) {
     dragStateRef.current.active = false;
   }, [open]);
 
-  const zoomIn = () => setZoom((z) => Math.min(MAX_ZOOM, +(z + ZOOM_STEP).toFixed(2)));
-  const zoomOut = () => setZoom((z) => Math.max(MIN_ZOOM, +(z - ZOOM_STEP).toFixed(2)));
   const resetZoom = () => {
     setZoom(1);
     setOrigin("center center");
     setPan({ x: 0, y: 0 });
     setMagnifyMode(false);
     setIsDragging(false);
+    dragStateRef.current.active = false;
   };
+
+  const zoomIn = () => setZoom((z) => clampZoom(z + ZOOM_STEP));
+  const zoomOut = () =>
+    setZoom((z) => {
+      const nz = clampZoom(z - ZOOM_STEP);
+      if (nz === 1) setPan({ x: 0, y: 0 });
+      return nz;
+    });
 
   const zoomAtPoint = (clientX: number, clientY: number, element: HTMLElement) => {
     const rect = element.getBoundingClientRect();
@@ -80,11 +97,14 @@ export function ArtworkZoomImage({ src, alt }: ArtworkZoomImageProps) {
     const x = ((clientX - rect.left) / rect.width) * 100;
     const y = ((clientY - rect.top) / rect.height) * 100;
     setOrigin(`${x.toFixed(2)}% ${y.toFixed(2)}%`);
-    setZoom((z) => Math.min(MAX_ZOOM, +(z + ZOOM_STEP).toFixed(2)));
+    setZoom((z) => clampZoom(z + ZOOM_STEP));
   };
 
+  /** Pan whenever zoomed — works with magnify mode: drag moves, click (no drag) zooms at point. */
   const beginPan = (event: ReactPointerEvent<HTMLDivElement>) => {
-    if (zoom <= 1 || magnifyMode) return;
+    if (zoom <= 1) return;
+    if (event.button !== 0) return;
+
     dragStateRef.current = {
       active: true,
       pointerId: event.pointerId,
@@ -121,10 +141,51 @@ export function ArtworkZoomImage({ src, alt }: ArtworkZoomImageProps) {
       try {
         event.currentTarget.releasePointerCapture(event.pointerId);
       } catch {
-        // no-op if capture was already released
+        // ignore
       }
     }
   };
+
+  useEffect(() => {
+    if (!open) return;
+    const node = viewportRef.current;
+    if (!node) return;
+
+    const handler = (event: WheelEvent) => {
+      const surface = node.querySelector<HTMLElement>("[data-zoom-surface]");
+      if (!surface) return;
+      event.preventDefault();
+
+      const rect = surface.getBoundingClientRect();
+      const cx = event.clientX;
+      const cy = event.clientY;
+
+      const prevZoom = zoomRef.current;
+      const direction = event.deltaY > 0 ? -1 : 1;
+      const nextZoom = clampZoom(prevZoom + direction * ZOOM_STEP);
+      if (nextZoom === prevZoom) return;
+
+      if (nextZoom === 1) {
+        setPan({ x: 0, y: 0 });
+        setOrigin("center center");
+        zoomRef.current = 1;
+        setZoom(1);
+        return;
+      }
+
+      const ox = ((cx - rect.left) / rect.width) * 100;
+      const oy = ((cy - rect.top) / rect.height) * 100;
+      setOrigin(`${ox.toFixed(2)}% ${oy.toFixed(2)}%`);
+      zoomRef.current = nextZoom;
+      setZoom(nextZoom);
+    };
+
+    node.addEventListener("wheel", handler, { passive: false });
+    return () => node.removeEventListener("wheel", handler);
+  }, [open, clampZoom]);
+
+  const cursorClass =
+    zoom > 1 ? (isDragging ? "cursor-grabbing" : "cursor-grab") : magnifyMode ? "cursor-zoom-in" : "";
 
   return (
     <>
@@ -149,7 +210,6 @@ export function ArtworkZoomImage({ src, alt }: ArtworkZoomImageProps) {
 
       {open ? (
         <div className="fixed inset-0 z-50 bg-black/90" onClick={() => setOpen(false)}>
-
           <div className="absolute right-4 top-4 z-10 flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
             <button
               type="button"
@@ -176,7 +236,7 @@ export function ArtworkZoomImage({ src, alt }: ArtworkZoomImageProps) {
                   : "rounded-md bg-white/15 px-3 py-2 text-sm text-white hover:bg-white/25"
               }
               aria-label="Toggle point zoom mode"
-              title="Magnify point mode"
+              title="Click image to zoom at a point"
             >
               <svg
                 viewBox="0 0 24 24"
@@ -207,11 +267,19 @@ export function ArtworkZoomImage({ src, alt }: ArtworkZoomImageProps) {
             </button>
           </div>
 
-          <div className="relative z-[1] flex h-full w-full items-center justify-center overflow-auto p-8" onClick={(e) => e.stopPropagation()}>
-            {/* keep transform on wrapper so Next image sizing remains predictable */}
+          <p className="pointer-events-none absolute bottom-4 left-1/2 z-10 -translate-x-1/2 text-center text-xs text-white/70">
+            {zoom > 1 ? "Drag with the mouse to move around · Scroll wheel to zoom" : "Scroll wheel or + to zoom"}
+          </p>
+
+          <div
+            ref={viewportRef}
+            className="relative z-[1] flex h-full w-full items-center justify-center overflow-hidden p-8 touch-none"
+            onClick={(e) => e.stopPropagation()}
+          >
             <div
+              data-zoom-surface
               style={{ transform: `translate3d(${pan.x}px, ${pan.y}px, 0) scale(${zoom})`, transformOrigin: origin }}
-              className={magnifyMode ? "cursor-zoom-in" : zoom > 1 ? (isDragging ? "cursor-grabbing" : "cursor-grab") : ""}
+              className={cursorClass}
               onPointerDown={beginPan}
               onPointerMove={updatePan}
               onPointerUp={endPan}
@@ -227,7 +295,8 @@ export function ArtworkZoomImage({ src, alt }: ArtworkZoomImageProps) {
                 width={1600}
                 height={1200}
                 unoptimized
-                className="h-auto max-h-[85vh] w-auto object-contain"
+                draggable={false}
+                className="h-auto max-h-[85vh] w-auto object-contain select-none"
               />
             </div>
           </div>
