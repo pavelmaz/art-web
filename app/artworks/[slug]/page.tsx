@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
@@ -8,6 +7,7 @@ import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { DownloadButton } from "@/components/DownloadButton";
 import { ArtworkDescriptionContent } from "@/components/ArtworkDescriptionContent";
 import { ArtworkJsonLd } from "@/components/ArtworkJsonLd";
+import { ArtworkZoomImage } from "@/components/ArtworkZoomImage";
 import { supabase } from "@/lib/supabase";
 import { absoluteUrl, artworkImageUrl, generateAltText, slugify } from "@/lib/utils";
 import type { Artwork } from "@/types/artwork";
@@ -248,15 +248,7 @@ export default async function ArtworkDetailPage({ params }: ArtworkPageProps) {
             <div className="bg-white p-6">
               {imageUrl ? (
                 <div className="flex justify-center">
-                  <Image
-                    src={imageUrl}
-                    alt={generateAltText(artwork)}
-                    width={1200}
-                    height={900}
-                    priority={true}
-                    unoptimized
-                    className="h-auto max-h-[70vh] w-auto object-contain shadow-[0_4px_24px_rgba(0,0,0,0.10)]"
-                  />
+                  <ArtworkZoomImage src={imageUrl} alt={generateAltText(artwork)} />
                 </div>
               ) : (
                 <div className="flex h-[420px] w-full items-center justify-center bg-neutral-200 text-neutral-600">

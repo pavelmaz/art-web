@@ -27,6 +27,9 @@ type ArtworkRow = {
   score: number | null;
 };
 
+const SELECT_COLUMNS =
+  "id, title, slug, artist_display, image_id, url, museum, style_title, genre_title, score";
+
 function unslugifyMuseum(slug: string): string {
   return slug
     .split("-")
@@ -58,6 +61,41 @@ function toImageUrl(imageId: string | null): string {
 
 function getSeoDescription(museumName: string): string {
   return `Browse free public domain artworks and paintings from ${museumName}.`;
+}
+
+async function loadMuseumRowsBySlug(slug: string): Promise<ArtworkRow[]> {
+  const rows: ArtworkRow[] = [];
+  const BATCH = 1000;
+  let from = 0;
+
+  while (true) {
+    const { data, error } = await supabase
+      .from("artworks")
+      .select(SELECT_COLUMNS)
+      .not("museum", "is", null)
+      .order("id", { ascending: true })
+      .range(from, from + BATCH - 1);
+
+    if (error) {
+      console.error("[museum-slug-fallback] batch", from, error);
+      break;
+    }
+
+    const batch = (data as ArtworkRow[] | null) ?? [];
+    if (!batch.length) {
+      break;
+    }
+
+    for (const item of batch) {
+      if (item.museum && slugifyMuseum(item.museum) === slug) {
+        rows.push(item);
+      }
+    }
+
+    from += BATCH;
+  }
+
+  return rows.sort((a, b) => (b.score ?? 0) - (a.score ?? 0));
 }
 
 export async function generateMetadata({ params }: MuseumPageProps): Promise<Metadata> {
@@ -98,9 +136,7 @@ export default async function MuseumPage({ params, searchParams }: MuseumPagePro
 
   const orderedQuery = await supabase
     .from("artworks")
-    .select("id, title, slug, artist_display, image_id, url, museum, style_title, genre_title, score", {
-      count: "exact",
-    })
+    .select(SELECT_COLUMNS, { count: "planned" })
     .eq("museum", museumName)
     .order("score", { ascending: false })
     .range(from, to);
@@ -111,41 +147,27 @@ export default async function MuseumPage({ params, searchParams }: MuseumPagePro
   if (orderedQuery.error?.code === "57014") {
     const fallbackQuery = await supabase
       .from("artworks")
-      .select("id, title, slug, artist_display, image_id, url, museum, style_title, genre_title, score")
+      .select(SELECT_COLUMNS)
       .eq("museum", museumName)
       .limit(200);
 
-    if (fallbackQuery.error) {
-      return <p>Error loading data</p>;
+    if (!fallbackQuery.error) {
+      rows = ((fallbackQuery.data as ArtworkRow[] | null) ?? [])
+        .sort((a, b) => (b.score ?? 0) - (a.score ?? 0))
+        .slice(from, to + 1);
+      totalCount = fallbackQuery.data?.length ?? totalCount;
     }
-
-    rows = ((fallbackQuery.data as ArtworkRow[] | null) ?? [])
-      .sort((a, b) => (b.score ?? 0) - (a.score ?? 0))
-      .slice(from, to + 1);
-    totalCount = fallbackQuery.data?.length ?? totalCount;
   } else if (orderedQuery.error) {
-    return <p>Error loading data</p>;
+    console.error("[museum-primary-query]", orderedQuery.error);
+    rows = [];
+    totalCount = 0;
   }
 
   // Fallback for museum naming mismatches (e.g. aliases/punctuation/case differences).
   if (!rows.length) {
-    const fallbackQuery = await supabase
-      .from("artworks")
-      .select("id, title, slug, artist_display, image_id, url, museum, style_title, genre_title, score")
-      .not("museum", "is", null)
-      .limit(1500);
-
-    if (fallbackQuery.error) {
-      return <p>Error loading data</p>;
-    }
-
-    rows = ((fallbackQuery.data as ArtworkRow[] | null) ?? [])
-      .filter((item) => item.museum && slugifyMuseum(item.museum) === slug)
-      .sort((a, b) => (b.score ?? 0) - (a.score ?? 0))
-      .slice(from, to + 1);
-    totalCount = ((fallbackQuery.data as ArtworkRow[] | null) ?? []).filter(
-      (item) => item.museum && slugifyMuseum(item.museum) === slug
-    ).length;
+    const matched = await loadMuseumRowsBySlug(slug);
+    totalCount = matched.length;
+    rows = matched.slice(from, to + 1);
   }
 
   const artworks: Artwork[] = rows.map((item) => ({
