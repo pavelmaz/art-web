@@ -22,7 +22,7 @@ export default function Header() {
           className="inline-flex shrink-0 items-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:ring-offset-2 focus-visible:ring-offset-transparent"
         >
           <Image
-            src="/logo-fine-art.png"
+            src="/logo-fine-art.svg"
             alt="Fine Art"
             width={1024}
             height={1024}
