@@ -46,7 +46,7 @@ export default async function ArtworksPage({ searchParams }: ArtworksPageProps) 
     if (error) {
       console.error("Artworks search query error:", error);
       return (
-        <div className="space-y-6">
+        <div className="space-y-6 px-[10px]">
           <h1 className="text-3xl font-bold tracking-tight">Artworks</h1>
           <p>Error loading data</p>
         </div>
@@ -82,7 +82,7 @@ export default async function ArtworksPage({ searchParams }: ArtworksPageProps) 
 
     if (!artworks.length) {
       return (
-        <div className="space-y-6">
+        <div className="space-y-6 px-[10px]">
           <h1 className="text-3xl font-bold tracking-tight">Artworks</h1>
           <p>No results found for {q}</p>
         </div>
@@ -90,7 +90,7 @@ export default async function ArtworksPage({ searchParams }: ArtworksPageProps) 
     }
 
     return (
-      <div className="space-y-6">
+      <div className="space-y-6 px-[10px]">
         <h1 className="text-3xl font-bold tracking-tight">Artworks</h1>
         <p className="text-sm text-[#6b6b6b]">Results for &quot;{q}&quot;</p>
         <ArtworkGrid artworks={artworks} />
@@ -156,7 +156,7 @@ export default async function ArtworksPage({ searchParams }: ArtworksPageProps) 
 
   if (!artworks.length) {
     return (
-      <div className="space-y-6">
+      <div className="space-y-6 px-[10px]">
         <h1 className="text-3xl font-bold tracking-tight">Artworks</h1>
         <p>No artworks found.</p>
       </div>
@@ -164,7 +164,7 @@ export default async function ArtworksPage({ searchParams }: ArtworksPageProps) 
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 px-[10px]">
       <h1 className="text-3xl font-bold tracking-tight">Artworks</h1>
       <ArtworkGrid artworks={artworks} />
       <Pagination

@@ -16,10 +16,10 @@ export default function Header() {
           : "border-b border-neutral-800 bg-black"
       }
     >
-      <div className="mx-auto flex w-full max-w-6xl items-center justify-between px-6 py-4">
+      <div className="flex w-full items-center justify-between px-3 py-3 md:px-6">
         <Link
           href="/"
-          className="inline-flex shrink-0 items-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:ring-offset-2 focus-visible:ring-offset-transparent"
+          className="-ml-1 inline-flex shrink-0 items-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:ring-offset-2 focus-visible:ring-offset-transparent"
         >
           <Image
             src="/logo-fine-art.svg"
@@ -27,7 +27,7 @@ export default function Header() {
             width={1024}
             height={1024}
             priority
-            className="h-[72px] w-auto max-h-[72px] max-w-[400px] object-contain object-left"
+            className="h-12 w-auto max-h-12 max-w-[280px] object-contain object-left"
           />
         </Link>
 

@@ -32,7 +32,7 @@ export default async function MuseumsPage({ searchParams }: MuseumsPageProps) {
   const paginated = items.slice(from, to + 1);
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 px-[10px]">
       <div>
         <h1 className="mb-2 text-2xl font-semibold">Museums</h1>
         <p className="mb-8 text-sm text-[#6b6b6b]">Browse artworks by museum</p>

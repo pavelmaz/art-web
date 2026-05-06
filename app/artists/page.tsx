@@ -82,7 +82,7 @@ export default async function ArtistsPage({ searchParams }: ArtistsPageProps) {
   const paginatedArtists = artists.slice(from, to + 1);
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 px-[10px]">
       <div>
         <h1 className="mb-2 text-2xl font-semibold">Artists</h1>
         <p className="mb-8 text-sm text-[#6b6b6b]">Browse artworks by artist</p>

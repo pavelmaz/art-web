@@ -32,7 +32,7 @@ except ImportError:
 SUPABASE_URL = (os.environ.get("NEXT_PUBLIC_SUPABASE_URL") or "").rstrip("/") or (
     "https://froigstrpvutwqtqikzt.supabase.co"
 )
-SUPABASE_KEY = os.environ.get("NEXT_PUBLIC_SUPABASE_ANON_KEY", "")
+SUPABASE_KEY = os.environ.get("SUPABASE_SERVICE_KEY", "")
 OPENAI_KEY = os.environ.get("OPENAI_API_KEY", "")
 
 if not (SUPABASE_KEY or "").strip():
@@ -292,7 +292,7 @@ Return ONLY raw JSON. No markdown. No code blocks. No explanation.
 
 
 def process_artwork(artwork: dict) -> bool:
-    artwork_id = artwork["id"]
+    artwork_id = artwork["id"].strip()
 
     # Pre-clean in memory — no DB write
     hints = pre_clean(artwork)
@@ -352,15 +352,19 @@ def process_artwork(artwork: dict) -> bool:
         last_update_err = None
         for attempt in range(3):
             try:
-                supabase.table("artworks").update({
+                response = supabase.table("artworks").update({
                     "style_title": style,
                     "subject":     subject,
                     "tags":        tags if tags else None,
                     "alt_text":    en_data.get("alt_text"),
                 }).eq("id", artwork_id).execute()
+                
+                if hasattr(response, 'data'):
+                    print(f"  DB write ok: {artwork_id[:30]} subject={subject}")
                 update_ok = True
                 break
             except Exception as e:
+                print(f"  ✗ artworks UPDATE failed [{artwork_id}]: {e}")
                 last_update_err = e
                 if attempt < 2:
                     time.sleep(2)

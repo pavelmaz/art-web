@@ -112,20 +112,20 @@ export default async function HomePage() {
             <br />
             Classic Paintings &amp; Illustrations
           </h1>
-          <p className="mt-4 max-w-2xl text-lg text-[#d0d0d0]">
+          <p className="mt-4 max-w-2xl text-lg text-white">
             Browse thousands of museum masterpieces free to download, share, and use for personal
             or commercial projects.
           </p>
           <form action="/search" method="get" className="mt-8 max-w-3xl">
-            <div className="flex items-center border-b border-white/70">
+            <div className="flex items-center border-b border-white">
               <input
                 type="text"
                 name="q"
                 placeholder="Search by artwork title or artist"
-                className="w-full bg-transparent py-2 text-xl text-white placeholder:text-white/70 focus:outline-none"
+                className="w-full bg-transparent py-2 text-xl text-white placeholder:text-white focus:outline-none"
                 aria-label="Search by artwork title or artist"
               />
-              <button type="submit" className="px-2 text-2xl text-white/90 hover:text-white" aria-label="Search">
+              <button type="submit" className="px-2 text-3xl text-white hover:text-white" aria-label="Search">
                 ⌕
               </button>
             </div>
