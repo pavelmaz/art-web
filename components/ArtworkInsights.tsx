@@ -219,7 +219,7 @@ export function ArtworkInsightsOverlay() {
                   backgroundColor: "rgba(140, 140, 140, 0.4)",
                   borderWidth: 2,
                   borderStyle: "solid",
-                  borderColor: "#6b6b6b",
+                  borderColor: "#4CAF50",
                 }}
                 aria-label={insight.title}
               />
@@ -270,7 +270,7 @@ export function ArtworkInsightsControls() {
           type="button"
           onClick={handleDiscover}
           disabled={loading}
-          className="inline-flex shrink-0 items-center justify-center gap-2 rounded-md border border-[#8a8a8a] bg-[#9e9e9e] px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[#8a8a8a] disabled:cursor-not-allowed disabled:opacity-60"
+          className="inline-flex shrink-0 items-center justify-center gap-2 rounded-md bg-[#9e9e9e] px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[#8a8a8a] disabled:cursor-not-allowed disabled:opacity-60"
         >
           {loading ? (
             <>
