@@ -1,7 +1,14 @@
 "use client";
 
 import { Eye, Loader2 } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+  type ReactNode,
+} from "react";
 
 export type ArtworkRow = {
   title: string;
@@ -20,10 +27,28 @@ type InsightsResponse = {
   insights: Insight[];
 };
 
-type ArtworkInsightsProps = {
+type ArtworkInsightsContextValue = {
   artwork: ArtworkRow;
-  imageUrl: string;
+  loading: boolean;
+  error: string | null;
+  insights: Insight[];
+  visibleCount: number;
+  activeId: number | null;
+  openPopupId: number | null;
+  setActiveId: (id: number | null) => void;
+  setOpenPopupId: (id: number | null) => void;
+  handleDiscover: () => void;
 };
+
+const ArtworkInsightsContext = createContext<ArtworkInsightsContextValue | null>(null);
+
+function useArtworkInsights() {
+  const ctx = useContext(ArtworkInsightsContext);
+  if (!ctx) {
+    throw new Error("ArtworkInsights components must be used within ArtworkInsightsProvider");
+  }
+  return ctx;
+}
 
 function buildPrompt(artwork: ArtworkRow): string {
   const artist = artwork.artist_display?.trim() || "Unknown artist";
@@ -55,7 +80,13 @@ Return ONLY valid JSON:
 }`;
 }
 
-export function ArtworkInsights({ artwork, imageUrl }: ArtworkInsightsProps) {
+export function ArtworkInsightsProvider({
+  artwork,
+  children,
+}: {
+  artwork: ArtworkRow;
+  children: ReactNode;
+}) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [insights, setInsights] = useState<Insight[]>([]);
@@ -125,64 +156,108 @@ export function ArtworkInsights({ artwork, imageUrl }: ArtworkInsightsProps) {
   }, [artwork]);
 
   return (
-    <div className="mt-4 space-y-4">
+    <ArtworkInsightsContext.Provider
+      value={{
+        artwork,
+        loading,
+        error,
+        insights,
+        visibleCount,
+        activeId,
+        openPopupId,
+        setActiveId,
+        setOpenPopupId,
+        handleDiscover,
+      }}
+    >
       <style
         dangerouslySetInnerHTML={{
           __html: `@keyframes insight-dot-in{from{opacity:0;transform:translate(-50%,-50%) scale(.75)}to{opacity:1;transform:translate(-50%,-50%) scale(1)}}`,
         }}
       />
-      <div className="relative w-full overflow-hidden rounded-lg bg-white">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={imageUrl}
-          alt={artwork.title}
-          className="block w-full h-auto object-contain"
-        />
-        {insights.slice(0, visibleCount).map((insight) => {
-          const isActive = activeId === insight.id;
-          const isOpen = openPopupId === insight.id;
-          return (
-            <div
-              key={insight.id}
-              className="absolute z-10 -translate-x-1/2 -translate-y-1/2"
-              style={{
-                left: `${insight.x}%`,
-                top: `${insight.y}%`,
-                animation: "insight-dot-in 0.35s ease-out forwards",
-              }}
-            >
-              <button
-                type="button"
-                onClick={() => {
-                  setOpenPopupId(isOpen ? null : insight.id);
-                  setActiveId(insight.id);
-                }}
-                className={`relative flex size-9 items-center justify-center rounded-full border-2 bg-transparent transition-all ${
-                  isActive
-                    ? "border-white shadow-[0_0_0_3px_rgba(59,130,246,0.6)]"
-                    : "border-white/90 hover:border-white"
-                }`}
-                aria-label={insight.title}
-              >
-                <span className="flex size-5 items-center justify-center rounded-full bg-white/95 text-[11px] font-semibold text-[#1a1a1a]">
-                  {insight.id}
-                </span>
-              </button>
-              {isOpen ? (
-                <div
-                  className="absolute left-1/2 top-full z-20 mt-2 w-56 -translate-x-1/2 rounded-lg px-3 py-2.5 text-left text-xs leading-relaxed text-white shadow-lg backdrop-blur-md sm:w-64"
-                  style={{ background: "rgba(15,15,15,0.95)" }}
-                >
-                  <p className="mb-1 font-medium">{insight.title}</p>
-                  <p className="text-white/90">{insight.text}</p>
-                </div>
-              ) : null}
-            </div>
-          );
-        })}
-      </div>
+      {children}
+    </ArtworkInsightsContext.Provider>
+  );
+}
 
-      {hasInsights && visibleCount >= insights.length ? (
+/** Overlay insight dots on the main artwork image (place inside a `relative` wrapper). */
+export function ArtworkInsightsOverlay() {
+  const { insights, visibleCount, activeId, openPopupId, setActiveId, setOpenPopupId } =
+    useArtworkInsights();
+
+  if (visibleCount === 0) {
+    return null;
+  }
+
+  return (
+    <div className="pointer-events-none absolute inset-0 z-10">
+      {insights.slice(0, visibleCount).map((insight) => {
+        const isActive = activeId === insight.id;
+        const isOpen = openPopupId === insight.id;
+        return (
+          <div
+            key={insight.id}
+            className="pointer-events-auto absolute -translate-x-1/2 -translate-y-1/2"
+            style={{
+              left: `${insight.x}%`,
+              top: `${insight.y}%`,
+              animation: "insight-dot-in 0.35s ease-out forwards",
+            }}
+          >
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                setOpenPopupId(isOpen ? null : insight.id);
+                setActiveId(insight.id);
+              }}
+              className={`relative flex size-9 items-center justify-center rounded-full border-2 bg-transparent transition-all ${
+                isActive
+                  ? "border-white shadow-[0_0_0_3px_rgba(59,130,246,0.6)]"
+                  : "border-white/90 hover:border-white"
+              }`}
+              aria-label={insight.title}
+            >
+              <span className="flex size-5 items-center justify-center rounded-full bg-white/95 text-[11px] font-semibold text-[#1a1a1a]">
+                {insight.id}
+              </span>
+            </button>
+            {isOpen ? (
+              <div
+                className="absolute left-1/2 top-full z-20 mt-2 w-56 -translate-x-1/2 rounded-lg px-3 py-2.5 text-left text-xs leading-relaxed text-white shadow-lg backdrop-blur-md sm:w-64"
+                style={{ background: "rgba(15,15,15,0.95)" }}
+              >
+                <p className="mb-1 font-medium">{insight.title}</p>
+                <p className="text-white/90">{insight.text}</p>
+              </div>
+            ) : null}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+/** Blue info box, Discover button, and insight cards — place under the main artwork image. */
+export function ArtworkInsightsControls() {
+  const {
+    loading,
+    error,
+    insights,
+    visibleCount,
+    activeId,
+    openPopupId,
+    setActiveId,
+    setOpenPopupId,
+    handleDiscover,
+  } = useArtworkInsights();
+
+  const hasInsights = insights.length > 0;
+  const showCards = hasInsights && visibleCount >= insights.length;
+
+  return (
+    <div className="mt-4 space-y-4">
+      {showCards ? (
         <div className="grid grid-cols-2 gap-3">
           {insights.map((insight) => {
             const isActive = activeId === insight.id;
@@ -224,7 +299,7 @@ export function ArtworkInsights({ artwork, imageUrl }: ArtworkInsightsProps) {
         type="button"
         onClick={handleDiscover}
         disabled={loading}
-        className="inline-flex w-full items-center justify-center gap-2 rounded-md border border-[#d1d5db] bg-transparent px-4 py-2 text-sm font-medium text-[#4a4a4a] transition-colors hover:bg-[#f9fafb] disabled:cursor-not-allowed disabled:opacity-60"
+        className="inline-flex w-full max-w-sm items-center justify-center gap-2 rounded-md border border-[#d1d5db] bg-transparent px-4 py-2 text-sm font-medium text-[#4a4a4a] transition-colors hover:bg-[#f9fafb] disabled:cursor-not-allowed disabled:opacity-60"
       >
         {loading ? (
           <>

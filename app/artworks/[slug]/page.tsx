@@ -7,7 +7,11 @@ import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { DownloadButton } from "@/components/DownloadButton";
 import { ArtworkJsonLd } from "@/components/ArtworkJsonLd";
 import { ArtworkZoomImage } from "@/components/ArtworkZoomImage";
-import { ArtworkInsights } from "@/components/ArtworkInsights";
+import {
+  ArtworkInsightsControls,
+  ArtworkInsightsOverlay,
+  ArtworkInsightsProvider,
+} from "@/components/ArtworkInsights";
 import { SectionCtaLink } from "@/components/SectionCtaLink";
 import { supabase } from "@/lib/supabase";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
@@ -477,20 +481,32 @@ export default async function ArtworkDetailPage({ params }: ArtworkPageProps) {
         <BreadcrumbJsonLd artwork={artwork} />
 
         <div className="flex flex-col gap-8 lg:flex-row lg:items-start">
-          <div className="flex-1 space-y-4">
-            <div className="bg-white p-2 sm:p-6">
-              {imageUrl ? (
-                <div className="flex justify-center">
-                  <ArtworkZoomImage src={imageUrl} fullSrc={artworkOriginalUrl(artwork) || imageUrl} alt={generateAltText(artwork)} />
-                </div>
-              ) : (
-                <div className="flex h-[420px] w-full items-center justify-center bg-neutral-200 text-neutral-600">
-                  No image available
-                </div>
-              )}
+          <ArtworkInsightsProvider artwork={artwork}>
+            <div className="flex-1 space-y-4">
+              <div className="bg-white p-2 sm:p-6">
+                {imageUrl ? (
+                  <>
+                    <div className="flex justify-center">
+                      <div className="relative w-fit max-w-full">
+                        <ArtworkZoomImage
+                          src={imageUrl}
+                          fullSrc={artworkOriginalUrl(artwork) || imageUrl}
+                          alt={generateAltText(artwork)}
+                        />
+                        <ArtworkInsightsOverlay />
+                      </div>
+                    </div>
+                    <ArtworkInsightsControls />
+                  </>
+                ) : (
+                  <div className="flex h-[420px] w-full items-center justify-center bg-neutral-200 text-neutral-600">
+                    No image available
+                  </div>
+                )}
+              </div>
+              <Breadcrumbs items={breadcrumbItems} currentPath={`/artworks/${artwork.slug}`} includeJsonLd={false} />
             </div>
-            <Breadcrumbs items={breadcrumbItems} currentPath={`/artworks/${artwork.slug}`} includeJsonLd={false} />
-          </div>
+          </ArtworkInsightsProvider>
 
           <aside className="w-full lg:w-80">
             <div className="space-y-4 rounded-2xl bg-[#f5f5f5] p-5 lg:sticky lg:top-6">
@@ -562,8 +578,6 @@ export default async function ArtworkDetailPage({ params }: ArtworkPageProps) {
                   </div>
                 </details>
               </div>
-
-              <ArtworkInsights artwork={artwork} imageUrl={imageUrl} />
 
               <div className="my-4 border-t border-[#e8e6e1]" />
 
