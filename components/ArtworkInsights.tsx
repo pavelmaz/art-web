@@ -1,6 +1,6 @@
 "use client";
 
-import { Eye, Loader2 } from "lucide-react";
+import { Eye, Loader2, X } from "lucide-react";
 import {
   createContext,
   useCallback,
@@ -33,10 +33,9 @@ type ArtworkInsightsContextValue = {
   error: string | null;
   insights: Insight[];
   visibleCount: number;
-  activeId: number | null;
   openPopupId: number | null;
-  setActiveId: (id: number | null) => void;
   setOpenPopupId: (id: number | null) => void;
+  closePopup: () => void;
   handleDiscover: () => void;
 };
 
@@ -91,9 +90,12 @@ export function ArtworkInsightsProvider({
   const [error, setError] = useState<string | null>(null);
   const [insights, setInsights] = useState<Insight[]>([]);
   const [visibleCount, setVisibleCount] = useState(0);
-  const [activeId, setActiveId] = useState<number | null>(null);
   const [openPopupId, setOpenPopupId] = useState<number | null>(null);
   const hasInsights = insights.length > 0;
+
+  const closePopup = useCallback(() => {
+    setOpenPopupId(null);
+  }, []);
 
   useEffect(() => {
     if (!hasInsights || visibleCount >= insights.length) {
@@ -116,7 +118,6 @@ export function ArtworkInsightsProvider({
     setError(null);
     setInsights([]);
     setVisibleCount(0);
-    setActiveId(null);
     setOpenPopupId(null);
 
     try {
@@ -163,10 +164,9 @@ export function ArtworkInsightsProvider({
         error,
         insights,
         visibleCount,
-        activeId,
         openPopupId,
-        setActiveId,
         setOpenPopupId,
+        closePopup,
         handleDiscover,
       }}
     >
@@ -182,17 +182,20 @@ export function ArtworkInsightsProvider({
 
 /** Overlay insight dots on the main artwork image (place inside a `relative` wrapper). */
 export function ArtworkInsightsOverlay() {
-  const { insights, visibleCount, activeId, openPopupId, setActiveId, setOpenPopupId } =
-    useArtworkInsights();
+  const { insights, visibleCount, openPopupId, setOpenPopupId, closePopup } = useArtworkInsights();
 
   if (visibleCount === 0) {
     return null;
   }
 
+  const visibleInsights =
+    openPopupId !== null
+      ? insights.filter((insight) => insight.id === openPopupId)
+      : insights.slice(0, visibleCount);
+
   return (
     <div className="pointer-events-none absolute inset-0 z-10">
-      {insights.slice(0, visibleCount).map((insight) => {
-        const isActive = activeId === insight.id;
+      {visibleInsights.map((insight) => {
         const isOpen = openPopupId === insight.id;
         return (
           <div
@@ -201,32 +204,40 @@ export function ArtworkInsightsOverlay() {
             style={{
               left: `${insight.x}%`,
               top: `${insight.y}%`,
-              animation: "insight-dot-in 0.35s ease-out forwards",
+              animation: isOpen ? undefined : "insight-dot-in 0.35s ease-out forwards",
             }}
           >
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                setOpenPopupId(isOpen ? null : insight.id);
-                setActiveId(insight.id);
-              }}
-              className={`relative flex size-9 items-center justify-center rounded-full border-2 bg-transparent transition-all ${
-                isActive
-                  ? "border-white shadow-[0_0_0_3px_rgba(59,130,246,0.6)]"
-                  : "border-white/90 hover:border-white"
-              }`}
-              aria-label={insight.title}
-            >
-              <span className="flex size-5 items-center justify-center rounded-full bg-white/95 text-[11px] font-semibold text-[#1a1a1a]">
-                {insight.id}
-              </span>
-            </button>
+            {!isOpen ? (
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setOpenPopupId(insight.id);
+                }}
+                className="relative flex size-9 items-center justify-center rounded-full border-2 border-white/90 bg-transparent transition-all hover:border-white"
+                aria-label={insight.title}
+              >
+                <span className="flex size-5 items-center justify-center rounded-full bg-white/95 text-[11px] font-semibold text-[#1a1a1a]">
+                  {insight.id}
+                </span>
+              </button>
+            ) : null}
             {isOpen ? (
               <div
-                className="absolute left-1/2 top-full z-20 mt-2 w-56 -translate-x-1/2 rounded-lg px-3 py-2.5 text-left text-xs leading-relaxed text-white shadow-lg backdrop-blur-md sm:w-64"
+                className="absolute left-1/2 top-1/2 z-20 w-56 -translate-x-1/2 -translate-y-1/2 rounded-lg px-3 py-2.5 pr-8 text-left text-xs leading-relaxed text-white shadow-lg backdrop-blur-md sm:w-64"
                 style={{ background: "rgba(15,15,15,0.95)" }}
               >
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    closePopup();
+                  }}
+                  className="absolute right-2 top-2 rounded p-0.5 text-white/70 transition-colors hover:bg-white/10 hover:text-white"
+                  aria-label="Close insight"
+                >
+                  <X className="size-3.5" aria-hidden />
+                </button>
                 <p className="mb-1 font-medium">{insight.title}</p>
                 <p className="text-white/90">{insight.text}</p>
               </div>
@@ -238,80 +249,43 @@ export function ArtworkInsightsOverlay() {
   );
 }
 
-/** Blue info box, Discover button, and insight cards — place under the main artwork image. */
+/** Blue info box and Discover button — place under the main artwork image. */
 export function ArtworkInsightsControls() {
-  const {
-    loading,
-    error,
-    insights,
-    visibleCount,
-    activeId,
-    openPopupId,
-    setActiveId,
-    setOpenPopupId,
-    handleDiscover,
-  } = useArtworkInsights();
-
-  const hasInsights = insights.length > 0;
-  const showCards = hasInsights && visibleCount >= insights.length;
+  const { loading, error, handleDiscover } = useArtworkInsights();
 
   return (
-    <div className="mt-4 space-y-4">
-      {showCards ? (
-        <div className="grid grid-cols-2 gap-3">
-          {insights.map((insight) => {
-            const isActive = activeId === insight.id;
-            return (
-              <button
-                key={insight.id}
-                type="button"
-                onClick={() => {
-                  setActiveId(insight.id);
-                  setOpenPopupId(insight.id);
-                }}
-                className={`rounded-lg border bg-white p-3 text-left transition-shadow ${
-                  isActive
-                    ? "border-[#3b82f6] shadow-[0_0_0_1px_rgba(59,130,246,0.4)]"
-                    : "border-[#e8e6e1] hover:border-[#d1d5db]"
-                }`}
-              >
-                <p className="text-xs font-semibold text-[#1a1a1a]">{insight.title}</p>
-                <p className="mt-1 line-clamp-3 text-[11px] leading-relaxed text-[#6b6b6b]">{insight.text}</p>
-              </button>
-            );
-          })}
+    <div className="mt-4">
+      <div className="flex flex-wrap items-center gap-3">
+        <div
+          className="flex min-w-0 flex-1 items-center gap-2.5 px-3 py-2.5 text-sm text-[#1e40af]"
+          style={{
+            background: "rgba(59,130,246,0.06)",
+            border: "1px solid rgba(59,130,246,0.2)",
+            borderRadius: "10px",
+          }}
+        >
+          <Eye className="size-4 shrink-0 text-[#3b82f6]" aria-hidden />
+          <p className="leading-snug text-[#1e3a8a]">Discover insights about this artwork</p>
         </div>
-      ) : null}
 
-      <div
-        className="flex items-start gap-2.5 px-3 py-2.5 text-sm text-[#1e40af]"
-        style={{
-          background: "rgba(59,130,246,0.06)",
-          border: "1px solid rgba(59,130,246,0.2)",
-          borderRadius: "10px",
-        }}
-      >
-        <Eye className="mt-0.5 size-4 shrink-0 text-[#3b82f6]" aria-hidden />
-        <p className="leading-snug text-[#1e3a8a]">Discover insights about this artwork</p>
+        <button
+          type="button"
+          onClick={handleDiscover}
+          disabled={loading}
+          className="inline-flex shrink-0 items-center justify-center gap-2 rounded-md border border-[#8a8a8a] bg-[#9e9e9e] px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[#8a8a8a] disabled:cursor-not-allowed disabled:opacity-60"
+        >
+          {loading ? (
+            <>
+              <Loader2 className="size-4 animate-spin" aria-hidden />
+              Generating...
+            </>
+          ) : (
+            "Discover"
+          )}
+        </button>
       </div>
 
-      <button
-        type="button"
-        onClick={handleDiscover}
-        disabled={loading}
-        className="inline-flex w-full max-w-sm items-center justify-center gap-2 rounded-md border border-[#d1d5db] bg-transparent px-4 py-2 text-sm font-medium text-[#4a4a4a] transition-colors hover:bg-[#f9fafb] disabled:cursor-not-allowed disabled:opacity-60"
-      >
-        {loading ? (
-          <>
-            <Loader2 className="size-4 animate-spin" aria-hidden />
-            Generating...
-          </>
-        ) : (
-          "Discover"
-        )}
-      </button>
-
-      {error ? <p className="text-xs text-red-600">{error}</p> : null}
+      {error ? <p className="mt-2 text-xs text-red-600">{error}</p> : null}
     </div>
   );
 }
