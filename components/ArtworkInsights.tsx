@@ -214,18 +214,21 @@ export function ArtworkInsightsOverlay() {
                   e.stopPropagation();
                   setOpenPopupId(insight.id);
                 }}
-                className="relative flex size-9 items-center justify-center rounded-full border-2 border-white/90 bg-transparent transition-all hover:border-white"
+                className="size-5 rounded-full transition-opacity hover:opacity-90"
+                style={{
+                  background: "rgba(120, 120, 120, 0.35)",
+                  border: "2px solid rgba(90, 90, 90, 0.85)",
+                }}
                 aria-label={insight.title}
-              >
-                <span className="flex size-5 items-center justify-center rounded-full bg-white/95 text-[11px] font-semibold text-[#1a1a1a]">
-                  {insight.id}
-                </span>
-              </button>
+              />
             ) : null}
             {isOpen ? (
               <div
-                className="absolute left-1/2 top-1/2 z-20 w-56 -translate-x-1/2 -translate-y-1/2 rounded-lg px-3 py-2.5 pr-8 text-left text-xs leading-relaxed text-white shadow-lg backdrop-blur-md sm:w-64"
-                style={{ background: "rgba(15,15,15,0.95)" }}
+                className="absolute left-1/2 top-1/2 z-20 w-56 -translate-x-1/2 -translate-y-1/2 rounded-lg border-2 px-3 py-2.5 pr-8 text-left text-xs leading-relaxed text-[#1a1a1a] shadow-lg backdrop-blur-[2px] sm:w-64"
+                style={{
+                  background: "rgba(140, 140, 140, 0.45)",
+                  borderColor: "rgba(90, 90, 90, 0.85)",
+                }}
               >
                 <button
                   type="button"
@@ -233,13 +236,13 @@ export function ArtworkInsightsOverlay() {
                     e.stopPropagation();
                     closePopup();
                   }}
-                  className="absolute right-2 top-2 rounded p-0.5 text-white/70 transition-colors hover:bg-white/10 hover:text-white"
+                  className="absolute right-2 top-2 rounded p-0.5 text-[#1a1a1a]/70 transition-colors hover:bg-black/10 hover:text-[#1a1a1a]"
                   aria-label="Close insight"
                 >
                   <X className="size-3.5" aria-hidden />
                 </button>
-                <p className="mb-1 font-medium">{insight.title}</p>
-                <p className="text-white/90">{insight.text}</p>
+                <p className="mb-1 font-semibold">{insight.title}</p>
+                <p className="text-[#2a2a2a]/90">{insight.text}</p>
               </div>
             ) : null}
           </div>
