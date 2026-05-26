@@ -217,7 +217,7 @@ export function ArtworkInsightsOverlay() {
                 className="size-5 rounded-full transition-opacity hover:opacity-90"
                 style={{
                   background: "rgba(120, 120, 120, 0.35)",
-                  border: "2px solid rgba(90, 90, 90, 0.85)",
+                  border: "2px solid #4CAF50",
                 }}
                 aria-label={insight.title}
               />
