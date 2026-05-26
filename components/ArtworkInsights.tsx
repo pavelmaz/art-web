@@ -214,20 +214,22 @@ export function ArtworkInsightsOverlay() {
                   e.stopPropagation();
                   setOpenPopupId(insight.id);
                 }}
-                className="size-5 rounded-full transition-opacity hover:opacity-90"
+                className="box-border size-6 shrink-0 rounded-full transition-opacity hover:opacity-90"
                 style={{
-                  background: "rgba(120, 120, 120, 0.35)",
-                  border: "2px solid #4CAF50",
+                  backgroundColor: "rgba(140, 140, 140, 0.4)",
+                  borderWidth: 2,
+                  borderStyle: "solid",
+                  borderColor: "#6b6b6b",
                 }}
                 aria-label={insight.title}
               />
             ) : null}
             {isOpen ? (
               <div
-                className="absolute left-1/2 top-1/2 z-20 w-56 -translate-x-1/2 -translate-y-1/2 rounded-lg border-2 px-3 py-2.5 pr-8 text-left text-xs leading-relaxed text-[#1a1a1a] shadow-lg backdrop-blur-[2px] sm:w-64"
+                className="absolute left-1/2 top-1/2 z-20 w-56 -translate-x-1/2 -translate-y-1/2 rounded-lg border-2 px-3 py-2.5 pr-8 text-left text-xs leading-relaxed text-white shadow-lg backdrop-blur-sm sm:w-64"
                 style={{
-                  background: "rgba(220, 220, 220, 0.22)",
-                  borderColor: "rgba(90, 90, 90, 0.85)",
+                  background: "rgba(90, 90, 90, 0.88)",
+                  borderColor: "rgba(120, 120, 120, 0.9)",
                 }}
               >
                 <button
@@ -236,13 +238,13 @@ export function ArtworkInsightsOverlay() {
                     e.stopPropagation();
                     closePopup();
                   }}
-                  className="absolute right-2 top-2 rounded p-0.5 text-[#1a1a1a]/70 transition-colors hover:bg-black/10 hover:text-[#1a1a1a]"
+                  className="absolute right-2 top-2 rounded p-0.5 text-white/80 transition-colors hover:bg-white/15 hover:text-white"
                   aria-label="Close insight"
                 >
                   <X className="size-3.5" aria-hidden />
                 </button>
-                <p className="mb-1 font-semibold text-[#1a1a1a]">{insight.title}</p>
-                <p className="text-[#1a1a1a]/90">{insight.text}</p>
+                <p className="mb-1 font-semibold text-white">{insight.title}</p>
+                <p className="text-white">{insight.text}</p>
               </div>
             ) : null}
           </div>
@@ -259,16 +261,9 @@ export function ArtworkInsightsControls() {
   return (
     <div className="mt-4">
       <div className="flex flex-wrap items-center gap-3">
-        <div
-          className="flex min-w-0 flex-1 items-center gap-2.5 px-3 py-2.5 text-sm text-[#1e40af]"
-          style={{
-            background: "rgba(59,130,246,0.06)",
-            border: "1px solid rgba(59,130,246,0.2)",
-            borderRadius: "10px",
-          }}
-        >
-          <Eye className="size-4 shrink-0 text-[#3b82f6]" aria-hidden />
-          <p className="leading-snug text-[#1e3a8a]">Discover insights about this artwork</p>
+        <div className="flex min-w-0 flex-1 items-center gap-2.5 rounded-lg bg-[#eceff3] p-3">
+          <Eye className="size-4 shrink-0 text-[#6b6b6b]" aria-hidden />
+          <p className="text-sm font-medium text-[#1a1a1a]">Discover insights about this artwork</p>
         </div>
 
         <button
