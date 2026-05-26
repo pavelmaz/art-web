@@ -226,7 +226,7 @@ export function ArtworkInsightsOverlay() {
               <div
                 className="absolute left-1/2 top-1/2 z-20 w-56 -translate-x-1/2 -translate-y-1/2 rounded-lg border-2 px-3 py-2.5 pr-8 text-left text-xs leading-relaxed text-[#1a1a1a] shadow-lg backdrop-blur-[2px] sm:w-64"
                 style={{
-                  background: "rgba(140, 140, 140, 0.45)",
+                  background: "rgba(220, 220, 220, 0.22)",
                   borderColor: "rgba(90, 90, 90, 0.85)",
                 }}
               >
@@ -241,8 +241,8 @@ export function ArtworkInsightsOverlay() {
                 >
                   <X className="size-3.5" aria-hidden />
                 </button>
-                <p className="mb-1 font-semibold">{insight.title}</p>
-                <p className="text-[#2a2a2a]/90">{insight.text}</p>
+                <p className="mb-1 font-semibold text-[#1a1a1a]">{insight.title}</p>
+                <p className="text-[#1a1a1a]/90">{insight.text}</p>
               </div>
             ) : null}
           </div>
