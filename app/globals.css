@@ -1,0 +1,54 @@
+@import "tailwindcss";
+
+:root {
+  --background: #faf9f7;
+  --foreground: #1a1a1a;
+  --muted: #6b6b6b;
+  --border: #e8e6e1;
+  --font-urbanist: var(--font-urbanist);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-urbanist), system-ui, sans-serif;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+img {
+  display: block;
+}
+
+/* Natural aspect ratio: scale down to fit container, never stretch or crop */
+.artwork-img {
+  display: block;
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  margin-inline: auto;
+}
+
+.artwork-img--card {
+  max-height: 400px;
+}
+
+.artwork-img--related {
+  max-height: 300px;
+}
+
+.artwork-img--hero {
+  max-height: 70vh;
+}
+
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}

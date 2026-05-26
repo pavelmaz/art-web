@@ -1,0 +1,687 @@
+import type { Metadata } from "next";
+import type { ReactNode } from "react";
+import Link from "next/link";
+import { notFound } from "next/navigation";
+
+import { Breadcrumbs } from "@/components/Breadcrumbs";
+import { DownloadButton } from "@/components/DownloadButton";
+import { ArtworkJsonLd } from "@/components/ArtworkJsonLd";
+import { ArtworkZoomImage } from "@/components/ArtworkZoomImage";
+import { ArtworkInsights } from "@/components/ArtworkInsights";
+import { SectionCtaLink } from "@/components/SectionCtaLink";
+import { supabase } from "@/lib/supabase";
+import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { getT } from "@/lib/translations";
+import { absoluteUrl, artworkDetailImageUrl, artworkGridImageUrl, artworkImageUrl, artworkOriginalUrl, generateAltText, slugify } from "@/lib/utils";
+import type { Artwork } from "@/types/artwork";
+
+export const revalidate = 86400;
+
+type ArtworkRow = {
+  id: string;
+  slug: string;
+  title: string;
+  artist_display: string | null;
+  url: string | null;
+  image_id: string | null;
+  museum: string | null;
+  style_title: string | null;
+  genre_title: string | null;
+  medium_display: string | null;
+  date_display: string | null;
+  dimensions: string | null;
+  description: string | null;
+};
+
+async function getArtistDeathYear(artistName: string | null): Promise<number | null> {
+  const normalized = artistName?.trim();
+  if (!normalized) {
+    return null;
+  }
+
+  const attempts = [
+    () => supabase.from("artists").select("death_year").eq("name", normalized).maybeSingle(),
+    () => supabase.from("artists").select("death_year").eq("artist_display", normalized).maybeSingle(),
+    () => supabase.from("artists").select("death_year").ilike("name", normalized).limit(1).maybeSingle(),
+    () => supabase.from("artists").select("death_year").ilike("artist_display", normalized).limit(1).maybeSingle(),
+  ] as const;
+
+  for (const query of attempts) {
+    const { data, error } = await query();
+    if (error || !data) {
+      continue;
+    }
+
+    const value = (data as { death_year?: unknown }).death_year;
+    if (typeof value === "number" && Number.isFinite(value)) {
+      return value;
+    }
+    if (typeof value === "string") {
+      const parsed = Number.parseInt(value, 10);
+      if (!Number.isNaN(parsed)) {
+        return parsed;
+      }
+    }
+  }
+
+  return null;
+}
+
+type ArtworkPageProps = {
+  params: Promise<{ slug: string }>;
+};
+
+const VALID_GENRE_SLUGS = new Set([
+  "landscape", "marine", "architecture", "genre-scene",
+  "religious", "portrait", "figurative", "decorative-art",
+  "historical", "interior", "botanical", "abstract",
+  "animal", "still-life", "mythology", "allegory",
+  "drawing", "illustration",
+]);
+
+function getCategoryBreadcrumb(artwork: ArtworkRow): { label: string; href: string } | null {
+  if (artwork.genre_title?.trim()) {
+    const genreSlug = artwork.genre_title.trim().toLowerCase().replace(/\s+/g, "-");
+    if (VALID_GENRE_SLUGS.has(genreSlug)) {
+      return { label: artwork.genre_title.trim(), href: `/genres/${genreSlug}` };
+    }
+  }
+  if (artwork.style_title?.trim()) {
+    return { label: artwork.style_title.trim(), href: `/styles/${slugify(artwork.style_title)}` };
+  }
+  return null;
+}
+
+function BreadcrumbJsonLd({ artwork }: { artwork: ArtworkRow }) {
+  const siteUrl = "https://fineartfree.com";
+  const category = getCategoryBreadcrumb(artwork);
+
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: "Home",
+        item: siteUrl,
+      },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: category?.label || "Artworks",
+        item: category ? `${siteUrl}${category.href}` : `${siteUrl}/artworks`,
+      },
+      {
+        "@type": "ListItem",
+        position: 3,
+        name: artwork.title,
+        item: `${siteUrl}/artworks/${artwork.slug}`,
+      },
+    ],
+  };
+
+  return (
+    <script
+      type="application/ld+json"
+      dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+    />
+  );
+}
+
+function truncateDescription(text: string | null): string {
+  if (!text) {
+    return "";
+  }
+
+  if (text.length <= 160) {
+    return text;
+  }
+
+  return `${text.slice(0, 157)}...`;
+}
+
+/** Strip a leading decorative open-quote block ending at the first `."` or `.”`. */
+function stripOpeningDecorativeQuote(text: string): string {
+  const t = text.trim();
+  if (!t.startsWith('"') && !t.startsWith("\u201c")) {
+    return text.trim();
+  }
+
+  const straight = '."';
+  const curly = `.\u201d`;
+  let cutEnd = -1;
+  const iStraight = t.indexOf(straight);
+  if (iStraight !== -1) {
+    cutEnd = iStraight + straight.length;
+  }
+  const iCurly = t.indexOf(curly);
+  if (iCurly !== -1) {
+    const end = iCurly + curly.length;
+    if (cutEnd === -1 || end < cutEnd) {
+      cutEnd = end;
+    }
+  }
+
+  if (cutEnd === -1) {
+    return text.trim();
+  }
+
+  return t.slice(cutEnd).trimStart();
+}
+
+function splitSentencesOnPeriodSpace(text: string): string[] {
+  const cleaned = text.trim();
+  if (!cleaned) {
+    return [];
+  }
+
+  const parts = cleaned.split(". ");
+  return parts
+    .map((part, i) => {
+      const p = part.trim();
+      if (!p) {
+        return "";
+      }
+      return i < parts.length - 1 ? `${p}.` : p;
+    })
+    .filter(Boolean);
+}
+
+function groupEveryThreeSentences(sentences: string[]): string[] {
+  const out: string[] = [];
+  for (let i = 0; i < sentences.length; i += 3) {
+    out.push(sentences.slice(i, i + 3).join(" "));
+  }
+  return out;
+}
+
+function parseBoldAsterisk(text: string): ReactNode {
+  const segments = text.split(/(\*[^*]+\*)/g);
+  const nodes: ReactNode[] = [];
+  let key = 0;
+  for (const seg of segments) {
+    if (!seg) {
+      continue;
+    }
+    if (seg.startsWith("*") && seg.endsWith("*") && seg.length > 2) {
+      nodes.push(<strong key={key++}>{seg.slice(1, -1)}</strong>);
+    } else {
+      nodes.push(seg);
+    }
+  }
+  return nodes.length === 1 ? nodes[0] : <>{nodes}</>;
+}
+
+function ArtworkDescriptionFormatted({ description }: { description: string }) {
+  const body = stripOpeningDecorativeQuote(description);
+  const sentences = splitSentencesOnPeriodSpace(body);
+  const paragraphs = groupEveryThreeSentences(sentences);
+
+  return (
+    <div className="space-y-4 mt-4">
+      {paragraphs.map((para, index) => (
+        <p key={index} className="text-sm leading-relaxed text-[#3a3a3a]">
+          {parseBoldAsterisk(para)}
+        </p>
+      ))}
+    </div>
+  );
+}
+
+async function getArtworkBySlug(slug: string): Promise<ArtworkRow | null> {
+  const selectColumns =
+    "id, slug, title, artist_display, url, image_id, museum, style_title, genre_title, medium_display, date_display, dimensions, description";
+
+  const primary = await supabase
+    .from("artworks")
+    .select(selectColumns)
+    .eq("slug", slug)
+    .single();
+
+  if (!primary.error && primary.data) {
+    return primary.data as ArtworkRow;
+  }
+
+  if (primary.error && primary.error.code !== "PGRST116") {
+    throw primary.error;
+  }
+
+  const fallback = await supabase
+    .from("daily_artworks")
+    .select(
+      selectColumns
+    )
+    .eq("slug", slug)
+    .single();
+
+  if (fallback.error) {
+    if (fallback.error.code === "PGRST116") {
+      return null;
+    }
+    throw fallback.error;
+  }
+
+  return fallback.data as ArtworkRow;
+}
+
+export async function generateMetadata({ params }: ArtworkPageProps): Promise<Metadata> {
+  const { slug } = await params;
+  const artwork = await getArtworkBySlug(slug);
+
+  if (!artwork) {
+    return {
+      title: "Artwork not found",
+    };
+  }
+
+  const artist = artwork.artist_display ?? "Unknown artist";
+  const title = `${artwork.title} by ${artist} — Free Download | Fine Art Free`;
+
+  const { data: translation } = await supabase
+    .from("artwork_translations")
+    .select("seo_description")
+    .eq("artwork_id", artwork.id)
+    .eq("locale", "en")
+    .single();
+
+  const description =
+    translation?.seo_description ||
+    `${artwork.title} by ${artist}. Public domain artwork free to download.`;
+
+  const imageUrl = artworkImageUrl(artwork);
+
+  return {
+    title,
+    description,
+    alternates: {
+      canonical: absoluteUrl(`/artworks/${slug}`),
+    },
+    openGraph: {
+      title,
+      description,
+      images: imageUrl ? [imageUrl] : undefined,
+    },
+  };
+}
+
+export default async function ArtworkDetailPage({ params }: ArtworkPageProps) {
+  const { slug } = await params;
+  const artwork = await getArtworkBySlug(slug);
+
+  if (!artwork) {
+    notFound();
+  }
+
+  const sessionSupabase = await createSupabaseServerClient();
+  const {
+    data: { user },
+  } = await sessionSupabase.auth.getUser();
+  let isPro = false;
+  if (user) {
+    const { data: profile } = await sessionSupabase
+      .from("profiles")
+      .select("subscription_status")
+      .eq("id", user.id)
+      .maybeSingle();
+    isPro = profile?.subscription_status === "active";
+  }
+
+  const t = getT("en");
+  const imageUrl = artworkDetailImageUrl(artwork);
+  const maxDownloadHref = artworkOriginalUrl(artwork) || imageUrl;
+  const artist = artwork.artist_display ?? "Unknown artist";
+  const artistDeathYear = await getArtistDeathYear(artwork.artist_display);
+  const artistSlug = artwork.artist_display?.trim() ? slugify(artwork.artist_display) : null;
+  let artistArtworkCount = 0;
+
+  if (artwork.artist_display?.trim()) {
+    const countQuery = await supabase
+      .from("artworks")
+      .select("id", { count: "exact", head: true })
+      .eq("artist_display", artwork.artist_display);
+    artistArtworkCount = countQuery.count ?? 0;
+  }
+
+  const category = getCategoryBreadcrumb(artwork);
+  const breadcrumbItems = [
+    { label: "Home", href: "/" },
+    ...(category ? [category] : []),
+    ...(artwork.artist_display?.trim()
+      ? [{ label: artwork.artist_display.trim(), href: `/artists/${slugify(artwork.artist_display)}` }]
+      : []),
+    { label: artwork.title },
+  ];
+
+  let relatedArtworks: Artwork[] = [];
+
+  if (artwork.artist_display?.trim()) {
+    const relatedQuery = await supabase
+      .from("artworks")
+      .select("id, title, slug, artist_display, image_id, url, museum, style_title, genre_title, score, alt_text")
+      .eq("artist_display", artwork.artist_display)
+      .order("score", { ascending: false })
+      .limit(20);
+
+    if (!relatedQuery.error) {
+      const rows =
+        (relatedQuery.data as
+          | Array<{
+              id: string;
+              title: string;
+              slug: string;
+              artist_display: string | null;
+              image_id: string | null;
+              url: string | null;
+              museum: string | null;
+              style_title: string | null;
+              genre_title: string | null;
+              score: number | null;
+              alt_text: string | null;
+            }>
+          | null) ?? [];
+
+      relatedArtworks = rows
+        .filter((item) => item.slug !== artwork.slug)
+        .slice(0, 10)
+        .map((item) => ({
+          id: item.id,
+          title: item.title,
+          slug: item.slug,
+          artistName: item.artist_display ?? artist,
+          artistDisplay: item.artist_display ?? undefined,
+          imageUrl: artworkGridImageUrl(item),
+          imageId: item.image_id,
+          museum: item.museum,
+          styleTitle: item.style_title,
+          genreTitle: item.genre_title,
+          score: item.score,
+          url: item.url,
+          styleSlug: "unknown",
+          styleName: item.style_title ?? "Unknown style",
+          sourceUrl: item.url ?? undefined,
+          altText: item.alt_text ?? null,
+        }));
+    }
+  }
+
+  const GENRE_TO_SLUG: Record<string, string> = {
+    Landscape: "landscape",
+    Marine: "marine",
+    Portrait: "portrait",
+    Religious: "religious",
+    Architecture: "architecture",
+    "Genre Scene": "genre-scene",
+    Historical: "historical",
+    Figurative: "figurative",
+    "Decorative Art": "decorative-art",
+    Interior: "interior",
+    Botanical: "botanical",
+    Abstract: "abstract",
+    Animal: "animal",
+    "Still Life": "still-life",
+    Mythology: "mythology",
+    Allegory: "allegory",
+    Drawing: "drawing",
+    Illustration: "illustration",
+  };
+
+  const genreSlug = artwork.genre_title ? GENRE_TO_SLUG[artwork.genre_title] ?? null : null;
+
+  let relatedByGenre: Artwork[] = [];
+  if (genreSlug && artwork.genre_title) {
+    const { data: genreData } = await supabase
+      .from("artworks")
+      .select("id, title, slug, artist_display, image_id, url, museum, style_title, genre_title, alt_text")
+      .eq("genre_title", artwork.genre_title)
+      .neq("id", artwork.id)
+      .limit(6);
+
+    if (genreData) {
+      relatedByGenre = (genreData as Array<{
+        id: string;
+        title: string;
+        slug: string;
+        artist_display: string | null;
+        image_id: string | null;
+        url: string | null;
+        museum: string | null;
+        style_title: string | null;
+        genre_title: string | null;
+        alt_text: string | null;
+      }>).map((item) => ({
+        id: item.id,
+        title: item.title,
+        slug: item.slug,
+        artistName: item.artist_display ?? "Unknown artist",
+        artistDisplay: item.artist_display ?? undefined,
+        imageUrl: artworkGridImageUrl(item),
+        imageId: item.image_id,
+        museum: item.museum,
+        styleTitle: item.style_title,
+        genreTitle: item.genre_title,
+        score: null,
+        url: item.url,
+        styleSlug: "unknown",
+        styleName: item.style_title ?? "Unknown style",
+        sourceUrl: item.url ?? undefined,
+        altText: item.alt_text ?? null,
+      }));
+    }
+  }
+
+  return (
+    <article className="bg-[#faf9f7] py-8">
+      <div className="mx-auto max-w-7xl px-5">
+        <ArtworkJsonLd artwork={artwork} />
+        <BreadcrumbJsonLd artwork={artwork} />
+
+        <div className="flex flex-col gap-8 lg:flex-row lg:items-start">
+          <div className="flex-1 space-y-4">
+            <div className="bg-white p-2 sm:p-6">
+              {imageUrl ? (
+                <div className="flex justify-center">
+                  <ArtworkZoomImage src={imageUrl} fullSrc={artworkOriginalUrl(artwork) || imageUrl} alt={generateAltText(artwork)} />
+                </div>
+              ) : (
+                <div className="flex h-[420px] w-full items-center justify-center bg-neutral-200 text-neutral-600">
+                  No image available
+                </div>
+              )}
+            </div>
+            <Breadcrumbs items={breadcrumbItems} currentPath={`/artworks/${artwork.slug}`} includeJsonLd={false} />
+          </div>
+
+          <aside className="w-full lg:w-80">
+            <div className="space-y-4 rounded-2xl bg-[#f5f5f5] p-5 lg:sticky lg:top-6">
+              <div>
+                <h1 className="mb-1 text-lg font-semibold text-[#1a1a1a]">{artwork.title}</h1>
+                {artistSlug ? (
+                  <Link href={`/artists/${artistSlug}`} className="text-sm text-[#6b6b6b] hover:text-[#1a1a1a]">
+                    {artist}
+                  </Link>
+                ) : (
+                  <p className="text-sm text-[#6b6b6b]">{artist}</p>
+                )}
+              </div>
+
+              <p className="text-sm text-[#6b6b6b]">{artistArtworkCount} Artworks</p>
+
+              <div className="my-4 border-t border-[#e8e6e1]" />
+
+              <div className="space-y-3">
+                <div className="flex items-center justify-between gap-4 rounded-lg bg-[#eceff3] p-3">
+                  <div>
+                    <p className="text-sm font-medium text-[#1a1a1a]">Standard</p>
+                    <p className="text-xs text-[#999]">JPG</p>
+                  </div>
+                  <DownloadButton imageUrl={imageUrl} />
+                </div>
+
+                <div className="flex items-center justify-between gap-4 rounded-lg bg-[#eceff3] p-3">
+                  <div>
+                    <p className="text-sm font-medium text-[#1a1a1a]">🔒 Max Size</p>
+                    <p className="text-xs text-[#999]">{t.downloadMaxFormat}</p>
+                  </div>
+                  {isPro ? (
+                    <a
+                      href={maxDownloadHref}
+                      download
+                      className="inline-flex items-center justify-center rounded-md bg-[#9e9e9e] px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-[#8a8a8a] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#6b6b6b] focus-visible:ring-offset-2"
+                    >
+                      Download
+                    </a>
+                  ) : (
+                    <Link
+                      href="/fineart-pro"
+                      className="inline-flex items-center justify-center rounded-md bg-[#9e9e9e] px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-[#8a8a8a] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#6b6b6b] focus-visible:ring-offset-2"
+                    >
+                      Download
+                    </Link>
+                  )}
+                </div>
+              </div>
+
+              <div className="my-4 border-t border-[#e8e6e1]" />
+
+              <div className="rounded-lg bg-[#eceff3] p-3">
+                <p className="text-xs leading-relaxed text-[#4a4a4a]">
+                  License: All public domain files can be freely used for personal and commercial
+                  projects.
+                </p>
+                <details className="mt-2 text-xs text-[#4a4a4a]">
+                  <summary className="inline-flex cursor-pointer list-none select-none items-center gap-1 text-[#6b6b6b] marker:content-none">
+                    ⓘ Why is this image in the public domain?
+                  </summary>
+                  <div className="mt-3 rounded-lg bg-white p-4">
+                    <p className="leading-relaxed text-[#4a4a4a]">
+                      The Artist died in {artistDeathYear ?? "an unknown year"}, so this work is in
+                      the public domain in its country of origin and other countries where the
+                      copyright term is the Artist&apos;s life plus 70 years or fewer.
+                    </p>
+                  </div>
+                </details>
+              </div>
+
+              <ArtworkInsights artwork={artwork} imageUrl={imageUrl} />
+
+              <div className="my-4 border-t border-[#e8e6e1]" />
+
+              <div className="space-y-3 rounded-lg bg-[#eceff3] p-3">
+                {artwork.medium_display?.trim() ? (
+                  <div>
+                    <p className="text-xs text-[#999]">Medium</p>
+                    <p className="text-sm text-[#1a1a1a]">{artwork.medium_display}</p>
+                  </div>
+                ) : null}
+
+                {artwork.date_display?.trim() ? (
+                  <div>
+                    <p className="text-xs text-[#999]">Date</p>
+                    <p className="text-sm text-[#1a1a1a]">{artwork.date_display}</p>
+                  </div>
+                ) : null}
+
+                {artwork.dimensions?.trim() ? (
+                  <div>
+                    <p className="text-xs text-[#999]">Dimensions</p>
+                    <p className="text-sm text-[#1a1a1a]">{artwork.dimensions}</p>
+                  </div>
+                ) : null}
+
+                {artwork.museum?.trim() ? (
+                  <div>
+                    <p className="text-xs text-[#999]">Museum</p>
+                    <Link
+                      href={`/museums/${slugify(artwork.museum)}`}
+                      className="text-sm text-[#1a1a1a] underline"
+                    >
+                      {artwork.museum}
+                    </Link>
+                  </div>
+                ) : null}
+              </div>
+
+              <div className="border-t border-[#e8e6e1]" />
+
+              <span className="inline-flex items-center gap-1 rounded-full bg-green-50 px-2 py-1 text-xs text-green-700">
+                <span aria-hidden>✓</span>
+                Public Domain
+              </span>
+            </div>
+          </aside>
+        </div>
+
+        {artwork.description?.trim() ? (
+          <section className="mt-10">
+            <h2 className="mb-4 text-base font-semibold text-[#1a1a1a]">
+              {artwork.title} — History & Facts
+            </h2>
+            <div>
+              <ArtworkDescriptionFormatted description={artwork.description.trim()} />
+            </div>
+            {artistSlug && relatedArtworks.length === 0 ? (
+              <SectionCtaLink href={`/artists/${artistSlug}`}>Browse all</SectionCtaLink>
+            ) : null}
+          </section>
+        ) : null}
+
+        {relatedArtworks.length > 0 && artistSlug ? (
+          <section className="mt-10">
+            <h2 className="mb-4 text-base font-semibold">More Artworks by {artist}</h2>
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+              {relatedArtworks.map((item) => (
+                <a key={item.id} href={`/artworks/${item.slug}`} className="group block">
+                  <div className="overflow-hidden">
+                    <img
+                      src={item.imageUrl}
+                      alt={item.altText || item.title}
+                      className="artwork-img artwork-img--related group-hover:scale-[1.03] transition-transform duration-300"
+                      loading="lazy"
+                      decoding="async"
+                    />
+                  </div>
+                  <p className="mt-2 text-[13px] font-medium leading-snug text-[#1a1a1a] line-clamp-2">
+                    {item.title}
+                  </p>
+                  <p className="mt-[2px] text-[12px] text-[#6b6b6b] truncate">
+                    {item.artistDisplay || item.artistName}
+                  </p>
+                </a>
+              ))}
+            </div>
+            <SectionCtaLink href={`/artists/${artistSlug}`}>Browse all</SectionCtaLink>
+          </section>
+        ) : null}
+
+        {genreSlug && relatedByGenre.length > 0 ? (
+          <section className="mt-12">
+            <h2 className="mb-4 text-base font-semibold">More {artwork.genre_title} Art</h2>
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+              {relatedByGenre.map((item) => (
+                <a key={item.id} href={`/artworks/${item.slug}`} className="group block">
+                  <div className="overflow-hidden">
+                    <img
+                      src={item.imageUrl}
+                      alt={item.altText || item.title}
+                      className="artwork-img artwork-img--related group-hover:scale-[1.03] transition-transform duration-300"
+                      loading="lazy"
+                      decoding="async"
+                    />
+                  </div>
+                  <p className="mt-2 text-[13px] font-medium leading-snug text-[#1a1a1a] line-clamp-2">
+                    {item.title}
+                  </p>
+                  <p className="mt-[2px] text-[12px] text-[#6b6b6b] truncate">
+                    {item.artistDisplay || item.artistName}
+                  </p>
+                </a>
+              ))}
+            </div>
+            <SectionCtaLink href={`/genres/${genreSlug}`}>Browse all</SectionCtaLink>
+          </section>
+        ) : null}
+      </div>
+    </article>
+  );
+}

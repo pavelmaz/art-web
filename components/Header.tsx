@@ -1,0 +1,341 @@
+"use client";
+
+import Image from "next/image";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
+
+import type { BrowseGenreRow } from "@/lib/browse-genres";
+import { getT, type Locale } from "@/lib/translations";
+
+function SearchIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      className={className}
+      width={16}
+      height={16}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden
+    >
+      <circle cx="11" cy="11" r="7" />
+      <path d="m20 20-3.5-3.5" />
+    </svg>
+  );
+}
+
+function ChevronDown({ className }: { className?: string }) {
+  return (
+    <svg
+      width={12}
+      height={12}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden
+      className={className}
+    >
+      <path d="m6 9 6 6 6-6" />
+    </svg>
+  );
+}
+
+type HeaderProps = {
+  /** From `genres` table via `getCachedGenresForBrowse` — labels and path segments are never invented here. */
+  browseGenres?: BrowseGenreRow[];
+};
+
+export default function Header({ browseGenres = [] }: HeaderProps) {
+  const pathname = usePathname();
+  const locale: Locale =
+    pathname === "/ja" || pathname.startsWith("/ja/")
+      ? "ja"
+      : pathname.startsWith("/es")
+        ? "es"
+        : pathname.startsWith("/pt")
+          ? "pt"
+          : "en";
+  const t = getT(locale);
+  const prefix = locale === "en" ? "" : `/${locale}`;
+  const searchPath =
+    locale === "es"
+      ? "/es/buscar"
+      : locale === "pt"
+        ? "/pt/buscar"
+        : locale === "ja"
+          ? "/ja/search"
+          : "/search";
+  const isHome =
+    pathname === "/" || pathname === "/es" || pathname === "/pt" || pathname === "/ja";
+
+  const genresSegment = locale === "es" || locale === "pt" ? "generos" : "genres";
+  const stylesSegment = locale === "es" || locale === "pt" ? "estilos" : "styles";
+  const artistsSegment = locale === "es" || locale === "pt" ? "artistas" : "artists";
+  const museumsSegment = locale === "es" ? "museos" : locale === "pt" ? "museus" : "museums";
+
+  const BROWSE_LINKS = browseGenres.map((g) => {
+    const slug =
+      locale === "es"
+        ? g.slug_es?.trim() || g.slug
+        : locale === "pt"
+          ? g.slug_pt?.trim() || g.slug
+          : g.slug;
+    const label =
+      locale === "es"
+        ? g.name_es?.trim() || g.name
+        : locale === "pt"
+          ? g.name_pt?.trim() || g.name
+          : locale === "ja"
+            ? g.name_ja?.trim() || g.name
+            : g.name;
+    return {
+      href: `${prefix}/${genresSegment}/${slug}`,
+      label,
+    };
+  });
+
+  const topicsSegment = locale === "es" || locale === "pt" ? "temas" : "topics";
+  const countriesSegment = locale === "es" || locale === "pt" ? "paises" : "countries";
+
+  const EXPLORE_LINKS = [
+    { href: `${prefix}/${topicsSegment}`, label: t.topics },
+    { href: `${prefix}/${countriesSegment}`, label: t.countries },
+    { href: `${prefix}/${stylesSegment}`, label: t.styles },
+    { href: `${prefix}/${genresSegment}`, label: t.genres },
+  ];
+
+  const artworksSegment = locale === "es" || locale === "pt" ? "obras" : "artworks";
+
+  const NAV_LINKS = [
+    { href: `${prefix}/${artworksSegment}`, label: t.artworks },
+    { href: `${prefix}/${artistsSegment}`, label: t.artists },
+    { href: `${prefix}/${museumsSegment}`, label: t.museums },
+    { href: "/fineart-pro", label: "Fine Art Pro" },
+  ];
+
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const [browseOpen, setBrowseOpen] = useState(false);
+  const [exploreOpen, setExploreOpen] = useState(false);
+
+  useEffect(() => {
+    setMobileOpen(false);
+    setBrowseOpen(false);
+    setExploreOpen(false);
+  }, [pathname]);
+
+  useEffect(() => {
+    if (mobileOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => { document.body.style.overflow = ""; };
+  }, [mobileOpen]);
+
+  const textColor = isHome ? "text-white/85 hover:text-white" : "text-[#1a1a1a] hover:text-black";
+
+  return (
+    <header
+      className={
+        isHome
+          ? "absolute inset-x-0 top-0 z-20 bg-transparent"
+          : "mb-4 border-b border-[#e8e6e1] bg-white"
+      }
+    >
+      <div className="flex w-full items-center gap-3 px-3 py-3 md:gap-4 md:px-6">
+        <Link
+          href={prefix || "/"}
+          className="-ml-1 inline-flex shrink-0 items-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:ring-offset-2 focus-visible:ring-offset-transparent"
+        >
+          <Image
+            src={isHome ? "/logo-fine-art.svg" : "/FineArt logo-dark.svg"}
+            alt="Fine Art"
+            width={1024}
+            height={1024}
+            priority
+            className="h-12 w-auto max-h-12 max-w-[280px] object-contain object-left"
+          />
+        </Link>
+
+        {!isHome ? (
+          <form action={searchPath} method="get" className="min-w-0 flex-1 max-w-md hidden sm:block">
+            <label htmlFor="header-search" className="sr-only">
+              {t.searchPlaceholder}
+            </label>
+            <div className="flex h-9 items-center gap-2 rounded-full bg-[#f3f4f6] px-3 py-1 focus-within:ring-2 focus-within:ring-[#d1d5db] md:h-10 md:px-4">
+              <SearchIcon className="size-4 shrink-0 text-[#9ca3af]" />
+              <input
+                id="header-search"
+                type="search"
+                name="q"
+                placeholder={t.searchPlaceholder}
+                className="min-w-0 flex-1 border-0 bg-transparent text-sm text-[#1a1a1a] placeholder:text-[#6b7280] focus:outline-none focus:ring-0"
+                autoComplete="off"
+              />
+            </div>
+          </form>
+        ) : null}
+
+        {/* Desktop nav — hidden on mobile */}
+        <nav
+          aria-label="Main navigation"
+          className="ml-auto hidden md:flex shrink-0 items-center gap-4 text-sm md:gap-6"
+        >
+          {/* Browse dropdown — hover on desktop */}
+          <div className="relative group">
+            <button
+              type="button"
+              className={`flex items-center gap-1 ${textColor} text-sm`}
+            >
+              {t.navBrowse}
+              <ChevronDown className="mt-px" />
+            </button>
+            <div className="absolute top-full left-0 hidden group-hover:block pt-2 z-50">
+              <div className="rounded-lg bg-white p-6 shadow-lg w-80">
+                <div className="grid grid-cols-2 gap-x-8 gap-y-3">
+                  {BROWSE_LINKS.map((link) => (
+                    <Link key={link.href} href={link.href} className="text-sm text-[#6b6b6b] hover:text-[#1a1a1a]">
+                      {link.label}
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Explore dropdown — hover on desktop */}
+          <div className="relative group/explore">
+            <button
+              type="button"
+              className={`flex items-center gap-1 ${textColor} text-sm`}
+            >
+              {t.navExplore}
+              <ChevronDown className="mt-px" />
+            </button>
+            <div className="absolute top-full left-0 hidden group-hover/explore:block pt-2 z-50">
+              <div className="rounded-lg bg-white p-6 shadow-lg w-48">
+                <div className="flex flex-col gap-4">
+                  {EXPLORE_LINKS.map((link) => (
+                    <Link key={link.href} href={link.href} className="text-sm text-[#6b6b6b] hover:text-[#1a1a1a]">
+                      {link.label}
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {NAV_LINKS.map((link) => (
+            <Link key={link.href} href={link.href} className={textColor}>
+              {link.label}
+            </Link>
+          ))}
+        </nav>
+
+        {/* Mobile hamburger — visible on mobile only */}
+        <button
+          type="button"
+          onClick={() => setMobileOpen(!mobileOpen)}
+          className={`ml-auto md:hidden p-2 ${isHome ? "text-white" : "text-[#1a1a1a]"}`}
+          aria-label={mobileOpen ? "Close menu" : "Open menu"}
+        >
+          {mobileOpen ? (
+            <svg width={24} height={24} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+              <path d="M18 6 6 18" />
+              <path d="m6 6 12 12" />
+            </svg>
+          ) : (
+            <svg width={24} height={24} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+              <path d="M4 6h16" />
+              <path d="M4 12h16" />
+              <path d="M4 18h16" />
+            </svg>
+          )}
+        </button>
+      </div>
+
+      {/* Mobile menu panel */}
+      {mobileOpen ? (
+        <div className="fixed inset-0 top-[60px] z-50 bg-white overflow-y-auto md:hidden">
+          <div className="px-5 py-6 space-y-1">
+            {/* Mobile search */}
+            {!isHome ? (
+              <form action={searchPath} method="get" className="mb-6">
+                <div className="flex h-10 items-center gap-2 rounded-full bg-[#f3f4f6] px-4 focus-within:ring-2 focus-within:ring-[#d1d5db]">
+                  <SearchIcon className="size-4 shrink-0 text-[#9ca3af]" />
+                  <input
+                    type="search"
+                    name="q"
+                    placeholder={t.searchPlaceholder}
+                    className="min-w-0 flex-1 border-0 bg-transparent text-sm text-[#1a1a1a] placeholder:text-[#6b7280] focus:outline-none focus:ring-0"
+                    autoComplete="off"
+                  />
+                </div>
+              </form>
+            ) : null}
+
+            {/* Browse accordion */}
+            <div className="border-b border-[#e8e6e1]">
+              <button
+                type="button"
+                onClick={() => setBrowseOpen(!browseOpen)}
+                className="flex w-full items-center justify-between py-4 text-[15px] font-medium text-[#1a1a1a]"
+              >
+                {t.navBrowse}
+                <ChevronDown className={`transition-transform duration-200 ${browseOpen ? "rotate-180" : ""}`} />
+              </button>
+              {browseOpen ? (
+                <div className="grid grid-cols-2 gap-x-6 gap-y-3 pb-4">
+                  {BROWSE_LINKS.map((link) => (
+                    <Link key={link.href} href={link.href} className="text-sm text-[#6b6b6b] active:text-[#1a1a1a]">
+                      {link.label}
+                    </Link>
+                  ))}
+                </div>
+              ) : null}
+            </div>
+
+            {/* Explore accordion */}
+            <div className="border-b border-[#e8e6e1]">
+              <button
+                type="button"
+                onClick={() => setExploreOpen(!exploreOpen)}
+                className="flex w-full items-center justify-between py-4 text-[15px] font-medium text-[#1a1a1a]"
+              >
+                {t.navExplore}
+                <ChevronDown className={`transition-transform duration-200 ${exploreOpen ? "rotate-180" : ""}`} />
+              </button>
+              {exploreOpen ? (
+                <div className="flex flex-col gap-3 pb-4">
+                  {EXPLORE_LINKS.map((link) => (
+                    <Link key={link.href} href={link.href} className="text-sm text-[#6b6b6b] active:text-[#1a1a1a]">
+                      {link.label}
+                    </Link>
+                  ))}
+                </div>
+              ) : null}
+            </div>
+
+            {/* Direct nav links */}
+            {NAV_LINKS.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                className="block border-b border-[#e8e6e1] py-4 text-[15px] font-medium text-[#1a1a1a]"
+              >
+                {link.label}
+              </Link>
+            ))}
+          </div>
+        </div>
+      ) : null}
+    </header>
+  );
+}
