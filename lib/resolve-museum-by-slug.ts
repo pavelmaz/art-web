@@ -14,7 +14,7 @@ export async function resolveMuseumBySlug(slug: string): Promise<string | null> 
   const hub = await getCachedMuseumHub();
   const match = hub.find((row) => {
     const name = row.display?.trim();
-    if (!name || name.toLowerCase() === "private collection") {
+    if (!name) {
       return false;
     }
     return slugify(name) === target;
