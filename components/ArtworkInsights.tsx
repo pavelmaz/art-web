@@ -17,6 +17,7 @@ export type ArtworkRow = {
 
 type Insight = {
   id: number;
+  category?: string;
   x: number;
   y: number;
   title: string;
@@ -51,29 +52,50 @@ function useArtworkInsights() {
 
 function buildPrompt(artwork: ArtworkRow): string {
   const artist = artwork.artist_display?.trim() || "Unknown artist";
-  return `You are an expert art guide. For the painting 
-"${artwork.title}" by ${artist}, 
-generate exactly 4 insights that create "aha moments".
+  return `You are a world-class museum audio guide writer and art historian. 
+For the painting "${artwork.title}" by ${artist}, generate exactly 4 insights 
+that make viewers feel like insiders — people who now see what others miss.
 
-Each insight must:
-- Point to a SPECIFIC visible element in the painting
-- Contain a concrete verifiable fact or observation
-- Be written in simple engaging language (no philosophical fluff)
-- Create genuine surprise or discovery
-- Be 1-2 sentences max
+Each insight must belong to ONE of these 4 categories (use all 4, in this order):
 
-Provide x/y position (0-100 percentage) where the marker 
-should appear on the image, placed on the actual element.
+1. THE HIDDEN SECRET — A detail most people walk past but changes everything once 
+   you see it. A symbol, hidden figure, visual trick, or disguised meaning embedded 
+   in a specific part of the painting.
+
+2. WHY IT WAS PAINTED — The real reason, commission, political motive, personal 
+   obsession, or historical moment that made the artist create this. Not "he loved 
+   beauty" — the actual documented reason or context.
+
+3. TIME CAPSULE — One element in the painting that reveals something surprising 
+   about everyday life, fashion, technology, or society in that exact era. 
+   Anchor it with a specific date or time period (e.g., "In 1665, only nobility 
+   could afford...").
+
+4. THE PAINTER'S TRICK — A deliberate technical or compositional decision the 
+   artist made — a perspective cheat, an impossible light source, a brushwork 
+   innovation, a color that shouldn't work but does — and why they did it.
+
+Rules for ALL insights:
+- Point to a SPECIFIC visible element (not "the painting overall")
+- 2 sentences max: sentence 1 = what to look at / the fact, sentence 2 = why it matters or surprises
+- Write like you're whispering a secret to a friend, not lecturing
+- NO philosophical fluff, NO vague praise ("masterful", "timeless")
+- At least 1 insight must contain a concrete data point: a year, a price, a 
+  measurement, a documented historical fact with a date
+
+Provide x/y position (0-100 percentage) for where the dot should appear on the 
+painting, placed precisely on the element being described.
 
 Return ONLY valid JSON:
 {
   "insights": [
     {
       "id": 1,
+      "category": "hidden_secret",
       "x": 45,
       "y": 30,
-      "title": "short label 3-4 words",
-      "text": "The insight text. One surprising specific fact."
+      "title": "3-4 word label",
+      "text": "Sentence one: the specific fact or observation. Sentence two: why it's surprising or what it reveals."
     }
   ]
 }`;
