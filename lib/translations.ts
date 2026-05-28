@@ -34,6 +34,12 @@ export const translations = {
     navBrowse: 'Browse',
     navExplore: 'Explore',
     noResults: 'No results found',
+    insightsDiscoverAbout: 'Discover insights about this artwork',
+    insightsDiscover: 'Discover',
+    insightsGenerating: 'Generating...',
+    insightsClose: 'Close insight',
+    insightsApiKeyMissing: 'OpenAI API key is not configured.',
+    insightsGenerateFailed: 'Failed to generate insights.',
     // SEO page title templates
     artworkPageTitle: (title: string, artist: string) => 
       `${title} de ${artist} — Descarga Gratuita`,
@@ -75,6 +81,12 @@ export const translations = {
     navBrowse: 'Explorar',
     navExplore: 'Descubrir',
     noResults: 'Sin resultados',
+    insightsDiscoverAbout: 'Descubre información sobre esta obra',
+    insightsDiscover: 'Descubrir',
+    insightsGenerating: 'Generando...',
+    insightsClose: 'Cerrar información',
+    insightsApiKeyMissing: 'La clave de API de OpenAI no está configurada.',
+    insightsGenerateFailed: 'No se pudo generar la información.',
     // SEO page title templates
     artworkPageTitle: (title: string, artist: string) => 
       `${title} de ${artist} — Descarga Gratuita | Fine Art Free`,
@@ -116,6 +128,12 @@ export const translations = {
     navBrowse: 'Explorar',
     navExplore: 'Descobrir',
     noResults: 'Nenhum resultado',
+    insightsDiscoverAbout: 'Descubra informações sobre esta obra',
+    insightsDiscover: 'Descobrir',
+    insightsGenerating: 'Gerando...',
+    insightsClose: 'Fechar informação',
+    insightsApiKeyMissing: 'A chave da API OpenAI não está configurada.',
+    insightsGenerateFailed: 'Não foi possível gerar as informações.',
     // SEO page title templates
     artworkPageTitle: (title: string, artist: string) => 
       `${title} de ${artist} — Download Gratuito | Fine Art Free`,
@@ -160,6 +178,12 @@ export const translations = {
     downloadFree: '無料ダウンロード',
     freeToDownload: '無料でダウンロード',
     noResults: '結果が見つかりません',
+    insightsDiscoverAbout: 'この作品のインサイトを見る',
+    insightsDiscover: '発見',
+    insightsGenerating: '生成中...',
+    insightsClose: '閉じる',
+    insightsApiKeyMissing: 'OpenAI APIキーが設定されていません。',
+    insightsGenerateFailed: 'インサイトの生成に失敗しました。',
     artworkPageTitle: (title: string, artist: string) =>
       `${title} — ${artist} | 無料ダウンロード | Fine Art Free`,
     stylePageTitle: (style: string) =>

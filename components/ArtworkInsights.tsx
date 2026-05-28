@@ -10,6 +10,8 @@ import {
   type ReactNode,
 } from "react";
 
+import { getT, type Locale } from "@/lib/translations";
+
 export type ArtworkRow = {
   title: string;
   artist_display: string | null;
@@ -28,8 +30,19 @@ type InsightsResponse = {
   insights: Insight[];
 };
 
+type InsightsLabels = {
+  insightsDiscoverAbout: string;
+  insightsDiscover: string;
+  insightsGenerating: string;
+  insightsClose: string;
+  insightsApiKeyMissing: string;
+  insightsGenerateFailed: string;
+};
+
 type ArtworkInsightsContextValue = {
   artwork: ArtworkRow;
+  locale: Locale;
+  labels: InsightsLabels;
   loading: boolean;
   error: string | null;
   insights: Insight[];
@@ -50,8 +63,16 @@ function useArtworkInsights() {
   return ctx;
 }
 
-function buildPrompt(artwork: ArtworkRow): string {
+const OUTPUT_LANGUAGE: Record<Locale, string> = {
+  en: "English",
+  es: "Spanish",
+  pt: "Portuguese",
+  ja: "Japanese",
+};
+
+function buildPrompt(artwork: ArtworkRow, locale: Locale): string {
   const artist = artwork.artist_display?.trim() || "Unknown artist";
+  const language = OUTPUT_LANGUAGE[locale];
   return `You are a world-class museum audio guide writer and art historian. 
 For the painting "${artwork.title}" by ${artist}, generate exactly 4 insights 
 that make viewers feel like insiders — people who now see what others miss.
@@ -82,6 +103,7 @@ Rules for ALL insights:
 - NO philosophical fluff, NO vague praise ("masterful", "timeless")
 - At least 1 insight must contain a concrete data point: a year, a price, a 
   measurement, a documented historical fact with a date
+- Write every "title" and "text" field in ${language}. Keep JSON keys and "category" values in English.
 
 Provide x/y position (0-100 percentage) for where the dot should appear on the 
 painting, placed precisely on the element being described.
@@ -103,11 +125,14 @@ Return ONLY valid JSON:
 
 export function ArtworkInsightsProvider({
   artwork,
+  locale,
   children,
 }: {
   artwork: ArtworkRow;
+  locale: Locale;
   children: ReactNode;
 }) {
+  const labels = getT(locale);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [insights, setInsights] = useState<Insight[]>([]);
@@ -132,7 +157,7 @@ export function ArtworkInsightsProvider({
   const handleDiscover = useCallback(async () => {
     const apiKey = process.env.NEXT_PUBLIC_OPENAI_API_KEY;
     if (!apiKey) {
-      setError("OpenAI API key is not configured.");
+      setError(labels.insightsApiKeyMissing);
       return;
     }
 
@@ -153,7 +178,7 @@ export function ArtworkInsightsProvider({
           model: "gpt-4o-mini",
           max_tokens: 1000,
           response_format: { type: "json_object" },
-          messages: [{ role: "user", content: buildPrompt(artwork) }],
+          messages: [{ role: "user", content: buildPrompt(artwork, locale) }],
         }),
       });
 
@@ -171,17 +196,26 @@ export function ArtworkInsightsProvider({
       const list = Array.isArray(parsed.insights) ? parsed.insights.slice(0, 4) : [];
       setInsights(list);
       setVisibleCount(0);
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "Failed to generate insights.");
+    } catch {
+      setError(labels.insightsGenerateFailed);
     } finally {
       setLoading(false);
     }
-  }, [artwork]);
+  }, [artwork, locale, labels.insightsApiKeyMissing, labels.insightsGenerateFailed]);
 
   return (
     <ArtworkInsightsContext.Provider
       value={{
         artwork,
+        locale,
+        labels: {
+          insightsDiscoverAbout: labels.insightsDiscoverAbout,
+          insightsDiscover: labels.insightsDiscover,
+          insightsGenerating: labels.insightsGenerating,
+          insightsClose: labels.insightsClose,
+          insightsApiKeyMissing: labels.insightsApiKeyMissing,
+          insightsGenerateFailed: labels.insightsGenerateFailed,
+        },
         loading,
         error,
         insights,
@@ -204,7 +238,8 @@ export function ArtworkInsightsProvider({
 
 /** Overlay insight dots on the main artwork image (place inside a `relative` wrapper). */
 export function ArtworkInsightsOverlay() {
-  const { insights, visibleCount, openPopupId, setOpenPopupId, closePopup } = useArtworkInsights();
+  const { insights, visibleCount, openPopupId, setOpenPopupId, closePopup, labels } =
+    useArtworkInsights();
 
   if (visibleCount === 0) {
     return null;
@@ -261,7 +296,7 @@ export function ArtworkInsightsOverlay() {
                     closePopup();
                   }}
                   className="absolute right-2 top-2 rounded p-0.5 text-white/80 transition-colors hover:bg-white/15 hover:text-white"
-                  aria-label="Close insight"
+                  aria-label={labels.insightsClose}
                 >
                   <X className="size-3.5" aria-hidden />
                 </button>
@@ -276,16 +311,16 @@ export function ArtworkInsightsOverlay() {
   );
 }
 
-/** Blue info box and Discover button — place under the main artwork image. */
+/** Info box and Discover button — place under the main artwork image. */
 export function ArtworkInsightsControls() {
-  const { loading, error, handleDiscover } = useArtworkInsights();
+  const { loading, error, handleDiscover, labels } = useArtworkInsights();
 
   return (
     <div className="mt-4">
       <div className="flex flex-wrap items-center gap-3">
         <div className="flex min-w-0 flex-1 items-center gap-2.5 rounded-lg bg-[#eceff3] p-3">
           <Eye className="size-4 shrink-0 text-[#6b6b6b]" aria-hidden />
-          <p className="text-sm font-medium text-[#1a1a1a]">Discover insights about this artwork</p>
+          <p className="text-sm font-medium text-[#1a1a1a]">{labels.insightsDiscoverAbout}</p>
         </div>
 
         <button
@@ -297,10 +332,10 @@ export function ArtworkInsightsControls() {
           {loading ? (
             <>
               <Loader2 className="size-4 animate-spin" aria-hidden />
-              Generating...
+              {labels.insightsGenerating}
             </>
           ) : (
-            "Discover"
+            labels.insightsDiscover
           )}
         </button>
       </div>
