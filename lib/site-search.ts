@@ -12,6 +12,7 @@ export type SiteSearchArtworkRow = {
   museum: string | null;
   alt_text?: string | null;
   score?: number | null;
+  tags?: string[] | null;
 };
 
 export type SiteSearchArtist = {
@@ -23,7 +24,7 @@ export type SiteSearchArtist = {
 };
 
 const ARTWORK_SELECT =
-  "id, title, slug, artist_display, image_id, url, museum, alt_text, score";
+  "id, title, slug, artist_display, image_id, url, museum, alt_text, score, tags";
 
 export function sanitizeSearchTerm(raw: string): string {
   return raw.replace(/[%_]/g, "").trim();
@@ -48,7 +49,7 @@ async function fetchArtworksByFilter(term: string) {
   return supabase
     .from("artworks")
     .select(ARTWORK_SELECT)
-    .or(`title.ilike.%${safe}%,artist_display.ilike.%${safe}%`)
+    .or(`title.ilike.%${safe}%,artist_display.ilike.%${safe}%,tags.cs.{${safe}}`)
     .order("score", { ascending: false })
     .limit(50);
 }
@@ -102,6 +103,37 @@ async function enrichSearchArtists(
     image_id: filled[index]?.image_id ?? artist.image_id,
     url: filled[index]?.url ?? artist.url,
   }));
+}
+
+export function getMatchingTagsFromArtworks(
+  rows: SiteSearchArtworkRow[],
+  rawQuery: string,
+  limit = 10,
+): string[] {
+  const needle = rawQuery.trim().toLowerCase();
+  if (!needle) {
+    return [];
+  }
+
+  const seen = new Set<string>();
+  const matches: string[] = [];
+
+  for (const row of rows) {
+    for (const tag of row.tags ?? []) {
+      const trimmed = tag?.trim();
+      if (!trimmed || !trimmed.toLowerCase().includes(needle)) {
+        continue;
+      }
+      const key = trimmed.toLowerCase();
+      if (seen.has(key)) {
+        continue;
+      }
+      seen.add(key);
+      matches.push(trimmed);
+    }
+  }
+
+  return matches.sort((a, b) => a.localeCompare(b)).slice(0, limit);
 }
 
 export async function runSiteSearch(rawQuery: string): Promise<{

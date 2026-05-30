@@ -1,6 +1,8 @@
+import Link from "next/link";
+
 import { ArtworkGrid } from "@/components/ArtworkGrid";
 import { BrowseHubGrid } from "@/components/BrowseHubGrid";
-import { runSiteSearch, type SiteSearchArtworkRow } from "@/lib/site-search";
+import { getMatchingTagsFromArtworks, runSiteSearch, type SiteSearchArtworkRow } from "@/lib/site-search";
 import { slugify } from "@/lib/utils";
 import type { Artwork } from "@/types/artwork";
 
@@ -77,6 +79,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
   }
 
   const artworks = rows.map(toArtwork);
+  const matchingTags = getMatchingTagsFromArtworks(rows, q);
 
   return (
     <div className="mx-auto max-w-7xl space-y-8 px-5 py-10">
@@ -92,6 +95,23 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
           <p className="text-sm text-[#6b6b6b]">No artworks found.</p>
         )}
       </section>
+
+      {matchingTags.length ? (
+        <section className="space-y-4">
+          <h2 className="text-xl font-semibold text-[#1a1a1a]">Topics</h2>
+          <div className="flex flex-wrap gap-2">
+            {matchingTags.map((tag) => (
+              <Link
+                key={tag}
+                href={`/artworks?tag=${encodeURIComponent(tag)}`}
+                className="rounded-full bg-[#f0ede8] px-3 py-1 text-xs text-[#4a4a4a] transition-colors hover:bg-[#e0ddd8]"
+              >
+                #{tag}
+              </Link>
+            ))}
+          </div>
+        </section>
+      ) : null}
 
       <section className="space-y-4">
         <h2 className="text-xl font-semibold text-[#1a1a1a]">Artists ({artistResults.length})</h2>
