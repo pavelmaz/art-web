@@ -181,7 +181,7 @@ export async function runSiteSearch(rawQuery: string): Promise<{
     }
   }
 
-  const artists: SiteSearchArtist[] = [];
+  const artists: Omit<SiteSearchArtist, "image_id" | "url">[] = [];
   const seen = new Set<string>();
 
   const { data: artistRows } = await fetchArtistsByName(term);
