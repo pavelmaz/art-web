@@ -1,6 +1,5 @@
-import { createClient } from "@supabase/supabase-js";
-
 import { escapeXml, getPublicSiteUrl } from "@/lib/sitemap-xml";
+import { supabase } from "@/lib/supabase";
 
 export const dynamic = "force-dynamic";
 
@@ -41,13 +40,6 @@ export async function GET(
       return new Response(emptyUrlset(), { status: 200, headers: XML_HEADERS });
     }
 
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-    if (!supabaseUrl?.trim() || !supabaseKey?.trim()) {
-      return new Response(emptyUrlset(), { status: 200, headers: XML_HEADERS });
-    }
-
-    const supabase = createClient(supabaseUrl, supabaseKey);
     const from = page * PAGE_SIZE;
     const to = page * PAGE_SIZE + (PAGE_SIZE - 1);
 
