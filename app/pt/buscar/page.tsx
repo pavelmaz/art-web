@@ -1,6 +1,5 @@
-import Link from "next/link";
-
 import { ArtworkGrid } from "@/components/ArtworkGrid";
+import { BrowseHubGrid } from "@/components/BrowseHubGrid";
 import { runSiteSearch, type SiteSearchArtworkRow } from "@/lib/site-search";
 import { slugify } from "@/lib/utils";
 import type { Artwork } from "@/types/artwork";
@@ -40,7 +39,7 @@ function toArtwork(item: SiteSearchArtworkRow): Artwork {
     styleTitle: null,
     genreTitle: null,
     score: item.score ?? null,
-    url: null,
+    url: item.url,
     styleSlug: "unknown",
     styleName: "Unknown style",
     sourceUrl: undefined,
@@ -78,10 +77,6 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
     <div className="mx-auto max-w-7xl space-y-8 px-5 py-10">
       <div className="space-y-2">
         <h1 className="text-3xl font-semibold text-[#1a1a1a]">Resultados para &quot;{q}&quot;</h1>
-        <div className="flex flex-wrap gap-4 text-sm text-[#6b6b6b]">
-          <span>Obras ({artworks.length})</span>
-          <span>Artistas ({artistResults.length})</span>
-        </div>
       </div>
 
       <section className="space-y-4">
@@ -96,16 +91,15 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
       <section className="space-y-4">
         <h2 className="text-xl font-semibold text-[#1a1a1a]">Artistas ({artistResults.length})</h2>
         {artistResults.length ? (
-          <ul className="space-y-2">
-            {artistResults.map((artist) => (
-              <li key={artist.slug}>
-                <Link href={`/pt/artistas/${artist.slug}`} className="text-sm text-[#1a1a1a] underline">
-                  {artist.name}
-                </Link>
-                <span className="ml-2 text-xs text-[#6b6b6b]">{artist.count} obras</span>
-              </li>
-            ))}
-          </ul>
+          <BrowseHubGrid
+            items={artistResults.map((artist) => ({
+              name: artist.name,
+              href: `/pt/artistas/${artist.slug}`,
+              count: artist.count,
+              imageId: artist.image_id,
+              url: artist.url,
+            }))}
+          />
         ) : (
           <p className="text-sm text-[#6b6b6b]">Nenhum resultado encontrado</p>
         )}
