@@ -12,7 +12,7 @@ export type SitemapEntry = {
 
 export const LOCALE_HUB_SITEMAP_XML_HEADERS = {
   "Content-Type": "application/xml; charset=utf-8",
-  "Cache-Control": "public, max-age=0, must-revalidate",
+  "Cache-Control": "public, max-age=0, s-maxage=86400, stale-while-revalidate=604800",
 } as const;
 
 export function buildUrlset(entries: SitemapEntry[]): string {

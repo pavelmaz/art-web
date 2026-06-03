@@ -8,6 +8,12 @@ type CookieRow = { name: string; value: string; options: CookieOptions };
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
+
+  // Sitemaps must stay fast and must not get hreflang Link headers (e.g. /es/sitemap/...).
+  if (pathname === "/sitemap.xml" || pathname.startsWith("/sitemap/")) {
+    return NextResponse.next();
+  }
+
   const requestHeaders = new Headers(request.headers);
   requestHeaders.set("x-pathname", pathname);
 

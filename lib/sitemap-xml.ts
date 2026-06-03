@@ -15,8 +15,13 @@ export function getPublicSiteUrl(): string {
   return "https://fineartfree.com";
 }
 
+/** Remove characters illegal in XML 1.0 that can break sitemap parsers. */
+export function sanitizeForXml(s: string): string {
+  return s.replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\uFFFE\uFFFF]/g, "");
+}
+
 export function escapeXml(s: string): string {
-  return s
+  return sanitizeForXml(s)
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;")
