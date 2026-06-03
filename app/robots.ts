@@ -23,6 +23,11 @@ export default function robots(): MetadataRoute.Robots {
     );
   }
 
+  const localesWithoutTopicsCountries = ["/fr", "/de", "/it", "/ko", "/ru", "/zh"] as const;
+  for (const prefix of localesWithoutTopicsCountries) {
+    wrongLocalePaths.push(`${prefix}/topics`, `${prefix}/countries`);
+  }
+
   return {
     rules: {
       userAgent: "*",

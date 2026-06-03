@@ -87,12 +87,18 @@ export default function Header({ browseGenres = [] }: HeaderProps) {
     };
   });
 
+  const hasTopicsAndCountries =
+    locale === "en" || locale === "es" || locale === "pt" || locale === "ja";
   const topicsSegment = locale === "es" || locale === "pt" ? "temas" : "topics";
   const countriesSegment = locale === "es" || locale === "pt" ? "paises" : "countries";
 
   const EXPLORE_LINKS = [
-    { href: `${prefix}/${topicsSegment}`, label: t.topics },
-    { href: `${prefix}/${countriesSegment}`, label: t.countries },
+    ...(hasTopicsAndCountries
+      ? [
+          { href: `${prefix}/${topicsSegment}`, label: t.topics },
+          { href: `${prefix}/${countriesSegment}`, label: t.countries },
+        ]
+      : []),
     { href: `${prefix}/${stylesSegment}`, label: t.styles },
     { href: `${prefix}/${genresSegment}`, label: t.genres },
   ];

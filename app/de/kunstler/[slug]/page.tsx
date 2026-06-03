@@ -9,9 +9,13 @@ import { Pagination } from "@/components/Pagination";
 import { getArtistBioForLocale, getArtistProfileBySlug } from "@/lib/get-artist-profile";
 import { getPaginationParams, getTotalPages } from "@/lib/pagination";
 import { supabase } from "@/lib/supabase";
-import { artistDetailPath, buildArtistLanguageAlternates, buildHubLanguageAlternates, localePath } from "@/lib/locale-routes";
-import { absoluteUrl, artworkGridImageUrl } from "@/lib/utils";
+import { buildArtistLanguageAlternates, localePath } from "@/lib/locale-routes";
+import { getT } from "@/lib/translations";
+import { artworkGridImageUrl } from "@/lib/utils";
 import type { Artwork } from "@/types/artwork";
+
+const t = getT("de");
+const artistsHubPath = localePath("de", "artists");
 
 export const revalidate = 86400;
 
@@ -47,15 +51,15 @@ export async function generateMetadata({ params }: ArtistPageProps): Promise<Met
     notFound();
   }
 
-  const title = `${artist.name} — Werke Completas Gratis para Descargar | Fine Art Free`;
-  const description = `Descarga ${totalCount} werke de ${artist.name}. Pinturas de dominio público en alta resolución, gratis para cualquier uso.`;
+  const title = t.artistPageTitle(artist.name);
+  const description = `Laden Sie ${totalCount} Werke von ${artist.name} herunter. Gemeinfreie Gemälde in hoher Auflösung, kostenlos für jede Nutzung.`;
 
   return {
     title,
     description,
     alternates: {
       canonical: `https://fineartfree.com${localePath("de", "artists")}/${slug}`,
-      languages: buildHubLanguageAlternates("artists"),
+      languages: buildArtistLanguageAlternates(slug),
     },
     openGraph: { title, description },
   };
@@ -118,8 +122,12 @@ export default async function ArtistPage({ params, searchParams }: ArtistPagePro
     <div className="space-y-8 px-5">
       <ArtistJsonLd name={artistName} slug={slug} />
       <Breadcrumbs
-        items={[{ label: "Start", href: "/de" }, { label: "Artistas", href: "/de/künstler" }, { label: artistName }]}
-        currentPath={`/de/künstler/${slug}`}
+        items={[
+          { label: "Startseite", href: "/de" },
+          { label: t.artists, href: artistsHubPath },
+          { label: artistName },
+        ]}
+        currentPath={`${artistsHubPath}/${slug}`}
       />
       <ArtistProfileHeader
         name={artistName}
@@ -128,16 +136,16 @@ export default async function ArtistPage({ params, searchParams }: ArtistPagePro
         birthYear={artist.birth_year}
         deathYear={artist.death_year}
         bio={bio}
-        readMoreLabel="Leer más"
+        readMoreLabel="Mehr lesen"
       />
       <p className="text-sm text-[#6b6b6b]">
-        {artworkCount} {artworkCount === 1 ? "obra de arte" : "werke de arte"}
+        {artworkCount} {t.artworks}
       </p>
       <ArtworkGrid artworks={artworks} basePath="/de" />
       <Pagination
         currentPage={page}
         totalPages={Math.max(1, getTotalPages(artworkCount))}
-        basePath={`/de/künstler/${slug}`}
+        basePath={`${artistsHubPath}/${slug}`}
       />
     </div>
   );

@@ -51,6 +51,22 @@ function buildLocalePathRedirects() {
   return redirects;
 }
 
+function buildTopicsCountriesRedirects() {
+  const locales = ["/fr", "/de", "/it", "/ko", "/ru", "/zh"] as const;
+  const redirects: { source: string; destination: string; permanent: boolean }[] = [];
+
+  for (const prefix of locales) {
+    redirects.push(
+      { source: `${prefix}/topics`, destination: prefix, permanent: true },
+      { source: `${prefix}/countries`, destination: prefix, permanent: true },
+      { source: `${prefix}/topics/:path*`, destination: prefix, permanent: true },
+      { source: `${prefix}/countries/:path*`, destination: prefix, permanent: true }
+    );
+  }
+
+  return redirects;
+}
+
 const nextConfig: NextConfig = {
   async rewrites() {
     return buildLocaleSegmentRewrites();
@@ -78,6 +94,7 @@ const nextConfig: NextConfig = {
         permanent: true,
       },
       ...buildLocalePathRedirects(),
+      ...buildTopicsCountriesRedirects(),
       {
         source: "/genres/theatrical",
         destination: "/genres",

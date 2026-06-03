@@ -9,9 +9,13 @@ import { Pagination } from "@/components/Pagination";
 import { getArtistBioForLocale, getArtistProfileBySlug } from "@/lib/get-artist-profile";
 import { getPaginationParams, getTotalPages } from "@/lib/pagination";
 import { supabase } from "@/lib/supabase";
-import { artistDetailPath, buildArtistLanguageAlternates, localePath } from "@/lib/locale-routes";
-import { absoluteUrl, artworkGridImageUrl } from "@/lib/utils";
+import { buildArtistLanguageAlternates, localePath } from "@/lib/locale-routes";
+import { getT } from "@/lib/translations";
+import { artworkGridImageUrl } from "@/lib/utils";
 import type { Artwork } from "@/types/artwork";
+
+const t = getT("it");
+const artistsHubPath = localePath("it", "artists");
 
 export const revalidate = 86400;
 
@@ -47,8 +51,8 @@ export async function generateMetadata({ params }: ArtistPageProps): Promise<Met
     notFound();
   }
 
-  const title = `${artist.name} — Opere Completas Gratis para Descargar | Fine Art Free`;
-  const description = `Descarga ${totalCount} opere de ${artist.name}. Pinturas de dominio público en alta resolución, gratis para cualquier uso.`;
+  const title = t.artistPageTitle(artist.name);
+  const description = `Scarica ${totalCount} opere di ${artist.name}. Dipinti di pubblico dominio ad alta risoluzione, gratis per qualsiasi uso.`;
 
   return {
     title,
@@ -118,8 +122,12 @@ export default async function ArtistPage({ params, searchParams }: ArtistPagePro
     <div className="space-y-8 px-5">
       <ArtistJsonLd name={artistName} slug={slug} />
       <Breadcrumbs
-        items={[{ label: "Home", href: "/it" }, { label: "Artistas", href: "/it/artisti" }, { label: artistName }]}
-        currentPath={`/it/artisti/${slug}`}
+        items={[
+          { label: "Home", href: "/it" },
+          { label: t.artists, href: artistsHubPath },
+          { label: artistName },
+        ]}
+        currentPath={`${artistsHubPath}/${slug}`}
       />
       <ArtistProfileHeader
         name={artistName}
@@ -128,16 +136,16 @@ export default async function ArtistPage({ params, searchParams }: ArtistPagePro
         birthYear={artist.birth_year}
         deathYear={artist.death_year}
         bio={bio}
-        readMoreLabel="Leer más"
+        readMoreLabel="Leggi di più"
       />
       <p className="text-sm text-[#6b6b6b]">
-        {artworkCount} {artworkCount === 1 ? "obra de arte" : "opere de arte"}
+        {artworkCount} {t.artworks}
       </p>
       <ArtworkGrid artworks={artworks} basePath="/it" />
       <Pagination
         currentPage={page}
         totalPages={Math.max(1, getTotalPages(artworkCount))}
-        basePath={`/it/artisti/${slug}`}
+        basePath={`${artistsHubPath}/${slug}`}
       />
     </div>
   );
