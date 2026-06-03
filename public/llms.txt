@@ -1,0 +1,93 @@
+# Fine Art Free
+
+> 500,000+ public domain paintings, prints and illustrations from the world's greatest museums — free for personal and commercial use.
+
+## English (default)
+- https://fineartfree.com
+- https://fineartfree.com/artworks
+- https://fineartfree.com/artists
+- https://fineartfree.com/museums
+- https://fineartfree.com/genres
+- https://fineartfree.com/styles
+- https://fineartfree.com/search
+
+## Spanish
+- https://fineartfree.com/es
+- https://fineartfree.com/es/obras
+- https://fineartfree.com/es/artistas
+- https://fineartfree.com/es/museos
+- https://fineartfree.com/es/generos
+- https://fineartfree.com/es/estilos
+- https://fineartfree.com/es/buscar
+
+## Portuguese
+- https://fineartfree.com/pt
+- https://fineartfree.com/pt/obras
+- https://fineartfree.com/pt/artistas
+- https://fineartfree.com/pt/museus
+- https://fineartfree.com/pt/generos
+- https://fineartfree.com/pt/estilos
+- https://fineartfree.com/pt/buscar
+
+## Japanese
+- https://fineartfree.com/ja
+- https://fineartfree.com/ja/artworks
+- https://fineartfree.com/ja/artists
+- https://fineartfree.com/ja/museums
+- https://fineartfree.com/ja/genres
+- https://fineartfree.com/ja/styles
+- https://fineartfree.com/ja/search
+
+## French
+- https://fineartfree.com/fr
+- https://fineartfree.com/fr/œuvres
+- https://fineartfree.com/fr/artistes
+- https://fineartfree.com/fr/musées
+- https://fineartfree.com/fr/genres
+- https://fineartfree.com/fr/styles
+- https://fineartfree.com/fr/recherche
+
+## German
+- https://fineartfree.com/de
+- https://fineartfree.com/de/werke
+- https://fineartfree.com/de/künstler
+- https://fineartfree.com/de/museen
+- https://fineartfree.com/de/genres
+- https://fineartfree.com/de/stile
+- https://fineartfree.com/de/suche
+
+## Italian
+- https://fineartfree.com/it
+- https://fineartfree.com/it/opere
+- https://fineartfree.com/it/artisti
+- https://fineartfree.com/it/musei
+- https://fineartfree.com/it/generi
+- https://fineartfree.com/it/stili
+- https://fineartfree.com/it/ricerca
+
+## Korean
+- https://fineartfree.com/ko
+- https://fineartfree.com/ko/작품
+- https://fineartfree.com/ko/예술가
+- https://fineartfree.com/ko/박물관
+- https://fineartfree.com/ko/장르
+- https://fineartfree.com/ko/스타일
+- https://fineartfree.com/ko/검색
+
+## Russian
+- https://fineartfree.com/ru
+- https://fineartfree.com/ru/произведения
+- https://fineartfree.com/ru/художники
+- https://fineartfree.com/ru/музеи
+- https://fineartfree.com/ru/жанры
+- https://fineartfree.com/ru/стили
+- https://fineartfree.com/ru/поиск
+
+## Chinese
+- https://fineartfree.com/zh
+- https://fineartfree.com/zh/作品
+- https://fineartfree.com/zh/艺术家
+- https://fineartfree.com/zh/博物馆
+- https://fineartfree.com/zh/流派
+- https://fineartfree.com/zh/风格
+- https://fineartfree.com/zh/搜索

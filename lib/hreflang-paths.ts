@@ -1,100 +1,137 @@
-/** Map canonical English URL paths to localized paths (same slug where possible). */
+import {
+  HREFLANG_LOCALES,
+  LOCALE_ROUTE_CONFIG,
+  getSegments,
+  type LocaleSegments,
+  type SiteLocale,
+} from "@/lib/locale-routes";
 
+const EN_SEGMENTS: LocaleSegments = {
+  artworks: "artworks",
+  artists: "artists",
+  museums: "museums",
+  genres: "genres",
+  styles: "styles",
+  search: "search",
+};
+
+function mapSegmentPath(
+  rest: string,
+  from: LocaleSegments,
+  to: LocaleSegments,
+  extra?: { fromTopics?: string; toTopics?: string; fromCountries?: string; toCountries?: string }
+): string {
+  let path = rest;
+  const pairs: Array<[keyof LocaleSegments, string]> = [
+    ["artworks", from.artworks],
+    ["artists", from.artists],
+    ["museums", from.museums],
+    ["genres", from.genres],
+    ["styles", from.styles],
+    ["search", from.search],
+  ];
+  for (const [key, fromSeg] of pairs) {
+    const prefix = `/${fromSeg}`;
+    if (path.startsWith(prefix)) {
+      const toSeg = to[key];
+      return `/${toSeg}${path.slice(prefix.length)}`;
+    }
+  }
+  if (extra?.fromTopics && extra?.toTopics && path.startsWith(`/${extra.fromTopics}`)) {
+    return `/${extra.toTopics}${path.slice(extra.fromTopics.length + 1)}`;
+  }
+  if (extra?.fromCountries && extra?.toCountries && path.startsWith(`/${extra.fromCountries}`)) {
+    return `/${extra.toCountries}${path.slice(extra.fromCountries.length + 1)}`;
+  }
+  return path;
+}
+
+export function enPathToLocalized(pathname: string, locale: SiteLocale): string {
+  if (locale === "en") {
+    return pathname === "/" ? "/" : pathname;
+  }
+  const p = pathname === "/" ? "" : pathname;
+  const to = getSegments(locale);
+  const prefix = LOCALE_ROUTE_CONFIG[locale].prefix;
+  const mapped = mapSegmentPath(p, EN_SEGMENTS, to);
+  if (mapped !== p) {
+    return `${prefix}${mapped}`;
+  }
+  return p ? `${prefix}${p}` : prefix;
+}
+
+export function localizedPathToEn(pathname: string, locale: SiteLocale): string {
+  if (locale === "en") {
+    return pathname === "/" ? "/" : pathname;
+  }
+  const config = LOCALE_ROUTE_CONFIG[locale];
+  const prefix = config.prefix;
+  if (pathname === prefix || pathname === `${prefix}/`) {
+    return "/";
+  }
+  if (!pathname.startsWith(prefix)) {
+    return pathname;
+  }
+  const rest = pathname.slice(prefix.length) || "/";
+  const from = getSegments(locale);
+  const mapped = mapSegmentPath(rest, from, EN_SEGMENTS);
+  return mapped || "/";
+}
+
+/** @deprecated Use enPathToLocalized(path, "ja") */
 export function enPathToJa(pathname: string): string {
-  const p = pathname === "/" ? "" : pathname;
-  if (p.startsWith("/artworks")) return `/ja${p}`;
-  if (p.startsWith("/artists")) return `/ja${p}`;
-  if (p.startsWith("/museums")) return `/ja${p}`;
-  if (p.startsWith("/styles")) return `/ja${p}`;
-  if (p.startsWith("/genres")) return `/ja${p}`;
-  if (p.startsWith("/countries")) return `/ja${p}`;
-  if (p.startsWith("/topics")) return `/ja${p}`;
-  if (p.startsWith("/search")) return `/ja/search`;
-  return p ? `/ja${p}` : "/ja";
+  return enPathToLocalized(pathname, "ja");
 }
 
+/** @deprecated Use enPathToLocalized(path, "es") */
 export function enPathToEs(pathname: string): string {
-  const p = pathname === "/" ? "" : pathname;
-  if (p.startsWith("/artworks")) return `/es/obras${p.slice("/artworks".length)}`;
-  if (p.startsWith("/artists")) return `/es/artistas${p.slice("/artists".length)}`;
-  if (p.startsWith("/museums")) return `/es/museos${p.slice("/museums".length)}`;
-  if (p.startsWith("/styles")) return `/es/estilos${p.slice("/styles".length)}`;
-  if (p.startsWith("/genres")) return `/es/generos${p.slice("/genres".length)}`;
-  if (p.startsWith("/countries")) return `/es/paises${p.slice("/countries".length)}`;
-  if (p.startsWith("/topics")) return `/es/temas${p.slice("/topics".length)}`;
-  if (p.startsWith("/search")) return "/es/buscar";
-  return p ? `/es${p}` : "/es";
+  return enPathToLocalized(pathname, "es");
 }
 
+/** @deprecated Use enPathToLocalized(path, "pt") */
 export function enPathToPt(pathname: string): string {
-  const p = pathname === "/" ? "" : pathname;
-  if (p.startsWith("/artworks")) return `/pt/obras${p.slice("/artworks".length)}`;
-  if (p.startsWith("/artists")) return `/pt/artistas${p.slice("/artists".length)}`;
-  if (p.startsWith("/museums")) return `/pt/museus${p.slice("/museums".length)}`;
-  if (p.startsWith("/styles")) return `/pt/estilos${p.slice("/styles".length)}`;
-  if (p.startsWith("/genres")) return `/pt/generos${p.slice("/genres".length)}`;
-  if (p.startsWith("/countries")) return `/pt/paises${p.slice("/countries".length)}`;
-  if (p.startsWith("/topics")) return `/pt/temas${p.slice("/topics".length)}`;
-  if (p.startsWith("/search")) return "/pt/buscar";
-  return p ? `/pt${p}` : "/pt";
+  return enPathToLocalized(pathname, "pt");
 }
 
+/** @deprecated Use localizedPathToEn(path, "es") */
 export function esPathToEn(pathname: string): string {
-  if (pathname === "/es" || pathname === "/es/") return "/";
-  const rest = pathname.slice(3);
-  if (rest.startsWith("/obras")) return `/artworks${rest.slice("/obras".length)}`;
-  if (rest.startsWith("/artistas")) return `/artists${rest.slice("/artistas".length)}`;
-  if (rest.startsWith("/museos")) return `/museums${rest.slice("/museos".length)}`;
-  if (rest.startsWith("/estilos")) return `/styles${rest.slice("/estilos".length)}`;
-  if (rest.startsWith("/generos")) return `/genres${rest.slice("/generos".length)}`;
-  if (rest.startsWith("/paises")) return `/countries${rest.slice("/paises".length)}`;
-  if (rest.startsWith("/temas")) return `/topics${rest.slice("/temas".length)}`;
-  if (rest.startsWith("/buscar")) return "/search";
-  return rest || "/";
+  return localizedPathToEn(pathname, "es");
 }
 
+/** @deprecated Use localizedPathToEn(path, "pt") */
 export function ptPathToEn(pathname: string): string {
-  if (pathname === "/pt" || pathname === "/pt/") return "/";
-  const rest = pathname.slice(3);
-  if (rest.startsWith("/obras")) return `/artworks${rest.slice("/obras".length)}`;
-  if (rest.startsWith("/artistas")) return `/artists${rest.slice("/artistas".length)}`;
-  if (rest.startsWith("/museus")) return `/museums${rest.slice("/museus".length)}`;
-  if (rest.startsWith("/estilos")) return `/styles${rest.slice("/estilos".length)}`;
-  if (rest.startsWith("/generos")) return `/genres${rest.slice("/generos".length)}`;
-  if (rest.startsWith("/paises")) return `/countries${rest.slice("/paises".length)}`;
-  if (rest.startsWith("/temas")) return `/topics${rest.slice("/temas".length)}`;
-  if (rest.startsWith("/buscar")) return "/search";
-  return rest || "/";
+  return localizedPathToEn(pathname, "pt");
 }
 
+/** @deprecated Use localizedPathToEn(path, "ja") */
 export function jaPathToEn(pathname: string): string {
-  if (pathname === "/ja" || pathname === "/ja/") return "/";
-  const rest = pathname.slice(3);
-  return rest || "/";
+  return localizedPathToEn(pathname, "ja");
+}
+
+export function detectLocaleFromPathname(pathname: string): SiteLocale {
+  for (const loc of HREFLANG_LOCALES) {
+    if (loc === "en") continue;
+    const prefix = LOCALE_ROUTE_CONFIG[loc].prefix;
+    if (pathname === prefix || pathname.startsWith(`${prefix}/`)) {
+      return loc;
+    }
+  }
+  return "en";
 }
 
 export function buildHreflangLinkHeader(pathname: string): string {
   const site = "https://fineartfree.com";
-  let enPath = pathname;
+  const current = detectLocaleFromPathname(pathname);
+  const enPath = localizedPathToEn(pathname, current);
 
-  if (pathname.startsWith("/es")) {
-    enPath = esPathToEn(pathname);
-  } else if (pathname.startsWith("/pt")) {
-    enPath = ptPathToEn(pathname);
-  } else if (pathname.startsWith("/ja")) {
-    enPath = jaPathToEn(pathname);
-  }
+  const parts = HREFLANG_LOCALES.map((loc) => {
+    const localized = enPathToLocalized(enPath, loc);
+    const url = `${site}${localized === "/" ? "" : localized}`;
+    return `<${url}>; rel="alternate"; hreflang="${loc}"`;
+  });
 
   const enUrl = `${site}${enPath === "/" ? "" : enPath}`;
-  const esUrl = `${site}${enPathToEs(enPath)}`;
-  const ptUrl = `${site}${enPathToPt(enPath)}`;
-  const jaUrl = `${site}${enPathToJa(enPath)}`;
+  parts.push(`<${enUrl}>; rel="alternate"; hreflang="x-default"`);
 
-  return (
-    `<${enUrl}>; rel="alternate"; hreflang="en", ` +
-    `<${esUrl}>; rel="alternate"; hreflang="es", ` +
-    `<${ptUrl}>; rel="alternate"; hreflang="pt", ` +
-    `<${jaUrl}>; rel="alternate"; hreflang="ja", ` +
-    `<${enUrl}>; rel="alternate"; hreflang="x-default"`
-  );
+  return parts.join(", ");
 }

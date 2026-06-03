@@ -6,6 +6,8 @@ import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import type { BrowseGenreRow } from "@/lib/browse-genres";
+import { detectLocaleFromPathname } from "@/lib/hreflang-paths";
+import { HREFLANG_LOCALES, LOCALE_ROUTE_CONFIG, getSegments, localePath } from "@/lib/locale-routes";
 import { getT, type Locale } from "@/lib/translations";
 
 function SearchIcon({ className }: { className?: string }) {
@@ -54,31 +56,23 @@ type HeaderProps = {
 
 export default function Header({ browseGenres = [] }: HeaderProps) {
   const pathname = usePathname();
-  const locale: Locale =
-    pathname === "/ja" || pathname.startsWith("/ja/")
-      ? "ja"
-      : pathname.startsWith("/es")
-        ? "es"
-        : pathname.startsWith("/pt")
-          ? "pt"
-          : "en";
+  const locale = detectLocaleFromPathname(pathname) as Locale;
   const t = getT(locale);
   const prefix = locale === "en" ? "" : `/${locale}`;
-  const searchPath =
-    locale === "es"
-      ? "/es/buscar"
-      : locale === "pt"
-        ? "/pt/buscar"
-        : locale === "ja"
-          ? "/ja/search"
-          : "/search";
+  const searchPath = localePath(locale, "search");
+  const segments = getSegments(locale);
   const isHome =
-    pathname === "/" || pathname === "/es" || pathname === "/pt" || pathname === "/ja";
+    pathname === "/" ||
+    HREFLANG_LOCALES.some((loc) => {
+      if (loc === "en") return false;
+      const p = LOCALE_ROUTE_CONFIG[loc].prefix;
+      return pathname === p;
+    });
 
-  const genresSegment = locale === "es" || locale === "pt" ? "generos" : "genres";
-  const stylesSegment = locale === "es" || locale === "pt" ? "estilos" : "styles";
-  const artistsSegment = locale === "es" || locale === "pt" ? "artistas" : "artists";
-  const museumsSegment = locale === "es" ? "museos" : locale === "pt" ? "museus" : "museums";
+  const genresSegment = segments.genres;
+  const stylesSegment = segments.styles;
+  const artistsSegment = segments.artists;
+  const museumsSegment = segments.museums;
 
   const BROWSE_LINKS = browseGenres.map((g) => {
     const slug =
@@ -111,7 +105,7 @@ export default function Header({ browseGenres = [] }: HeaderProps) {
     { href: `${prefix}/${genresSegment}`, label: t.genres },
   ];
 
-  const artworksSegment = locale === "es" || locale === "pt" ? "obras" : "artworks";
+  const artworksSegment = segments.artworks;
 
   const NAV_LINKS = [
     { href: `${prefix}/${artworksSegment}`, label: t.artworks },

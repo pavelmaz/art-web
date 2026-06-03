@@ -18,13 +18,17 @@ type ArtworkJsonLdInput = {
 
 type ArtworkJsonLdProps = {
   artwork: ArtworkJsonLdInput;
+  /** Canonical artwork page URL for this locale */
+  pageUrl?: string;
+  /** BCP 47 language tag, e.g. fr, de, zh */
+  inLanguage?: string;
 };
 
 function nonEmpty(value: string | null | undefined): value is string {
   return Boolean(value?.trim());
 }
 
-export function ArtworkJsonLd({ artwork }: ArtworkJsonLdProps) {
+export function ArtworkJsonLd({ artwork, pageUrl, inLanguage }: ArtworkJsonLdProps) {
   const image = artworkImageUrl(artwork);
   const title = artwork.title?.trim();
   const artist = artwork.artist_display?.trim();
@@ -44,9 +48,16 @@ export function ArtworkJsonLd({ artwork }: ArtworkJsonLdProps) {
   if (nonEmpty(title)) {
     schema.name = title;
   }
-  if (nonEmpty(artwork.slug)) {
-    schema.url = `https://fineartfree.com/artworks/${artwork.slug}`;
-    schema.acquireLicensePage = `https://fineartfree.com/artworks/${artwork.slug}`;
+  const detailUrl =
+    pageUrl ??
+    (nonEmpty(artwork.slug) ? `https://fineartfree.com/artworks/${artwork.slug}` : undefined);
+
+  if (detailUrl) {
+    schema.url = detailUrl;
+    schema.acquireLicensePage = detailUrl;
+  }
+  if (nonEmpty(inLanguage)) {
+    schema.inLanguage = inLanguage;
   }
   if (nonEmpty(artist)) {
     schema.creator = {
@@ -68,7 +79,7 @@ export function ArtworkJsonLd({ artwork }: ArtworkJsonLdProps) {
       "name": `${title} by ${artist}`,
       "description": artwork.alt_text || `${title} by ${artist}`,
       "license": "https://creativecommons.org/publicdomain/zero/1.0/",
-      "acquireLicensePage": `https://fineartfree.com/artworks/${artwork.slug}`,
+      "acquireLicensePage": detailUrl ?? `https://fineartfree.com/artworks/${artwork.slug}`,
       "creditText": artist || "Unknown artist",
     };
   }

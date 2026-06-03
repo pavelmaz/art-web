@@ -1,10 +1,11 @@
+import { getLocaleConfig, getSegments, type SiteLocale } from "@/lib/locale-routes";
 import { supabase } from "@/lib/supabase";
 
-type Locale = "es" | "pt" | "ja";
+type HubLocale = Exclude<SiteLocale, "en">;
 
 export async function resolveGenreHubLink(
   genreTitleEnglish: string,
-  locale: Locale
+  locale: HubLocale
 ): Promise<{ href: string; label: string } | null> {
   const name = genreTitleEnglish.trim();
   if (!name) return null;
@@ -26,7 +27,8 @@ export async function resolveGenreHubLink(
     slug_pt: string | null;
   };
 
-  const prefix = locale === "es" ? "/es" : locale === "pt" ? "/pt" : "/ja";
+  const config = getLocaleConfig(locale);
+  const prefix = config?.prefix ?? `/${locale}`;
   const slug =
     locale === "es"
       ? row.slug_es?.trim() || row.slug
@@ -40,13 +42,13 @@ export async function resolveGenreHubLink(
         ? row.name_pt?.trim() || row.name
         : row.name;
 
-  const segment = locale === "ja" ? "genres" : "generos";
+  const segment = getSegments(locale).genres;
   return { href: `${prefix}/${segment}/${slug}`, label };
 }
 
 export async function resolveStyleHubLink(
   styleTitleEnglish: string,
-  locale: Locale
+  locale: HubLocale
 ): Promise<{ href: string; label: string } | null> {
   const name = styleTitleEnglish.trim();
   if (!name) return null;
@@ -68,7 +70,8 @@ export async function resolveStyleHubLink(
     slug_pt: string | null;
   };
 
-  const prefix = locale === "es" ? "/es" : locale === "pt" ? "/pt" : "/ja";
+  const config = getLocaleConfig(locale);
+  const prefix = config?.prefix ?? `/${locale}`;
   const slug =
     locale === "es"
       ? row.slug_es?.trim() || row.slug
@@ -82,6 +85,6 @@ export async function resolveStyleHubLink(
         ? row.name_pt?.trim() || row.name
         : row.name;
 
-  const segment = locale === "ja" ? "styles" : "estilos";
+  const segment = getSegments(locale).styles;
   return { href: `${prefix}/${segment}/${slug}`, label };
 }

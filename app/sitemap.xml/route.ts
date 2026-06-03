@@ -28,6 +28,11 @@ export async function GET() {
     for (let i = 0; i < ARTWORK_SITEMAP_COUNT; i++) {
       locs.push(`${base}/sitemap/ja/artworks/${i}`);
     }
+    for (const loc of ["fr", "de", "it", "ko", "ru", "zh"] as const) {
+      for (let i = 0; i < ARTWORK_SITEMAP_COUNT; i++) {
+        locs.push(`${base}/sitemap/${loc}/artworks/${i}`);
+      }
+    }
     locs.push(`${base}/sitemap/es`);
     locs.push(`${base}/sitemap/pt`);
     locs.push(`${base}/sitemap/ja`);

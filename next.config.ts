@@ -1,5 +1,56 @@
 import type { NextConfig } from "next";
 
+import { LOCALE_ROUTE_CONFIG } from "./lib/locale-routes";
+
+function buildLocalePathRedirects() {
+  const redirects: {
+    source: string;
+    destination: string;
+    permanent: boolean;
+  }[] = [];
+
+  const englishSegments = ["artworks", "artists", "museums", "genres", "styles", "search"] as const;
+
+  for (const config of Object.values(LOCALE_ROUTE_CONFIG)) {
+    const prefix = config.prefix;
+    const map: Record<(typeof englishSegments)[number], string> = {
+      artworks: config.segments.artworks,
+      artists: config.segments.artists,
+      museums: config.segments.museums,
+      genres: config.segments.genres,
+      styles: config.segments.styles,
+      search: config.segments.search,
+    };
+
+    for (const enSeg of englishSegments) {
+      const locSeg = map[enSeg];
+      if (enSeg === locSeg && enSeg !== "search") {
+        continue;
+      }
+      if (enSeg === "search") {
+        redirects.push({
+          source: `${prefix}/search`,
+          destination: `${prefix}/${locSeg}`,
+          permanent: true,
+        });
+        continue;
+      }
+      redirects.push({
+        source: `${prefix}/${enSeg}/:path*`,
+        destination: `${prefix}/${locSeg}/:path*`,
+        permanent: true,
+      });
+      redirects.push({
+        source: `${prefix}/${enSeg}`,
+        destination: `${prefix}/${locSeg}`,
+        permanent: true,
+      });
+    }
+  }
+
+  return redirects;
+}
+
 const nextConfig: NextConfig = {
   async redirects() {
     return [
@@ -23,6 +74,7 @@ const nextConfig: NextConfig = {
         destination: "/es/artistas/:slug",
         permanent: true,
       },
+      ...buildLocalePathRedirects(),
       {
         source: "/genres/theatrical",
         destination: "/genres",

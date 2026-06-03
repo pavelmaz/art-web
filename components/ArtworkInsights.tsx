@@ -68,6 +68,12 @@ const OUTPUT_LANGUAGE: Record<Locale, string> = {
   es: "Spanish",
   pt: "Portuguese",
   ja: "Japanese",
+  fr: "French",
+  de: "German",
+  it: "Italian",
+  ko: "Korean",
+  ru: "Russian",
+  zh: "Chinese",
 };
 
 function buildPrompt(artwork: ArtworkRow, locale: Locale): string {
