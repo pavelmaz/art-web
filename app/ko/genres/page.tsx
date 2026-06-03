@@ -11,17 +11,17 @@ import { absoluteUrl } from "@/lib/utils";
 export const revalidate = 86400;
 
 export const metadata: Metadata = {
-  title: "Géneros Artísticos — Descarga Gratuita Dominio Público | Fine Art Free",
+  title: "예술 장르 — 무료 다운로드 | Fine Art Free",
   description:
-    "Explora arte de dominio público por género. Paisaje, Retrato, Naturaleza Muerta, Religioso y más — gratis para descargar en alta resolución.",
+    "장르별 예술. 풍경, 초상, 정물, 종교 등 — 고해상도 무료 다운로드.",
   alternates: {
     canonical: canonicalHubUrl("ko", "genres"),
     languages: buildHubLanguageAlternates("genres"),
   },
   openGraph: {
-    title: "Géneros Artísticos — Descarga Gratuita Dominio Público | Fine Art Free",
+    title: "예술 장르 — 무료 다운로드 | Fine Art Free",
     description:
-      "Explora arte de dominio público por género. Paisaje, Retrato, Naturaleza Muerta, Religioso y más — gratis para descargar en alta resolución.",
+      "장르별 예술. 풍경, 초상, 정물, 종교 등 — 고해상도 무료 다운로드.",
   },
 };
 

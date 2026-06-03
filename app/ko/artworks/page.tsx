@@ -11,17 +11,17 @@ import type { Artwork } from "@/types/artwork";
 export const revalidate = 86400;
 
 export const metadata: Metadata = {
-  title: "Explorar Todas las 작품 — Arte de Dominio Público Gratis | Fine Art Free",
+  title: "모든 작품 탐색 — 무료 퍼블릭 도메인 아트 | Fine Art Free",
   description:
-    "Descarga 72.000+ 작품 de arte de dominio público en alta resolución. Pinturas clásicas, grabados e ilustraciones gratis para cualquier uso.",
+    "72,000점 이상의 퍼블릭 도메인 작품을 고해상도로 다운로드하세요. 클래식 회화, 판화, 일러스트를 무료로 이용하세요.",
   alternates: {
     canonical: canonicalHubUrl("ko", "artworks"),
     languages: buildHubLanguageAlternates("artworks"),
   },
   openGraph: {
-    title: "Explorar Todas las 작품 — Arte de Dominio Público Gratis | Fine Art Free",
+    title: "모든 작품 탐색 — 무료 퍼블릭 도메인 아트 | Fine Art Free",
     description:
-      "Descarga 72.000+ 작품 de arte de dominio público en alta resolución. Pinturas clásicas, grabados e ilustraciones gratis para cualquier uso.",
+      "72,000점 이상의 퍼블릭 도메인 작품을 고해상도로 다운로드하세요. 클래식 회화, 판화, 일러스트를 무료로 이용하세요.",
   },
 };
 

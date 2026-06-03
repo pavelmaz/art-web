@@ -27,7 +27,7 @@ function buildLocalePathRedirects() {
 
     for (const enSeg of englishSegments) {
       const locSeg = map[enSeg];
-      if (enSeg === locSeg && enSeg !== "search") {
+      if (enSeg === locSeg) {
         continue;
       }
       if (enSeg === "search") {

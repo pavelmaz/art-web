@@ -320,7 +320,7 @@ export async function generateMetadata({ params }: ArtworkPageProps): Promise<Me
   }
 
   const artist = artwork.artist_display ?? "Artista sconosciuto";
-  const title = `${artwork.title} de ${artist} — Descarga Gratuita | Fine Art Free`;
+  const title = `${artwork.title} di ${artwork.artist_display} — Download Gratuito | Fine Art Free`;
 
   const { data: localeTranslation } = await supabase
     .from("artwork_translations")
@@ -603,9 +603,18 @@ export default async function ArtworkDetailPageIt({ params }: ArtworkPageProps) 
                   </summary>
                   <div className="mt-3 rounded-lg bg-white p-4">
                     <p className="leading-relaxed text-[#4a4a4a]">
-                      El artista falleció en {artistDeathYear ?? "un año desconocido"}, por lo que esta obra es de
-                      dominio público en su país de origen y en otros países donde el plazo de derechos de autor
-                      es la vida del artista más 70 años o menos.
+                      {artistDeathYear != null ? (
+                        <>
+                          L&apos;artista è morto nel {artistDeathYear}, quindi quest&apos;opera è di dominio pubblico nel
+                          suo paese d&apos;origine e in altri paesi dove il termine del diritto d&apos;autore è la vita
+                          dell&apos;artista più 70 anni o meno.
+                        </>
+                      ) : (
+                        <>
+                          Quest&apos;opera è di dominio pubblico nel suo paese d&apos;origine e in altri paesi dove il termine
+                          del diritto d&apos;autore è la vita dell&apos;artista più 70 anni o meno.
+                        </>
+                      )}
                     </p>
                   </div>
                 </details>

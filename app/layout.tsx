@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Urbanist } from "next/font/google";
 import Link from "next/link";
+import { headers } from "next/headers";
 import { Analytics } from "@vercel/analytics/next";
 
 import Header from "@/components/Header";
@@ -35,11 +36,28 @@ export const metadata: Metadata = {
   },
 };
 
+function htmlLangFromPathname(pathname: string): string {
+  const segment = pathname.split("/")[1];
+  if (segment === "fr") return "fr";
+  if (segment === "de") return "de";
+  if (segment === "it") return "it";
+  if (segment === "ko") return "ko";
+  if (segment === "ru") return "ru";
+  if (segment === "zh") return "zh";
+  if (segment === "es") return "es";
+  if (segment === "pt") return "pt";
+  if (segment === "ja") return "ja";
+  return "en";
+}
+
 export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const pathname = (await headers()).get("x-pathname") ?? "";
+  const htmlLang = htmlLangFromPathname(pathname);
+
   let browseGenres = [] as Awaited<ReturnType<typeof getCachedGenresForBrowse>>;
   try {
     browseGenres = await getCachedGenresForBrowse();
@@ -48,7 +66,7 @@ export default async function RootLayout({
   }
 
   return (
-    <html lang="en" className={`${urbanist.variable} h-full antialiased`}>
+    <html lang={htmlLang} className={`${urbanist.variable} h-full antialiased`}>
       <body className="flex min-h-full flex-col">
         <Header browseGenres={browseGenres} />
         {children}

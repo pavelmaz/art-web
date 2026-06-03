@@ -20,13 +20,13 @@ const t = getT('ko');
 export const revalidate = 86400;
 
 export const metadata: Metadata = {
-  title: "Fine Art Free — Descarga 500.000+ 작품 de Dominio Público",
+  title: "Fine Art Free — 500,000+ 퍼블릭 도메인 예술 작품 무료 다운로드",
   description:
-    "Explora y descarga 500.000+ pinturas clásicas gratis. Arte de dominio público de los mejores 박물관 del mundo. Gratis para uso personal y comercial.",
+    "500,000개 이상의 클래식 그림을 무료로 탐색하고 다운로드하세요. 세계 최고의 박물관에서 온 퍼블릭 도메인 예술. 개인 및 상업적 사용 무료.",
   openGraph: {
-    title: "Fine Art Free — Descarga 500.000+ 작품 de Dominio Público",
+    title: "Fine Art Free — 500,000+ 퍼블릭 도메인 예술 작품 무료 다운로드",
     description:
-      "Explora y descarga 500.000+ pinturas clásicas gratis. Arte de dominio público de los mejores 박물관 del mundo. Gratis para uso personal y comercial.",
+      "500,000개 이상의 클래식 그림을 무료로 탐색하고 다운로드하세요. 세계 최고의 박물관에서 온 퍼블릭 도메인 예술. 개인 및 상업적 사용 무료.",
   },
   alternates: {
     canonical: "https://fineartfree.com/ko",

@@ -11,17 +11,17 @@ import type { Artwork } from "@/types/artwork";
 export const revalidate = 86400;
 
 export const metadata: Metadata = {
-  title: "Explorar Todas las Opere — Arte de Dominio Público Gratis | Fine Art Free",
+  title: "Sfoglia tutte le opere — Arte di pubblico dominio gratuita | Fine Art Free",
   description:
-    "Descarga 72.000+ opere de arte de dominio público en alta resolución. Pinturas clásicas, grabados e ilustraciones gratis para cualquier uso.",
+    "Scarica 72.000+ opere di pubblico dominio in alta risoluzione. Dipinti classici, stampe e illustrazioni gratis per qualsiasi uso.",
   alternates: {
     canonical: canonicalHubUrl("it", "artworks"),
     languages: buildHubLanguageAlternates("artworks"),
   },
   openGraph: {
-    title: "Explorar Todas las Opere — Arte de Dominio Público Gratis | Fine Art Free",
+    title: "Sfoglia tutte le opere — Arte di pubblico dominio gratuita | Fine Art Free",
     description:
-      "Descarga 72.000+ opere de arte de dominio público en alta resolución. Pinturas clásicas, grabados e ilustraciones gratis para cualquier uso.",
+      "Scarica 72.000+ opere di pubblico dominio in alta risoluzione. Dipinti classici, stampe e illustrazioni gratis per qualsiasi uso.",
   },
 };
 

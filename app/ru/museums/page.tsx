@@ -10,17 +10,17 @@ import { absoluteUrl, slugify } from "@/lib/utils";
 export const revalidate = 86400;
 
 export const metadata: Metadata = {
-  title: "Colecciones de Museos — Arte Gratis para Descargar | Fine Art Free",
+  title: "Коллекции музеев — Бесплатная загрузка | Fine Art Free",
   description:
-    "Explora arte de dominio público por museo. Prado, Rijksmuseum, MFA Boston, National Gallery y más — gratis para descargar.",
+    "Искусство по музеям. Прадо, Рейксмузеум, MFA Бостон, National Gallery и другие — бесплатно.",
   alternates: {
     canonical: canonicalHubUrl("ru", "museums"),
     languages: buildHubLanguageAlternates("museums"),
   },
   openGraph: {
-    title: "Colecciones de Museos — Arte Gratis para Descargar | Fine Art Free",
+    title: "Коллекции музеев — Бесплатная загрузка | Fine Art Free",
     description:
-      "Explora arte de dominio público por museo. Prado, Rijksmuseum, MFA Boston, National Gallery y más — gratis para descargar.",
+      "Искусство по музеям. Прадо, Рейксмузеум, MFA Бостон, National Gallery и другие — бесплатно.",
   },
 };
 

@@ -20,13 +20,13 @@ const t = getT('zh');
 export const revalidate = 86400;
 
 export const metadata: Metadata = {
-  title: "Fine Art Free — Descarga 500.000+ 艺术作品 de Dominio Público",
+  title: "Fine Art Free — 免费下载500,000+公共领域艺术作品",
   description:
-    "Explora y descarga 500.000+ pinturas clásicas gratis. Arte de dominio público de los mejores 博物馆 del mundo. Gratis para uso personal y comercial.",
+    "探索并免费下载500,000+幅经典画作。来自世界顶级博物馆的公共领域艺术。免费用于个人和商业用途。",
   openGraph: {
-    title: "Fine Art Free — Descarga 500.000+ 艺术作品 de Dominio Público",
+    title: "Fine Art Free — 免费下载500,000+公共领域艺术作品",
     description:
-      "Explora y descarga 500.000+ pinturas clásicas gratis. Arte de dominio público de los mejores 博物馆 del mundo. Gratis para uso personal y comercial.",
+      "探索并免费下载500,000+幅经典画作。来自世界顶级博物馆的公共领域艺术。免费用于个人和商业用途。",
   },
   alternates: {
     canonical: "https://fineartfree.com/zh",

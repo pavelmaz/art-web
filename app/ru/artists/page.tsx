@@ -10,17 +10,17 @@ import { absoluteUrl, slugify } from "@/lib/utils";
 export const revalidate = 86400;
 
 export const metadata: Metadata = {
-  title: "Artistas — Произведения Completas Gratis para Descargar | Fine Art Free",
+  title: "Художники — Все работы бесплатно | Fine Art Free",
   description:
-    "Explora произведения de arte de dominio público por artista. Monet, Rembrandt, Van Gogh, Dürer y cientos más — gratis para descargar.",
+    "Искусство по художникам. Моне, Рембрандт, Ван Гог, Дюрер и сотни других — бесплатная загрузка.",
   alternates: {
     canonical: canonicalHubUrl("ru", "artists"),
     languages: buildHubLanguageAlternates("artists"),
   },
   openGraph: {
-    title: "Artistas — Произведения Completas Gratis para Descargar | Fine Art Free",
+    title: "Художники — Все работы бесплатно | Fine Art Free",
     description:
-      "Explora произведения de arte de dominio público por artista. Monet, Rembrandt, Van Gogh, Dürer y cientos más — gratis para descargar.",
+      "Искусство по художникам. Моне, Рембрандт, Ван Гог, Дюрер и сотни других — бесплатная загрузка.",
   },
 };
 

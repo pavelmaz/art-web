@@ -10,17 +10,17 @@ import { absoluteUrl, slugify } from "@/lib/utils";
 export const revalidate = 86400;
 
 export const metadata: Metadata = {
-  title: "Artistas — Werke Completas Gratis para Descargar | Fine Art Free",
+  title: "Künstler — Vollständige Werke kostenlos | Fine Art Free",
   description:
-    "Explora werke de arte de dominio público por artista. Monet, Rembrandt, Van Gogh, Dürer y cientos más — gratis para descargar.",
+    "Gemeinfreie Kunst nach Künstler. Monet, Rembrandt, Van Gogh, Dürer und Hunderte mehr — kostenlos zum Download.",
   alternates: {
     canonical: canonicalHubUrl("de", "artists"),
     languages: buildHubLanguageAlternates("artists"),
   },
   openGraph: {
-    title: "Artistas — Werke Completas Gratis para Descargar | Fine Art Free",
+    title: "Künstler — Vollständige Werke kostenlos | Fine Art Free",
     description:
-      "Explora werke de arte de dominio público por artista. Monet, Rembrandt, Van Gogh, Dürer y cientos más — gratis para descargar.",
+      "Gemeinfreie Kunst nach Künstler. Monet, Rembrandt, Van Gogh, Dürer und Hunderte mehr — kostenlos zum Download.",
   },
 };
 

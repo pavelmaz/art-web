@@ -10,17 +10,17 @@ import { absoluteUrl, slugify } from "@/lib/utils";
 export const revalidate = 86400;
 
 export const metadata: Metadata = {
-  title: "Colecciones de Museos — Arte Gratis para Descargar | Fine Art Free",
+  title: "박물관 컬렉션 — 무료 다운로드 | Fine Art Free",
   description:
-    "Explora arte de dominio público por museo. Prado, Rijksmuseum, MFA Boston, National Gallery y más — gratis para descargar.",
+    "박물관별 퍼블릭 도메인 예술. 프라도, 릭스뮤지엄, MFA 보스턴, 내셔널 갤러리 등 — 무료 다운로드.",
   alternates: {
     canonical: canonicalHubUrl("ko", "museums"),
     languages: buildHubLanguageAlternates("museums"),
   },
   openGraph: {
-    title: "Colecciones de Museos — Arte Gratis para Descargar | Fine Art Free",
+    title: "박물관 컬렉션 — 무료 다운로드 | Fine Art Free",
     description:
-      "Explora arte de dominio público por museo. Prado, Rijksmuseum, MFA Boston, National Gallery y más — gratis para descargar.",
+      "박물관별 퍼블릭 도메인 예술. 프라도, 릭스뮤지엄, MFA 보스턴, 내셔널 갤러리 등 — 무료 다운로드.",
   },
 };
 

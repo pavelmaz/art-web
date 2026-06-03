@@ -20,13 +20,13 @@ const t = getT('de');
 export const revalidate = 86400;
 
 export const metadata: Metadata = {
-  title: "Fine Art Free — Descarga 500.000+ Kunstwerke de Dominio Público",
+  title: "Fine Art Free — 500.000+ gemeinfreie Kunstwerke herunterladen",
   description:
-    "Explora y descarga 500.000+ pinturas clásicas gratis. Arte de dominio público de los mejores museen del mundo. Gratis para uso personal y comercial.",
+    "Entdecken und laden Sie 500.000+ klassische Gemälde kostenlos herunter. Gemeinfreie Kunst aus den bedeutendsten Museen der Welt. Kostenlos für persönliche und kommerzielle Nutzung.",
   openGraph: {
-    title: "Fine Art Free — Descarga 500.000+ Kunstwerke de Dominio Público",
+    title: "Fine Art Free — 500.000+ gemeinfreie Kunstwerke herunterladen",
     description:
-      "Explora y descarga 500.000+ pinturas clásicas gratis. Arte de dominio público de los mejores museen del mundo. Gratis para uso personal y comercial.",
+      "Entdecken und laden Sie 500.000+ klassische Gemälde kostenlos herunter. Gemeinfreie Kunst aus den bedeutendsten Museen der Welt. Kostenlos für persönliche und kommerzielle Nutzung.",
   },
   alternates: {
     canonical: "https://fineartfree.com/de",

@@ -11,17 +11,17 @@ import { absoluteUrl } from "@/lib/utils";
 export const revalidate = 86400;
 
 export const metadata: Metadata = {
-  title: "Movimientos y Estilos Artísticos — Descarga Gratuita | Fine Art Free",
+  title: "Стили и направления — Бесплатная загрузка | Fine Art Free",
   description:
-    "Explora arte de dominio público por movimiento. Barroco, Impresionismo, Siglo de Oro Holandés, Renacimiento y más — gratis para descargar.",
+    "Искусство по стилям. Барокко, импрессионизм, золотой век Голландии, Ренессанс и др. — бесплатно.",
   alternates: {
     canonical: canonicalHubUrl("ru", "styles"),
     languages: buildHubLanguageAlternates("styles"),
   },
   openGraph: {
-    title: "Movimientos y Estilos Artísticos — Descarga Gratuita | Fine Art Free",
+    title: "Стили и направления — Бесплатная загрузка | Fine Art Free",
     description:
-      "Explora arte de dominio público por movimiento. Barroco, Impresionismo, Siglo de Oro Holandés, Renacimiento y más — gratis para descargar.",
+      "Искусство по стилям. Барокко, импрессионизм, золотой век Голландии, Ренессанс и др. — бесплатно.",
   },
 };
 
