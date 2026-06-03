@@ -2,6 +2,7 @@
 
 import { useState, type FormEvent } from "react";
 
+import type { FineArtProCopy } from "@/lib/fineart-pro-translations";
 import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
 
 type FineArtProJoinAuthProps = {
@@ -9,16 +10,17 @@ type FineArtProJoinAuthProps = {
   plan: "monthly" | "yearly" | null;
   isLoggedIn: boolean;
   email: string | null;
+  copy: FineArtProCopy["joinAuth"];
 };
 
-export function FineArtProJoinAuth({ nextPath, plan, isLoggedIn, email }: FineArtProJoinAuthProps) {
+export function FineArtProJoinAuth({ nextPath, plan, isLoggedIn, email, copy }: FineArtProJoinAuthProps) {
   const [otpEmail, setOtpEmail] = useState("");
   const [busy, setBusy] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
 
   const startCheckout = async () => {
     if (!plan) {
-      setNotice("Choose Monthly or Yearly on the Fine Art Pro page first.");
+      setNotice(copy.choosePlanFirst);
       return;
     }
     setNotice(null);
@@ -32,29 +34,26 @@ export function FineArtProJoinAuth({ nextPath, plan, isLoggedIn, email }: FineAr
     try {
       data = (await res.json()) as { url?: string; error?: string };
     } catch {
-      setNotice("Unexpected response from server.");
+      setNotice(copy.unexpectedResponse);
       setBusy(false);
       return;
     }
     setBusy(false);
     if (!res.ok) {
-      setNotice(data.error ?? "Checkout could not start.");
+      setNotice(data.error ?? copy.checkoutFailed);
       return;
     }
     if (data.url) {
       window.location.href = data.url;
     } else {
-      setNotice("No checkout URL returned.");
+      setNotice(copy.noCheckoutUrl);
     }
   };
 
   const signInWithGoogle = async () => {
     setNotice(null);
     setBusy(true);
-    const redirectTo =
-      plan === "monthly" || plan === "yearly"
-        ? `${window.location.origin}/auth/callback?next=/fineart-pro/join?plan=${plan}`
-        : `${window.location.origin}/auth/callback?next=/fineart-pro/join`;
+    const redirectTo = `${window.location.origin}/auth/callback?next=${encodeURIComponent(nextPath)}`;
     const supabase = createSupabaseBrowserClient();
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
@@ -91,24 +90,22 @@ export function FineArtProJoinAuth({ nextPath, plan, isLoggedIn, email }: FineAr
       setNotice(error.message);
       return;
     }
-    setNotice("Check your email for a sign-in link.");
+    setNotice(copy.checkEmail);
   };
 
   return (
     <div className="mt-8 space-y-6">
       {plan ? (
         <p className="text-sm text-[#4a4a4a]">
-          Selected plan: <span className="font-semibold text-[#1a1a1a]">{plan === "yearly" ? "Yearly" : "Monthly"}</span>
+          <span className="font-semibold text-[#1a1a1a]">{copy.selectedPlan(plan)}</span>
         </p>
       ) : (
-        <p className="text-sm text-[#6b6b6b]">Pick a plan on the Fine Art Pro page first, or continue and choose billing in the next step.</p>
+        <p className="text-sm text-[#6b6b6b]">{copy.pickPlanHint}</p>
       )}
 
       {isLoggedIn ? (
         <div className="space-y-4 rounded-lg border border-[#e8e6e1] bg-[#f5f5f5] px-4 py-3 text-sm text-[#1a1a1a]">
-          <p>
-            Signed in as <span className="font-medium">{email}</span>.
-          </p>
+          <p>{copy.signedInAs(email ?? "")}</p>
           {plan ? (
             <button
               type="button"
@@ -116,10 +113,10 @@ export function FineArtProJoinAuth({ nextPath, plan, isLoggedIn, email }: FineAr
               onClick={() => void startCheckout()}
               className="w-full rounded-lg bg-[#1a1a1a] px-4 py-3 text-sm font-medium text-white transition-colors hover:bg-black disabled:opacity-60"
             >
-              Continue to secure checkout
+              {copy.continueCheckout}
             </button>
           ) : (
-            <p className="text-[#6b6b6b]">Go back to Fine Art Pro and choose Monthly or Yearly to continue.</p>
+            <p className="text-[#6b6b6b]">{copy.choosePlanOnLanding}</p>
           )}
         </div>
       ) : (
@@ -130,11 +127,11 @@ export function FineArtProJoinAuth({ nextPath, plan, isLoggedIn, email }: FineAr
             disabled={busy}
             className="flex w-full items-center justify-center gap-2 rounded-lg border border-[#dadada] bg-white px-4 py-3 text-sm font-medium text-[#1a1a1a] shadow-sm transition-colors hover:bg-[#fafafa] disabled:opacity-60"
           >
-            Continue with Google
+            {copy.continueGoogle}
           </button>
 
           <div className="relative py-2 text-center text-xs text-[#6b6b6b]">
-            <span className="relative z-10 bg-white px-2">or</span>
+            <span className="relative z-10 bg-white px-2">{copy.or}</span>
             <span className="absolute inset-x-0 top-1/2 z-0 h-px bg-[#e8e6e1]" aria-hidden />
           </div>
 
@@ -149,7 +146,7 @@ export function FineArtProJoinAuth({ nextPath, plan, isLoggedIn, email }: FineAr
               required
               value={otpEmail}
               onChange={(e) => setOtpEmail(e.target.value)}
-              placeholder="you@example.com"
+              placeholder={copy.emailPlaceholder}
               className="w-full rounded-lg border border-[#dadada] px-4 py-3 text-sm text-[#1a1a1a] placeholder:text-[#9ca3af] focus:border-[#1a1a1a] focus:outline-none focus:ring-1 focus:ring-[#1a1a1a]"
             />
             <button
@@ -157,7 +154,7 @@ export function FineArtProJoinAuth({ nextPath, plan, isLoggedIn, email }: FineAr
               disabled={busy}
               className="w-full rounded-lg bg-[#1a1a1a] px-4 py-3 text-sm font-medium text-white transition-colors hover:bg-black disabled:opacity-60"
             >
-              Email me a sign-in link
+              {copy.emailLink}
             </button>
           </form>
         </>

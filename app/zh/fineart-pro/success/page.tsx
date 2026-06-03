@@ -1,8 +1,8 @@
 import { FineArtProSuccessPage } from "@/components/FineArtProSuccessPage";
 import { fineArtProMetadata } from "@/lib/fineart-pro-translations";
 
-export const metadata = fineArtProMetadata("en");
+export const metadata = fineArtProMetadata("zh");
 
-export default function SuccessPage() {
-  return <FineArtProSuccessPage locale="en" />;
+export default function Page() {
+  return <FineArtProSuccessPage locale="zh" />;
 }

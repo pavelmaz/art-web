@@ -10,6 +10,7 @@ import {
   getGenreSlugForLocale,
   type BrowseGenreRow,
 } from "@/lib/browse-genres";
+import { fineArtProPath } from "@/lib/fineart-pro-path";
 import { detectLocaleFromPathname } from "@/lib/hreflang-paths";
 import { HREFLANG_LOCALES, LOCALE_ROUTE_CONFIG, getSegments, localePath } from "@/lib/locale-routes";
 import { getT, type Locale } from "@/lib/translations";
@@ -109,7 +110,7 @@ export default function Header({ browseGenres = [] }: HeaderProps) {
     { href: `${prefix}/${artworksSegment}`, label: t.artworks },
     { href: `${prefix}/${artistsSegment}`, label: t.artists },
     { href: `${prefix}/${museumsSegment}`, label: t.museums },
-    { href: "/fineart-pro", label: "Fine Art Pro" },
+    { href: fineArtProPath(locale), label: "Fine Art Pro" },
   ];
 
   const [mobileOpen, setMobileOpen] = useState(false);

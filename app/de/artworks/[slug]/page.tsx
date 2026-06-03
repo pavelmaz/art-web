@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { artworkDetailPath, buildArtworkLanguageAlternates } from "@/lib/locale-routes";
+import { fineArtProPath } from "@/lib/fineart-pro-path";
 import type { ReactNode } from "react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -581,7 +582,7 @@ export default async function ArtworkDetailPageDe({ params }: ArtworkPageProps) 
                     </a>
                   ) : (
                     <Link
-                      href="/fineart-pro"
+                      href={fineArtProPath("de")}
                       className="inline-flex items-center justify-center rounded-md bg-[#9e9e9e] px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-[#8a8a8a] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#6b6b6b] focus-visible:ring-offset-2"
                     >
                       {t.downloadStandard}
