@@ -6,7 +6,12 @@ import { ArtworkGrid } from "@/components/ArtworkGrid";
 import { WebSiteJsonLd } from "@/components/JsonLd";
 import { supabase } from "@/lib/supabase";
 import { getT } from "@/lib/translations";
-import { getCachedGenresForHomeStrip } from "@/lib/browse-genres";
+import {
+  getCachedGenresForHomeStrip,
+  getGenreLabelForLocale,
+  getGenreSlugForLocale,
+} from "@/lib/browse-genres";
+import { localePath } from "@/lib/locale-routes";
 import { artworkImageUrl, slugify } from "@/lib/utils";
 import type { Artwork } from "@/types/artwork";
 
@@ -135,8 +140,8 @@ export default async function HomePageDe() {
         .eq("genre_title", genre.name)
         .limit(1);
       const row = data?.[0];
-      const slug = genre.slug_es?.trim() || genre.slug;
-      const label = genre.name_es?.trim() || genre.name;
+      const slug = getGenreSlugForLocale(genre, "de");
+      const label = getGenreLabelForLocale(genre, "de");
       return {
         slug,
         label,
@@ -188,7 +193,7 @@ export default async function HomePageDe() {
           {genreImages.map((genre) => (
             <Link
               key={genre.slug}
-              href={`/de/genres/${genre.slug}`}
+              href={`${localePath("de", "genres")}/${genre.slug}`}
               className="relative overflow-hidden rounded-lg h-22 px-10 flex items-center justify-center whitespace-nowrap transition-opacity hover:opacity-90"
             >
               {genre.imageUrl ? (

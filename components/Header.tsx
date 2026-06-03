@@ -5,7 +5,11 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 
-import type { BrowseGenreRow } from "@/lib/browse-genres";
+import {
+  getGenreLabelForLocale,
+  getGenreSlugForLocale,
+  type BrowseGenreRow,
+} from "@/lib/browse-genres";
 import { detectLocaleFromPathname } from "@/lib/hreflang-paths";
 import { HREFLANG_LOCALES, LOCALE_ROUTE_CONFIG, getSegments, localePath } from "@/lib/locale-routes";
 import { getT, type Locale } from "@/lib/translations";
@@ -75,20 +79,8 @@ export default function Header({ browseGenres = [] }: HeaderProps) {
   const museumsSegment = segments.museums;
 
   const BROWSE_LINKS = browseGenres.map((g) => {
-    const slug =
-      locale === "es"
-        ? g.slug_es?.trim() || g.slug
-        : locale === "pt"
-          ? g.slug_pt?.trim() || g.slug
-          : g.slug;
-    const label =
-      locale === "es"
-        ? g.name_es?.trim() || g.name
-        : locale === "pt"
-          ? g.name_pt?.trim() || g.name
-          : locale === "ja"
-            ? g.name_ja?.trim() || g.name
-            : g.name;
+    const slug = getGenreSlugForLocale(g, locale);
+    const label = getGenreLabelForLocale(g, locale);
     return {
       href: `${prefix}/${genresSegment}/${slug}`,
       label,
