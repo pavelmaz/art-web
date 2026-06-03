@@ -1,4 +1,5 @@
 import { fineArtProPath } from "@/lib/fineart-pro-path";
+import { buildArtworkLanguageAlternates } from "@/lib/locale-routes";
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import Link from "next/link";
@@ -292,16 +293,7 @@ export async function generateMetadata({ params }: ArtworkPageProps): Promise<Me
     alternates: {
       canonical: absoluteUrl(`/ja/artworks/${slug}`),
       languages: {
-        en: absoluteUrl(`/artworks/${slug}`),
-        es: absoluteUrl(`/es/obras/${slug}`),
-        pt: absoluteUrl(`/pt/obras/${slug}`),
-        ja: absoluteUrl(`/ja/artworks/${slug}`),
-        fr: absoluteUrl(`/fr/œuvres/${slug}`),
-        de: absoluteUrl(`/de/werke/${slug}`),
-        it: absoluteUrl(`/it/opere/${slug}`),
-        ko: absoluteUrl(`/ko/작품/${slug}`),
-        ru: absoluteUrl(`/ru/произведения/${slug}`),
-        zh: absoluteUrl(`/zh/作品/${slug}`),
+        ...buildArtworkLanguageAlternates(slug),
         "x-default": absoluteUrl(`/artworks/${slug}`),
       },
     },

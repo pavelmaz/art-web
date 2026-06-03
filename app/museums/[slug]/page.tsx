@@ -6,6 +6,7 @@ import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { Pagination } from "@/components/Pagination";
 import { getPaginationParams, getTotalPages } from "@/lib/pagination";
 import { resolveMuseumBySlug } from "@/lib/resolve-museum-by-slug";
+import { buildMuseumLanguageAlternates } from "@/lib/locale-routes";
 import { supabase } from "@/lib/supabase";
 import { absoluteUrl } from "@/lib/utils";
 import type { Artwork } from "@/types/artwork";
@@ -77,6 +78,7 @@ export async function generateMetadata({ params }: MuseumPageProps): Promise<Met
     description,
     alternates: {
       canonical: absoluteUrl(`/museums/${slug}`),
+      languages: buildMuseumLanguageAlternates(slug),
     },
     openGraph: {
       title,

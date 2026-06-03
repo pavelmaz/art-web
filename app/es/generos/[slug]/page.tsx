@@ -7,6 +7,7 @@ import { CollectionPageJsonLd } from "@/components/JsonLd";
 import { Pagination } from "@/components/Pagination";
 import { getPaginationParams, getTotalPages } from "@/lib/pagination";
 import { supabase } from "@/lib/supabase";
+import { buildGenreLanguageAlternates } from "@/lib/locale-routes";
 import { absoluteUrl } from "@/lib/utils";
 import type { Artwork } from "@/types/artwork";
 
@@ -95,11 +96,7 @@ export async function generateMetadata({ params }: GenrePageProps): Promise<Meta
     description,
     alternates: {
       canonical: absoluteUrl(`/es/generos/${esSlug}`),
-      languages: {
-        en: absoluteUrl(`/genres/${genre.slug}`),
-        es: absoluteUrl(`/es/generos/${esSlug}`),
-        pt: absoluteUrl(`/pt/generos/${ptSlug}`),
-      },
+      languages: buildGenreLanguageAlternates(genre.slug),
     },
     openGraph: { title, description },
   };

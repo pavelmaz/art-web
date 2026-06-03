@@ -1,4 +1,4 @@
-import { buildHubLanguageAlternates, localePath } from "@/lib/locale-routes";
+import { buildGenreLanguageAlternates, localePath } from "@/lib/locale-routes";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
@@ -88,12 +88,14 @@ export async function generateMetadata({ params }: GenrePageProps): Promise<Meta
     genre.description?.trim() ||
     `探索${totalCount}件${displayName}高分辨率作品。公共领域，免费。`;
 
+  const linkSlug = genre.slug_zh?.trim() || genre.slug;
+
   return {
     title: { absolute: title },
     description,
     alternates: {
       canonical: `https://fineartfree.com${localePath("zh", "genres")}/${linkSlug}`,
-      languages: buildHubLanguageAlternates("genres"),
+      languages: buildGenreLanguageAlternates(genre.slug),
     },
     openGraph: { title, description },
   };

@@ -1,4 +1,4 @@
-import { buildHubLanguageAlternates, localePath } from "@/lib/locale-routes";
+import { buildStyleLanguageAlternates, localePath } from "@/lib/locale-routes";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
@@ -109,12 +109,14 @@ export async function generateMetadata({ params }: StylePageProps): Promise<Meta
     style?.description?.trim() ||
     `探索${totalCount}件${displayName}高分辨率作品。公共领域，免费。`;
 
+  const linkSlug = style?.slug_zh?.trim() || style?.slug || slug;
+
   return {
     title: { absolute: title },
     description,
     alternates: {
       canonical: `https://fineartfree.com${localePath("zh", "styles")}/${linkSlug}`,
-      languages: buildHubLanguageAlternates("styles"),
+      languages: buildStyleLanguageAlternates(style?.slug || slug),
     },
     openGraph: { title, description },
   };

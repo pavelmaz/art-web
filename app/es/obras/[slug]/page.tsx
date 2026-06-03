@@ -1,4 +1,5 @@
 import { fineArtProPath } from "@/lib/fineart-pro-path";
+import { buildArtworkLanguageAlternates } from "@/lib/locale-routes";
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import Link from "next/link";
@@ -289,16 +290,7 @@ export async function generateMetadata({ params }: ArtworkPageProps): Promise<Me
     alternates: {
       canonical: `https://fineartfree.com/es/obras/${slug}`,
       languages: {
-        en: `https://fineartfree.com/artworks/${slug}`,
-        es: `https://fineartfree.com/es/obras/${slug}`,
-        pt: `https://fineartfree.com/pt/obras/${slug}`,
-        ja: `https://fineartfree.com/ja/artworks/${slug}`,
-        fr: `https://fineartfree.com/fr/œuvres/${slug}`,
-        de: `https://fineartfree.com/de/werke/${slug}`,
-        it: `https://fineartfree.com/it/opere/${slug}`,
-        ko: `https://fineartfree.com/ko/작품/${slug}`,
-        ru: `https://fineartfree.com/ru/произведения/${slug}`,
-        zh: `https://fineartfree.com/zh/作品/${slug}`,
+        ...buildArtworkLanguageAlternates(slug),
         "x-default": `https://fineartfree.com/artworks/${slug}`,
       },
     },

@@ -1,4 +1,4 @@
-import { buildHubLanguageAlternates, localePath } from "@/lib/locale-routes";
+import { buildGenreLanguageAlternates, localePath } from "@/lib/locale-routes";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
@@ -88,12 +88,14 @@ export async function generateMetadata({ params }: GenrePageProps): Promise<Meta
     genre.description?.trim() ||
     `Découvrez ${totalCount} œuvres de ${displayName} en haute résolution. Domaine public, gratuit.`;
 
+  const linkSlug = genre.slug_fr?.trim() || genre.slug;
+
   return {
     title: { absolute: title },
     description,
     alternates: {
       canonical: `https://fineartfree.com${localePath("fr", "genres")}/${linkSlug}`,
-      languages: buildHubLanguageAlternates("genres"),
+      languages: buildGenreLanguageAlternates(genre.slug),
     },
     openGraph: { title, description },
   };

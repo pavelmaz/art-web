@@ -6,6 +6,7 @@ import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { CollectionPageJsonLd } from "@/components/JsonLd";
 import { Pagination } from "@/components/Pagination";
 import { getPaginationParams, getTotalPages } from "@/lib/pagination";
+import { buildStyleLanguageAlternates } from "@/lib/locale-routes";
 import { supabase } from "@/lib/supabase";
 import { absoluteUrl, styleSlugLookupVariants } from "@/lib/utils";
 import type { Artwork } from "@/types/artwork";
@@ -117,11 +118,7 @@ export async function generateMetadata({ params }: StylePageProps): Promise<Meta
     description,
     alternates: {
       canonical: absoluteUrl(`/pt/estilos/${ptSlug}`),
-      languages: {
-        en: absoluteUrl(`/styles/${enSlug}`),
-        es: absoluteUrl(`/es/estilos/${esSlug}`),
-        pt: absoluteUrl(`/pt/estilos/${ptSlug}`),
-      },
+      languages: buildStyleLanguageAlternates(enSlug),
     },
     openGraph: { title, description },
   };

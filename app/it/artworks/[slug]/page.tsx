@@ -333,7 +333,7 @@ export async function generateMetadata({ params }: ArtworkPageProps): Promise<Me
   const description =
     localeTranslation?.seo_description ||
     artwork.description_it?.slice(0, 200) ||
-    `${artwork.title} de ${artist}. Arte de dominio público gratis.`;
+    `${artwork.title} de ${artist}. Arte di dominio pubblico gratuita.`;
 
   const imageUrl = artworkImageUrl(artwork);
 

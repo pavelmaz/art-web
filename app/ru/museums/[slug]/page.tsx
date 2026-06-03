@@ -1,4 +1,4 @@
-import { buildHubLanguageAlternates, localePath } from "@/lib/locale-routes";
+import { buildMuseumLanguageAlternates, localePath } from "@/lib/locale-routes";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
@@ -68,7 +68,7 @@ export async function generateMetadata({ params }: MuseumPageProps): Promise<Met
     description,
     alternates: {
       canonical: `https://fineartfree.com${localePath("ru", "museums")}/${slug}`,
-      languages: buildHubLanguageAlternates("museums"),
+      languages: buildMuseumLanguageAlternates(slug),
     },
     openGraph: { title, description },
   };

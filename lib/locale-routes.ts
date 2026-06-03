@@ -1,5 +1,7 @@
 /** Localized URL segments and Supabase column names per site locale. */
 
+import { absoluteUrl } from "./utils";
+
 export type SiteLocale = "en" | "es" | "pt" | "ja" | "fr" | "de" | "it" | "ko" | "ru" | "zh";
 
 export const HREFLANG_LOCALES: SiteLocale[] = [
@@ -328,4 +330,39 @@ export function buildArtistLanguageAlternates(slug: string): Record<string, stri
     out[loc] = `${site}${artistDetailPath(loc, slug)}`;
   }
   return out;
+}
+
+function taxonomyDetailPath(
+  locale: SiteLocale,
+  hub: "genres" | "styles" | "museums",
+  slug: string
+): string {
+  return `${localePath(locale, hub)}/${encodeURIComponent(slug)}`;
+}
+
+export function buildGenreLanguageAlternates(slug: string): Record<string, string> {
+  const languages: Record<string, string> = {};
+  for (const loc of HREFLANG_LOCALES) {
+    languages[loc] = absoluteUrl(taxonomyDetailPath(loc, "genres", slug));
+  }
+  languages["x-default"] = absoluteUrl(taxonomyDetailPath("en", "genres", slug));
+  return languages;
+}
+
+export function buildStyleLanguageAlternates(slug: string): Record<string, string> {
+  const languages: Record<string, string> = {};
+  for (const loc of HREFLANG_LOCALES) {
+    languages[loc] = absoluteUrl(taxonomyDetailPath(loc, "styles", slug));
+  }
+  languages["x-default"] = absoluteUrl(taxonomyDetailPath("en", "styles", slug));
+  return languages;
+}
+
+export function buildMuseumLanguageAlternates(slug: string): Record<string, string> {
+  const languages: Record<string, string> = {};
+  for (const loc of HREFLANG_LOCALES) {
+    languages[loc] = absoluteUrl(taxonomyDetailPath(loc, "museums", slug));
+  }
+  languages["x-default"] = absoluteUrl(taxonomyDetailPath("en", "museums", slug));
+  return languages;
 }

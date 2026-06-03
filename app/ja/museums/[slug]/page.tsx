@@ -7,6 +7,7 @@ import { Pagination } from "@/components/Pagination";
 import { getPaginationParams, getTotalPages } from "@/lib/pagination";
 import { resolveMuseumBySlug } from "@/lib/resolve-museum-by-slug";
 import { supabase } from "@/lib/supabase";
+import { buildMuseumLanguageAlternates } from "@/lib/locale-routes";
 import { absoluteUrl } from "@/lib/utils";
 import { getT } from "@/lib/translations";
 import type { Artwork } from "@/types/artwork";
@@ -70,12 +71,7 @@ export async function generateMetadata({ params }: MuseumPageProps): Promise<Met
     description,
     alternates: {
       canonical: absoluteUrl(`/ja/museums/${slug}`),
-      languages: {
-        en: absoluteUrl(`/museums/${slug}`),
-        es: absoluteUrl(`/es/museos/${slug}`),
-        pt: absoluteUrl(`/pt/museus/${slug}`),
-        ja: absoluteUrl(`/ja/museums/${slug}`),
-      },
+      languages: buildMuseumLanguageAlternates(slug),
     },
     openGraph: { title, description },
   };
