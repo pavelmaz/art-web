@@ -15,7 +15,7 @@ export const metadata: Metadata = {
   description:
     "Descarga 72.000+ œuvres de arte de dominio público en alta resolución. Pinturas clásicas, grabados e ilustraciones gratis para cualquier uso.",
   alternates: {
-    canonical: absoluteUrl("/fr/œuvres"),
+    canonical: "https://fineartfree.com/fr/œuvres",
     languages: buildHubLanguageAlternates("artworks"),
   },
   openGraph: {

@@ -52,6 +52,12 @@ function buildLocalePathRedirects() {
 }
 
 const nextConfig: NextConfig = {
+  async rewrites() {
+    return [
+      { source: "/fr/œuvres", destination: "/fr/oeuvres" },
+      { source: "/fr/œuvres/:path*", destination: "/fr/oeuvres/:path*" },
+    ];
+  },
   async redirects() {
     return [
       {
