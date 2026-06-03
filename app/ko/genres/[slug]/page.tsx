@@ -163,17 +163,17 @@ export default async function GenrePage({ params, searchParams }: GenrePageProps
     <div className="space-y-6 px-5">
       <CollectionPageJsonLd
         name={`Pinturas de ${displayName}`}
-        path={`/ko/장르/${linkSlug}`}
+        path={`/ko/genres/${linkSlug}`}
         description={intro}
         numberOfItems={totalCount}
       />
       <Breadcrumbs
         items={[
           { label: "Home", href: "/ko" },
-          { label: "Genres", href: "/ko/장르" },
+          { label: "Genres", href: "/ko/genres" },
           { label: displayName },
         ]}
-        currentPath={`/ko/장르/${linkSlug}`}
+        currentPath={`/ko/genres/${linkSlug}`}
       />
       <h1 className="text-3xl font-bold tracking-tight">Pinturas de {displayName}</h1>
       {intro ? (
@@ -185,7 +185,7 @@ export default async function GenrePage({ params, searchParams }: GenrePageProps
       <Pagination
         currentPage={page}
         totalPages={Math.max(1, getTotalPages(totalCount || artworks.length))}
-        basePath={`/ko/장르/${linkSlug}`}
+        basePath={`/ko/genres/${linkSlug}`}
       />
     </div>
   );

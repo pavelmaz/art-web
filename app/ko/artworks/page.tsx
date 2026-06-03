@@ -137,7 +137,7 @@ export default async function ArtworksPage({ searchParams }: ArtworksPageProps) 
       <Pagination
         currentPage={page}
         totalPages={Math.max(1, getTotalPages(totalCount))}
-        basePath="/ko/작품"
+        basePath="/ko/artworks"
       />
     </div>
   );

@@ -125,8 +125,8 @@ export default async function MuseumPage({ params, searchParams }: MuseumPagePro
   return (
     <div className="space-y-6 px-5">
       <Breadcrumbs
-        items={[{ label: "Accueil", href: "/fr" }, { label: "Museos", href: "/fr/musées" }, { label: museumName }]}
-        currentPath={`/fr/musées/${slug}`}
+        items={[{ label: "Accueil", href: "/fr" }, { label: "Museos", href: "/fr/museums" }, { label: museumName }]}
+        currentPath={`/fr/museums/${slug}`}
       />
       <h1 className="text-3xl font-bold tracking-tight">Œuvres de {museumName}</h1>
       <p className="max-w-3xl text-neutral-700">
@@ -136,7 +136,7 @@ export default async function MuseumPage({ params, searchParams }: MuseumPagePro
       <Pagination
         currentPage={page}
         totalPages={Math.max(1, getTotalPages(totalCount || artworks.length))}
-        basePath={`/fr/musées/${slug}`}
+        basePath={`/fr/museums/${slug}`}
       />
     </div>
   );

@@ -70,7 +70,7 @@ export default async function StylesPage({ searchParams }: StylesPageProps) {
     const linkSlug = s.slug_zh?.trim() || s.slug;
     return {
       name: displayName,
-      href: `/zh/风格/${linkSlug}`,
+      href: `/zh/styles/${linkSlug}`,
       count: a?.count ?? 0,
       imageId: a?.image_id ?? null,
       url: a?.url ?? null,
@@ -97,7 +97,7 @@ export default async function StylesPage({ searchParams }: StylesPageProps) {
         <p className="text-sm text-[#6b6b6b]">No se encontraron estilos.</p>
       )}
 
-      <Pagination currentPage={page} totalPages={totalPages} basePath="/zh/风格" />
+      <Pagination currentPage={page} totalPages={totalPages} basePath="/zh/styles" />
     </div>
   );
 }

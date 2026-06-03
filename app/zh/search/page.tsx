@@ -114,7 +114,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
           <BrowseHubGrid
             items={artistResults.map((artist) => ({
               name: artist.name,
-              href: `/zh/艺术家/${artist.slug}`,
+              href: `/zh/artists/${artist.slug}`,
               count: artist.count,
               imageId: artist.image_id,
               url: artist.url,

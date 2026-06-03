@@ -176,17 +176,17 @@ export default async function StylePage({ params, searchParams }: StylePageProps
     <div className="space-y-6 px-5">
       <CollectionPageJsonLd
         name={`Arte ${displayName}`}
-        path={`/ru/стили/${linkSlug}`}
+        path={`/ru/styles/${linkSlug}`}
         description={intro}
         numberOfItems={totalCount}
       />
       <Breadcrumbs
         items={[
           { label: "Home", href: "/ru" },
-          { label: "Styles", href: "/ru/стили" },
+          { label: "Styles", href: "/ru/styles" },
           { label: displayName },
         ]}
-        currentPath={`/ru/стили/${linkSlug}`}
+        currentPath={`/ru/styles/${linkSlug}`}
       />
       <h1 className="text-3xl font-bold tracking-tight">Arte {displayName}</h1>
       {intro ? (
@@ -198,7 +198,7 @@ export default async function StylePage({ params, searchParams }: StylePageProps
       <Pagination
         currentPage={page}
         totalPages={Math.max(1, getTotalPages(totalCount))}
-        basePath={`/ru/стили/${linkSlug}`}
+        basePath={`/ru/styles/${linkSlug}`}
       />
     </div>
   );

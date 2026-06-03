@@ -171,7 +171,7 @@ export default async function HomePageKo() {
           <p className="mt-4 max-w-2xl text-base sm:text-lg text-white">
             {t.heroSubtitle}
           </p>
-          <form action="/ko/검색" method="get" className="mt-14 max-w-3xl md:mt-16">
+          <form action="/ko/search" method="get" className="mt-14 max-w-3xl md:mt-16">
             <div className="flex items-center border-b border-white">
               <input
                 type="text"
@@ -230,7 +230,7 @@ export default async function HomePageKo() {
                 return (
                   <Link
                     key={artist.name}
-                    href={`/ko/예술가/${slugify(artist.name)}`}
+                    href={`/ko/artists/${slugify(artist.name)}`}
                     className="group relative h-40 w-44 shrink-0 overflow-hidden bg-[#d8d4cc] md:h-44 md:w-52 lg:h-48 lg:w-56"
                   >
                     {backgroundImageUrl ? (
@@ -266,7 +266,7 @@ export default async function HomePageKo() {
           <ArtworkGrid artworks={artworks} basePath="/ko" />
           <div className="mt-8">
             <Link
-              href="/ko/작품?page=2"
+              href="/ko/artworks?page=2"
               className="inline-flex items-center rounded-md bg-[#1a1a1a] px-5 py-2 text-sm font-medium text-white hover:bg-[#333]"
             >
               다음

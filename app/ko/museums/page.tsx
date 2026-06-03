@@ -36,7 +36,7 @@ export default async function MuseumsPage({ searchParams }: MuseumsPageProps) {
 
   const items = aggregated.map((row) => ({
     name: row.display,
-    href: `/ko/박물관/${slugify(row.display)}`,
+    href: `/ko/museums/${slugify(row.display)}`,
     count: row.count,
     imageId: row.image_id,
     url: row.url,
@@ -54,7 +54,7 @@ export default async function MuseumsPage({ searchParams }: MuseumsPageProps) {
 
       {paginated.length ? <BrowseHubGrid items={paginated} /> : <p className="text-sm text-[#6b6b6b]">No se encontraron 박물관.</p>}
 
-      <Pagination currentPage={page} totalPages={totalPages} basePath="/ko/박물관" />
+      <Pagination currentPage={page} totalPages={totalPages} basePath="/ko/museums" />
     </div>
   );
 }

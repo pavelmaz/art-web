@@ -46,7 +46,7 @@ export default async function ArtistsPage({ searchParams }: ArtistsPageProps) {
         <BrowseHubGrid
           items={artists.map((artist) => ({
             name: artist.artistName,
-            href: `/ru/художники/${slugify(artist.artistName)}`,
+            href: `/ru/artists/${slugify(artist.artistName)}`,
             count: artist.count,
             imageId: artist.image_id,
             url: artist.url,
@@ -56,7 +56,7 @@ export default async function ArtistsPage({ searchParams }: ArtistsPageProps) {
         <p className="text-sm text-[#6b6b6b]">No se encontraron художники.</p>
       )}
 
-      <Pagination currentPage={page} totalPages={totalPages} basePath="/ru/художники" />
+      <Pagination currentPage={page} totalPages={totalPages} basePath="/ru/artists" />
     </div>
   );
 }

@@ -12,7 +12,8 @@ export default function robots(): MetadataRoute.Robots {
     "/es/artists/",
   ];
 
-  for (const config of Object.values(LOCALE_ROUTE_CONFIG)) {
+  for (const locale of ["es", "pt"] as const) {
+    const config = LOCALE_ROUTE_CONFIG[locale];
     wrongLocalePaths.push(
       `${config.prefix}/artworks/`,
       `${config.prefix}/artists/`,

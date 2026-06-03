@@ -97,7 +97,7 @@ async function resolveGenreHubLinkLocal(
 
   const linkSlug = row.slug_zh?.trim() || row.slug;
   const label = row.name_zh?.trim() || row.name;
-  return { href: `/zh/流派/${linkSlug}`, label };
+  return { href: `/zh/genres/${linkSlug}`, label };
 }
 
 async function resolveStyleHubLinkLocal(
@@ -123,7 +123,7 @@ async function resolveStyleHubLinkLocal(
 
   const linkSlug = row.slug_zh?.trim() || row.slug;
   const label = row.name_zh?.trim() || row.name;
-  return { href: `/zh/风格/${linkSlug}`, label };
+  return { href: `/zh/styles/${linkSlug}`, label };
 }
 
 type ArtworkPageProps = {
@@ -166,13 +166,13 @@ function BreadcrumbJsonLd({
         "@type": "ListItem",
         position: 2,
         name: category?.label || "作品",
-        item: category ? `${siteUrl}${category.href}` : `${siteUrl}/zh/作品`,
+        item: category ? `${siteUrl}${category.href}` : `${siteUrl}/zh/artworks`,
       },
       {
         "@type": "ListItem",
         position: 3,
         name: artwork.title,
-        item: `${siteUrl}/zh/作品/${artwork.slug}`,
+        item: `${siteUrl}/zh/artworks/${artwork.slug}`,
       },
     ],
   };
@@ -401,7 +401,7 @@ export default async function ArtworkDetailPageZh({ params }: ArtworkPageProps) 
     { label: "首页", href: "/zh" },
     ...(category ? [category] : []),
     ...(artwork.artist_display?.trim()
-      ? [{ label: artwork.artist_display.trim(), href: `/zh/艺术家/${slugify(artwork.artist_display)}` }]
+      ? [{ label: artwork.artist_display.trim(), href: `/zh/artists/${slugify(artwork.artist_display)}` }]
       : []),
     { label: artwork.title },
   ];
@@ -536,7 +536,7 @@ export default async function ArtworkDetailPageZh({ params }: ArtworkPageProps) 
                   </div>
                 )}
               </div>
-              <Breadcrumbs items={breadcrumbItems} currentPath={`/zh/作品/${artwork.slug}`} includeJsonLd={false} />
+              <Breadcrumbs items={breadcrumbItems} currentPath={`/zh/artworks/${artwork.slug}`} includeJsonLd={false} />
             </div>
           </ArtworkInsightsProvider>
 
@@ -545,7 +545,7 @@ export default async function ArtworkDetailPageZh({ params }: ArtworkPageProps) 
               <div>
                 <h1 className="mb-1 text-lg font-semibold text-[#1a1a1a]">{artwork.title}</h1>
                 {artistSlug ? (
-                  <Link href={`/zh/艺术家/${artistSlug}`} className="text-sm text-[#6b6b6b] hover:text-[#1a1a1a]">
+                  <Link href={`/zh/artists/${artistSlug}`} className="text-sm text-[#6b6b6b] hover:text-[#1a1a1a]">
                     {artist}
                   </Link>
                 ) : (
@@ -638,7 +638,7 @@ export default async function ArtworkDetailPageZh({ params }: ArtworkPageProps) 
                   <div>
                     <p className="text-xs text-[#999]">{t.museum}</p>
                     <Link
-                      href={`/zh/博物馆/${slugify(artwork.museum)}`}
+                      href={`/zh/museums/${slugify(artwork.museum)}`}
                       className="text-sm text-[#1a1a1a] underline"
                     >
                       {artwork.museum}
@@ -665,7 +665,7 @@ export default async function ArtworkDetailPageZh({ params }: ArtworkPageProps) 
               <ArtworkDescriptionFormatted description={descriptionText.trim()} />
             </div>
             {artistSlug && relatedArtworks.length === 0 ? (
-              <SectionCtaLink href={`/zh/艺术家/${artistSlug}`}>{t.browseAll}</SectionCtaLink>
+              <SectionCtaLink href={`/zh/artists/${artistSlug}`}>{t.browseAll}</SectionCtaLink>
             ) : null}
           </section>
         ) : null}
@@ -675,7 +675,7 @@ export default async function ArtworkDetailPageZh({ params }: ArtworkPageProps) 
             <h2 className="mb-4 text-base font-semibold">{t.moreByArtist} {artist}</h2>
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
               {relatedArtworks.map((item) => (
-                <a key={item.id} href={`/zh/作品/${item.slug}`} className="group block">
+                <a key={item.id} href={`/zh/artworks/${item.slug}`} className="group block">
                   <div className="overflow-hidden">
                     <img
                       src={item.imageUrl}
@@ -694,7 +694,7 @@ export default async function ArtworkDetailPageZh({ params }: ArtworkPageProps) 
                 </a>
               ))}
             </div>
-            <SectionCtaLink href={`/zh/艺术家/${artistSlug}`}>{t.browseAll}</SectionCtaLink>
+            <SectionCtaLink href={`/zh/artists/${artistSlug}`}>{t.browseAll}</SectionCtaLink>
           </section>
         ) : null}
 
@@ -703,7 +703,7 @@ export default async function ArtworkDetailPageZh({ params }: ArtworkPageProps) 
             <h2 className="mb-4 text-base font-semibold">更多 {genreHubLink?.label ?? artwork.genre_title}</h2>
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
               {relatedByGenre.map((item) => (
-                <a key={item.id} href={`/zh/作品/${item.slug}`} className="group block">
+                <a key={item.id} href={`/zh/artworks/${item.slug}`} className="group block">
                   <div className="overflow-hidden">
                     <img
                       src={item.imageUrl}

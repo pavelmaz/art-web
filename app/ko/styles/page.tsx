@@ -70,7 +70,7 @@ export default async function StylesPage({ searchParams }: StylesPageProps) {
     const linkSlug = s.slug_ko?.trim() || s.slug;
     return {
       name: displayName,
-      href: `/ko/스타일/${linkSlug}`,
+      href: `/ko/styles/${linkSlug}`,
       count: a?.count ?? 0,
       imageId: a?.image_id ?? null,
       url: a?.url ?? null,
@@ -97,7 +97,7 @@ export default async function StylesPage({ searchParams }: StylesPageProps) {
         <p className="text-sm text-[#6b6b6b]">No se encontraron estilos.</p>
       )}
 
-      <Pagination currentPage={page} totalPages={totalPages} basePath="/ko/스타일" />
+      <Pagination currentPage={page} totalPages={totalPages} basePath="/ko/styles" />
     </div>
   );
 }

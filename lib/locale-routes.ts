@@ -82,12 +82,12 @@ export const LOCALE_ROUTE_CONFIG: Record<Exclude<SiteLocale, "en">, LocaleRouteC
   fr: {
     prefix: "/fr",
     segments: {
-      artworks: "œuvres",
-      artists: "artistes",
-      museums: "musées",
+      artworks: "artworks",
+      artists: "artists",
+      museums: "museums",
       genres: "genres",
       styles: "styles",
-      search: "recherche",
+      search: "search",
     },
     descriptionColumn: "description_fr",
     translationLocale: "fr",
@@ -97,12 +97,12 @@ export const LOCALE_ROUTE_CONFIG: Record<Exclude<SiteLocale, "en">, LocaleRouteC
   de: {
     prefix: "/de",
     segments: {
-      artworks: "werke",
-      artists: "künstler",
-      museums: "museen",
+      artworks: "artworks",
+      artists: "artists",
+      museums: "museums",
       genres: "genres",
-      styles: "stile",
-      search: "suche",
+      styles: "styles",
+      search: "search",
     },
     descriptionColumn: "description_ger",
     translationLocale: "de",
@@ -112,12 +112,12 @@ export const LOCALE_ROUTE_CONFIG: Record<Exclude<SiteLocale, "en">, LocaleRouteC
   it: {
     prefix: "/it",
     segments: {
-      artworks: "opere",
-      artists: "artisti",
-      museums: "musei",
-      genres: "generi",
-      styles: "stili",
-      search: "ricerca",
+      artworks: "artworks",
+      artists: "artists",
+      museums: "museums",
+      genres: "genres",
+      styles: "styles",
+      search: "search",
     },
     descriptionColumn: "description_it",
     translationLocale: "it",
@@ -127,12 +127,12 @@ export const LOCALE_ROUTE_CONFIG: Record<Exclude<SiteLocale, "en">, LocaleRouteC
   ko: {
     prefix: "/ko",
     segments: {
-      artworks: "작품",
-      artists: "예술가",
-      museums: "박물관",
-      genres: "장르",
-      styles: "스타일",
-      search: "검색",
+      artworks: "artworks",
+      artists: "artists",
+      museums: "museums",
+      genres: "genres",
+      styles: "styles",
+      search: "search",
     },
     descriptionColumn: "description_ko",
     translationLocale: "ko",
@@ -142,12 +142,12 @@ export const LOCALE_ROUTE_CONFIG: Record<Exclude<SiteLocale, "en">, LocaleRouteC
   ru: {
     prefix: "/ru",
     segments: {
-      artworks: "произведения",
-      artists: "художники",
-      museums: "музеи",
-      genres: "жанры",
-      styles: "стили",
-      search: "поиск",
+      artworks: "artworks",
+      artists: "artists",
+      museums: "museums",
+      genres: "genres",
+      styles: "styles",
+      search: "search",
     },
     descriptionColumn: "description_ru",
     translationLocale: "ru",
@@ -157,12 +157,12 @@ export const LOCALE_ROUTE_CONFIG: Record<Exclude<SiteLocale, "en">, LocaleRouteC
   zh: {
     prefix: "/zh",
     segments: {
-      artworks: "作品",
-      artists: "艺术家",
-      museums: "博物馆",
-      genres: "流派",
-      styles: "风格",
-      search: "搜索",
+      artworks: "artworks",
+      artists: "artists",
+      museums: "museums",
+      genres: "genres",
+      styles: "styles",
+      search: "search",
     },
     descriptionColumn: "description_ch",
     translationLocale: "zh",
@@ -180,108 +180,74 @@ const EN_SEGMENTS: LocaleSegments = {
   search: "search",
 };
 
-/** ASCII-only `app/{locale}/` directory names (public URLs use `LOCALE_ROUTE_CONFIG.segments`). */
-export const LOCALE_APP_FOLDERS: Record<Exclude<SiteLocale, "en">, LocaleSegments> = {
-  es: {
-    artworks: "obras",
-    artists: "artistas",
-    museums: "museos",
-    genres: "generos",
-    styles: "estilos",
-    search: "buscar",
-  },
-  pt: {
-    artworks: "obras",
-    artists: "artistas",
-    museums: "museus",
-    genres: "generos",
-    styles: "estilos",
-    search: "buscar",
-  },
-  ja: {
-    artworks: "artworks",
-    artists: "artists",
-    museums: "museums",
-    genres: "genres",
-    styles: "styles",
-    search: "search",
-  },
-  fr: {
-    artworks: "oeuvres",
-    artists: "artistes",
-    museums: "museums",
-    genres: "genres",
-    styles: "styles",
-    search: "recherche",
-  },
-  de: {
-    artworks: "werke",
-    artists: "kunstler",
-    museums: "museen",
-    genres: "genres",
-    styles: "stile",
-    search: "suche",
-  },
-  it: {
-    artworks: "opere",
-    artists: "artisti",
-    museums: "musei",
-    genres: "generi",
-    styles: "stili",
-    search: "ricerca",
-  },
-  ko: {
-    artworks: "artworks",
-    artists: "artists",
-    museums: "museums",
-    genres: "genres",
-    styles: "styles",
-    search: "search",
-  },
-  ru: {
-    artworks: "artworks",
-    artists: "artists",
-    museums: "museums",
-    genres: "genres",
-    styles: "styles",
-    search: "search",
-  },
-  zh: {
-    artworks: "artworks",
-    artists: "artists",
-    museums: "museums",
-    genres: "genres",
-    styles: "styles",
-    search: "search",
-  },
-};
-
 export type LocaleSegmentRewrite = {
   source: string;
   destination: string;
 };
 
-/** Rewrites public localized paths to ASCII App Router folders. */
-export function buildLocaleSegmentRewrites(): LocaleSegmentRewrite[] {
-  const rewrites: LocaleSegmentRewrite[] = [];
+/** Legacy Unicode/localized URL segments → English paths (301). New locales use English segments only. */
+export const LEGACY_LOCALE_SEGMENT_REDIRECTS: Array<{
+  locale: Exclude<SiteLocale, "en" | "es" | "pt" | "ja">;
+  from: string;
+  to: string;
+}> = [
+  { locale: "fr", from: "œuvres", to: "artworks" },
+  { locale: "fr", from: "artistes", to: "artists" },
+  { locale: "fr", from: "musées", to: "museums" },
+  { locale: "fr", from: "recherche", to: "search" },
+  { locale: "de", from: "werke", to: "artworks" },
+  { locale: "de", from: "künstler", to: "artists" },
+  { locale: "de", from: "kunstler", to: "artists" },
+  { locale: "de", from: "museen", to: "museums" },
+  { locale: "de", from: "stile", to: "styles" },
+  { locale: "de", from: "suche", to: "search" },
+  { locale: "it", from: "opere", to: "artworks" },
+  { locale: "it", from: "artisti", to: "artists" },
+  { locale: "it", from: "musei", to: "museums" },
+  { locale: "it", from: "generi", to: "genres" },
+  { locale: "it", from: "stili", to: "styles" },
+  { locale: "it", from: "ricerca", to: "search" },
+  { locale: "ko", from: "작품", to: "artworks" },
+  { locale: "ko", from: "예술가", to: "artists" },
+  { locale: "ko", from: "박물관", to: "museums" },
+  { locale: "ko", from: "장르", to: "genres" },
+  { locale: "ko", from: "스타일", to: "styles" },
+  { locale: "ko", from: "검색", to: "search" },
+  { locale: "ru", from: "произведения", to: "artworks" },
+  { locale: "ru", from: "художники", to: "artists" },
+  { locale: "ru", from: "музеи", to: "museums" },
+  { locale: "ru", from: "жанры", to: "genres" },
+  { locale: "ru", from: "стили", to: "styles" },
+  { locale: "ru", from: "поиск", to: "search" },
+  { locale: "zh", from: "作品", to: "artworks" },
+  { locale: "zh", from: "艺术家", to: "artists" },
+  { locale: "zh", from: "博物馆", to: "museums" },
+  { locale: "zh", from: "流派", to: "genres" },
+  { locale: "zh", from: "风格", to: "styles" },
+  { locale: "zh", from: "搜索", to: "search" },
+];
 
-  for (const locale of Object.keys(LOCALE_ROUTE_CONFIG) as Array<Exclude<SiteLocale, "en">>) {
-    const { prefix, segments } = LOCALE_ROUTE_CONFIG[locale];
-    const folders = LOCALE_APP_FOLDERS[locale];
+export function buildLegacyLocalePathRedirects(): Array<{
+  source: string;
+  destination: string;
+  permanent: boolean;
+}> {
+  const redirects: Array<{ source: string; destination: string; permanent: boolean }> = [];
 
-    for (const key of Object.keys(segments) as Array<keyof LocaleSegments>) {
-      const publicSeg = segments[key];
-      const folder = folders[key];
-      if (publicSeg === folder) continue;
-
-      rewrites.push(
-        { source: `${prefix}/${publicSeg}`, destination: `${prefix}/${folder}` },
-        { source: `${prefix}/${publicSeg}/:path*`, destination: `${prefix}/${folder}/:path*` }
-      );
-    }
+  for (const { locale, from, to } of LEGACY_LOCALE_SEGMENT_REDIRECTS) {
+    const prefix = LOCALE_ROUTE_CONFIG[locale].prefix;
+    redirects.push(
+      { source: `${prefix}/${from}`, destination: `${prefix}/${to}`, permanent: true },
+      { source: `${prefix}/${from}/:path*`, destination: `${prefix}/${to}/:path*`, permanent: true }
+    );
   }
 
-  return rewrites;
+  return redirects;
+}
+
+/** No Unicode rewrites needed — app route folders match public URL segments for all locales. */
+export function buildLocaleSegmentRewrites(): LocaleSegmentRewrite[] {
+  return [];
 }
 
 export function canonicalHubUrl(

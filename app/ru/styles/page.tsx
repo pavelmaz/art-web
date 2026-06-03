@@ -70,7 +70,7 @@ export default async function StylesPage({ searchParams }: StylesPageProps) {
     const linkSlug = s.slug_ru?.trim() || s.slug;
     return {
       name: displayName,
-      href: `/ru/стили/${linkSlug}`,
+      href: `/ru/styles/${linkSlug}`,
       count: a?.count ?? 0,
       imageId: a?.image_id ?? null,
       url: a?.url ?? null,
@@ -97,7 +97,7 @@ export default async function StylesPage({ searchParams }: StylesPageProps) {
         <p className="text-sm text-[#6b6b6b]">No se encontraron estilos.</p>
       )}
 
-      <Pagination currentPage={page} totalPages={totalPages} basePath="/ru/стили" />
+      <Pagination currentPage={page} totalPages={totalPages} basePath="/ru/styles" />
     </div>
   );
 }

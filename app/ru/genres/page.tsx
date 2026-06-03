@@ -64,7 +64,7 @@ export default async function GenresPage({ searchParams }: GenresPageProps) {
     return [
       {
         name: displayName,
-        href: `/ru/жанры/${linkSlug}`,
+        href: `/ru/genres/${linkSlug}`,
         count: row.count,
         imageId: row.image_id,
         url: row.url,
@@ -88,7 +88,7 @@ export default async function GenresPage({ searchParams }: GenresPageProps) {
         <p className="text-sm text-[#6b6b6b]">No se encontraron géneros.</p>
       )}
 
-      <Pagination currentPage={page} totalPages={totalPages} basePath="/ru/жанры" />
+      <Pagination currentPage={page} totalPages={totalPages} basePath="/ru/genres" />
     </div>
   );
 }

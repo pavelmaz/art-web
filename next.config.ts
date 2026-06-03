@@ -1,6 +1,9 @@
 import type { NextConfig } from "next";
 
-import { LOCALE_ROUTE_CONFIG, buildLocaleSegmentRewrites } from "./lib/locale-routes";
+import {
+  LOCALE_ROUTE_CONFIG,
+  buildLegacyLocalePathRedirects,
+} from "./lib/locale-routes";
 
 function buildLocalePathRedirects() {
   const redirects: {
@@ -68,9 +71,6 @@ function buildTopicsCountriesRedirects() {
 }
 
 const nextConfig: NextConfig = {
-  async rewrites() {
-    return buildLocaleSegmentRewrites();
-  },
   async redirects() {
     return [
       {
@@ -94,6 +94,7 @@ const nextConfig: NextConfig = {
         permanent: true,
       },
       ...buildLocalePathRedirects(),
+      ...buildLegacyLocalePathRedirects(),
       ...buildTopicsCountriesRedirects(),
       {
         source: "/genres/theatrical",
