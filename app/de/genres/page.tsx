@@ -1,4 +1,4 @@
-import { buildHubLanguageAlternates } from "@/lib/locale-routes";
+import { buildHubLanguageAlternates, canonicalHubUrl } from "@/lib/locale-routes";
 import type { Metadata } from "next";
 
 import { BrowseHubGrid } from "@/components/BrowseHubGrid";
@@ -15,7 +15,7 @@ export const metadata: Metadata = {
   description:
     "Explora arte de dominio público por género. Paisaje, Retrato, Naturaleza Muerta, Religioso y más — gratis para descargar en alta resolución.",
   alternates: {
-    canonical: absoluteUrl("/de/genres"),
+    canonical: canonicalHubUrl("de", "genres"),
     languages: buildHubLanguageAlternates("genres"),
   },
   openGraph: {

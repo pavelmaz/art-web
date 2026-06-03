@@ -180,6 +180,120 @@ const EN_SEGMENTS: LocaleSegments = {
   search: "search",
 };
 
+/** ASCII-only `app/{locale}/` directory names (public URLs use `LOCALE_ROUTE_CONFIG.segments`). */
+export const LOCALE_APP_FOLDERS: Record<Exclude<SiteLocale, "en">, LocaleSegments> = {
+  es: {
+    artworks: "obras",
+    artists: "artistas",
+    museums: "museos",
+    genres: "generos",
+    styles: "estilos",
+    search: "buscar",
+  },
+  pt: {
+    artworks: "obras",
+    artists: "artistas",
+    museums: "museus",
+    genres: "generos",
+    styles: "estilos",
+    search: "buscar",
+  },
+  ja: {
+    artworks: "artworks",
+    artists: "artists",
+    museums: "museums",
+    genres: "genres",
+    styles: "styles",
+    search: "search",
+  },
+  fr: {
+    artworks: "oeuvres",
+    artists: "artistes",
+    museums: "museums",
+    genres: "genres",
+    styles: "styles",
+    search: "recherche",
+  },
+  de: {
+    artworks: "werke",
+    artists: "kunstler",
+    museums: "museen",
+    genres: "genres",
+    styles: "stile",
+    search: "suche",
+  },
+  it: {
+    artworks: "opere",
+    artists: "artisti",
+    museums: "musei",
+    genres: "generi",
+    styles: "stili",
+    search: "ricerca",
+  },
+  ko: {
+    artworks: "artworks",
+    artists: "artists",
+    museums: "museums",
+    genres: "genres",
+    styles: "styles",
+    search: "search",
+  },
+  ru: {
+    artworks: "artworks",
+    artists: "artists",
+    museums: "museums",
+    genres: "genres",
+    styles: "styles",
+    search: "search",
+  },
+  zh: {
+    artworks: "artworks",
+    artists: "artists",
+    museums: "museums",
+    genres: "genres",
+    styles: "styles",
+    search: "search",
+  },
+};
+
+export type LocaleSegmentRewrite = {
+  source: string;
+  destination: string;
+};
+
+/** Rewrites public localized paths to ASCII App Router folders. */
+export function buildLocaleSegmentRewrites(): LocaleSegmentRewrite[] {
+  const rewrites: LocaleSegmentRewrite[] = [];
+
+  for (const locale of Object.keys(LOCALE_ROUTE_CONFIG) as Array<Exclude<SiteLocale, "en">>) {
+    const { prefix, segments } = LOCALE_ROUTE_CONFIG[locale];
+    const folders = LOCALE_APP_FOLDERS[locale];
+
+    for (const key of Object.keys(segments) as Array<keyof LocaleSegments>) {
+      const publicSeg = segments[key];
+      const folder = folders[key];
+      if (publicSeg === folder) continue;
+
+      rewrites.push(
+        { source: `${prefix}/${publicSeg}`, destination: `${prefix}/${folder}` },
+        { source: `${prefix}/${publicSeg}/:path*`, destination: `${prefix}/${folder}/:path*` }
+      );
+    }
+  }
+
+  return rewrites;
+}
+
+export function canonicalHubUrl(
+  locale: SiteLocale,
+  hub: keyof LocaleSegments
+): string {
+  if (locale === "en") {
+    return `https://fineartfree.com${localePath("en", hub)}`;
+  }
+  return `https://fineartfree.com${localePath(locale, hub)}`;
+}
+
 export function getLocaleConfig(locale: SiteLocale): LocaleRouteConfig | null {
   if (locale === "en") return null;
   return LOCALE_ROUTE_CONFIG[locale];

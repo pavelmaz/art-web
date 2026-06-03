@@ -9,7 +9,7 @@ import { Pagination } from "@/components/Pagination";
 import { getArtistBioForLocale, getArtistProfileBySlug } from "@/lib/get-artist-profile";
 import { getPaginationParams, getTotalPages } from "@/lib/pagination";
 import { supabase } from "@/lib/supabase";
-import { artistDetailPath, buildArtistLanguageAlternates } from "@/lib/locale-routes";
+import { artistDetailPath, buildArtistLanguageAlternates, localePath } from "@/lib/locale-routes";
 import { absoluteUrl, artworkGridImageUrl } from "@/lib/utils";
 import type { Artwork } from "@/types/artwork";
 
@@ -54,7 +54,7 @@ export async function generateMetadata({ params }: ArtistPageProps): Promise<Met
     title,
     description,
     alternates: {
-      canonical: absoluteUrl(artistDetailPath("it", slug)),
+      canonical: `https://fineartfree.com${localePath("it", "artists")}/${slug}`,
       languages: buildArtistLanguageAlternates(slug),
     },
     openGraph: { title, description },

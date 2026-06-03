@@ -1,4 +1,4 @@
-import { buildHubLanguageAlternates } from "@/lib/locale-routes";
+import { buildHubLanguageAlternates, localePath } from "@/lib/locale-routes";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
@@ -115,7 +115,7 @@ export async function generateMetadata({ params }: StylePageProps): Promise<Meta
     title,
     description,
     alternates: {
-      canonical: absoluteUrl(`/de/stile/${linkSlug}`),
+      canonical: `https://fineartfree.com${localePath("de", "styles")}/${linkSlug}`,
       languages: buildHubLanguageAlternates("styles"),
     },
     openGraph: { title, description },

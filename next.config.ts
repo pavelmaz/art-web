@@ -1,6 +1,6 @@
 import type { NextConfig } from "next";
 
-import { LOCALE_ROUTE_CONFIG } from "./lib/locale-routes";
+import { LOCALE_ROUTE_CONFIG, buildLocaleSegmentRewrites } from "./lib/locale-routes";
 
 function buildLocalePathRedirects() {
   const redirects: {
@@ -53,10 +53,7 @@ function buildLocalePathRedirects() {
 
 const nextConfig: NextConfig = {
   async rewrites() {
-    return [
-      { source: "/fr/œuvres", destination: "/fr/oeuvres" },
-      { source: "/fr/œuvres/:path*", destination: "/fr/oeuvres/:path*" },
-    ];
+    return buildLocaleSegmentRewrites();
   },
   async redirects() {
     return [

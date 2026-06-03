@@ -1,4 +1,4 @@
-import { buildHubLanguageAlternates } from "@/lib/locale-routes";
+import { buildHubLanguageAlternates, localePath } from "@/lib/locale-routes";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
@@ -94,7 +94,7 @@ export async function generateMetadata({ params }: GenrePageProps): Promise<Meta
     title,
     description,
     alternates: {
-      canonical: absoluteUrl(`/it/generi/${linkSlug}`),
+      canonical: `https://fineartfree.com${localePath("it", "genres")}/${linkSlug}`,
       languages: buildHubLanguageAlternates("genres"),
     },
     openGraph: { title, description },

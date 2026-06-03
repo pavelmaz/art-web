@@ -1,4 +1,4 @@
-import { buildHubLanguageAlternates } from "@/lib/locale-routes";
+import { buildHubLanguageAlternates, canonicalHubUrl } from "@/lib/locale-routes";
 import type { Metadata } from "next";
 
 import { ArtworkGrid } from "@/components/ArtworkGrid";
@@ -15,7 +15,7 @@ export const metadata: Metadata = {
   description:
     "Descarga 72.000+ werke de arte de dominio público en alta resolución. Pinturas clásicas, grabados e ilustraciones gratis para cualquier uso.",
   alternates: {
-    canonical: absoluteUrl("/de/werke"),
+    canonical: canonicalHubUrl("de", "artworks"),
     languages: buildHubLanguageAlternates("artworks"),
   },
   openGraph: {

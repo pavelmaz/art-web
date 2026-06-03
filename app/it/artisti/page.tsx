@@ -1,4 +1,4 @@
-import { buildHubLanguageAlternates } from "@/lib/locale-routes";
+import { buildHubLanguageAlternates, canonicalHubUrl } from "@/lib/locale-routes";
 import type { Metadata } from "next";
 
 import { BrowseHubGrid } from "@/components/BrowseHubGrid";
@@ -14,7 +14,7 @@ export const metadata: Metadata = {
   description:
     "Explora opere de arte de dominio público por artista. Monet, Rembrandt, Van Gogh, Dürer y cientos más — gratis para descargar.",
   alternates: {
-    canonical: absoluteUrl("/it/artisti"),
+    canonical: canonicalHubUrl("it", "artists"),
     languages: buildHubLanguageAlternates("artists"),
   },
   openGraph: {

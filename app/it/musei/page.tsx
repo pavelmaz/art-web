@@ -1,4 +1,4 @@
-import { buildHubLanguageAlternates } from "@/lib/locale-routes";
+import { buildHubLanguageAlternates, canonicalHubUrl } from "@/lib/locale-routes";
 import type { Metadata } from "next";
 
 import { BrowseHubGrid } from "@/components/BrowseHubGrid";
@@ -14,7 +14,7 @@ export const metadata: Metadata = {
   description:
     "Explora arte de dominio público por museo. Prado, Rijksmuseum, MFA Boston, National Gallery y más — gratis para descargar.",
   alternates: {
-    canonical: absoluteUrl("/it/musei"),
+    canonical: canonicalHubUrl("it", "museums"),
     languages: buildHubLanguageAlternates("museums"),
   },
   openGraph: {

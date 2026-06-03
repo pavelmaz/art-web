@@ -1,4 +1,4 @@
-import { buildHubLanguageAlternates } from "@/lib/locale-routes";
+import { buildHubLanguageAlternates, canonicalHubUrl } from "@/lib/locale-routes";
 import type { Metadata } from "next";
 
 import { BrowseHubGrid, type BrowseHubItem } from "@/components/BrowseHubGrid";
@@ -15,7 +15,7 @@ export const metadata: Metadata = {
   description:
     "Explora arte de dominio público por movimiento. Barroco, Impresionismo, Siglo de Oro Holandés, Renacimiento y más — gratis para descargar.",
   alternates: {
-    canonical: absoluteUrl("/fr/styles"),
+    canonical: canonicalHubUrl("fr", "styles"),
     languages: buildHubLanguageAlternates("styles"),
   },
   openGraph: {
