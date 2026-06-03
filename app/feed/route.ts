@@ -23,7 +23,7 @@ export async function GET() {
       <guid isPermaLink="true">${pageUrl}</guid>
       <description>${desc}</description>
       <pubDate>${new Date(a.created_at).toUTCString()}</pubDate>
-      ${imageUrl ? `<enclosure url="${imageUrl}" type="image/jpeg"/>` : ''}
+      ${imageUrl ? `<enclosure url="${imageUrl}" type="image/jpeg" length="0"/>` : ''}
     </item>`
   }).join('')
 
