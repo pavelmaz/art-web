@@ -32,6 +32,7 @@ export async function GET() {
       for (let i = 0; i < ARTWORK_SITEMAP_COUNT; i++) {
         locs.push(`${base}/sitemap/${loc}/artworks/${i}`);
       }
+      locs.push(`${base}/sitemap/${loc}`);
     }
     locs.push(`${base}/sitemap/es`);
     locs.push(`${base}/sitemap/pt`);
