@@ -10,7 +10,7 @@ import { absoluteUrl, slugify } from "@/lib/utils";
 export const revalidate = 86400;
 
 export const metadata: Metadata = {
-  title: "Artistes — Œuvres complètes gratuites | Fine Art Free",
+  title: { absolute: "Artistes — Œuvres complètes gratuites | Fine Art Free" },
   description:
     "Art du domaine public par artiste. Monet, Rembrandt, Van Gogh, Dürer et des centaines d'autres — gratuit à télécharger.",
   alternates: {
@@ -38,8 +38,8 @@ export default async function ArtistsPage({ searchParams }: ArtistsPageProps) {
   return (
     <div className="space-y-8 px-5">
       <div>
-        <h1 className="mb-2 text-2xl font-semibold">Artistas</h1>
-        <p className="mb-8 text-sm text-[#6b6b6b]">Explorar œuvres de arte por artista</p>
+        <h1 className="mb-2 text-2xl font-semibold">Artistes</h1>
+        <p className="mb-8 text-sm text-[#6b6b6b]">Explorer les œuvres par artiste</p>
       </div>
 
       {artists.length ? (
@@ -53,7 +53,7 @@ export default async function ArtistsPage({ searchParams }: ArtistsPageProps) {
           }))}
         />
       ) : (
-        <p className="text-sm text-[#6b6b6b]">No se encontraron artistes.</p>
+        <p className="text-sm text-[#6b6b6b]">Aucun artiste trouvé.</p>
       )}
 
       <Pagination currentPage={page} totalPages={totalPages} basePath="/fr/artists" />

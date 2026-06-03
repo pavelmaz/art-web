@@ -9,7 +9,7 @@ import type { Artwork } from "@/types/artwork";
 export const dynamic = "force-dynamic";
 
 export const metadata = {
-  title: "Recherche | Fine Art Free",
+  title: { absolute: "Recherche | Fine Art Free" },
   robots: {
     index: false,
     follow: true,
@@ -57,7 +57,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
     return (
       <div className="mx-auto max-w-7xl space-y-4 px-5 py-10">
         <h1 className="text-2xl font-semibold text-[#1a1a1a]">Recherche</h1>
-        <p className="text-sm text-[#6b6b6b]">Frcribe una palabra clave en la barra de búsqueda para ver resultados.</p>
+        <p className="text-sm text-[#6b6b6b]">Saisissez un mot-clé dans la barre de recherche pour voir les résultats.</p>
       </div>
     );
   }
@@ -68,7 +68,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
     return (
       <div className="mx-auto max-w-7xl space-y-4 px-5 py-10">
         <h1 className="text-2xl font-semibold text-[#1a1a1a]">Recherche</h1>
-        <p className="text-sm text-[#6b6b6b]">Error al cargar los resultados de búsqueda.</p>
+        <p className="text-sm text-[#6b6b6b]">Erreur lors du chargement des résultats de recherche.</p>
       </div>
     );
   }
@@ -79,7 +79,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
   return (
     <div className="mx-auto max-w-7xl space-y-8 px-5 py-10">
       <div className="space-y-2">
-        <h1 className="text-3xl font-semibold text-[#1a1a1a]">Resultados de &quot;{q}&quot;</h1>
+        <h1 className="text-3xl font-semibold text-[#1a1a1a]">Résultats pour &quot;{q}&quot;</h1>
       </div>
 
       <section className="space-y-4">
@@ -87,13 +87,13 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
         {artworks.length ? (
           <ArtworkGrid artworks={artworks} basePath="/fr" />
         ) : (
-          <p className="text-sm text-[#6b6b6b]">No se encontraron resultados</p>
+          <p className="text-sm text-[#6b6b6b]">Aucun résultat</p>
         )}
       </section>
 
       {matchingTags.length ? (
         <section className="space-y-4">
-          <h2 className="text-xl font-semibold text-[#1a1a1a]">Temas</h2>
+          <h2 className="text-xl font-semibold text-[#1a1a1a]">Thèmes</h2>
           <div className="flex flex-wrap gap-2">
             {matchingTags.map((tag) => (
               <Link
@@ -109,7 +109,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
       ) : null}
 
       <section className="space-y-4">
-        <h2 className="text-xl font-semibold text-[#1a1a1a]">Artistas ({artistResults.length})</h2>
+        <h2 className="text-xl font-semibold text-[#1a1a1a]">Artistes ({artistResults.length})</h2>
         {artistResults.length ? (
           <BrowseHubGrid
             items={artistResults.map((artist) => ({
@@ -121,7 +121,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
             }))}
           />
         ) : (
-          <p className="text-sm text-[#6b6b6b]">No se encontraron resultados</p>
+          <p className="text-sm text-[#6b6b6b]">Aucun résultat</p>
         )}
       </section>
     </div>

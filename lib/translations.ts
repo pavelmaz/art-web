@@ -329,7 +329,7 @@ export const translations = {
     insightsApiKeyMissing: 'Chiave API OpenAI non configurata.',
     insightsGenerateFailed: 'Impossibile generare le informazioni.',
     artworkPageTitle: (title: string, artist: string) =>
-      `${title} di ${artist} — Download gratuito | Fine Art Free`,
+      `${title} di ${artist} — Scarica gratuitamente | Fine Art Free`,
     stylePageTitle: (style: string) =>
       `${style} — Download gratuito | Fine Art Free`,
     artistPageTitle: (name: string) =>

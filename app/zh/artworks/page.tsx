@@ -11,7 +11,7 @@ import type { Artwork } from "@/types/artwork";
 export const revalidate = 86400;
 
 export const metadata: Metadata = {
-  title: "浏览全部作品 — 免费公共领域艺术 | Fine Art Free",
+  title: { absolute: "浏览全部作品 — 免费公共领域艺术 | Fine Art Free" },
   description:
     "下载72,000+幅公共领域作品高清图像。经典绘画、版画与插图，可免费用于任何用途。",
   alternates: {
@@ -49,7 +49,7 @@ export default async function ArtworksPage({ searchParams }: ArtworksPageProps) 
       return (
         <div className="space-y-6 px-5">
           <h1 className="text-3xl font-bold tracking-tight">艺术作品</h1>
-          <p>Error loading data</p>
+          <p>加载数据时出错</p>
         </div>
       );
     }
@@ -77,7 +77,7 @@ export default async function ArtworksPage({ searchParams }: ArtworksPageProps) 
       return (
         <div className="space-y-6 px-5">
           <h1 className="text-3xl font-bold tracking-tight">艺术作品</h1>
-          <p>No se encontraron resultados para {q}</p>
+          <p>未找到结果： {q}</p>
         </div>
       );
     }
@@ -85,7 +85,7 @@ export default async function ArtworksPage({ searchParams }: ArtworksPageProps) 
     return (
       <div className="space-y-6 px-5">
         <h1 className="text-3xl font-bold tracking-tight">艺术作品</h1>
-        <p className="text-sm text-[#6b6b6b]">Resultados para &quot;{q}&quot;</p>
+        <p className="text-sm text-[#6b6b6b]">搜索结果： &quot;{q}&quot;</p>
         <ArtworkGrid artworks={artworks} basePath="/zh" />
       </div>
     );
@@ -99,7 +99,7 @@ export default async function ArtworksPage({ searchParams }: ArtworksPageProps) 
     totalCount = slice.totalCount;
   } catch (error) {
     console.error("Artworks primary query error:", error);
-    return <p>Error loading data</p>;
+    return <p>加载数据时出错</p>;
   }
 
   const artworks: Artwork[] = rows.map((item) => ({
@@ -125,7 +125,7 @@ export default async function ArtworksPage({ searchParams }: ArtworksPageProps) 
     return (
       <div className="space-y-6 px-5">
         <h1 className="text-3xl font-bold tracking-tight">艺术作品</h1>
-        <p>No se encontraron 作品 de arte.</p>
+        <p>未找到作品。</p>
       </div>
     );
   }

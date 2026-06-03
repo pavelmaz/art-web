@@ -11,7 +11,7 @@ import { absoluteUrl } from "@/lib/utils";
 export const revalidate = 86400;
 
 export const metadata: Metadata = {
-  title: "Художественные жанры — Бесплатная загрузка | Fine Art Free",
+  title: { absolute: "Художественные жанры — Бесплатная загрузка | Fine Art Free" },
   description:
     "Искусство по жанрам. Пейзаж, портрет, натюрморт, религиозное и др. — бесплатно в высоком разрешении.",
   alternates: {
@@ -78,14 +78,14 @@ export default async function GenresPage({ searchParams }: GenresPageProps) {
   return (
     <div className="space-y-8 px-5">
       <div>
-        <h1 className="mb-2 text-2xl font-semibold">Géneros</h1>
-        <p className="mb-8 text-sm text-[#6b6b6b]">Explorar obras de arte por género</p>
+        <h1 className="mb-2 text-2xl font-semibold">Жанры</h1>
+        <p className="mb-8 text-sm text-[#6b6b6b]">Работы по жанрам</p>
       </div>
 
       {paginated.length ? (
         <BrowseHubGrid items={paginated} />
       ) : (
-        <p className="text-sm text-[#6b6b6b]">No se encontraron géneros.</p>
+        <p className="text-sm text-[#6b6b6b]">Жанры не найдены.</p>
       )}
 
       <Pagination currentPage={page} totalPages={totalPages} basePath="/ru/genres" />

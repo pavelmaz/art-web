@@ -11,7 +11,7 @@ import { absoluteUrl } from "@/lib/utils";
 export const revalidate = 86400;
 
 export const metadata: Metadata = {
-  title: "艺术风格与运动 — 免费下载 | Fine Art Free",
+  title: { absolute: "艺术风格与运动 — 免费下载 | Fine Art Free" },
   description:
     "按风格浏览。巴洛克、印象派、荷兰黄金时代、文艺复兴等 — 免费下载。",
   alternates: {
@@ -61,7 +61,7 @@ export default async function StylesPage({ searchParams }: StylesPageProps) {
   const byLower = new Map(agg.map((a) => [a.display.toLowerCase(), a]));
 
   if (!stylesByName.size) {
-    return <p className="text-sm text-[#6b6b6b]">No se pudieron cargar los estilos.</p>;
+    return <p className="text-sm text-[#6b6b6b]">无法加载风格列表。</p>;
   }
 
   const hubItems: BrowseHubItem[] = Array.from(stylesByName.values()).map((s) => {
@@ -87,14 +87,14 @@ export default async function StylesPage({ searchParams }: StylesPageProps) {
   return (
     <div className="space-y-8 px-5">
       <div>
-        <h1 className="mb-2 text-2xl font-semibold">Estilos</h1>
-        <p className="mb-8 text-sm text-[#6b6b6b]">Explorar obras de arte por estilo</p>
+        <h1 className="mb-2 text-2xl font-semibold">风格</h1>
+        <p className="mb-8 text-sm text-[#6b6b6b]">按风格浏览作品</p>
       </div>
 
       {paginated.length ? (
         <BrowseHubGrid items={paginated} />
       ) : (
-        <p className="text-sm text-[#6b6b6b]">No se encontraron estilos.</p>
+        <p className="text-sm text-[#6b6b6b]">未找到风格。</p>
       )}
 
       <Pagination currentPage={page} totalPages={totalPages} basePath="/zh/styles" />

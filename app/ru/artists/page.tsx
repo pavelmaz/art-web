@@ -10,7 +10,7 @@ import { absoluteUrl, slugify } from "@/lib/utils";
 export const revalidate = 86400;
 
 export const metadata: Metadata = {
-  title: "Художники — Все работы бесплатно | Fine Art Free",
+  title: { absolute: "Художники — Все работы бесплатно | Fine Art Free" },
   description:
     "Искусство по художникам. Моне, Рембрандт, Ван Гог, Дюрер и сотни других — бесплатная загрузка.",
   alternates: {
@@ -38,8 +38,8 @@ export default async function ArtistsPage({ searchParams }: ArtistsPageProps) {
   return (
     <div className="space-y-8 px-5">
       <div>
-        <h1 className="mb-2 text-2xl font-semibold">Artistas</h1>
-        <p className="mb-8 text-sm text-[#6b6b6b]">Explorar произведения de arte por artista</p>
+        <h1 className="mb-2 text-2xl font-semibold">Художники</h1>
+        <p className="mb-8 text-sm text-[#6b6b6b]">Работы по художникам</p>
       </div>
 
       {artists.length ? (
@@ -53,7 +53,7 @@ export default async function ArtistsPage({ searchParams }: ArtistsPageProps) {
           }))}
         />
       ) : (
-        <p className="text-sm text-[#6b6b6b]">No se encontraron художники.</p>
+        <p className="text-sm text-[#6b6b6b]">Художники не найдены.</p>
       )}
 
       <Pagination currentPage={page} totalPages={totalPages} basePath="/ru/artists" />

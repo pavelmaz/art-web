@@ -11,7 +11,7 @@ import { absoluteUrl } from "@/lib/utils";
 export const revalidate = 86400;
 
 export const metadata: Metadata = {
-  title: "艺术流派 — 免费下载 | Fine Art Free",
+  title: { absolute: "艺术流派 — 免费下载 | Fine Art Free" },
   description:
     "按流派浏览。风景、肖像、静物、宗教等 — 高分辨率免费下载。",
   alternates: {
@@ -78,14 +78,14 @@ export default async function GenresPage({ searchParams }: GenresPageProps) {
   return (
     <div className="space-y-8 px-5">
       <div>
-        <h1 className="mb-2 text-2xl font-semibold">Géneros</h1>
-        <p className="mb-8 text-sm text-[#6b6b6b]">Explorar obras de arte por género</p>
+        <h1 className="mb-2 text-2xl font-semibold">流派</h1>
+        <p className="mb-8 text-sm text-[#6b6b6b]">按流派浏览作品</p>
       </div>
 
       {paginated.length ? (
         <BrowseHubGrid items={paginated} />
       ) : (
-        <p className="text-sm text-[#6b6b6b]">No se encontraron géneros.</p>
+        <p className="text-sm text-[#6b6b6b]">未找到流派。</p>
       )}
 
       <Pagination currentPage={page} totalPages={totalPages} basePath="/zh/genres" />

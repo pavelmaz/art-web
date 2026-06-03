@@ -10,7 +10,7 @@ import { absoluteUrl, slugify } from "@/lib/utils";
 export const revalidate = 86400;
 
 export const metadata: Metadata = {
-  title: "예술가 — 전 작품 무료 다운로드 | Fine Art Free",
+  title: { absolute: "예술가 — 전 작품 무료 다운로드 | Fine Art Free" },
   description:
     "예술가별 퍼블릭 도메인 예술. 모네, 렘브란트, 반 고흐, 뒤러 등 수백 명 — 무료 다운로드.",
   alternates: {
@@ -38,8 +38,8 @@ export default async function ArtistsPage({ searchParams }: ArtistsPageProps) {
   return (
     <div className="space-y-8 px-5">
       <div>
-        <h1 className="mb-2 text-2xl font-semibold">Artistas</h1>
-        <p className="mb-8 text-sm text-[#6b6b6b]">Explorar 작품 de arte por artista</p>
+        <h1 className="mb-2 text-2xl font-semibold">예술가</h1>
+        <p className="mb-8 text-sm text-[#6b6b6b]">예술가별 작품 탐색</p>
       </div>
 
       {artists.length ? (
@@ -53,7 +53,7 @@ export default async function ArtistsPage({ searchParams }: ArtistsPageProps) {
           }))}
         />
       ) : (
-        <p className="text-sm text-[#6b6b6b]">No se encontraron 예술가.</p>
+        <p className="text-sm text-[#6b6b6b]">예술가를 찾을 수 없습니다.</p>
       )}
 
       <Pagination currentPage={page} totalPages={totalPages} basePath="/ko/artists" />

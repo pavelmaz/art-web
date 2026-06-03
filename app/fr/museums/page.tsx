@@ -10,7 +10,7 @@ import { absoluteUrl, slugify } from "@/lib/utils";
 export const revalidate = 86400;
 
 export const metadata: Metadata = {
-  title: "Collections des musées — Téléchargement gratuit | Fine Art Free",
+  title: { absolute: "Collections des musées — Téléchargement gratuit | Fine Art Free" },
   description:
     "Art du domaine public par musée. Prado, Rijksmuseum, MFA Boston, National Gallery et plus — gratuit à télécharger.",
   alternates: {
@@ -48,11 +48,11 @@ export default async function MuseumsPage({ searchParams }: MuseumsPageProps) {
   return (
     <div className="space-y-8 px-5">
       <div>
-        <h1 className="mb-2 text-2xl font-semibold">Museos</h1>
-        <p className="mb-8 text-sm text-[#6b6b6b]">Explorar œuvres de arte por museo</p>
+        <h1 className="mb-2 text-2xl font-semibold">Musées</h1>
+        <p className="mb-8 text-sm text-[#6b6b6b]">Explorer les œuvres par musée</p>
       </div>
 
-      {paginated.length ? <BrowseHubGrid items={paginated} /> : <p className="text-sm text-[#6b6b6b]">No se encontraron musées.</p>}
+      {paginated.length ? <BrowseHubGrid items={paginated} /> : <p className="text-sm text-[#6b6b6b]">Aucun musée trouvé.</p>}
 
       <Pagination currentPage={page} totalPages={totalPages} basePath="/fr/museums" />
     </div>

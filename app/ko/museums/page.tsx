@@ -10,7 +10,7 @@ import { absoluteUrl, slugify } from "@/lib/utils";
 export const revalidate = 86400;
 
 export const metadata: Metadata = {
-  title: "박물관 컬렉션 — 무료 다운로드 | Fine Art Free",
+  title: { absolute: "박물관 컬렉션 — 무료 다운로드 | Fine Art Free" },
   description:
     "박물관별 퍼블릭 도메인 예술. 프라도, 릭스뮤지엄, MFA 보스턴, 내셔널 갤러리 등 — 무료 다운로드.",
   alternates: {
@@ -48,11 +48,11 @@ export default async function MuseumsPage({ searchParams }: MuseumsPageProps) {
   return (
     <div className="space-y-8 px-5">
       <div>
-        <h1 className="mb-2 text-2xl font-semibold">Museos</h1>
-        <p className="mb-8 text-sm text-[#6b6b6b]">Explorar 작품 de arte por museo</p>
+        <h1 className="mb-2 text-2xl font-semibold">박물관</h1>
+        <p className="mb-8 text-sm text-[#6b6b6b]">박물관별 작품 탐색</p>
       </div>
 
-      {paginated.length ? <BrowseHubGrid items={paginated} /> : <p className="text-sm text-[#6b6b6b]">No se encontraron 박물관.</p>}
+      {paginated.length ? <BrowseHubGrid items={paginated} /> : <p className="text-sm text-[#6b6b6b]">박물관을 찾을 수 없습니다.</p>}
 
       <Pagination currentPage={page} totalPages={totalPages} basePath="/ko/museums" />
     </div>

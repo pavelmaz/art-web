@@ -103,16 +103,14 @@ export async function generateMetadata({ params }: StylePageProps): Promise<Meta
     notFound();
   }
 
-  const title = `Arte ${displayName} — Descarga Gratuita Dominio Público | Fine Art Free`;
+  const title = `${displayName} — Styles gratuits | Fine Art Free`;
   const description =
     style?.description_fr?.trim() ||
     style?.description?.trim() ||
-    `Descarga ${totalCount} obras de arte ${displayName} en alta resolución. Arte de dominio público gratis para uso personal y comercial.`;
-
-  const linkSlug = style?.slug_fr?.trim() || style?.slug || slug;
+    `Découvrez ${totalCount} œuvres de ${displayName} en haute résolution. Domaine public, gratuit.`;
 
   return {
-    title,
+    title: { absolute: title },
     description,
     alternates: {
       canonical: `https://fineartfree.com${localePath("fr", "styles")}/${linkSlug}`,
@@ -175,7 +173,7 @@ export default async function StylePage({ params, searchParams }: StylePageProps
   return (
     <div className="space-y-6 px-5">
       <CollectionPageJsonLd
-        name={`Arte ${displayName}`}
+        name={`Style ${displayName}`}
         path={`/fr/styles/${linkSlug}`}
         description={intro}
         numberOfItems={totalCount}
@@ -188,7 +186,7 @@ export default async function StylePage({ params, searchParams }: StylePageProps
         ]}
         currentPath={`/fr/styles/${linkSlug}`}
       />
-      <h1 className="text-3xl font-bold tracking-tight">Arte {displayName}</h1>
+      <h1 className="text-3xl font-bold tracking-tight">Style {displayName}</h1>
       {intro ? (
         <div className="max-w-3xl mb-8 text-sm leading-relaxed text-[#4a4a4a]">
           <p>{intro}</p>

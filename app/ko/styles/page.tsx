@@ -11,7 +11,7 @@ import { absoluteUrl } from "@/lib/utils";
 export const revalidate = 86400;
 
 export const metadata: Metadata = {
-  title: "예술 스타일과 운동 — 무료 다운로드 | Fine Art Free",
+  title: { absolute: "예술 스타일과 운동 — 무료 다운로드 | Fine Art Free" },
   description:
     "스타일별 예술. 바로크, 인상주의, 네덜란드 황금시대, 르네상스 등 — 무료 다운로드.",
   alternates: {
@@ -61,7 +61,7 @@ export default async function StylesPage({ searchParams }: StylesPageProps) {
   const byLower = new Map(agg.map((a) => [a.display.toLowerCase(), a]));
 
   if (!stylesByName.size) {
-    return <p className="text-sm text-[#6b6b6b]">No se pudieron cargar los estilos.</p>;
+    return <p className="text-sm text-[#6b6b6b]">스타일을 불러올 수 없습니다.</p>;
   }
 
   const hubItems: BrowseHubItem[] = Array.from(stylesByName.values()).map((s) => {
@@ -87,14 +87,14 @@ export default async function StylesPage({ searchParams }: StylesPageProps) {
   return (
     <div className="space-y-8 px-5">
       <div>
-        <h1 className="mb-2 text-2xl font-semibold">Estilos</h1>
-        <p className="mb-8 text-sm text-[#6b6b6b]">Explorar obras de arte por estilo</p>
+        <h1 className="mb-2 text-2xl font-semibold">스타일</h1>
+        <p className="mb-8 text-sm text-[#6b6b6b]">스타일별 작품 탐색</p>
       </div>
 
       {paginated.length ? (
         <BrowseHubGrid items={paginated} />
       ) : (
-        <p className="text-sm text-[#6b6b6b]">No se encontraron estilos.</p>
+        <p className="text-sm text-[#6b6b6b]">스타일을 찾을 수 없습니다.</p>
       )}
 
       <Pagination currentPage={page} totalPages={totalPages} basePath="/ko/styles" />

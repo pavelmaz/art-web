@@ -11,7 +11,7 @@ import type { Artwork } from "@/types/artwork";
 export const revalidate = 86400;
 
 export const metadata: Metadata = {
-  title: "모든 작품 탐색 — 무료 퍼블릭 도메인 아트 | Fine Art Free",
+  title: { absolute: "모든 작품 탐색 — 무료 퍼블릭 도메인 아트 | Fine Art Free" },
   description:
     "72,000점 이상의 퍼블릭 도메인 작품을 고해상도로 다운로드하세요. 클래식 회화, 판화, 일러스트를 무료로 이용하세요.",
   alternates: {
@@ -49,7 +49,7 @@ export default async function ArtworksPage({ searchParams }: ArtworksPageProps) 
       return (
         <div className="space-y-6 px-5">
           <h1 className="text-3xl font-bold tracking-tight">작품</h1>
-          <p>Error loading data</p>
+          <p>데이터를 불러오는 중 오류가 발생했습니다</p>
         </div>
       );
     }
@@ -77,7 +77,7 @@ export default async function ArtworksPage({ searchParams }: ArtworksPageProps) 
       return (
         <div className="space-y-6 px-5">
           <h1 className="text-3xl font-bold tracking-tight">작품</h1>
-          <p>No se encontraron resultados para {q}</p>
+          <p>검색 결과 없음: {q}</p>
         </div>
       );
     }
@@ -85,7 +85,7 @@ export default async function ArtworksPage({ searchParams }: ArtworksPageProps) 
     return (
       <div className="space-y-6 px-5">
         <h1 className="text-3xl font-bold tracking-tight">작품</h1>
-        <p className="text-sm text-[#6b6b6b]">Resultados para &quot;{q}&quot;</p>
+        <p className="text-sm text-[#6b6b6b]">검색 결과: &quot;{q}&quot;</p>
         <ArtworkGrid artworks={artworks} basePath="/ko" />
       </div>
     );
@@ -99,7 +99,7 @@ export default async function ArtworksPage({ searchParams }: ArtworksPageProps) 
     totalCount = slice.totalCount;
   } catch (error) {
     console.error("Artworks primary query error:", error);
-    return <p>Error loading data</p>;
+    return <p>데이터를 불러오는 중 오류가 발생했습니다</p>;
   }
 
   const artworks: Artwork[] = rows.map((item) => ({
@@ -125,7 +125,7 @@ export default async function ArtworksPage({ searchParams }: ArtworksPageProps) 
     return (
       <div className="space-y-6 px-5">
         <h1 className="text-3xl font-bold tracking-tight">작품</h1>
-        <p>No se encontraron 작품 de arte.</p>
+        <p>작품을 찾을 수 없습니다.</p>
       </div>
     );
   }

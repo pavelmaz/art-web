@@ -10,7 +10,7 @@ import { absoluteUrl, slugify } from "@/lib/utils";
 export const revalidate = 86400;
 
 export const metadata: Metadata = {
-  title: "博物馆馆藏 — 免费下载 | Fine Art Free",
+  title: { absolute: "博物馆馆藏 — 免费下载 | Fine Art Free" },
   description:
     "按博物馆浏览公共领域艺术。普拉多、国立博物馆、波士顿MFA、国家美术馆等 — 免费下载。",
   alternates: {
@@ -48,11 +48,11 @@ export default async function MuseumsPage({ searchParams }: MuseumsPageProps) {
   return (
     <div className="space-y-8 px-5">
       <div>
-        <h1 className="mb-2 text-2xl font-semibold">Museos</h1>
-        <p className="mb-8 text-sm text-[#6b6b6b]">Explorar 作品 de arte por museo</p>
+        <h1 className="mb-2 text-2xl font-semibold">博物馆</h1>
+        <p className="mb-8 text-sm text-[#6b6b6b]">按博物馆浏览作品</p>
       </div>
 
-      {paginated.length ? <BrowseHubGrid items={paginated} /> : <p className="text-sm text-[#6b6b6b]">No se encontraron 博物馆.</p>}
+      {paginated.length ? <BrowseHubGrid items={paginated} /> : <p className="text-sm text-[#6b6b6b]">未找到博物馆。</p>}
 
       <Pagination currentPage={page} totalPages={totalPages} basePath="/zh/museums" />
     </div>

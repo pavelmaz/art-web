@@ -11,7 +11,7 @@ import type { Artwork } from "@/types/artwork";
 export const revalidate = 86400;
 
 export const metadata: Metadata = {
-  title: "Sfoglia tutte le opere — Arte di pubblico dominio gratuita | Fine Art Free",
+  title: { absolute: "Sfoglia tutte le opere — Arte di pubblico dominio gratuita | Fine Art Free" },
   description:
     "Scarica 72.000+ opere di pubblico dominio in alta risoluzione. Dipinti classici, stampe e illustrazioni gratis per qualsiasi uso.",
   alternates: {
@@ -49,7 +49,7 @@ export default async function ArtworksPage({ searchParams }: ArtworksPageProps) 
       return (
         <div className="space-y-6 px-5">
           <h1 className="text-3xl font-bold tracking-tight">Opere d\'arte</h1>
-          <p>Error loading data</p>
+          <p>Errore nel caricamento dei dati</p>
         </div>
       );
     }
@@ -77,7 +77,7 @@ export default async function ArtworksPage({ searchParams }: ArtworksPageProps) 
       return (
         <div className="space-y-6 px-5">
           <h1 className="text-3xl font-bold tracking-tight">Opere d\'arte</h1>
-          <p>No se encontraron resultados para {q}</p>
+          <p>Nessun risultato per {q}</p>
         </div>
       );
     }
@@ -85,7 +85,7 @@ export default async function ArtworksPage({ searchParams }: ArtworksPageProps) 
     return (
       <div className="space-y-6 px-5">
         <h1 className="text-3xl font-bold tracking-tight">Opere d\'arte</h1>
-        <p className="text-sm text-[#6b6b6b]">Resultados para &quot;{q}&quot;</p>
+        <p className="text-sm text-[#6b6b6b]">Risultati per &quot;{q}&quot;</p>
         <ArtworkGrid artworks={artworks} basePath="/it" />
       </div>
     );
@@ -99,7 +99,7 @@ export default async function ArtworksPage({ searchParams }: ArtworksPageProps) 
     totalCount = slice.totalCount;
   } catch (error) {
     console.error("Artworks primary query error:", error);
-    return <p>Error loading data</p>;
+    return <p>Errore nel caricamento dei dati</p>;
   }
 
   const artworks: Artwork[] = rows.map((item) => ({
@@ -125,7 +125,7 @@ export default async function ArtworksPage({ searchParams }: ArtworksPageProps) 
     return (
       <div className="space-y-6 px-5">
         <h1 className="text-3xl font-bold tracking-tight">Opere d\'arte</h1>
-        <p>No se encontraron opere de arte.</p>
+        <p>Nessuna opera trovata.</p>
       </div>
     );
   }

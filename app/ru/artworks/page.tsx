@@ -11,7 +11,7 @@ import type { Artwork } from "@/types/artwork";
 export const revalidate = 86400;
 
 export const metadata: Metadata = {
-  title: "Все произведения — Бесплатное искусство общественного достояния | Fine Art Free",
+  title: { absolute: "Все произведения — Бесплатное искусство общественного достояния | Fine Art Free" },
   description:
     "Скачайте 72 000+ произведений общественного достояния в высоком разрешении. Классическая живопись, гравюры и иллюстрации бесплатно.",
   alternates: {
@@ -49,7 +49,7 @@ export default async function ArtworksPage({ searchParams }: ArtworksPageProps) 
       return (
         <div className="space-y-6 px-5">
           <h1 className="text-3xl font-bold tracking-tight">Произведения</h1>
-          <p>Error loading data</p>
+          <p>Ошибка загрузки данных</p>
         </div>
       );
     }
@@ -77,7 +77,7 @@ export default async function ArtworksPage({ searchParams }: ArtworksPageProps) 
       return (
         <div className="space-y-6 px-5">
           <h1 className="text-3xl font-bold tracking-tight">Произведения</h1>
-          <p>No se encontraron resultados para {q}</p>
+          <p>Нет результатов для {q}</p>
         </div>
       );
     }
@@ -85,7 +85,7 @@ export default async function ArtworksPage({ searchParams }: ArtworksPageProps) 
     return (
       <div className="space-y-6 px-5">
         <h1 className="text-3xl font-bold tracking-tight">Произведения</h1>
-        <p className="text-sm text-[#6b6b6b]">Resultados para &quot;{q}&quot;</p>
+        <p className="text-sm text-[#6b6b6b]">Результаты для &quot;{q}&quot;</p>
         <ArtworkGrid artworks={artworks} basePath="/ru" />
       </div>
     );
@@ -99,7 +99,7 @@ export default async function ArtworksPage({ searchParams }: ArtworksPageProps) 
     totalCount = slice.totalCount;
   } catch (error) {
     console.error("Artworks primary query error:", error);
-    return <p>Error loading data</p>;
+    return <p>Ошибка загрузки данных</p>;
   }
 
   const artworks: Artwork[] = rows.map((item) => ({
@@ -125,7 +125,7 @@ export default async function ArtworksPage({ searchParams }: ArtworksPageProps) 
     return (
       <div className="space-y-6 px-5">
         <h1 className="text-3xl font-bold tracking-tight">Произведения</h1>
-        <p>No se encontraron произведения de arte.</p>
+        <p>Произведения не найдены.</p>
       </div>
     );
   }

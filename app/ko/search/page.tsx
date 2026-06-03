@@ -9,7 +9,7 @@ import type { Artwork } from "@/types/artwork";
 export const dynamic = "force-dynamic";
 
 export const metadata = {
-  title: "검색 | Fine Art Free",
+  title: { absolute: "검색 | Fine Art Free" },
   robots: {
     index: false,
     follow: true,
@@ -68,7 +68,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
     return (
       <div className="mx-auto max-w-7xl space-y-4 px-5 py-10">
         <h1 className="text-2xl font-semibold text-[#1a1a1a]">검색</h1>
-        <p className="text-sm text-[#6b6b6b]">Error al cargar los resultados de búsqueda.</p>
+        <p className="text-sm text-[#6b6b6b]">검색 결과를 불러오는 중 오류가 발생했습니다.</p>
       </div>
     );
   }
@@ -79,7 +79,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
   return (
     <div className="mx-auto max-w-7xl space-y-8 px-5 py-10">
       <div className="space-y-2">
-        <h1 className="text-3xl font-semibold text-[#1a1a1a]">Resultados de &quot;{q}&quot;</h1>
+        <h1 className="text-3xl font-semibold text-[#1a1a1a]">검색 결과 &quot;{q}&quot;</h1>
       </div>
 
       <section className="space-y-4">
@@ -87,13 +87,13 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
         {artworks.length ? (
           <ArtworkGrid artworks={artworks} basePath="/ko" />
         ) : (
-          <p className="text-sm text-[#6b6b6b]">No se encontraron resultados</p>
+          <p className="text-sm text-[#6b6b6b]">결과 없음</p>
         )}
       </section>
 
       {matchingTags.length ? (
         <section className="space-y-4">
-          <h2 className="text-xl font-semibold text-[#1a1a1a]">Temas</h2>
+          <h2 className="text-xl font-semibold text-[#1a1a1a]">주제</h2>
           <div className="flex flex-wrap gap-2">
             {matchingTags.map((tag) => (
               <Link
@@ -109,7 +109,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
       ) : null}
 
       <section className="space-y-4">
-        <h2 className="text-xl font-semibold text-[#1a1a1a]">Artistas ({artistResults.length})</h2>
+        <h2 className="text-xl font-semibold text-[#1a1a1a]">예술가 ({artistResults.length})</h2>
         {artistResults.length ? (
           <BrowseHubGrid
             items={artistResults.map((artist) => ({
@@ -121,7 +121,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
             }))}
           />
         ) : (
-          <p className="text-sm text-[#6b6b6b]">No se encontraron resultados</p>
+          <p className="text-sm text-[#6b6b6b]">결과 없음</p>
         )}
       </section>
     </div>

@@ -11,7 +11,7 @@ import type { Artwork } from "@/types/artwork";
 export const revalidate = 86400;
 
 export const metadata: Metadata = {
-  title: "Parcourir toutes les œuvres — Art du domaine public gratuit | Fine Art Free",
+  title: { absolute: "Parcourir toutes les œuvres — Art du domaine public gratuit | Fine Art Free" },
   description:
     "Téléchargez 72 000+ œuvres du domaine public en haute résolution. Peintures classiques, gravures et illustrations gratuites pour tout usage.",
   alternates: {
@@ -48,8 +48,8 @@ export default async function ArtworksPage({ searchParams }: ArtworksPageProps) 
       console.error("Artworks search query error:", error);
       return (
         <div className="space-y-6 px-5">
-          <h1 className="text-3xl font-bold tracking-tight">Œuvres d\'art</h1>
-          <p>Error loading data</p>
+          <h1 className="text-3xl font-bold tracking-tight">Œuvres d'art</h1>
+          <p>Erreur lors du chargement des données</p>
         </div>
       );
     }
@@ -76,16 +76,16 @@ export default async function ArtworksPage({ searchParams }: ArtworksPageProps) 
     if (!artworks.length) {
       return (
         <div className="space-y-6 px-5">
-          <h1 className="text-3xl font-bold tracking-tight">Œuvres d\'art</h1>
-          <p>No se encontraron resultados para {q}</p>
+          <h1 className="text-3xl font-bold tracking-tight">Œuvres d'art</h1>
+          <p>Aucun résultat pour {q}</p>
         </div>
       );
     }
 
     return (
       <div className="space-y-6 px-5">
-        <h1 className="text-3xl font-bold tracking-tight">Œuvres d\'art</h1>
-        <p className="text-sm text-[#6b6b6b]">Resultados para &quot;{q}&quot;</p>
+        <h1 className="text-3xl font-bold tracking-tight">Œuvres d'art</h1>
+        <p className="text-sm text-[#6b6b6b]">Résultats pour &quot;{q}&quot;</p>
         <ArtworkGrid artworks={artworks} basePath="/fr" />
       </div>
     );
@@ -99,7 +99,7 @@ export default async function ArtworksPage({ searchParams }: ArtworksPageProps) 
     totalCount = slice.totalCount;
   } catch (error) {
     console.error("Artworks primary query error:", error);
-    return <p>Error loading data</p>;
+    return <p>Erreur lors du chargement des données</p>;
   }
 
   const artworks: Artwork[] = rows.map((item) => ({
@@ -124,15 +124,15 @@ export default async function ArtworksPage({ searchParams }: ArtworksPageProps) 
   if (!artworks.length) {
     return (
       <div className="space-y-6 px-5">
-        <h1 className="text-3xl font-bold tracking-tight">Œuvres d\'art</h1>
-        <p>No se encontraron œuvres de arte.</p>
+        <h1 className="text-3xl font-bold tracking-tight">Œuvres d'art</h1>
+        <p>Aucune œuvre trouvée.</p>
       </div>
     );
   }
 
   return (
     <div className="space-y-6 px-5">
-      <h1 className="text-3xl font-bold tracking-tight">Œuvres d\'art</h1>
+      <h1 className="text-3xl font-bold tracking-tight">Œuvres d'art</h1>
       <ArtworkGrid artworks={artworks} basePath="/fr" />
       <Pagination
         currentPage={page}

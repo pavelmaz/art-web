@@ -11,7 +11,7 @@ import type { Artwork } from "@/types/artwork";
 export const revalidate = 86400;
 
 export const metadata: Metadata = {
-  title: "Alle Kunstwerke erkunden — Kostenlose gemeinfreie Kunst | Fine Art Free",
+  title: { absolute: "Alle Kunstwerke erkunden — Kostenlose gemeinfreie Kunst | Fine Art Free" },
   description:
     "Laden Sie 72.000+ gemeinfreie Kunstwerke in hoher Auflösung herunter. Klassische Gemälde, Drucke und Illustrationen gratis für jede Nutzung.",
   alternates: {
@@ -49,7 +49,7 @@ export default async function ArtworksPage({ searchParams }: ArtworksPageProps) 
       return (
         <div className="space-y-6 px-5">
           <h1 className="text-3xl font-bold tracking-tight">Kunstwerke</h1>
-          <p>Error loading data</p>
+          <p>Fehler beim Laden der Daten</p>
         </div>
       );
     }
@@ -77,7 +77,7 @@ export default async function ArtworksPage({ searchParams }: ArtworksPageProps) 
       return (
         <div className="space-y-6 px-5">
           <h1 className="text-3xl font-bold tracking-tight">Kunstwerke</h1>
-          <p>No se encontraron resultados para {q}</p>
+          <p>Keine Ergebnisse für {q}</p>
         </div>
       );
     }
@@ -85,7 +85,7 @@ export default async function ArtworksPage({ searchParams }: ArtworksPageProps) 
     return (
       <div className="space-y-6 px-5">
         <h1 className="text-3xl font-bold tracking-tight">Kunstwerke</h1>
-        <p className="text-sm text-[#6b6b6b]">Resultados para &quot;{q}&quot;</p>
+        <p className="text-sm text-[#6b6b6b]">Ergebnisse für &quot;{q}&quot;</p>
         <ArtworkGrid artworks={artworks} basePath="/de" />
       </div>
     );
@@ -99,7 +99,7 @@ export default async function ArtworksPage({ searchParams }: ArtworksPageProps) 
     totalCount = slice.totalCount;
   } catch (error) {
     console.error("Artworks primary query error:", error);
-    return <p>Error loading data</p>;
+    return <p>Fehler beim Laden der Daten</p>;
   }
 
   const artworks: Artwork[] = rows.map((item) => ({
@@ -125,7 +125,7 @@ export default async function ArtworksPage({ searchParams }: ArtworksPageProps) 
     return (
       <div className="space-y-6 px-5">
         <h1 className="text-3xl font-bold tracking-tight">Kunstwerke</h1>
-        <p>No se encontraron werke de arte.</p>
+        <p>Keine Kunstwerke gefunden.</p>
       </div>
     );
   }

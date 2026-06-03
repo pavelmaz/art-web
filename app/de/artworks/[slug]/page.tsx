@@ -312,6 +312,7 @@ async function getArtworkBySlug(slug: string): Promise<ArtworkRow | null> {
 export async function generateMetadata({ params }: ArtworkPageProps): Promise<Metadata> {
   const { slug } = await params;
   const artwork = await getArtworkBySlug(slug);
+  const t = getT("de");
 
   if (!artwork) {
     return {
@@ -320,7 +321,7 @@ export async function generateMetadata({ params }: ArtworkPageProps): Promise<Me
   }
 
   const artist = artwork.artist_display ?? "Unbekannter Künstler";
-  const title = `${artwork.title} von ${artwork.artist_display} — Kostenloser Download | Fine Art Free`;
+  const title = t.artworkPageTitle(artwork.title, artist);
 
   const { data: localeTranslation } = await supabase
     .from("artwork_translations")
@@ -337,7 +338,7 @@ export async function generateMetadata({ params }: ArtworkPageProps): Promise<Me
   const imageUrl = artworkImageUrl(artwork);
 
   return {
-    title,
+    title: { absolute: title },
     description,
     alternates: {
       canonical: `https://fineartfree.com${artworkDetailPath("de", slug)}`,
@@ -354,7 +355,7 @@ export async function generateMetadata({ params }: ArtworkPageProps): Promise<Me
 export default async function ArtworkDetailPageDe({ params }: ArtworkPageProps) {
   const { slug } = await params;
   const artwork = await getArtworkBySlug(slug);
-  const t = getT('de');
+  const t = getT("de");
 
   if (!artwork) {
     notFound();

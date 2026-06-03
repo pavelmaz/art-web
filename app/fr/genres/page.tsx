@@ -11,7 +11,7 @@ import { absoluteUrl } from "@/lib/utils";
 export const revalidate = 86400;
 
 export const metadata: Metadata = {
-  title: "Genres artistiques — Téléchargement gratuit | Fine Art Free",
+  title: { absolute: "Genres artistiques — Téléchargement gratuit | Fine Art Free" },
   description:
     "Art par genre. Paysage, portrait, nature morte, religieux et plus — gratuit en haute résolution.",
   alternates: {
@@ -78,14 +78,14 @@ export default async function GenresPage({ searchParams }: GenresPageProps) {
   return (
     <div className="space-y-8 px-5">
       <div>
-        <h1 className="mb-2 text-2xl font-semibold">Géneros</h1>
-        <p className="mb-8 text-sm text-[#6b6b6b]">Explorar obras de arte por género</p>
+        <h1 className="mb-2 text-2xl font-semibold">Genres</h1>
+        <p className="mb-8 text-sm text-[#6b6b6b]">Explorer les œuvres par genre</p>
       </div>
 
       {paginated.length ? (
         <BrowseHubGrid items={paginated} />
       ) : (
-        <p className="text-sm text-[#6b6b6b]">No se encontraron géneros.</p>
+        <p className="text-sm text-[#6b6b6b]">Aucun genre trouvé.</p>
       )}
 
       <Pagination currentPage={page} totalPages={totalPages} basePath="/fr/genres" />

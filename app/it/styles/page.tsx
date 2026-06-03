@@ -11,7 +11,7 @@ import { absoluteUrl } from "@/lib/utils";
 export const revalidate = 86400;
 
 export const metadata: Metadata = {
-  title: "Stili e movimenti artistici — Download gratuito | Fine Art Free",
+  title: { absolute: "Stili e movimenti artistici — Download gratuito | Fine Art Free" },
   description:
     "Arte per stile. Barocco, impressionismo, Secolo d'oro olandese, Rinascimento e altro — gratis da scaricare.",
   alternates: {
@@ -61,7 +61,7 @@ export default async function StylesPage({ searchParams }: StylesPageProps) {
   const byLower = new Map(agg.map((a) => [a.display.toLowerCase(), a]));
 
   if (!stylesByName.size) {
-    return <p className="text-sm text-[#6b6b6b]">No se pudieron cargar los estilos.</p>;
+    return <p className="text-sm text-[#6b6b6b]">Impossibile caricare gli stili.</p>;
   }
 
   const hubItems: BrowseHubItem[] = Array.from(stylesByName.values()).map((s) => {
@@ -87,14 +87,14 @@ export default async function StylesPage({ searchParams }: StylesPageProps) {
   return (
     <div className="space-y-8 px-5">
       <div>
-        <h1 className="mb-2 text-2xl font-semibold">Estilos</h1>
-        <p className="mb-8 text-sm text-[#6b6b6b]">Explorar obras de arte por estilo</p>
+        <h1 className="mb-2 text-2xl font-semibold">Stili</h1>
+        <p className="mb-8 text-sm text-[#6b6b6b]">Esplora opere per stile</p>
       </div>
 
       {paginated.length ? (
         <BrowseHubGrid items={paginated} />
       ) : (
-        <p className="text-sm text-[#6b6b6b]">No se encontraron estilos.</p>
+        <p className="text-sm text-[#6b6b6b]">Nessuno stile trovato.</p>
       )}
 
       <Pagination currentPage={page} totalPages={totalPages} basePath="/it/styles" />

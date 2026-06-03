@@ -82,16 +82,14 @@ export async function generateMetadata({ params }: GenrePageProps): Promise<Meta
   const totalCount = countQuery.count ?? 0;
   if (!totalCount) notFound();
 
-  const title = `Pinturas de ${displayName} — Descarga Gratuita | Fine Art Free`;
+  const title = `${displayName} — Kostenlose Gemälde | Fine Art Free`;
   const description =
     genre.description_de?.trim() ||
     genre.description?.trim() ||
-    `Descarga ${totalCount} pinturas de ${displayName} en alta resolución. Arte de dominio público gratis para uso personal y comercial.`;
-
-  const linkSlug = genre.slug_de?.trim() || genre.slug;
+    `Entdecken Sie ${totalCount} Werke von ${displayName} in hoher Auflösung. Gemeinfrei, kostenlos.`;
 
   return {
-    title,
+    title: { absolute: title },
     description,
     alternates: {
       canonical: `https://fineartfree.com${localePath("de", "genres")}/${linkSlug}`,
@@ -162,7 +160,7 @@ export default async function GenrePage({ params, searchParams }: GenrePageProps
   return (
     <div className="space-y-6 px-5">
       <CollectionPageJsonLd
-        name={`Pinturas de ${displayName}`}
+        name={`Gemälde: ${displayName}`}
         path={`/de/genres/${linkSlug}`}
         description={intro}
         numberOfItems={totalCount}
@@ -175,7 +173,7 @@ export default async function GenrePage({ params, searchParams }: GenrePageProps
         ]}
         currentPath={`/de/genres/${linkSlug}`}
       />
-      <h1 className="text-3xl font-bold tracking-tight">Pinturas de {displayName}</h1>
+      <h1 className="text-3xl font-bold tracking-tight">Gemälde: {displayName}</h1>
       {intro ? (
         <div className="max-w-3xl mb-8 text-sm leading-relaxed text-[#4a4a4a]">
           <p>{intro}</p>

@@ -60,11 +60,11 @@ export async function generateMetadata({ params }: MuseumPageProps): Promise<Met
 
   const totalCount = count;
 
-  const title = `${museumName} — Arte Gratis para Descargar | Fine Art Free`;
-  const description = `Explora ${totalCount} 作品 de arte de ${museumName} gratis para descargar. Arte de dominio público en alta resolución para cualquier uso.`;
+  const title = `${museumName} — 免费博物馆 | Fine Art Free`;
+  const description = `探索${museumName}的${totalCount}件高分辨率作品。公共领域，免费。`;
 
   return {
-    title,
+    title: { absolute: title },
     description,
     alternates: {
       canonical: `https://fineartfree.com${localePath("zh", "museums")}/${slug}`,
@@ -125,12 +125,12 @@ export default async function MuseumPage({ params, searchParams }: MuseumPagePro
   return (
     <div className="space-y-6 px-5">
       <Breadcrumbs
-        items={[{ label: "首页", href: "/zh" }, { label: "Museos", href: "/zh/museums" }, { label: museumName }]}
+        items={[{ label: "首页", href: "/zh" }, { label: "博物馆", href: "/zh/museums" }, { label: museumName }]}
         currentPath={`/zh/museums/${slug}`}
       />
       <h1 className="text-3xl font-bold tracking-tight">作品 de {museumName}</h1>
       <p className="max-w-3xl text-neutral-700">
-        Explora 作品 de arte y pinturas de dominio público de {museumName}, gratis para descargar.
+        探索{museumName}的{totalCount}件公共领域艺术作品，免费高分辨率下载。
       </p>
       <ArtworkGrid artworks={artworks} basePath="/zh" />
       <Pagination

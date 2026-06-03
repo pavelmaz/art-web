@@ -60,11 +60,11 @@ export async function generateMetadata({ params }: MuseumPageProps): Promise<Met
 
   const totalCount = count;
 
-  const title = `${museumName} — Arte Gratis para Descargar | Fine Art Free`;
-  const description = `Explora ${totalCount} 작품 de arte de ${museumName} gratis para descargar. Arte de dominio público en alta resolución para cualquier uso.`;
+  const title = `${museumName} — 무료 박물관 | Fine Art Free`;
+  const description = `${museumName}의 ${totalCount}개 작품을 고해상도로 감상하세요. 퍼블릭 도메인, 무료.`;
 
   return {
-    title,
+    title: { absolute: title },
     description,
     alternates: {
       canonical: `https://fineartfree.com${localePath("ko", "museums")}/${slug}`,
@@ -125,12 +125,12 @@ export default async function MuseumPage({ params, searchParams }: MuseumPagePro
   return (
     <div className="space-y-6 px-5">
       <Breadcrumbs
-        items={[{ label: "홈", href: "/ko" }, { label: "Museos", href: "/ko/museums" }, { label: museumName }]}
+        items={[{ label: "홈", href: "/ko" }, { label: "박물관", href: "/ko/museums" }, { label: museumName }]}
         currentPath={`/ko/museums/${slug}`}
       />
       <h1 className="text-3xl font-bold tracking-tight">작품 de {museumName}</h1>
       <p className="max-w-3xl text-neutral-700">
-        Explora 작품 de arte y pinturas de dominio público de {museumName}, gratis para descargar.
+        {museumName}의 퍼블릭 도메인 작품 {totalCount}점을 고해상도로 무료 다운로드하세요.
       </p>
       <ArtworkGrid artworks={artworks} basePath="/ko" />
       <Pagination

@@ -10,7 +10,7 @@ import { absoluteUrl, slugify } from "@/lib/utils";
 export const revalidate = 86400;
 
 export const metadata: Metadata = {
-  title: "艺术家 — 全集免费下载 | Fine Art Free",
+  title: { absolute: "艺术家 — 全集免费下载 | Fine Art Free" },
   description:
     "按艺术家浏览公共领域艺术。莫奈、伦勃朗、梵高、丢勒等数百位 — 免费下载。",
   alternates: {
@@ -38,8 +38,8 @@ export default async function ArtistsPage({ searchParams }: ArtistsPageProps) {
   return (
     <div className="space-y-8 px-5">
       <div>
-        <h1 className="mb-2 text-2xl font-semibold">Artistas</h1>
-        <p className="mb-8 text-sm text-[#6b6b6b]">Explorar 作品 de arte por artista</p>
+        <h1 className="mb-2 text-2xl font-semibold">艺术家</h1>
+        <p className="mb-8 text-sm text-[#6b6b6b]">按艺术家浏览作品</p>
       </div>
 
       {artists.length ? (
@@ -53,7 +53,7 @@ export default async function ArtistsPage({ searchParams }: ArtistsPageProps) {
           }))}
         />
       ) : (
-        <p className="text-sm text-[#6b6b6b]">No se encontraron 艺术家.</p>
+        <p className="text-sm text-[#6b6b6b]">未找到艺术家。</p>
       )}
 
       <Pagination currentPage={page} totalPages={totalPages} basePath="/zh/artists" />

@@ -60,11 +60,11 @@ export async function generateMetadata({ params }: MuseumPageProps): Promise<Met
 
   const totalCount = count;
 
-  const title = `${museumName} — Arte Gratis para Descargar | Fine Art Free`;
-  const description = `Explora ${totalCount} œuvres de arte de ${museumName} gratis para descargar. Arte de dominio público en alta resolución para cualquier uso.`;
+  const title = `${museumName} — Musées gratuits | Fine Art Free`;
+  const description = `Découvrez ${totalCount} œuvres du ${museumName} en haute résolution. Domaine public, gratuit.`;
 
   return {
-    title,
+    title: { absolute: title },
     description,
     alternates: {
       canonical: `https://fineartfree.com${localePath("fr", "museums")}/${slug}`,
@@ -125,12 +125,12 @@ export default async function MuseumPage({ params, searchParams }: MuseumPagePro
   return (
     <div className="space-y-6 px-5">
       <Breadcrumbs
-        items={[{ label: "Accueil", href: "/fr" }, { label: "Museos", href: "/fr/museums" }, { label: museumName }]}
+        items={[{ label: "Accueil", href: "/fr" }, { label: "Musées", href: "/fr/museums" }, { label: museumName }]}
         currentPath={`/fr/museums/${slug}`}
       />
       <h1 className="text-3xl font-bold tracking-tight">Œuvres de {museumName}</h1>
       <p className="max-w-3xl text-neutral-700">
-        Explora œuvres de arte y pinturas de dominio público de {museumName}, gratis para descargar.
+        Découvrez {totalCount} œuvres et peintures du domaine public du {museumName}, gratuites à télécharger.
       </p>
       <ArtworkGrid artworks={artworks} basePath="/fr" />
       <Pagination

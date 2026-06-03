@@ -10,7 +10,7 @@ import { absoluteUrl, slugify } from "@/lib/utils";
 export const revalidate = 86400;
 
 export const metadata: Metadata = {
-  title: "Коллекции музеев — Бесплатная загрузка | Fine Art Free",
+  title: { absolute: "Коллекции музеев — Бесплатная загрузка | Fine Art Free" },
   description:
     "Искусство по музеям. Прадо, Рейксмузеум, MFA Бостон, National Gallery и другие — бесплатно.",
   alternates: {
@@ -48,11 +48,11 @@ export default async function MuseumsPage({ searchParams }: MuseumsPageProps) {
   return (
     <div className="space-y-8 px-5">
       <div>
-        <h1 className="mb-2 text-2xl font-semibold">Museos</h1>
-        <p className="mb-8 text-sm text-[#6b6b6b]">Explorar произведения de arte por museo</p>
+        <h1 className="mb-2 text-2xl font-semibold">Музеи</h1>
+        <p className="mb-8 text-sm text-[#6b6b6b]">Работы по музеям</p>
       </div>
 
-      {paginated.length ? <BrowseHubGrid items={paginated} /> : <p className="text-sm text-[#6b6b6b]">No se encontraron музеи.</p>}
+      {paginated.length ? <BrowseHubGrid items={paginated} /> : <p className="text-sm text-[#6b6b6b]">Музеи не найдены.</p>}
 
       <Pagination currentPage={page} totalPages={totalPages} basePath="/ru/museums" />
     </div>
