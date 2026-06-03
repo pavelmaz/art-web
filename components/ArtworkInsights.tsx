@@ -1,5 +1,6 @@
 "use client";
 
+import { track } from "@vercel/analytics";
 import { Eye, Loader2, X } from "lucide-react";
 import {
   createContext,
@@ -167,6 +168,8 @@ export function ArtworkInsightsProvider({
       return;
     }
 
+    track("Artwork Insights Discover", { locale });
+
     setLoading(true);
     setError(null);
     setInsights([]);
@@ -202,7 +205,12 @@ export function ArtworkInsightsProvider({
       const list = Array.isArray(parsed.insights) ? parsed.insights.slice(0, 4) : [];
       setInsights(list);
       setVisibleCount(0);
+      track("Artwork Insights Generated", {
+        locale,
+        count: list.length,
+      });
     } catch {
+      track("Artwork Insights Failed", { locale });
       setError(labels.insightsGenerateFailed);
     } finally {
       setLoading(false);
