@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { artworkDetailSelectColumns } from "@/lib/locale-query-columns";
 import { artworkDetailPath, buildArtworkLanguageAlternates } from "@/lib/locale-routes";
 import { fineArtProPath } from "@/lib/fineart-pro-path";
 import type { ReactNode } from "react";
@@ -274,8 +275,7 @@ function ArtworkDescriptionFormatted({ description }: { description: string }) {
 }
 
 async function getArtworkBySlug(slug: string): Promise<ArtworkRow | null> {
-  const selectColumns =
-    "id, slug, title, artist_display, url, image_id, museum, style_title, genre_title, medium_display, date_display, dimensions, description, description_ch";
+  const selectColumns = artworkDetailSelectColumns("zh");
 
   const primary = await supabase
     .from("artworks")

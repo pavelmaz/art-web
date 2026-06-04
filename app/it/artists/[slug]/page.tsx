@@ -40,7 +40,7 @@ type ArtworkRow = {
 
 export async function generateMetadata({ params }: ArtistPageProps): Promise<Metadata> {
   const { slug } = await params;
-  const artist = await getArtistProfileBySlug(slug);
+  const artist = await getArtistProfileBySlug(slug, "it");
 
   if (!artist?.name) {
     notFound();
@@ -70,7 +70,7 @@ export default async function ArtistPage({ params, searchParams }: ArtistPagePro
   const resolvedSearchParams = await searchParams;
   const { page, from, to } = getPaginationParams(resolvedSearchParams);
 
-  const artist = await getArtistProfileBySlug(slug);
+  const artist = await getArtistProfileBySlug(slug, "it");
   if (!artist?.name) {
     notFound();
   }

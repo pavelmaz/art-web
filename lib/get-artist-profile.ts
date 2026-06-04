@@ -1,7 +1,13 @@
+import {
+  ARTIST_PROFILE_COLUMNS_ALL,
+  artistProfileSelectColumns,
+  isNewLocaleSlug,
+} from "@/lib/locale-query-columns";
 import { supabase } from "@/lib/supabase";
 import type { Locale } from "@/lib/translations";
 
 export type ArtistProfileRow = {
+  id?: string;
   name: string;
   slug: string;
   image_url: string | null;
@@ -21,13 +27,18 @@ export type ArtistProfileRow = {
   bio_zh: string | null;
 };
 
-const ARTIST_PROFILE_COLUMNS =
-  "name, slug, image_url, nationality, birth_year, death_year, artwork_count, bio, bio_es, bio_pt, bio_ja, bio_fr, bio_de, bio_it, bio_ko, bio_ru, bio_zh";
+export async function getArtistProfileBySlug(
+  slug: string,
+  locale?: Locale
+): Promise<ArtistProfileRow | null> {
+  const columns =
+    locale && isNewLocaleSlug(locale)
+      ? artistProfileSelectColumns(locale)
+      : ARTIST_PROFILE_COLUMNS_ALL;
 
-export async function getArtistProfileBySlug(slug: string): Promise<ArtistProfileRow | null> {
   const { data, error } = await supabase
     .from("artists")
-    .select(ARTIST_PROFILE_COLUMNS)
+    .select(columns)
     .eq("slug", slug)
     .maybeSingle();
 
