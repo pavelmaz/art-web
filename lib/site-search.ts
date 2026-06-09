@@ -55,41 +55,52 @@ async function fetchArtworksByFilter(term: string) {
 }
 
 async function fetchArtistsByName(term: string) {
-  return supabase.from("artists").select("name, slug").ilike("name", `%${term}%`).limit(20);
+  return supabase
+    .from("artists")
+    .select("name, slug, image_url, artwork_count")
+    .ilike("name", `%${term}%`)
+    .limit(20);
 }
 
-function previewFromArtworks(
-  artistName: string,
-  artworks: SiteSearchArtworkRow[],
-): { image_id: string; url: string | null } | null {
-  const key = artistName.toLowerCase();
-  for (const row of artworks) {
-    if (row.artist_display?.trim().toLowerCase() !== key) {
-      continue;
-    }
-    const image_id = row.image_id?.trim();
-    if (image_id) {
-      return { image_id, url: row.url ?? null };
-    }
-  }
-  return null;
-}
-
+/** Match artists hub: use `artists.image_url` first, artwork preview only as fallback. */
 async function enrichSearchArtists(
   artists: Omit<SiteSearchArtist, "image_id" | "url">[],
-  artworks: SiteSearchArtworkRow[],
 ): Promise<SiteSearchArtist[]> {
-  const withPreview = artists.map((artist) => {
-    const preview = previewFromArtworks(artist.name, artworks);
+  const slugs = artists.map((artist) => artist.slug).filter(Boolean);
+  const dbBySlug = new Map<string, { image_url: string | null; artwork_count: number | null }>();
+
+  if (slugs.length) {
+    const { data, error } = await supabase
+      .from("artists")
+      .select("slug, image_url, artwork_count")
+      .in("slug", slugs);
+
+    if (error) {
+      console.error("enrichSearchArtists: failed to load artist images", error.message);
+    }
+
+    for (const row of data ?? []) {
+      const slug = row.slug?.trim();
+      if (!slug) continue;
+      dbBySlug.set(slug, {
+        image_url: row.image_url ?? null,
+        artwork_count: row.artwork_count ?? null,
+      });
+    }
+  }
+
+  const withDbImage = artists.map((artist) => {
+    const db = dbBySlug.get(artist.slug);
     return {
       ...artist,
-      image_id: preview?.image_id ?? null,
-      url: preview?.url ?? null,
+      count: db?.artwork_count ?? artist.count,
+      image_id: db?.image_url?.trim() || null,
+      url: null as string | null,
     };
   });
 
   const filled = await fillArtistHubPreviewImages(
-    withPreview.map((artist) => ({
+    withDbImage.map((artist) => ({
       display: artist.name,
       count: artist.count,
       image_id: artist.image_id,
@@ -98,7 +109,7 @@ async function enrichSearchArtists(
     })),
   );
 
-  return withPreview.map((artist, index) => ({
+  return withDbImage.map((artist, index) => ({
     ...artist,
     image_id: filled[index]?.image_id ?? artist.image_id,
     url: filled[index]?.url ?? artist.url,
@@ -195,7 +206,7 @@ export async function runSiteSearch(rawQuery: string): Promise<{
     artists.push({
       name,
       slug,
-      count: countFromArtworks.get(key)?.count ?? 0,
+      count: row.artwork_count ?? countFromArtworks.get(key)?.count ?? 0,
     });
   }
 
@@ -208,7 +219,7 @@ export async function runSiteSearch(rawQuery: string): Promise<{
 
   artists.sort((a, b) => b.count - a.count || a.name.localeCompare(b.name));
 
-  const enrichedArtists = await enrichSearchArtists(artists, artworks);
+  const enrichedArtists = await enrichSearchArtists(artists);
 
   return { artworks, artists: enrichedArtists, error };
 }
