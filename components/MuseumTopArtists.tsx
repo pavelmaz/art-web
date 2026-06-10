@@ -9,17 +9,9 @@ type MuseumTopArtistsProps = {
   artists: MuseumTopArtist[];
   heading: string;
   locale: SiteLocale;
-  artworksLabel: string;
-  artworksSingular?: string;
 };
 
-export function MuseumTopArtists({
-  artists,
-  heading,
-  locale,
-  artworksLabel,
-  artworksSingular,
-}: MuseumTopArtistsProps) {
+export function MuseumTopArtists({ artists, heading, locale }: MuseumTopArtistsProps) {
   if (!artists.length) {
     return null;
   }
@@ -60,9 +52,6 @@ export function MuseumTopArtists({
               </div>
               <p className="line-clamp-2 text-center text-xs font-medium leading-snug text-[#1a1a1a]">
                 {artist.name}
-              </p>
-              <p className="text-center text-xs text-[#6b6b6b]">
-                {artist.count} {artist.count === 1 ? (artworksSingular ?? artworksLabel) : artworksLabel}
               </p>
             </Link>
           );

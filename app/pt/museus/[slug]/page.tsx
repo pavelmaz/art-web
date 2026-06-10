@@ -96,13 +96,7 @@ export default async function MuseumPage({ params, searchParams }: MuseumPagePro
         description={pageDescription}
         readMoreLabel="Ler mais"
       />
-      <MuseumTopArtists
-        artists={topArtists}
-        heading={t.topArtists}
-        locale="pt"
-        artworksLabel="obras de arte"
-        artworksSingular="obra de arte"
-      />
+      <MuseumTopArtists artists={topArtists} heading={t.topArtists} locale="pt" />
       <p className="text-sm text-[#6b6b6b]">
         {museum.artworkCount} {museum.artworkCount === 1 ? "obra de arte" : "obras de arte"}
       </p>
