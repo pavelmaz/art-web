@@ -32,7 +32,7 @@ const TIME_OPTIONS: Array<{ label: string; value: TimeHours }> = [
 ];
 
 type FocusNotFoundError = {
-  focus: string;
+  message: string;
   suggestions: string[];
 };
 
@@ -150,23 +150,32 @@ export function GuideModal({
         }),
       });
 
-      const data = (await response.json()) as GenerateResponse;
+      const errorData = (await response.json().catch(() => null)) as GenerateResponse | null;
 
-      if (response.status === 422 && data.error === "focus_not_found") {
+      if (response.status === 422 && errorData?.error === "focus_not_found") {
         setFocusError({
-          focus: focus ?? focusText.trim(),
-          suggestions: Array.isArray(data.suggestions) ? data.suggestions : [],
+          message: errorData.message ?? t.modal.errorRetry,
+          suggestions: errorData.suggestions ?? [],
         });
         setGenerating(false);
         return;
       }
 
-      if (!response.ok || !data.token) {
-        throw new Error(data.error ?? "Generation failed");
+      if (!response.ok) {
+        const msg = errorData?.message || errorData?.error || t.modal.errorRetry;
+        setError(msg);
+        setGenerating(false);
+        return;
+      }
+
+      if (!errorData?.token) {
+        setError(t.modal.errorRetry);
+        setGenerating(false);
+        return;
       }
 
       onClose();
-      router.push(`/guides/${museumSlug}/${data.token}`);
+      router.push(`/guides/${museumSlug}/${errorData.token}`);
     } catch {
       setError(t.modal.errorRetry);
       setGenerating(false);
@@ -230,9 +239,7 @@ export function GuideModal({
             <h2 id="guide-modal-title" className="text-xl font-semibold text-[#1a1a1a]">
               {t.modal.focusNotFoundTitle}
             </h2>
-            <p className="text-sm leading-relaxed text-[#4a4a4a]">
-              {t.modal.focusNotFound(focusError.focus, museumName)}
-            </p>
+            <p className="text-sm leading-relaxed text-[#4a4a4a]">{focusError.message}</p>
             {focusError.suggestions.length > 0 ? (
               <div>
                 <p className="text-sm font-medium text-[#1a1a1a]">{t.modal.focusArtistsLabel}</p>

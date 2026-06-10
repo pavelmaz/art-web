@@ -64,12 +64,16 @@ function parseRequest(body: unknown): GenerateGuideRequest | { error: string } {
   };
 }
 
-function focusMatchesArtworks(artworks: GuideArtworkCandidate[], focus: string): boolean {
-  const focusLower = focus.trim().toLowerCase();
-  return artworks.some(
-    (artwork) =>
-      artwork.artist_display.toLowerCase().includes(focusLower) ||
-      (artwork.style_title?.toLowerCase().includes(focusLower) ?? false),
+function focusMatchesArtwork(focus: string, artwork: GuideArtworkCandidate): boolean {
+  const focusWords = focus.toLowerCase().trim().split(/\s+/);
+  const artistLower = (artwork.artist_display || "").toLowerCase();
+  const styleLower = (artwork.style_title || "").toLowerCase();
+  const titleLower = (artwork.title || "").toLowerCase();
+
+  return focusWords.some(
+    (word) =>
+      word.length > 2 &&
+      (artistLower.includes(word) || styleLower.includes(word) || titleLower.includes(word)),
   );
 }
 
@@ -179,7 +183,8 @@ export async function POST(req: NextRequest) {
     }
 
     if (parsed.visit_type === "in_depth" && parsed.focus) {
-      if (!focusMatchesArtworks(artworks, parsed.focus)) {
+      const focusMatches = artworks.some((a) => focusMatchesArtwork(parsed.focus!, a));
+      if (!focusMatches) {
         return NextResponse.json(
           {
             error: "focus_not_found",

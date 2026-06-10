@@ -54,6 +54,8 @@ MAX_SEO_LEN = 155
 # Set to a slug to process one museum only (skips resume check). Set None for full run.
 TEST_SLUG_ONLY: str | None = None
 
+FORCE_SLUGS = {"mauritshuis"}
+
 LOCALES = {
     "en": "English",
     "es": "Spanish",
@@ -386,7 +388,7 @@ def main() -> None:
 
         print(f"[{index}/{len(museums)}] {name} ({slug})")
 
-        if slug in enriched_slugs:
+        if slug in enriched_slugs and slug not in FORCE_SLUGS:
             print("  → skipped (en row exists)")
             total_skipped += 1
             continue

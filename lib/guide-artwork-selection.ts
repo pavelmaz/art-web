@@ -12,6 +12,19 @@ function normalizeStyle(style: string | null): string {
   return trimmed ? trimmed : "Unknown";
 }
 
+function focusMatchesArtwork(focus: string, artwork: GuideArtworkCandidate): boolean {
+  const focusWords = focus.toLowerCase().trim().split(/\s+/);
+  const artistLower = (artwork.artist_display || "").toLowerCase();
+  const styleLower = (artwork.style_title || "").toLowerCase();
+  const titleLower = (artwork.title || "").toLowerCase();
+
+  return focusWords.some(
+    (word) =>
+      word.length > 2 &&
+      (artistLower.includes(word) || styleLower.includes(word) || titleLower.includes(word)),
+  );
+}
+
 function filterCandidates(artworks: GuideArtworkCandidate[]): GuideArtworkCandidate[] {
   return artworks.filter(
     (artwork) =>
@@ -89,20 +102,27 @@ function pickInDepth(
     return pickMasterpieces(candidates, stopCount);
   }
 
-  const focusLower = focus.trim().toLowerCase();
+  const trimmedFocus = focus.trim();
+  const focusWords = trimmedFocus.toLowerCase().split(/\s+/);
+  const fieldMatches = (text: string) =>
+    focusWords.some((word) => word.length > 2 && text.toLowerCase().includes(word));
   const selected: GuideArtworkCandidate[] = [];
   const selectedIds = new Set<string>();
 
-  const artistMatches = iconicStrong.filter((a) =>
-    a.artist_display.toLowerCase().includes(focusLower),
+  const matching = iconicStrong.filter((a) => focusMatchesArtwork(trimmedFocus, a));
+  const artistMatches = matching.filter((a) => fieldMatches(a.artist_display));
+  const styleMatches = matching.filter(
+    (a) =>
+      !artistMatches.some((m) => m.id === a.id) && fieldMatches(a.style_title ?? ""),
   );
-  const styleMatches = iconicStrong.filter(
+  const titleMatches = matching.filter(
     (a) =>
       !artistMatches.some((m) => m.id === a.id) &&
-      (a.style_title?.toLowerCase().includes(focusLower) ?? false),
+      !styleMatches.some((m) => m.id === a.id) &&
+      fieldMatches(a.title),
   );
 
-  for (const artwork of [...artistMatches, ...styleMatches]) {
+  for (const artwork of [...artistMatches, ...styleMatches, ...titleMatches]) {
     if (selected.length >= stopCount) break;
     if (!selectedIds.has(artwork.id)) {
       selected.push(artwork);
