@@ -47,7 +47,7 @@ export default async function GuidePage({ params }: GuidePageProps) {
   } = await supabase.auth.getUser();
 
   return (
-    <div className="overflow-x-hidden">
+    <div className="min-h-screen bg-[#111111]">
       <GuideDisplay guide={guide} isLoggedIn={!!user} locale={visit.locale} />
     </div>
   );

@@ -1,20 +1,23 @@
 "use client";
 
-import { useEffect } from "react";
-import { usePathname } from "next/navigation";
+import { useEffect, useMemo, useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
+import { ChevronRight, Eye, X } from "lucide-react";
 
-import {
-  ArtworkInsightsControls,
-  ArtworkInsightsOverlay,
-  ArtworkInsightsProvider,
-} from "@/components/ArtworkInsights";
+import { ArtworkInsightsControls, ArtworkInsightsOverlay, ArtworkInsightsProvider } from "@/components/ArtworkInsights";
 import { GuideLoginGate } from "@/components/GuideLoginGate";
 import { ArtworkZoomImage } from "@/components/ArtworkZoomImage";
 import type { GuideData, GuideStop } from "@/lib/guide-types";
 import { getGuideTranslations } from "@/lib/guide-translations";
+import { localePath } from "@/lib/locale-routes";
 import type { Locale } from "@/lib/translations";
 
 const LOCALES: Locale[] = ["en", "es", "pt", "ja", "fr", "de", "it", "ko", "ru", "zh"];
+
+const HERO_GRADIENT =
+  "linear-gradient(to bottom, rgba(0,0,0,0.35), rgba(0,0,0,0.58), rgba(0,0,0,0.82), rgba(0,0,0,0.95))";
+
+const CARD_GRADIENT = "linear-gradient(to bottom, #2C2C2E, #1C1C1E)";
 
 function toLocale(value?: string): Locale {
   if (value && LOCALES.includes(value as Locale)) {
@@ -23,80 +26,152 @@ function toLocale(value?: string): Locale {
   return "en";
 }
 
+function uniqueArtists(stops: GuideStop[]): string[] {
+  const seen = new Set<string>();
+  const artists: string[] = [];
+  for (const stop of stops) {
+    if (!seen.has(stop.artist_display)) {
+      seen.add(stop.artist_display);
+      artists.push(stop.artist_display);
+    }
+  }
+  return artists;
+}
+
 type GuideDisplayProps = {
   guide: GuideData;
   isLoggedIn: boolean;
   locale?: string;
 };
 
+type MetricProps = {
+  value: number;
+  label: string;
+};
+
+function Metric({ value, label }: MetricProps) {
+  return (
+    <div className="text-center">
+      <p className="text-xl font-bold text-white">{value}</p>
+      <p className="mt-1 text-[10px] font-medium uppercase tracking-[0.08em] text-white/75">{label}</p>
+    </div>
+  );
+}
+
 type StopCardProps = {
   stop: GuideStop;
   locale: Locale;
-  isLast: boolean;
+  copy: ReturnType<typeof getGuideTranslations>["guide"];
+  onOpenZoom: (artworkId: string) => void;
 };
 
-function StopCard({ stop, locale, isLast }: StopCardProps) {
-  const imageSrc = stop.image_id;
+function StopCard({ stop, locale, copy, onOpenZoom }: StopCardProps) {
+  return (
+    <div
+      className="mx-2 mb-3.5 rounded-[14px] border border-white/[0.04] p-3 md:mx-4"
+      style={{ background: CARD_GRADIENT }}
+    >
+      <p className="mb-2 text-xs font-semibold text-white/50">{copy.stopNumberLabel(stop.order)}</p>
+
+      <button
+        type="button"
+        onClick={() => onOpenZoom(stop.artwork_id)}
+        className="flex w-full items-center gap-2.5 rounded-[10px] border border-white/[0.08] bg-white/[0.06] p-3 text-left transition-colors hover:bg-white/[0.1]"
+      >
+        {stop.image_id ? (
+          <img
+            src={stop.image_id}
+            alt=""
+            className="h-16 w-16 shrink-0 rounded-[10px] object-cover"
+          />
+        ) : (
+          <div className="h-16 w-16 shrink-0 rounded-[10px] bg-white/10" />
+        )}
+        <div className="min-w-0 flex-1">
+          <p className="line-clamp-2 text-[15px] font-semibold leading-snug text-white">{stop.title}</p>
+          <p className="mt-0.5 line-clamp-1 text-[13px] text-white/55">{stop.artist_display}</p>
+        </div>
+        <ChevronRight className="size-5 shrink-0 text-white/40" aria-hidden />
+      </button>
+
+      {stop.bullets.length > 0 ? (
+        <ul className="mt-3 space-y-1">
+          {stop.bullets.map((bullet, index) => (
+            <li key={index} className="flex gap-2">
+              <span className="shrink-0 text-[#5B9FE3]">•</span>
+              <p className="text-xs leading-relaxed text-white/80">{bullet}</p>
+            </li>
+          ))}
+        </ul>
+      ) : null}
+
+      <ArtworkInsightsProvider
+        artwork={{ title: stop.title, artist_display: stop.artist_display }}
+        locale={locale}
+      >
+        <div className="mt-3 [&_button]:border-white/20 [&_button]:bg-neutral-600 [&_button]:text-white [&_button]:hover:bg-neutral-500 [&_button]:disabled:opacity-60 [&_div.rounded-lg]:border [&_div.rounded-lg]:border-white/10 [&_div.rounded-lg]:bg-white/10 [&_p]:text-white/85 [&_svg]:text-white/60">
+          <ArtworkInsightsControls />
+        </div>
+      </ArtworkInsightsProvider>
+    </div>
+  );
+}
+
+type ZoomOverlayProps = {
+  stop: GuideStop;
+  locale: Locale;
+  closeLabel: string;
+  onClose: () => void;
+};
+
+function ZoomOverlay({ stop, locale, closeLabel, onClose }: ZoomOverlayProps) {
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") onClose();
+    };
+    document.body.style.overflow = "hidden";
+    window.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.body.style.overflow = "";
+      window.removeEventListener("keydown", onKeyDown);
+    };
+  }, [onClose]);
 
   return (
-    <div className="mb-20 flex gap-5 md:gap-8">
-      <div className="hidden shrink-0 flex-col items-center pt-1 md:flex">
-        <div className="z-10 flex h-8 w-8 items-center justify-center rounded-full bg-neutral-900 font-mono text-xs font-bold text-white">
-          {String(stop.order).padStart(2, "0")}
-        </div>
-        {!isLast ? <div className="mt-3 min-h-[60px] w-px flex-1 bg-neutral-200" /> : null}
-      </div>
+    <div
+      className="fixed inset-0 z-50 flex flex-col bg-black/95"
+      onClick={onClose}
+      role="presentation"
+    >
+      <button
+        type="button"
+        onClick={onClose}
+        className="absolute right-0 top-0 z-10 p-4 text-white"
+        aria-label={closeLabel}
+      >
+        <X className="size-6" />
+      </button>
 
-      <div className="min-w-0 flex-1 pb-4">
-        <div className="mb-2 flex items-center gap-3 md:hidden">
-          <span className="flex h-8 w-8 items-center justify-center rounded-full bg-neutral-900 font-mono text-xs font-bold text-white">
-            {String(stop.order).padStart(2, "0")}
-          </span>
-        </div>
-
-        <p className="mb-2 text-xs font-medium uppercase tracking-widest text-neutral-400">
-          {stop.artist_display}
-        </p>
-
-        <h2 className="mb-4 font-serif text-2xl font-bold leading-tight text-neutral-900">
-          {stop.title}
-        </h2>
-
-        {imageSrc ? (
-          <ArtworkInsightsProvider
-            artwork={{ title: stop.title, artist_display: stop.artist_display }}
-            locale={locale}
-          >
-            <div className="relative mb-6 w-fit max-w-full">
-              <ArtworkZoomImage
-                src={imageSrc}
-                fullSrc={imageSrc}
-                alt={`${stop.title} by ${stop.artist_display}`}
-              />
-              <ArtworkInsightsOverlay />
-            </div>
-            <ArtworkInsightsControls />
-          </ArtworkInsightsProvider>
-        ) : null}
-
-        <p className="mb-6 border-l-2 border-neutral-300 pl-4 text-sm italic leading-relaxed text-neutral-600">
-          {stop.reason}
-        </p>
-
-        {stop.bullets.length > 0 ? (
-          <div className="overflow-hidden rounded-xl border border-neutral-200">
-            <div className="divide-y divide-neutral-100">
-              {stop.bullets.map((bullet, index) => (
-                <div key={index} className="flex gap-4 px-5 py-4">
-                  <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-neutral-900 text-xs font-medium text-white">
-                    {index + 1}
-                  </span>
-                  <p className="text-sm leading-relaxed text-neutral-700">{bullet}</p>
-                </div>
-              ))}
-            </div>
+      <div
+        className="flex flex-1 flex-col items-center justify-center overflow-y-auto px-4 py-16"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <ArtworkInsightsProvider
+          artwork={{ title: stop.title, artist_display: stop.artist_display }}
+          locale={locale}
+        >
+          <div className="relative mx-auto w-fit max-w-full">
+            <ArtworkZoomImage
+              src={stop.image_id}
+              fullSrc={stop.image_id}
+              alt={`${stop.title} by ${stop.artist_display}`}
+            />
+            <ArtworkInsightsOverlay />
           </div>
-        ) : null}
+          <div className="mx-auto mt-4 w-full max-w-lg [&_button]:border-white/20 [&_button]:bg-neutral-600 [&_button]:text-white [&_button]:hover:bg-neutral-500 [&_div.rounded-lg]:border [&_div.rounded-lg]:border-white/10 [&_div.rounded-lg]:bg-white/10 [&_p]:text-white/85 [&_svg]:text-white/60">
+            <ArtworkInsightsControls />
+          </div>
+        </ArtworkInsightsProvider>
       </div>
     </div>
   );
@@ -104,9 +179,17 @@ function StopCard({ stop, locale, isLast }: StopCardProps) {
 
 export function GuideDisplay({ guide, isLoggedIn, locale }: GuideDisplayProps) {
   const pathname = usePathname();
+  const router = useRouter();
   const resolvedLocale = toLocale(locale);
   const t = getGuideTranslations(resolvedLocale);
+  const copy = t.guide;
   const heroImage = guide.stops[0]?.image_id;
+  const [zoomedStop, setZoomedStop] = useState<string | null>(null);
+
+  const artists = useMemo(() => uniqueArtists(guide.stops), [guide.stops]);
+  const highlightReasons = useMemo(() => guide.stops.slice(0, 3).map((s) => s.reason), [guide.stops]);
+  const keyArtists = useMemo(() => artists.slice(0, 6).join(" · "), [artists]);
+  const zoomedStopData = guide.stops.find((s) => s.artwork_id === zoomedStop) ?? null;
 
   useEffect(() => {
     if (!isLoggedIn) return;
@@ -120,9 +203,9 @@ export function GuideDisplay({ guide, isLoggedIn, locale }: GuideDisplayProps) {
   }, [isLoggedIn, pathname]);
 
   return (
-    <article className="overflow-x-hidden bg-white">
+    <article className="overflow-x-hidden text-white">
       {heroImage ? (
-        <div className="relative h-[80vh] min-h-[400px] w-full overflow-hidden">
+        <div className="relative h-[46vh] max-h-[320px] w-full overflow-hidden">
           <img
             src={guide.stops[0].image_id}
             alt=""
@@ -131,56 +214,113 @@ export function GuideDisplay({ guide, isLoggedIn, locale }: GuideDisplayProps) {
             loading="eager"
             fetchPriority="high"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
+          <div className="absolute inset-0" style={{ background: HERO_GRADIENT }} />
 
-          <div className="absolute bottom-0 left-0 right-0 p-8 md:p-12">
-            <p className="mb-3 text-sm uppercase tracking-widest text-white/60">{t.guide.eyebrow}</p>
-            <h1 className="mb-6 max-w-3xl font-serif text-5xl font-bold leading-tight text-white md:text-6xl">
+          <div className="absolute inset-x-0 bottom-0 px-5 pb-6 text-center">
+            <p className="mb-2 text-base font-semibold tracking-[0.05em] text-white">{copy.eyebrow}</p>
+            <h1 className="mx-auto mb-3 line-clamp-2 max-w-lg font-serif text-[22px] font-bold leading-tight text-white">
               {guide.title}
             </h1>
-            <div className="flex flex-wrap gap-3">
-              <span className="rounded-full bg-white/20 px-4 py-1.5 text-sm text-white backdrop-blur-sm">
-                {guide.museum_name}
-              </span>
-              <span className="rounded-full bg-white/20 px-4 py-1.5 text-sm text-white backdrop-blur-sm">
-                {guide.stops.length} {t.guide.stops}
-              </span>
-              <span className="rounded-full bg-white/20 px-4 py-1.5 text-sm text-white backdrop-blur-sm">
-                {guide.time_hours}
-                {t.guide.hours}
-              </span>
-              {guide.focus ? (
-                <span className="rounded-full bg-white/20 px-4 py-1.5 text-sm text-white backdrop-blur-sm">
-                  {t.guide.focus(guide.focus)}
-                </span>
-              ) : null}
+
+            <div className="mb-3 flex items-center justify-center gap-7">
+              <Metric value={guide.stops.length} label={copy.metricStops} />
+              <Metric value={artists.length} label={copy.metricArtists} />
+              <Metric value={guide.stops.length} label={copy.metricArtworks} />
             </div>
+
+            <p className="text-xs text-white/[0.78]">
+              {copy.metaLine(guide.museum_name, guide.time_hours, guide.stops.length)}
+            </p>
+
+            <p className="mx-auto mt-2.5 line-clamp-3 max-w-lg text-sm leading-normal text-white/90">
+              {guide.description}
+            </p>
           </div>
         </div>
       ) : (
-        <div className="bg-neutral-900 px-8 py-14 md:px-12">
-          <p className="mb-3 text-sm uppercase tracking-widest text-white/60">{t.guide.eyebrow}</p>
-          <h1 className="max-w-3xl font-serif text-5xl font-bold leading-tight text-white md:text-6xl">
-            {guide.title}
-          </h1>
+        <div className="px-5 py-10 text-center">
+          <p className="mb-2 text-base font-semibold tracking-[0.05em] text-white/60">{copy.eyebrow}</p>
+          <h1 className="mx-auto line-clamp-2 max-w-lg font-serif text-[22px] font-bold text-white">{guide.title}</h1>
         </div>
       )}
 
-      <div className="mx-auto max-w-2xl px-6 py-10 md:py-14">
-        <p className="text-center text-base leading-relaxed text-neutral-600">{guide.description}</p>
-        <hr className="mx-auto mt-10 max-w-xs border-neutral-200" />
+      <div
+        className="mx-5 mb-7 rounded-2xl border border-white/[0.04] p-5"
+        style={{ background: CARD_GRADIENT }}
+      >
+        <h2 className="mb-3 text-xl font-bold text-white">{copy.exploreTitle(guide.museum_name)}</h2>
+        <p className="mb-4 text-[15px] leading-relaxed text-white/85">{guide.description}</p>
+
+        {highlightReasons.length > 0 ? (
+          <ul className="mb-4 space-y-1.5">
+            {highlightReasons.map((reason, index) => (
+              <li key={index} className="flex gap-2 text-sm leading-normal text-white/85">
+                <span className="shrink-0 text-[#5B9FE3]">•</span>
+                <span>{reason}</span>
+              </li>
+            ))}
+          </ul>
+        ) : null}
+
+        {keyArtists ? (
+          <div className="mb-3.5">
+            <p className="mb-1 text-xs text-white/50">{copy.keyArtistsLabel}</p>
+            <p className="text-sm text-white">{keyArtists}</p>
+          </div>
+        ) : null}
+
+        <div className="rounded-xl border border-white/10 p-3.5">
+          <p className="mb-1.5 text-[11px] text-white/50">{copy.whatToNoticeLabel}</p>
+          <p className="text-sm leading-normal text-white/85">{copy.whatToNoticeText}</p>
+        </div>
+
+        <div className="mt-2.5 flex gap-3 rounded-xl border border-white/10 p-3.5">
+          <div className="grid size-10 shrink-0 place-items-center rounded-full bg-gray-500/20">
+            <Eye className="size-[18px] text-white/60" aria-hidden />
+          </div>
+          <p className="flex-1 text-sm leading-normal text-white/85">{copy.eyeCtaText}</p>
+        </div>
       </div>
 
-      <div className="mx-auto max-w-3xl px-6 pb-20">
-        {guide.stops.map((stop, index) => (
-          <StopCard
-            key={stop.artwork_id}
-            stop={stop}
-            locale={resolvedLocale}
-            isLast={index === guide.stops.length - 1}
-          />
-        ))}
+      <div className="pb-4">
+        {guide.stops.map((stop, index) => {
+          const prevArtist = index > 0 ? guide.stops[index - 1].artist_display : null;
+          const showArtistHeader = stop.artist_display !== prevArtist;
+
+          return (
+            <div key={stop.artwork_id}>
+              {showArtistHeader ? (
+                <p className="mb-1 mt-1.5 px-4 text-[13px] font-bold uppercase tracking-[0.05em] text-white/90">
+                  {stop.artist_display}
+                </p>
+              ) : null}
+              <StopCard
+                stop={stop}
+                locale={resolvedLocale}
+                copy={copy}
+                onOpenZoom={setZoomedStop}
+              />
+            </div>
+          );
+        })}
       </div>
+
+      <button
+        type="button"
+        onClick={() => router.push(`${localePath(resolvedLocale, "museums")}/${guide.museum_slug}`)}
+        className="mx-4 mb-8 w-[calc(100%-32px)] rounded-xl border border-white/15 bg-transparent py-3.5 text-center text-[15px] font-semibold text-white/50 transition-colors hover:border-white/25 hover:text-white/70"
+      >
+        {copy.startOver}
+      </button>
+
+      {zoomedStopData ? (
+        <ZoomOverlay
+          stop={zoomedStopData}
+          locale={resolvedLocale}
+          closeLabel={copy.closeZoomAriaLabel}
+          onClose={() => setZoomedStop(null)}
+        />
+      ) : null}
 
       {false && <GuideLoginGate isLoggedIn={isLoggedIn} locale={locale} />}
     </article>

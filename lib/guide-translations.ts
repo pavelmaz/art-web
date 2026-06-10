@@ -53,6 +53,18 @@ export type GuideTranslations = {
     stops: string;
     hours: string;
     focus: (value: string) => string;
+    metricStops: string;
+    metricArtists: string;
+    metricArtworks: string;
+    metaLine: (museum: string, hours: number, stopCount: number) => string;
+    exploreTitle: (museum: string) => string;
+    keyArtistsLabel: string;
+    whatToNoticeLabel: string;
+    whatToNoticeText: string;
+    eyeCtaText: string;
+    stopNumberLabel: (order: number) => string;
+    startOver: string;
+    closeZoomAriaLabel: string;
   };
   loginGate: {
     heading: string;
@@ -129,7 +141,7 @@ const en: GuideTranslations = {
     generateWithout: "Generate without focus",
   },
   guide: {
-    eyebrow: "Museum Visit Guide",
+    eyebrow: "GUIDED VISIT",
     stopLabel: (order, total) => `Stop ${order} of ${total}`,
     reasonLabel: "Why this stop is on the route",
     showInsights: "Show guide insights",
@@ -142,6 +154,19 @@ const en: GuideTranslations = {
     stops: "stops",
     hours: "h",
     focus: (value) => `Focus: ${value}`,
+    metricStops: "STOPS",
+    metricArtists: "ARTISTS",
+    metricArtworks: "ARTWORKS",
+    metaLine: (museum, hours, stopCount) => `${museum} · ${hours}H · ${stopCount} STOPS`,
+    exploreTitle: (museum) => `Explore ${museum}`,
+    keyArtistsLabel: "Key artists",
+    whatToNoticeLabel: "What to notice in the artworks",
+    whatToNoticeText:
+      "Focus on composition, color use, and the story each work is telling. Look for details that surprise you.",
+    eyeCtaText: "Tap the eye icon on each artwork for deeper insights.",
+    stopNumberLabel: (order) => `Stop ${order}`,
+    startOver: "Start over",
+    closeZoomAriaLabel: "Close artwork view",
   },
   loginGate: {
     heading: "Save your guide",
@@ -231,6 +256,19 @@ const es: GuideTranslations = {
     stops: "paradas",
     hours: "h",
     focus: (value) => `Enfoque: ${value}`,
+    metricStops: "PARADAS",
+    metricArtists: "ARTISTAS",
+    metricArtworks: "OBRAS",
+    metaLine: (museum, hours, stopCount) => `${museum} · ${hours}H · ${stopCount} PARADAS`,
+    exploreTitle: (museum) => `Explora ${museum}`,
+    keyArtistsLabel: "Artistas clave",
+    whatToNoticeLabel: "Qué observar en las obras",
+    whatToNoticeText:
+      "Fíjate en la composición, el uso del color y la historia que cuenta cada obra. Busca detalles que te sorprendan.",
+    eyeCtaText: "Toca el icono del ojo en cada obra para más información.",
+    stopNumberLabel: (order) => `Parada ${order}`,
+    startOver: "Empezar de nuevo",
+    closeZoomAriaLabel: "Cerrar vista de la obra",
   },
   loginGate: {
     heading: "Guarda tu guía",
@@ -320,6 +358,19 @@ const pt: GuideTranslations = {
     stops: "paragens",
     hours: "h",
     focus: (value) => `Foco: ${value}`,
+    metricStops: "PARAGENS",
+    metricArtists: "ARTISTAS",
+    metricArtworks: "OBRAS",
+    metaLine: (museum, hours, stopCount) => `${museum} · ${hours}H · ${stopCount} PARAGENS`,
+    exploreTitle: (museum) => `Explore ${museum}`,
+    keyArtistsLabel: "Artistas principais",
+    whatToNoticeLabel: "O que observar nas obras",
+    whatToNoticeText:
+      "Preste atenção à composição, ao uso da cor e à história de cada obra. Procure detalhes que o surpreendam.",
+    eyeCtaText: "Toque no ícone do olho em cada obra para mais informações.",
+    stopNumberLabel: (order) => `Paragem ${order}`,
+    startOver: "Recomeçar",
+    closeZoomAriaLabel: "Fechar vista da obra",
   },
   loginGate: {
     heading: "Guarde o seu guia",
@@ -409,6 +460,19 @@ const fr: GuideTranslations = {
     stops: "étapes",
     hours: "h",
     focus: (value) => `Thème : ${value}`,
+    metricStops: "ÉTAPES",
+    metricArtists: "ARTISTES",
+    metricArtworks: "ŒUVRES",
+    metaLine: (museum, hours, stopCount) => `${museum} · ${hours}H · ${stopCount} ÉTAPES`,
+    exploreTitle: (museum) => `Explorez ${museum}`,
+    keyArtistsLabel: "Artistes clés",
+    whatToNoticeLabel: "Ce qu'il faut remarquer dans les œuvres",
+    whatToNoticeText:
+      "Observez la composition, l'usage de la couleur et l'histoire de chaque œuvre. Cherchez des détails qui vous surprennent.",
+    eyeCtaText: "Appuyez sur l'icône œil sur chaque œuvre pour en savoir plus.",
+    stopNumberLabel: (order) => `Étape ${order}`,
+    startOver: "Recommencer",
+    closeZoomAriaLabel: "Fermer la vue de l'œuvre",
   },
   loginGate: {
     heading: "Enregistrez votre guide",
@@ -498,6 +562,19 @@ const de: GuideTranslations = {
     stops: "Stopps",
     hours: "Std.",
     focus: (value) => `Schwerpunkt: ${value}`,
+    metricStops: "STOPPS",
+    metricArtists: "KÜNSTLER",
+    metricArtworks: "WERKE",
+    metaLine: (museum, hours, stopCount) => `${museum} · ${hours}H · ${stopCount} STOPPS`,
+    exploreTitle: (museum) => `${museum} entdecken`,
+    keyArtistsLabel: "Wichtige Künstler",
+    whatToNoticeLabel: "Worauf Sie bei den Werken achten sollten",
+    whatToNoticeText:
+      "Achten Sie auf Komposition, Farbeinsatz und die Geschichte jedes Werks. Suchen Sie nach überraschenden Details.",
+    eyeCtaText: "Tippen Sie auf das Augen-Symbol bei jedem Werk für mehr Einblicke.",
+    stopNumberLabel: (order) => `Stopp ${order}`,
+    startOver: "Neu beginnen",
+    closeZoomAriaLabel: "Werkansicht schließen",
   },
   loginGate: {
     heading: "Führer speichern",
@@ -587,6 +664,19 @@ const it: GuideTranslations = {
     stops: "tappe",
     hours: "h",
     focus: (value) => `Focus: ${value}`,
+    metricStops: "TAPPE",
+    metricArtists: "ARTISTI",
+    metricArtworks: "OPERE",
+    metaLine: (museum, hours, stopCount) => `${museum} · ${hours}H · ${stopCount} TAPPE`,
+    exploreTitle: (museum) => `Esplora ${museum}`,
+    keyArtistsLabel: "Artisti principali",
+    whatToNoticeLabel: "Cosa notare nelle opere",
+    whatToNoticeText:
+      "Osserva composizione, uso del colore e la storia di ogni opera. Cerca dettagli che ti sorprendano.",
+    eyeCtaText: "Tocca l'icona dell'occhio su ogni opera per approfondire.",
+    stopNumberLabel: (order) => `Tappa ${order}`,
+    startOver: "Ricomincia",
+    closeZoomAriaLabel: "Chiudi vista opera",
   },
   loginGate: {
     heading: "Salva la tua guida",
@@ -675,6 +765,19 @@ const ko: GuideTranslations = {
     stops: "곳",
     hours: "시간",
     focus: (value) => `주제: ${value}`,
+    metricStops: "코스",
+    metricArtists: "작가",
+    metricArtworks: "작품",
+    metaLine: (museum, hours, stopCount) => `${museum} · ${hours}시간 · ${stopCount}코스`,
+    exploreTitle: (museum) => `${museum} 탐색`,
+    keyArtistsLabel: "주요 작가",
+    whatToNoticeLabel: "작품에서 주목할 점",
+    whatToNoticeText:
+      "구도, 색 사용, 각 작품이 전하는 이야기에 집중하세요. 놀라운 디테일을 찾아보세요.",
+    eyeCtaText: "각 작품의 눈 아이콘을 눌러 더 깊은 인사이트를 확인하세요.",
+    stopNumberLabel: (order) => `코스 ${order}`,
+    startOver: "처음부터",
+    closeZoomAriaLabel: "작품 보기 닫기",
   },
   loginGate: {
     heading: "가이드 저장하기",
@@ -762,6 +865,18 @@ const zh: GuideTranslations = {
     stops: "站",
     hours: "小时",
     focus: (value) => `主题：${value}`,
+    metricStops: "站点",
+    metricArtists: "艺术家",
+    metricArtworks: "作品",
+    metaLine: (museum, hours, stopCount) => `${museum} · ${hours}小时 · ${stopCount}站`,
+    exploreTitle: (museum) => `探索${museum}`,
+    keyArtistsLabel: "重要艺术家",
+    whatToNoticeLabel: "欣赏作品时注意什么",
+    whatToNoticeText: "关注构图、色彩运用和每件作品讲述的故事。寻找令你惊喜的细节。",
+    eyeCtaText: "点击每件作品上的眼睛图标，获取更深入的信息。",
+    stopNumberLabel: (order) => `第${order}站`,
+    startOver: "重新开始",
+    closeZoomAriaLabel: "关闭作品视图",
   },
   loginGate: {
     heading: "保存您的指南",
@@ -850,6 +965,19 @@ const ru: GuideTranslations = {
     stops: "остановок",
     hours: "ч",
     focus: (value) => `Тема: ${value}`,
+    metricStops: "ОСТАНОВОК",
+    metricArtists: "ХУДОЖНИКОВ",
+    metricArtworks: "РАБОТ",
+    metaLine: (museum, hours, stopCount) => `${museum} · ${hours}Ч · ${stopCount} ОСТАНОВОК`,
+    exploreTitle: (museum) => `Исследуйте ${museum}`,
+    keyArtistsLabel: "Ключевые художники",
+    whatToNoticeLabel: "На что обратить внимание в работах",
+    whatToNoticeText:
+      "Смотрите на композицию, цвет и историю каждой работы. Ищите детали, которые вас удивят.",
+    eyeCtaText: "Нажмите на иконку глаза у каждой работы для более глубоких сведений.",
+    stopNumberLabel: (order) => `Остановка ${order}`,
+    startOver: "Начать заново",
+    closeZoomAriaLabel: "Закрыть просмотр работы",
   },
   loginGate: {
     heading: "Сохраните гид",
@@ -938,6 +1066,19 @@ const ja: GuideTranslations = {
     stops: "箇所",
     hours: "時間",
     focus: (value) => `テーマ：${value}`,
+    metricStops: "スポット",
+    metricArtists: "作家",
+    metricArtworks: "作品",
+    metaLine: (museum, hours, stopCount) => `${museum} · ${hours}時間 · ${stopCount}スポット`,
+    exploreTitle: (museum) => `${museum}を探索`,
+    keyArtistsLabel: "主要な作家",
+    whatToNoticeLabel: "作品で注目すべき点",
+    whatToNoticeText:
+      "構図、色彩の使い方、各作品が語る物語に注目してください。驚くような細部を探してみましょう。",
+    eyeCtaText: "各作品の目のアイコンをタップして、より深い解説を見る。",
+    stopNumberLabel: (order) => `スポット ${order}`,
+    startOver: "最初から",
+    closeZoomAriaLabel: "作品ビューを閉じる",
   },
   loginGate: {
     heading: "ガイドを保存",
