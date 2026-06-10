@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { ArtworkGrid } from "@/components/ArtworkGrid";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { CollectionPageJsonLd } from "@/components/JsonLd";
+import { MuseumGuideBanner } from "@/components/MuseumGuideBanner";
 import { MuseumProfileHeader } from "@/components/MuseumProfileHeader";
 import { MuseumTopArtists } from "@/components/MuseumTopArtists";
 import { Pagination } from "@/components/Pagination";
@@ -96,6 +97,7 @@ export default async function MuseumPage({ params, searchParams }: MuseumPagePro
         description={pageDescription}
         readMoreLabel="Read more"
       />
+      <MuseumGuideBanner museumSlug={slug} museumName={museum.name} locale="en" />
       <MuseumTopArtists artists={topArtists} heading={t.topArtists} locale="en" />
       <p className="text-sm text-[#6b6b6b]">
         {museum.artworkCount} {museum.artworkCount === 1 ? "artwork" : "artworks"}
