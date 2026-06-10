@@ -54,7 +54,7 @@ MAX_SEO_LEN = 155
 # Set to a slug to process one museum only (skips resume check). Set None for full run.
 TEST_SLUG_ONLY: str | None = None
 
-FORCE_SLUGS = {"mauritshuis"}
+FORCE_SLUGS = set()
 
 LOCALES = {
     "en": "English",

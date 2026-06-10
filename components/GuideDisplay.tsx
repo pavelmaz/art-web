@@ -55,18 +55,16 @@ function StopCard({ stop, locale, expanded, onToggleBullets, copy }: StopCardPro
               artwork={{ title: stop.title, artist_display: stop.artist_display }}
               locale={locale}
             >
-              <div className="relative w-full">
-                <div className="relative overflow-hidden" style={{ maxHeight: "420px" }}>
-                  <ArtworkZoomImage
-                    src={imageSrc}
-                    fullSrc={imageSrc}
-                    alt={`${stop.title} by ${stop.artist_display}`}
-                  />
-                  <ArtworkInsightsOverlay />
-                </div>
-                <div className="px-4 pb-4">
-                  <ArtworkInsightsControls />
-                </div>
+              <div className="relative mx-auto w-fit max-w-full">
+                <ArtworkZoomImage
+                  src={imageSrc}
+                  fullSrc={imageSrc}
+                  alt={`${stop.title} by ${stop.artist_display}`}
+                />
+                <ArtworkInsightsOverlay />
+              </div>
+              <div className="px-4 pb-4">
+                <ArtworkInsightsControls />
               </div>
             </ArtworkInsightsProvider>
           </div>
@@ -143,13 +141,16 @@ export function GuideDisplay({ guide, isLoggedIn, locale }: GuideDisplayProps) {
   }, [isLoggedIn, pathname]);
 
   return (
-    <article className="bg-white">
+    <article className="overflow-x-hidden bg-white">
       {heroImage ? (
-        <div className="relative h-[70vh] min-h-[400px] w-full overflow-hidden">
+        <div className="relative h-[80vh] min-h-[400px] w-full overflow-hidden">
           <img
-            src={heroImage}
+            src={guide.stops[0].image_id}
             alt=""
             className="absolute inset-0 h-full w-full object-cover"
+            style={{ imageRendering: "auto" }}
+            loading="eager"
+            fetchPriority="high"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
 
