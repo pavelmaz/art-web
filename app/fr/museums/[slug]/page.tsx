@@ -1,12 +1,12 @@
-import { artistDetailPath, buildMuseumLanguageAlternates, localePath } from "@/lib/locale-routes";
+import { buildMuseumLanguageAlternates, localePath } from "@/lib/locale-routes";
 import type { Metadata } from "next";
-import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { ArtworkGrid } from "@/components/ArtworkGrid";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { CollectionPageJsonLd } from "@/components/JsonLd";
 import { MuseumProfileHeader } from "@/components/MuseumProfileHeader";
+import { MuseumTopArtists } from "@/components/MuseumTopArtists";
 import { Pagination } from "@/components/Pagination";
 import { fetchMuseumArtworks, fetchMuseumTopArtists, getMuseumPageData } from "@/lib/museum-page-data";
 import { getPaginationParams, getTotalPages } from "@/lib/pagination";
@@ -96,22 +96,12 @@ export default async function MuseumPage({ params, searchParams }: MuseumPagePro
         description={pageDescription}
         readMoreLabel="Lire la suite"
       />
-      {topArtists.length > 0 ? (
-        <section>
-          <h2 className="text-lg font-semibold tracking-tight text-[#1a1a1a]">{t.topArtists}</h2>
-          <div className="mt-3 flex flex-wrap gap-2">
-            {topArtists.map((artist) => (
-              <Link
-                key={artist.slug}
-                href={artistDetailPath("fr", artist.slug)}
-                className="rounded-full bg-neutral-100 px-3 py-1.5 text-sm text-[#1a1a1a] hover:bg-neutral-200"
-              >
-                {artist.name} ({artist.count})
-              </Link>
-            ))}
-          </div>
-        </section>
-      ) : null}
+      <MuseumTopArtists
+        artists={topArtists}
+        heading={t.topArtists}
+        locale="fr"
+        artworksLabel={t.artworks}
+      />
       <p className="text-sm text-[#6b6b6b]">
         {museum.artworkCount} {t.artworks}
       </p>

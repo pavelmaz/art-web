@@ -1,5 +1,6 @@
 import { cache } from "react";
 
+import { fillArtistHubPreviewImages, type ArtistHubListItem } from "@/lib/cached-hub-data";
 import { resolveMuseumBySlug } from "@/lib/resolve-museum-by-slug";
 import { supabase } from "@/lib/supabase";
 import type { Locale } from "@/lib/translations";
@@ -151,10 +152,55 @@ async function getMuseumPageDataUncached(slug: string, locale: Locale): Promise<
 
 export const getMuseumPageData = cache(getMuseumPageDataUncached);
 
+export type MuseumTopArtist = {
+  name: string;
+  slug: string;
+  count: number;
+  imageId: string | null;
+  url: string | null;
+};
+
+async function enrichTopArtistImages(
+  artists: { name: string; slug: string; count: number }[],
+): Promise<MuseumTopArtist[]> {
+  if (!artists.length) {
+    return [];
+  }
+
+  const slugs = artists.map((artist) => artist.slug);
+  const { data: artistRows } = await supabase.from("artists").select("slug, image_url").in("slug", slugs);
+
+  const imageBySlug = new Map<string, string | null>();
+  for (const row of artistRows ?? []) {
+    const slug = (row as { slug?: string }).slug?.trim();
+    if (slug) {
+      imageBySlug.set(slug, (row as { image_url?: string | null }).image_url ?? null);
+    }
+  }
+
+  const hubItems: ArtistHubListItem[] = artists.map((artist) => ({
+    display: artist.name,
+    count: artist.count,
+    image_id: imageBySlug.get(artist.slug)?.trim() || null,
+    url: null,
+    slug: artist.slug,
+  }));
+
+  const filled = await fillArtistHubPreviewImages(hubItems);
+
+  return artists.map((artist, index) => ({
+    name: artist.name,
+    slug: artist.slug,
+    count: artist.count,
+    imageId: filled[index]?.image_id ?? null,
+    url: filled[index]?.url ?? null,
+  }));
+}
+
 export async function fetchMuseumTopArtists(
   museumName: string,
   limit = 8,
-): Promise<{ name: string; slug: string; count: number }[]> {
+): Promise<MuseumTopArtist[]> {
   const { data } = await supabase
     .from("artworks")
     .select("artist_display")
@@ -174,7 +220,7 @@ export async function fetchMuseumTopArtists(
     }
   }
 
-  return Object.entries(counts)
+  const ranked = Object.entries(counts)
     .sort((a, b) => b[1] - a[1])
     .slice(0, limit)
     .map(([name, count]) => ({
@@ -182,6 +228,8 @@ export async function fetchMuseumTopArtists(
       slug: slugify(name),
       count,
     }));
+
+  return enrichTopArtistImages(ranked);
 }
 
 export async function fetchMuseumArtworks(
