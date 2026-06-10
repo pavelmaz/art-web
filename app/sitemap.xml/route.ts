@@ -2,8 +2,9 @@ import { getPublicSiteUrl, escapeXml } from "@/lib/sitemap-xml";
 
 export const dynamic = "force-dynamic";
 
-/** 72_297 / 500 → pages 0 … 144 (145 child sitemaps). */
-const ARTWORK_SITEMAP_COUNT = 145;
+/** 82,372 artworks / 500 → pages 0–164 (165 child sitemaps). */
+const ARTWORK_SITEMAP_COUNT = 165;
+const IMAGE_SITEMAP_COUNT = 165;
 
 function emptySitemapIndex(): string {
   return `<?xml version="1.0" encoding="UTF-8"?>
@@ -37,6 +38,9 @@ export async function GET() {
     locs.push(`${base}/sitemap/es`);
     locs.push(`${base}/sitemap/pt`);
     locs.push(`${base}/sitemap/ja`);
+    for (let i = 0; i < IMAGE_SITEMAP_COUNT; i++) {
+      locs.push(`${base}/sitemap/images/${i}`);
+    }
 
     const body =
       `<?xml version="1.0" encoding="UTF-8"?>\n` +
