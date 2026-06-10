@@ -8,6 +8,7 @@ import { ArtistJsonLd } from "@/components/JsonLd";
 import { Pagination } from "@/components/Pagination";
 import { getArtistBioForLocale, getArtistProfileBySlug } from "@/lib/get-artist-profile";
 import { getPaginationParams, getTotalPages } from "@/lib/pagination";
+import { buildArtistLanguageAlternates } from "@/lib/locale-routes";
 import { supabase } from "@/lib/supabase";
 import { absoluteUrl, artworkGridImageUrl } from "@/lib/utils";
 import { getT } from "@/lib/translations";
@@ -57,14 +58,13 @@ export async function generateMetadata({ params }: ArtistPageProps): Promise<Met
     description,
     alternates: {
       canonical: absoluteUrl(`/ja/artists/${slug}`),
-      languages: {
-        en: absoluteUrl(`/artists/${slug}`),
-        es: absoluteUrl(`/es/artistas/${slug}`),
-        pt: absoluteUrl(`/pt/artistas/${slug}`),
-        ja: absoluteUrl(`/ja/artists/${slug}`),
-      },
+      languages: buildArtistLanguageAlternates(slug),
     },
-    openGraph: { title, description },
+    openGraph: {
+      title,
+      description,
+      images: artist.image_url ? [{ url: artist.image_url }] : undefined,
+    },
   };
 }
 
@@ -123,7 +123,15 @@ export default async function ArtistPage({ params, searchParams }: ArtistPagePro
 
   return (
     <div className="space-y-8 px-5">
-      <ArtistJsonLd name={artistName} slug={slug} />
+      <ArtistJsonLd
+        name={artistName}
+        slug={slug}
+        nationality={artist.nationality}
+        birthYear={artist.birth_year}
+        deathYear={artist.death_year}
+        description={bio}
+        imageUrl={artist.image_url}
+      />
       <Breadcrumbs
         items={[{ label: "ホーム", href: "/ja" }, { label: t.artists, href: "/ja/artists" }, { label: artistName }]}
         currentPath={`/ja/artists/${slug}`}

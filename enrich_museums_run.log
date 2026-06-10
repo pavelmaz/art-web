@@ -1,0 +1,249 @@
+=================================================================
+Museum translations enrichment
+Locales : en, es, fr, de, it, pt, ru, zh, ja, ko (10 total)
+Model   : gpt-4o
+Sleep   : 0.5s between OpenAI calls
+=================================================================
+
+Museums in DB     : 83
+Already have EN   : 27
+To process        : 56
+
+[1/83] Albertina Museum (albertina-museum)
+  → skipped (en row exists)
+[2/83] Alte Pinakothek (alte-pinakothek)
+  → skipped (en row exists)
+[3/83] Art Institute of Chicago (art-institute-of-chicago)
+  → skipped (en row exists)
+[4/83] Belvedere Museum (belvedere-museum)
+  → skipped (en row exists)
+[5/83] British Museum (british-museum)
+  → skipped (en row exists)
+[6/83] Brooklyn Museum (brooklyn-museum)
+  → skipped (en row exists)
+[7/83] Cincinnati Art Museum (cincinnati-art-museum)
+  → skipped (en row exists)
+[8/83] Cleveland Museum of Art (cleveland-museum-of-art)
+  → skipped (en row exists)
+[9/83] Detroit Institute of Arts (detroit-institute-of-arts)
+  → skipped (en row exists)
+[10/83] Galleria Borghese (galleria-borghese)
+  → skipped (en row exists)
+[11/83] Galleria dell'Accademia (galleria-dellaccademia)
+  → skipped (en row exists)
+[12/83] Getty Center (getty-center)
+  → skipped (en row exists)
+[13/83] Guggenheim Bilbao (guggenheim-bilbao)
+  → skipped (en row exists)
+[14/83] Guggenheim Museum (guggenheim-museum)
+  → skipped (en row exists)
+[15/83] Hamburger Kunsthalle (hamburger-kunsthalle)
+  → skipped (en row exists)
+[16/83] Hermitage Museum (hermitage-museum)
+  → skipped (en row exists)
+[17/83] Hirshhorn Museum (hirshhorn-museum)
+  → skipped (en row exists)
+[18/83] Kunsthaus Zürich (kunsthaus-zurich)
+  → skipped (en row exists)
+[19/83] Kunsthistorisches Museum (kunsthistorisches-museum)
+  → skipped (en row exists)
+[20/83] Kunstmuseum Basel (kunstmuseum-basel)
+  → skipped (en row exists)
+[21/83] LACMA (lacma)
+  → skipped (en row exists)
+[22/83] Leeum Samsung Museum of Art (leeum-samsung-museum-of-art)
+  → skipped (en row exists)
+[23/83] Leopold Museum (leopold-museum)
+  → skipped (en row exists)
+[24/83] Louvre Museum (louvre-museum)
+  → skipped (en row exists)
+[25/83] M+ Hong Kong (m-hong-kong)
+  → skipped (en row exists)
+[26/83] Mauritshuis (mauritshuis)
+  → skipped (en row exists)
+[27/83] Metropolitan Museum of Art (metropolitan-museum-of-art)
+  artwork_count=134
+
+  --- EN description ---
+At the Metropolitan Museum of Art in New York, one of the most iconic paintings is Washington Crossing the Delaware by Emanuel Leutze, a powerful depiction of a pivotal moment in American history painted in 1851. Our platform offers 134 works from this renowned New York art museum, providing a glimpse into its vast and varied collection. Among these masterpieces, you'll find works by renowned artists such as Vincent van Gogh and Claude Monet, each contributing to the museum's rich tapestry of art history.
+
+What sets the Metropolitan Museum of Art apart is its commitment to representing a wide array of cultural narratives through its extensive collection. Founded in 1870, the museum is housed in a striking Beaux-Arts building on Fifth Avenue, which itself is a work of art. The museum is known for its dedication to preserving art from every corner of the globe, making it a unique institution that offers visitors a chance to explore the interconnectedness of different cultures through art.
+
+This collection is perfect for art enthusiasts, history buffs, and anyone interested in exploring the diverse narratives captured in these paintings. Dive into the world of art and history by browsing the 134 works from the Metropolitan Museum of Art available online.
+
+  --- EN seo_description ---
+Discover 134 public domain artworks from the Metropolitan Museum of Art, featuring pieces by Van Gogh. Free to download.
+  (seo length: 120 chars)
+
+  ✓ upserted en
+  ✓ upserted es
+  ✓ upserted fr
+  ✓ upserted de
+  ✓ upserted it
+  ✓ upserted pt
+  ✓ upserted ru
+  ✓ upserted zh
+  ✓ upserted ja
+  ✓ upserted ko
+  → done
+[28/83] MoMA (moma)
+  artwork_count=59
+
+  --- EN description ---
+At the Museum of Modern Art (MoMA) in New York, Vincent van Gogh's The Starry Night stands as a beacon of post-impressionist brilliance, painted in 1889 and renowned for its swirling, dreamlike depiction of the night sky. Our online platform features 59 works from this iconic New York art museum, offering a glimpse into its vast collection. Among these masterpieces, you'll find Claude Monet's Water Lilies and Pablo Picasso's Les Demoiselles d'Avignon, each representing pivotal moments in the evolution of modern art.
+
+MoMA distinguishes itself through its dedication to modern and contemporary art, showcasing groundbreaking works that have shaped artistic movements over the last century. Established in 1929, the museum was one of the first to embrace modern art, and its building in Midtown Manhattan is a testament to innovative architectural design, with spaces that encourage interaction and reflection. MoMA's collection is particularly noted for its focus on the avant-garde, continually pushing the boundaries of what art can be.
+
+This collection is perfect for art enthusiasts, students, and anyone interested in the evolution of modern art. Whether you're a seasoned connoisseur or a curious newcomer, explore these 59 works online to experience the transformative power of MoMA's masterpieces.
+
+  --- EN seo_description ---
+Discover 59 public domain artworks from MoMA, home to Van Gogh's The Starry Night. Explore free.
+  (seo length: 96 chars)
+
+  ✓ upserted en
+  ✓ upserted es
+  ✓ upserted fr
+  ✓ upserted de
+  ✓ upserted it
+  ✓ upserted pt
+  ✓ upserted ru
+  ✓ upserted zh
+  ✓ upserted ja
+  ✓ upserted ko
+  → done
+[29/83] Mori Art Museum (mori-art-museum)
+  artwork_count=123
+
+  --- EN description ---
+At the Mori Art Museum in Tokyo, one of the most iconic paintings you can find is The Dream of Venus by Salvador Dalí, a surreal masterpiece from 1939 that captivates with its dreamlike imagery and vibrant colors. This Tokyo art museum houses a collection of 123 works available online, offering a unique glimpse into the world of public domain paintings. Alongside Dalí, the collection features works by renowned artists such as Pablo Picasso and Henri Matisse, each contributing to the museum's diverse artistic landscape.
+
+What sets the Mori Art Museum apart is its focus on contemporary art and its location atop the Roppongi Hills Mori Tower, providing visitors with a panoramic view of Tokyo. The museum is committed to exploring the intersection of art and life, often featuring exhibitions that challenge traditional boundaries and encourage dialogue. This innovative approach is reflected in its collection, which includes both historical masterpieces and thought-provoking modern works.
+
+Art enthusiasts and curious minds alike should explore this collection to experience the dynamic interplay between historical and contemporary art. Dive into the Mori Art Museum's selection of 123 paintings online and discover a world where tradition meets innovation.
+
+  --- EN seo_description ---
+Discover 123 public domain artworks from Tokyo's Mori Art Museum, including pieces by Takashi Murakami. Free to download.
+  (seo length: 121 chars)
+
+  ✓ upserted en
+  ✓ upserted es
+  ✓ upserted fr
+  ✓ upserted de
+  ✓ upserted it
+  ✓ upserted pt
+  ✓ upserted ru
+  ✓ upserted zh
+  ✓ upserted ja
+  ✓ upserted ko
+  → done
+[30/83] Musée d'Art Moderne de la Ville de Paris (musee-dart-moderne-de-la-ville-de-paris)
+  artwork_count=7
+
+  --- EN description ---
+The Musée d'Art Moderne de la Ville de Paris is home to the iconic painting La Danse by Henri Matisse, a vibrant work from 1931 that captures the dynamic movement and color characteristic of modern art. This Paris art museum offers a curated collection of 7 works available online, showcasing the evolution of 20th-century art. Among these masterpieces are pieces by artists such as Sonia Delaunay and Robert Delaunay, whose contributions to the Orphism movement are celebrated for their bold use of color and abstraction.
+
+What sets the Musée d'Art Moderne de la Ville de Paris apart is its focus on the art movements that defined the 20th century, particularly in France. Housed in a striking Art Deco building, the museum emphasizes the connections between art and the social changes of its time, offering a unique perspective on how modern art evolved in response to historical events. This focus on the intersection of art and history provides visitors with a deeper understanding of the cultural context in which these works were created.
+
+Art enthusiasts, students, and anyone interested in modern art will find this collection insightful and inspiring. Explore the 7 works from the Musée d'Art Moderne de la Ville de Paris online and discover the vibrant world of 20th-century art.
+
+  --- EN seo_description ---
+Discover 7 public domain artworks from Musée d'Art Moderne de la Ville de Paris, home to masterpieces by Picasso. Free to download.
+  (seo length: 131 chars)
+
+  ✓ upserted en
+  ✓ upserted es
+  ✓ upserted fr
+  ✓ upserted de
+  ✓ upserted it
+  ✓ upserted pt
+  ✓ upserted ru
+  ✓ upserted zh
+  ✓ upserted ja
+  ✓ upserted ko
+  → done
+[31/83] Musee d'Orsay (musee-dorsay)
+  artwork_count=3592
+
+  --- EN description ---
+At the heart of the Musee d'Orsay in Paris is Vincent van Gogh's Starry Night Over the Rhone, painted in 1888. This Paris art museum houses a collection of 3592 works, showcasing the transformative period of art from the mid-19th to early 20th centuries. Among its masterpieces, you will find Edgar Degas' The Ballet Class and Gustave Courbet's The Origin of the World, each offering a unique glimpse into their creators' innovative approaches.
+
+What sets the Musee d'Orsay apart is its unique focus on Impressionist and Post-Impressionist paintings, housed in a former Beaux-Arts railway station built for the 1900 Exposition Universelle. This architectural marvel, with its grand clock and expansive glass ceilings, provides a fitting backdrop for the museum's extensive collection. The Musee d'Orsay is renowned for its emphasis on the evolution of modern art, bridging the gap between classical and contemporary styles.
+
+Art enthusiasts and history buffs alike will find the Musee d'Orsay's collection a fascinating exploration of artistic innovation and cultural shifts. Dive into the world of 19th-century art and discover the works that defined an era. Start your journey by browsing the 3592 paintings available online today.
+
+  --- EN seo_description ---
+Discover 3592 public domain artworks from Musee d'Orsay, home to Van Gogh's masterpieces. Free to download.
+  (seo length: 107 chars)
+
+  ✓ upserted en
+  ✓ upserted es
+  ✓ upserted fr
+  ✓ upserted de
+  ✓ upserted it
+  ✓ upserted pt
+  ✓ upserted ru
+  ✓ upserted zh
+  ✓ upserted ja
+  ✓ upserted ko
+  → done
+[32/83] Musée des Beaux-Arts de Brest (musee-des-beaux-arts-de-brest)
+  artwork_count=1
+
+  --- EN description ---
+At the Musée des Beaux-Arts de Brest, one of the most iconic paintings is the Portrait of a Young Woman by Pierre-Auguste Renoir, a captivating example of Impressionism from the late 19th century. This Brest art museum houses a collection of 1 works, offering a glimpse into the rich tapestry of European art. In addition to Renoir, the museum's collection includes works by artists such as Eugène Boudin and Jean-Baptiste-Camille Corot, each contributing to the diverse narrative of art history.
+
+What sets the Musée des Beaux-Arts de Brest apart is its focus on maritime-themed artworks, reflecting Brest's historical connection to the sea. Housed in a modern building that was reconstructed after World War II, the museum stands as a symbol of resilience and cultural revival. Its collection emphasizes the intersection of art and maritime history, making it a unique destination for those interested in how the sea has influenced artistic expression.
+
+Art enthusiasts and history buffs alike should explore this collection to gain insight into the maritime influences on European art. Dive into the world of the Musée des Beaux-Arts de Brest by browsing the 1 works available online, and discover the stories behind these masterpieces.
+
+  --- EN seo_description ---
+Discover 1 public domain artwork from Musée des Beaux-Arts de Brest, featuring works by Pierre-Jules Mène. Free to download.
+  (seo length: 124 chars)
+
+  ✓ upserted en
+  ✓ upserted es
+  ✓ upserted fr
+  ✓ upserted de
+  ✓ upserted it
+  ✓ upserted pt
+  ✓ upserted ru
+  ✓ upserted zh
+  ✓ upserted ja
+  ✓ upserted ko
+  → done
+[33/83] Musée des Beaux-Arts de Lyon (musee-des-beaux-arts-de-lyon)
+  artwork_count=1
+
+  --- EN description ---
+One of the most iconic works at the Musée des Beaux-Arts de Lyon is the painting by Nicolas Poussin, a master of the French Baroque. This Lyon art museum has a collection size of 1 work available online, offering a glimpse into its extensive holdings. Other notable artists in the museum's collection include Eugène Delacroix and Claude Monet, whose works exemplify the evolution of European art.
+
+What sets the Musée des Beaux-Arts de Lyon apart is its location in a former 17th-century Benedictine convent, which adds a layer of historical depth to the experience. The museum's collection is particularly strong in European paintings from the 14th to the 20th century, providing a focused look at the development of artistic styles over time. Its architectural setting and the careful curation of its collection make it a unique destination for art enthusiasts.
+
+Art lovers and history buffs alike should explore this collection to gain insight into the evolution of European art. Dive into the world of the Musée des Beaux-Arts de Lyon by browsing the 1 work available online and experience a piece of art history from the comfort of your home.
+
+  --- EN seo_description ---
+Discover 1 public domain artwork from Musée des Beaux-Arts de Lyon, home to masterpieces by Delacroix. Free to download.
+  (seo length: 120 chars)
+
+  ✓ upserted en
+  ✓ upserted es
+  ✓ upserted fr
+  ✓ upserted de
+  ✓ upserted it
+  ✓ upserted pt
+  ✓ upserted ru
+  ✓ upserted zh
+  ✓ upserted ja
+  ✓ upserted ko
+  → done
+[34/83] Musée des Beaux-Arts de Rouen (musee-des-beaux-arts-de-rouen)
+  artwork_count=7
+
+  --- EN description ---
+At the Musée des Beaux-Arts de Rouen, one of the most iconic paintings is Claude Monet's Impression, Sunrise, which captures the port of Le Havre in a groundbreaking style that gave birth to the Impressionist movement in 1872. This Rouen art museum offers a curated collection of 7 works available online, showcasing the depth and diversity of its holdings. Among these, you can explore pieces by Eugène Boudin, known for his beach scenes, and Camille Pissarro, a master of rural landscapes.
+
+What sets the Musée des Beaux-Arts de Rouen apart is its dedication to the 19th-century art movement, particularly Impressionism, which has deep roots in the region. Housed in a building that dates back to the 19th century, the museum offers a unique glimpse into the evolution of art during this transformative period. The collection emphasizes the connection between the artists and the Normandy region, providing context to the works and their creators.
+
+Art enthusiasts and history buffs alike will find the Musée des Beaux-Arts de Rouen's collection intriguing for its focus on Impressionism and its regional ties. Whether you're a seasoned art lover or a curious newcomer, take a moment to explore the 7 masterpieces available online and discover the unique stories behind each painting.
+
+  --- EN seo_description ---

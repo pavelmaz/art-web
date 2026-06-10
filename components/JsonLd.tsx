@@ -26,14 +26,55 @@ export function WebSiteJsonLd() {
   );
 }
 
-export function ArtistJsonLd({ name, slug }: { name: string; slug: string }) {
-  const schema = {
+type ArtistJsonLdProps = {
+  name: string;
+  slug: string;
+  nationality?: string | null;
+  birthYear?: number | null;
+  deathYear?: number | null;
+  description?: string | null;
+  imageUrl?: string | null;
+};
+
+export function ArtistJsonLd({
+  name,
+  slug,
+  nationality,
+  birthYear,
+  deathYear,
+  description,
+  imageUrl,
+}: ArtistJsonLdProps) {
+  const schema: Record<string, unknown> = {
     "@context": "https://schema.org",
-    "@type": "Person",
+    "@type": ["Person", "Artist"],
     name,
     url: absoluteUrl(`/artists/${slug}`),
     jobTitle: "Artist",
   };
+
+  const nation = nationality?.trim();
+  if (nation) {
+    schema.nationality = nation;
+  }
+
+  if (typeof birthYear === "number" && Number.isFinite(birthYear)) {
+    schema.birthDate = String(birthYear);
+  }
+
+  if (typeof deathYear === "number" && Number.isFinite(deathYear)) {
+    schema.deathDate = String(deathYear);
+  }
+
+  const desc = description?.trim();
+  if (desc) {
+    schema.description = desc.length > 300 ? `${desc.slice(0, 297)}...` : desc;
+  }
+
+  const image = imageUrl?.trim();
+  if (image) {
+    schema.image = image;
+  }
 
   return (
     <script

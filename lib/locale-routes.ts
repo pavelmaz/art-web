@@ -294,6 +294,7 @@ export function buildArtworkLanguageAlternates(slug: string): Record<string, str
   for (const loc of HREFLANG_LOCALES) {
     out[loc] = absoluteArtworkUrl(loc, slug);
   }
+  out["x-default"] = absoluteArtworkUrl("en", slug);
   return out;
 }
 
@@ -306,6 +307,7 @@ export function buildHubLanguageAlternates(
     const path = localePath(loc, hub);
     out[loc] = `${site}${path === "/" ? "" : path}`;
   }
+  out["x-default"] = absoluteUrl(localePath("en", hub));
   return out;
 }
 
@@ -316,6 +318,7 @@ export function buildHomeLanguageAlternates(): Record<string, string> {
     if (loc === "en") continue;
     out[loc] = `${site}${LOCALE_ROUTE_CONFIG[loc].prefix}`;
   }
+  out["x-default"] = site;
   return out;
 }
 
@@ -329,6 +332,7 @@ export function buildArtistLanguageAlternates(slug: string): Record<string, stri
   for (const loc of HREFLANG_LOCALES) {
     out[loc] = `${site}${artistDetailPath(loc, slug)}`;
   }
+  out["x-default"] = absoluteUrl(`/artists/${slug}`);
   return out;
 }
 
