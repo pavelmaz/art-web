@@ -3,7 +3,7 @@ import { cache } from "react";
 import { resolveMuseumBySlug } from "@/lib/resolve-museum-by-slug";
 import { supabase } from "@/lib/supabase";
 import type { Locale } from "@/lib/translations";
-import { artworkGridImageUrl } from "@/lib/utils";
+import { artworkGridImageUrl, slugify } from "@/lib/utils";
 import type { Artwork } from "@/types/artwork";
 
 export type MuseumPageData = {
@@ -150,6 +150,39 @@ async function getMuseumPageDataUncached(slug: string, locale: Locale): Promise<
 }
 
 export const getMuseumPageData = cache(getMuseumPageDataUncached);
+
+export async function fetchMuseumTopArtists(
+  museumName: string,
+  limit = 8,
+): Promise<{ name: string; slug: string; count: number }[]> {
+  const { data } = await supabase
+    .from("artworks")
+    .select("artist_display")
+    .eq("museum", museumName)
+    .not("artist_display", "is", null)
+    .neq("artist_display", "Unknown Artist")
+    .neq("artist_display", "Unknown artist");
+
+  if (!data) {
+    return [];
+  }
+
+  const counts: Record<string, number> = {};
+  for (const row of data) {
+    if (row.artist_display) {
+      counts[row.artist_display] = (counts[row.artist_display] || 0) + 1;
+    }
+  }
+
+  return Object.entries(counts)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, limit)
+    .map(([name, count]) => ({
+      name,
+      slug: slugify(name),
+      count,
+    }));
+}
 
 export async function fetchMuseumArtworks(
   museumName: string,
