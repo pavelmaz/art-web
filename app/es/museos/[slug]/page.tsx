@@ -3,13 +3,13 @@ import { notFound } from "next/navigation";
 
 import { ArtworkGrid } from "@/components/ArtworkGrid";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
+import { CollectionPageJsonLd } from "@/components/JsonLd";
+import { MuseumProfileHeader } from "@/components/MuseumProfileHeader";
 import { Pagination } from "@/components/Pagination";
-import { getPaginationParams, getTotalPages } from "@/lib/pagination";
-import { resolveMuseumBySlug } from "@/lib/resolve-museum-by-slug";
-import { supabase } from "@/lib/supabase";
 import { buildMuseumLanguageAlternates } from "@/lib/locale-routes";
+import { fetchMuseumArtworks, getMuseumPageData } from "@/lib/museum-page-data";
+import { getPaginationParams, getTotalPages } from "@/lib/pagination";
 import { absoluteUrl } from "@/lib/utils";
-import type { Artwork } from "@/types/artwork";
 
 export const revalidate = 86400;
 
@@ -18,50 +18,18 @@ type MuseumPageProps = {
   searchParams: Promise<{ page?: string }>;
 };
 
-type ArtworkRow = {
-  id: string;
-  title: string;
-  slug: string;
-  artist_display: string | null;
-  image_id: string | null;
-  url: string | null;
-  museum: string | null;
-  style_title: string | null;
-  genre_title: string | null;
-  score: number | null;
-  alt_text: string | null;
-};
-
-const SELECT_COLUMNS =
-  "id, title, slug, artist_display, image_id, url, museum, style_title, genre_title, score, alt_text";
-
-function toImageUrl(imageId: string | null): string {
-  if (!imageId) return "";
-  if (imageId.startsWith("http://") || imageId.startsWith("https://")) return imageId;
-  return `https://www.artic.edu/iiif/2/${imageId}/full/400,/0/default.jpg`;
-}
-
 export async function generateMetadata({ params }: MuseumPageProps): Promise<Metadata> {
   const { slug } = await params;
-  const museumName = await resolveMuseumBySlug(slug);
+  const museum = await getMuseumPageData(slug, "es");
 
-  if (!museumName) {
+  if (!museum) {
     notFound();
   }
 
-  const { count, error } = await supabase
-    .from("artworks")
-    .select("id", { count: "exact", head: true })
-    .eq("museum", museumName);
-
-  if (error || !count) {
-    notFound();
-  }
-
-  const totalCount = count;
-
-  const title = `${museumName} — Arte Gratis para Descargar | Fine Art Free`;
-  const description = `Explora ${totalCount} obras de arte de ${museumName} gratis para descargar. Arte de dominio público en alta resolución para cualquier uso.`;
+  const title = `${museum.name} — Arte Gratis para Descargar | Fine Art Free`;
+  const description =
+    museum.seoDescription ??
+    `Explora ${museum.artworkCount} obras de arte de ${museum.name} gratis para descargar. Arte de dominio público en alta resolución para cualquier uso.`;
 
   return {
     title,
@@ -70,7 +38,10 @@ export async function generateMetadata({ params }: MuseumPageProps): Promise<Met
       canonical: absoluteUrl(`/es/museos/${slug}`),
       languages: buildMuseumLanguageAlternates(slug),
     },
-    openGraph: { title, description },
+    openGraph: {
+      title,
+      description,
+    },
   };
 }
 
@@ -78,59 +49,48 @@ export default async function MuseumPage({ params, searchParams }: MuseumPagePro
   const { slug } = await params;
   const resolvedSearchParams = await searchParams;
   const { page, from, to } = getPaginationParams(resolvedSearchParams);
-  const museumName = await resolveMuseumBySlug(slug);
 
-  if (!museumName) {
+  const museum = await getMuseumPageData(slug, "es");
+  if (!museum) {
     notFound();
   }
 
-  const { data, count, error } = await supabase
-    .from("artworks")
-    .select(SELECT_COLUMNS, { count: "exact" })
-    .eq("museum", museumName)
-    .order("score", { ascending: false })
-    .range(from, to);
+  const { artworks, totalCount, error } = await fetchMuseumArtworks(museum.name, from, to);
 
   if (error) {
     console.error("[museum-primary-query/es]", error);
     return <p>Error loading data</p>;
   }
 
-  const rows = (data as ArtworkRow[] | null) ?? [];
-  const totalCount = count ?? 0;
-
-  const artworks: Artwork[] = rows.map((item) => ({
-    id: item.id,
-    title: item.title,
-    slug: item.slug,
-    artistName: item.artist_display ?? "Unknown artist",
-    artistDisplay: item.artist_display ?? undefined,
-    imageUrl: toImageUrl(item.image_id),
-    imageId: item.image_id,
-    museum: item.museum,
-    styleTitle: item.style_title,
-    genreTitle: item.genre_title,
-    score: item.score,
-    url: item.url,
-    styleSlug: "unknown",
-    styleName: item.style_title ?? "Unknown style",
-    sourceUrl: item.url ?? undefined,
-    altText: item.alt_text ?? null,
-  }));
-
   if (!artworks.length) {
     notFound();
   }
 
+  const pageDescription =
+    museum.description ??
+    `Explora obras de arte y pinturas de dominio público de ${museum.name}, gratis para descargar.`;
+
   return (
-    <div className="space-y-6 px-5">
+    <div className="space-y-8 px-5">
+      <CollectionPageJsonLd
+        name={`Colección de ${museum.name}`}
+        path={`/es/museos/${slug}`}
+        description={pageDescription}
+        numberOfItems={totalCount}
+      />
       <Breadcrumbs
-        items={[{ label: "Inicio", href: "/es" }, { label: "Museos", href: "/es/museos" }, { label: museumName }]}
+        items={[{ label: "Inicio", href: "/es" }, { label: "Museos", href: "/es/museos" }, { label: museum.name }]}
         currentPath={`/es/museos/${slug}`}
       />
-      <h1 className="text-3xl font-bold tracking-tight">Obras de {museumName}</h1>
-      <p className="max-w-3xl text-neutral-700">
-        Explora obras de arte y pinturas de dominio público de {museumName}, gratis para descargar.
+      <MuseumProfileHeader
+        name={museum.name}
+        city={museum.city}
+        country={museum.country}
+        description={pageDescription}
+        readMoreLabel="Leer más"
+      />
+      <p className="text-sm text-[#6b6b6b]">
+        {museum.artworkCount} {museum.artworkCount === 1 ? "obra de arte" : "obras de arte"}
       </p>
       <ArtworkGrid artworks={artworks} basePath="/es" />
       <Pagination

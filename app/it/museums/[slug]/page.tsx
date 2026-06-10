@@ -4,73 +4,47 @@ import { notFound } from "next/navigation";
 
 import { ArtworkGrid } from "@/components/ArtworkGrid";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
+import { CollectionPageJsonLd } from "@/components/JsonLd";
+import { MuseumProfileHeader } from "@/components/MuseumProfileHeader";
 import { Pagination } from "@/components/Pagination";
+import { fetchMuseumArtworks, getMuseumPageData } from "@/lib/museum-page-data";
 import { getPaginationParams, getTotalPages } from "@/lib/pagination";
-import { resolveMuseumBySlug } from "@/lib/resolve-museum-by-slug";
-import { supabase } from "@/lib/supabase";
-import { absoluteUrl } from "@/lib/utils";
-import type { Artwork } from "@/types/artwork";
+import { getT } from "@/lib/translations";
 
 export const revalidate = 86400;
+
+const t = getT("it");
+const museumsHubPath = localePath("it", "museums");
 
 type MuseumPageProps = {
   params: Promise<{ slug: string }>;
   searchParams: Promise<{ page?: string }>;
 };
 
-type ArtworkRow = {
-  id: string;
-  title: string;
-  slug: string;
-  artist_display: string | null;
-  image_id: string | null;
-  url: string | null;
-  museum: string | null;
-  style_title: string | null;
-  genre_title: string | null;
-  score: number | null;
-  alt_text: string | null;
-};
-
-const SELECT_COLUMNS =
-  "id, title, slug, artist_display, image_id, url, museum, style_title, genre_title, score, alt_text";
-
-function toImageUrl(imageId: string | null): string {
-  if (!imageId) return "";
-  if (imageId.startsWith("http://") || imageId.startsWith("https://")) return imageId;
-  return `https://www.artic.edu/iiif/2/${imageId}/full/400,/0/default.jpg`;
-}
-
 export async function generateMetadata({ params }: MuseumPageProps): Promise<Metadata> {
   const { slug } = await params;
-  const museumName = await resolveMuseumBySlug(slug);
+  const museum = await getMuseumPageData(slug, "it");
 
-  if (!museumName) {
+  if (!museum) {
     notFound();
   }
 
-  const { count, error } = await supabase
-    .from("artworks")
-    .select("id", { count: "exact", head: true })
-    .eq("museum", museumName);
-
-  if (error || !count) {
-    notFound();
-  }
-
-  const totalCount = count;
-
-  const title = `${museumName} — Musei gratuiti | Fine Art Free`;
-  const description = `Scopri ${totalCount} opere da ${museumName} in alta risoluzione. Dominio pubblico, gratuito.`;
+  const title = `${museum.name} — Musei gratuiti | Fine Art Free`;
+  const description =
+    museum.seoDescription ??
+    `Scopri ${museum.artworkCount} opere da ${museum.name} in alta risoluzione. Dominio pubblico, gratuito.`;
 
   return {
     title: { absolute: title },
     description,
     alternates: {
-      canonical: `https://fineartfree.com${localePath("it", "museums")}/${slug}`,
+      canonical: `https://fineartfree.com${museumsHubPath}/${slug}`,
       languages: buildMuseumLanguageAlternates(slug),
     },
-    openGraph: { title, description },
+    openGraph: {
+      title,
+      description,
+    },
   };
 }
 
@@ -78,65 +52,54 @@ export default async function MuseumPage({ params, searchParams }: MuseumPagePro
   const { slug } = await params;
   const resolvedSearchParams = await searchParams;
   const { page, from, to } = getPaginationParams(resolvedSearchParams);
-  const museumName = await resolveMuseumBySlug(slug);
 
-  if (!museumName) {
+  const museum = await getMuseumPageData(slug, "it");
+  if (!museum) {
     notFound();
   }
 
-  const { data, count, error } = await supabase
-    .from("artworks")
-    .select(SELECT_COLUMNS, { count: "exact" })
-    .eq("museum", museumName)
-    .order("score", { ascending: false })
-    .range(from, to);
+  const { artworks, totalCount, error } = await fetchMuseumArtworks(museum.name, from, to);
 
   if (error) {
     console.error("[museum-primary-query/it]", error);
     return <p>Error loading data</p>;
   }
 
-  const rows = (data as ArtworkRow[] | null) ?? [];
-  const totalCount = count ?? 0;
-
-  const artworks: Artwork[] = rows.map((item) => ({
-    id: item.id,
-    title: item.title,
-    slug: item.slug,
-    artistName: item.artist_display ?? "Unknown artist",
-    artistDisplay: item.artist_display ?? undefined,
-    imageUrl: toImageUrl(item.image_id),
-    imageId: item.image_id,
-    museum: item.museum,
-    styleTitle: item.style_title,
-    genreTitle: item.genre_title,
-    score: item.score,
-    url: item.url,
-    styleSlug: "unknown",
-    styleName: item.style_title ?? "Unknown style",
-    sourceUrl: item.url ?? undefined,
-    altText: item.alt_text ?? null,
-  }));
-
   if (!artworks.length) {
     notFound();
   }
 
+  const pageDescription =
+    museum.description ??
+    `Scopri ${museum.artworkCount} opere e dipinti di pubblico dominio del ${museum.name}, gratis da scaricare.`;
+
   return (
-    <div className="space-y-6 px-5">
-      <Breadcrumbs
-        items={[{ label: "Home", href: "/it" }, { label: "Musei", href: "/it/museums" }, { label: museumName }]}
-        currentPath={`/it/museums/${slug}`}
+    <div className="space-y-8 px-5">
+      <CollectionPageJsonLd
+        name={`Collezione del ${museum.name}`}
+        path={`${museumsHubPath}/${slug}`}
+        description={pageDescription}
+        numberOfItems={totalCount}
       />
-      <h1 className="text-3xl font-bold tracking-tight">Opere de {museumName}</h1>
-      <p className="max-w-3xl text-neutral-700">
-        Scopri {totalCount} opere e dipinti di dominio pubblico da {museumName}, gratuiti da scaricare.
+      <Breadcrumbs
+        items={[{ label: "Home", href: "/it" }, { label: t.museums, href: museumsHubPath }, { label: museum.name }]}
+        currentPath={`${museumsHubPath}/${slug}`}
+      />
+      <MuseumProfileHeader
+        name={museum.name}
+        city={museum.city}
+        country={museum.country}
+        description={pageDescription}
+        readMoreLabel="Leggi di più"
+      />
+      <p className="text-sm text-[#6b6b6b]">
+        {museum.artworkCount} {t.artworks}
       </p>
       <ArtworkGrid artworks={artworks} basePath="/it" />
       <Pagination
         currentPage={page}
         totalPages={Math.max(1, getTotalPages(totalCount || artworks.length))}
-        basePath={`/it/museums/${slug}`}
+        basePath={`${museumsHubPath}/${slug}`}
       />
     </div>
   );
