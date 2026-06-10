@@ -157,7 +157,7 @@ export async function generateGuideInsights(
   const prompt = `You write educational content for an art platform.
 Tone: direct, simple, human. Not academic.
 
-For each artwork below generate exactly 4 insight bullets.
+For each artwork below generate exactly 3 insight bullets.
 
 Artworks:
 ${artworkList}
@@ -167,7 +167,7 @@ Return ONLY valid JSON:
   "insights": [
     {
       "artwork_id": "exact id",
-      "bullets": ["bullet1", "bullet2", "bullet3", "bullet4"]
+      "bullets": ["bullet1", "bullet2", "bullet3"]
     }
   ]
 }
@@ -178,20 +178,14 @@ Bullet 1: The real reason this specific work was made.
 Name the patron, the occasion, or the personal motivation.
 Not "it was a commission" — say WHO commissioned it and WHY.
 
-Bullet 2: One concrete fact about the artist's life at the
-time of this work. Include a specific year or age.
-Not "was gaining recognition" — say something specific
-like "had just moved to Amsterdam after his first wife died"
-or "was 36 and deeply in debt."
-
-Bullet 3: A specific visual detail the visitor can verify
+Bullet 2: A specific visual detail the visitor can verify
 by looking at the image right now. Must start with
 "Look at..." or "Notice..." and point to something
 non-obvious — not light and shadow, not composition,
 not color palette (too generic). Something specific:
 a hidden face, an object out of place, an unusual detail.
 
-Bullet 4: Historical context with a SPECIFIC year AND
+Bullet 3: Historical context with a SPECIFIC year AND
 a SPECIFIC city or region. Not "a period of prosperity" —
 say what was actually happening: a war, a political event,
 a social change, and how it connects directly to this
@@ -223,7 +217,7 @@ Rules:
     const artworkId = item.artwork_id?.trim();
     const bullets = item.bullets?.map((b) => b.trim()).filter(Boolean) ?? [];
     if (artworkId && bullets.length > 0) {
-      insights.set(artworkId, bullets.slice(0, 4));
+      insights.set(artworkId, bullets.slice(0, 3));
     }
   }
 

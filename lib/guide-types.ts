@@ -9,8 +9,8 @@ export const STOP_COUNT_BY_TIME: Record<TimeHours, number> = {
   1: 8,
   1.5: 12,
   2: 16,
-  3: 22,
-  4: 28,
+  3: 16,
+  4: 16,
 };
 
 export type GuideArtworkCandidate = {

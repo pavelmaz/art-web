@@ -48,9 +48,9 @@ function StopCard({ stop, locale, expanded, onToggleBullets, copy }: StopCardPro
         </div>
       </div>
 
-      <div className="flex-1 overflow-hidden rounded-2xl border border-neutral-100 bg-white shadow-sm">
+      <div className="min-w-0 flex-1 rounded-2xl border border-neutral-100 bg-white shadow-sm">
         {imageSrc ? (
-          <div className="relative bg-neutral-50">
+          <div className="bg-neutral-50 px-4 pb-4 pt-4">
             <ArtworkInsightsProvider
               artwork={{ title: stop.title, artist_display: stop.artist_display }}
               locale={locale}
@@ -63,9 +63,7 @@ function StopCard({ stop, locale, expanded, onToggleBullets, copy }: StopCardPro
                 />
                 <ArtworkInsightsOverlay />
               </div>
-              <div className="px-4 pb-4">
-                <ArtworkInsightsControls />
-              </div>
+              <ArtworkInsightsControls />
             </ArtworkInsightsProvider>
           </div>
         ) : null}
@@ -87,25 +85,29 @@ function StopCard({ stop, locale, expanded, onToggleBullets, copy }: StopCardPro
           </p>
 
           {stop.bullets.length > 0 ? (
-            <div className="border-t border-neutral-100 pt-4">
+            <div className="mt-6 overflow-hidden rounded-xl border border-neutral-200">
               <button
                 type="button"
                 onClick={onToggleBullets}
-                className="flex items-center gap-2 text-sm font-medium text-neutral-700 transition-colors hover:text-neutral-900"
+                className="flex w-full items-center justify-between bg-neutral-50 px-5 py-4 text-left transition-colors hover:bg-neutral-100"
               >
-                <span>{expanded ? "−" : "+"}</span>
-                <span>{expanded ? copy.hideInsights : copy.showInsights}</span>
+                <span className="text-sm font-medium text-neutral-900">
+                  {expanded ? copy.hideInsights : copy.showInsights}
+                </span>
+                <span className="text-lg text-neutral-500">{expanded ? "−" : "+"}</span>
               </button>
 
               {expanded ? (
-                <ol className="mt-4 list-none space-y-3 pl-0">
+                <div className="space-y-4 bg-white px-5 py-4">
                   {stop.bullets.map((bullet, index) => (
-                    <li key={index} className="flex gap-3 text-sm leading-relaxed text-neutral-700">
-                      <span className="mt-0.5 shrink-0 font-mono text-neutral-400">{index + 1}</span>
-                      <span>{bullet}</span>
-                    </li>
+                    <div key={index} className="flex gap-3">
+                      <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-neutral-900 text-xs font-bold text-white">
+                        {index + 1}
+                      </span>
+                      <p className="text-sm leading-relaxed text-neutral-700">{bullet}</p>
+                    </div>
                   ))}
-                </ol>
+                </div>
               ) : null}
             </div>
           ) : null}
@@ -120,7 +122,10 @@ export function GuideDisplay({ guide, isLoggedIn, locale }: GuideDisplayProps) {
   const resolvedLocale = toLocale(locale);
   const t = getGuideTranslations(resolvedLocale);
   const heroImage = guide.stops[0]?.image_id;
-  const [expandedStops, setExpandedStops] = useState<Record<string, boolean>>({});
+  const [expandedStops, setExpandedStops] = useState<Record<string, boolean>>(() => {
+    if (guide.stops.length === 0) return {};
+    return { [guide.stops[0].artwork_id]: true };
+  });
 
   const toggleBullets = (artworkId: string) => {
     setExpandedStops((prev) => ({

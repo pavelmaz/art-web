@@ -218,20 +218,23 @@ export async function POST(req: NextRequest) {
 
     const stopCount = selected.length;
 
-    const overviewResult = await generateGuideOverview(
-      parsed.museum_name,
-      parsed.visit_type,
-      parsed.time_hours,
-      parsed.focus ?? null,
-      stopCount,
-      selected,
-    );
+    const [overviewResult, insightsResult] = await Promise.all([
+      generateGuideOverview(
+        parsed.museum_name,
+        parsed.visit_type,
+        parsed.time_hours,
+        parsed.focus ?? null,
+        stopCount,
+        selected,
+      ),
+      generateGuideInsights(selected),
+    ]);
+
     if ("error" in overviewResult) {
       console.error("[guides/generate] OpenAI overview error:", overviewResult.error);
       return NextResponse.json({ error: overviewResult.error }, { status: 500 });
     }
 
-    const insightsResult = await generateGuideInsights(selected);
     if ("error" in insightsResult) {
       console.error("[guides/generate] OpenAI insights error:", insightsResult.error);
       return NextResponse.json({ error: insightsResult.error }, { status: 500 });
