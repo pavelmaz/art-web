@@ -38,9 +38,16 @@ function pickMasterpieces(candidates: GuideArtworkCandidate[], stopCount: number
   return [...iconic, ...strong].slice(0, stopCount);
 }
 
-function pickOverview(candidates: GuideArtworkCandidate[], stopCount: number): GuideArtworkCandidate[] {
+function pickOverview(
+  candidates: GuideArtworkCandidate[],
+  stopCount: number,
+  returningVisitor = false,
+): GuideArtworkCandidate[] {
   const pool = candidates.filter((a) => {
     const bucket = scoreBucket(a.score);
+    if (returningVisitor) {
+      return bucket === "iconic" || bucket === "strong" || bucket === "discovery";
+    }
     return bucket === "iconic" || bucket === "strong";
   });
 
@@ -53,7 +60,17 @@ function pickOverview(candidates: GuideArtworkCandidate[], stopCount: number): G
   }
 
   for (const group of byStyle.values()) {
-    group.sort((a, b) => b.score - a.score);
+    if (returningVisitor) {
+      group.sort((a, b) => {
+        const bucketRank = { discovery: 0, strong: 1, iconic: 2 };
+        const rankA = bucketRank[scoreBucket(a.score)];
+        const rankB = bucketRank[scoreBucket(b.score)];
+        if (rankA !== rankB) return rankA - rankB;
+        return b.score - a.score;
+      });
+    } else {
+      group.sort((a, b) => b.score - a.score);
+    }
   }
 
   const styles = [...byStyle.keys()].sort();
@@ -146,6 +163,7 @@ export function selectArtworksForGuide(
   visitType: VisitType,
   timeHours: TimeHours,
   focus?: string,
+  options?: { returningVisitor?: boolean },
 ): GuideArtworkCandidate[] {
   const stopCount = STOP_COUNT_BY_TIME[timeHours];
   const candidates = filterCandidates(artworks);
@@ -154,7 +172,7 @@ export function selectArtworksForGuide(
     case "masterpieces":
       return pickMasterpieces(candidates, stopCount);
     case "overview":
-      return pickOverview(candidates, stopCount);
+      return pickOverview(candidates, stopCount, options?.returningVisitor ?? false);
     case "in_depth":
       return pickInDepth(candidates, stopCount, focus);
     default:

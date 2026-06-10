@@ -1,4 +1,4 @@
-import type { GuideArtworkCandidate } from "@/lib/guide-types";
+import type { GuideArtworkCandidate, GuideInterest } from "@/lib/guide-types";
 
 function getOpenAiApiKey(): string {
   return (
@@ -76,10 +76,14 @@ export async function generateGuideOverview(
   focus: string | null,
   stopCount: number,
   selected: GuideArtworkCandidate[],
+  options?: { isFirstVisit?: boolean; interest?: GuideInterest },
 ): Promise<OpenAiJsonResult<GeneratedOverview>> {
   const artworkList = selected
     .map((a) => `ID: ${a.id} | ${a.title} by ${a.artist_display} (score: ${a.score})`)
     .join("\n");
+
+  const interest = options?.interest ?? "stories";
+  const visitorType = options?.isFirstVisit ? "first visit" : "returning visitor";
 
   const prompt = `You write short museum visit guides for a mobile-first art platform.
 
@@ -89,6 +93,8 @@ Visit type: ${visitType}
 Duration: ${timeHours} hours
 Focus: ${focus ?? "none"}
 Number of stops: ${stopCount}
+Visitor type: ${visitorType}
+Visitor interest: ${interest}
 
 Artworks selected (in order):
 ${artworkList}
@@ -149,6 +155,7 @@ Rules:
 
 export async function generateGuideInsights(
   selected: GuideArtworkCandidate[],
+  interest: GuideInterest = "stories",
 ): Promise<OpenAiJsonResult<GeneratedInsights>> {
   const artworkList = selected
     .map((a) => `ID: ${a.id} | Title: ${a.title} | Artist: ${a.artist_display}`)
@@ -161,6 +168,11 @@ For each artwork below generate exactly 3 insight bullets.
 
 Artworks:
 ${artworkList}
+
+Visitor interest: ${interest}
+- If 'stories': prioritize historical context and commission reasons in bullets
+- If 'artist': prioritize facts about the artist's life and technique in bullets
+- If 'visual': prioritize visual details the visitor can spot, and impact/uniqueness of the work
 
 Return ONLY valid JSON:
 {

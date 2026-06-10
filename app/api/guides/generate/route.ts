@@ -11,11 +11,12 @@ import type {
   GenerateGuideRequest,
   GuideArtworkCandidate,
   GuideData,
+  GuideInterest,
   GuideStop,
   TimeHours,
   VisitType,
 } from "@/lib/guide-types";
-import { TIME_HOURS_OPTIONS, VISIT_TYPES } from "@/lib/guide-types";
+import { GUIDE_INTERESTS, TIME_HOURS_OPTIONS, VISIT_TYPES } from "@/lib/guide-types";
 import { supabase } from "@/lib/supabase";
 
 export const maxDuration = 60;
@@ -37,6 +38,10 @@ function isTimeHours(value: unknown): value is TimeHours {
   return typeof value === "number" && (TIME_HOURS_OPTIONS as readonly number[]).includes(value);
 }
 
+function isGuideInterest(value: unknown): value is GuideInterest {
+  return typeof value === "string" && (GUIDE_INTERESTS as readonly string[]).includes(value);
+}
+
 function parseRequest(body: unknown): GenerateGuideRequest | { error: string } {
   if (!body || typeof body !== "object") {
     return { error: "Request body must be a JSON object" };
@@ -49,6 +54,8 @@ function parseRequest(body: unknown): GenerateGuideRequest | { error: string } {
   const time_hours = raw.time_hours;
   const locale = typeof raw.locale === "string" && raw.locale.trim() ? raw.locale.trim() : "en";
   const focus = typeof raw.focus === "string" && raw.focus.trim() ? raw.focus.trim() : undefined;
+  const interest = isGuideInterest(raw.interest) ? raw.interest : undefined;
+  const returning_visitor = raw.returning_visitor === true;
 
   if (!museum_slug || !museum_name) {
     return { error: "museum_slug and museum_name are required" };
@@ -67,6 +74,8 @@ function parseRequest(body: unknown): GenerateGuideRequest | { error: string } {
     time_hours,
     focus,
     locale,
+    interest,
+    returning_visitor,
   };
 }
 
@@ -207,6 +216,7 @@ export async function POST(req: NextRequest) {
       parsed.visit_type,
       parsed.time_hours,
       parsed.focus,
+      { returningVisitor: parsed.returning_visitor },
     );
 
     if (selected.length === 0) {
@@ -218,6 +228,9 @@ export async function POST(req: NextRequest) {
 
     const stopCount = selected.length;
 
+    const isFirstVisit = parsed.visit_type === "masterpieces";
+    const interest = parsed.interest ?? "stories";
+
     const [overviewResult, insightsResult] = await Promise.all([
       generateGuideOverview(
         parsed.museum_name,
@@ -226,8 +239,9 @@ export async function POST(req: NextRequest) {
         parsed.focus ?? null,
         stopCount,
         selected,
+        { isFirstVisit, interest },
       ),
-      generateGuideInsights(selected),
+      generateGuideInsights(selected, interest),
     ]);
 
     if ("error" in overviewResult) {

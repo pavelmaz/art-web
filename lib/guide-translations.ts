@@ -11,11 +11,16 @@ export type GuideTranslations = {
   modal: {
     stepLabel: (current: number, total: number) => string;
     closeAriaLabel: string;
-    visitTypeHeading: string;
-    visitTypes: {
-      masterpieces: { label: string; description: string };
-      overview: { label: string; description: string };
-      in_depth: { label: string; description: string };
+    visitBeforeHeading: string;
+    visitBeforeOptions: {
+      first_visit: { label: string; description: string };
+      returning: { label: string; description: string };
+    };
+    interestHeading: string;
+    interestOptions: {
+      stories: { label: string; description: string };
+      artist: { label: string; description: string };
+      visual: { label: string; description: string };
     };
     durationHeading: string;
     focusHeading: string;
@@ -71,13 +76,34 @@ const en: GuideTranslations = {
     ctaSub: "Free · Takes 30 seconds",
   },
   modal: {
-    stepLabel: (current, total) => `Step ${current} of ${total}`,
+    stepLabel: (current, total) => `STEP ${current} OF ${total}`,
     closeAriaLabel: "Close",
-    visitTypeHeading: "What kind of visit?",
-    visitTypes: {
-      masterpieces: { label: "Highlights", description: "Must-see iconic works" },
-      overview: { label: "Overview", description: "A balanced introduction" },
-      in_depth: { label: "In Depth", description: "Focused exploration" },
+    visitBeforeHeading: "Have you visited before?",
+    visitBeforeOptions: {
+      first_visit: {
+        label: "First visit",
+        description: "I want to see the essential works this museum is known for",
+      },
+      returning: {
+        label: "I have been before",
+        description: "I have seen the highlights and want to go deeper",
+      },
+    },
+    interestHeading: "What matters most to you?",
+    interestOptions: {
+      stories: {
+        label: "Stories and history",
+        description:
+          "Why each work was made, who commissioned it, what was happening",
+      },
+      artist: {
+        label: "The artist — life and technique",
+        description: "Understanding the person behind the work and how it was made",
+      },
+      visual: {
+        label: "Visual beauty and impact",
+        description: "Works that stop you in your tracks, details worth looking for",
+      },
     },
     durationHeading: "How much time do you have?",
     focusHeading: "What would you like to focus on?",
@@ -140,13 +166,33 @@ const es: GuideTranslations = {
     ctaSub: "Gratis · 30 segundos",
   },
   modal: {
-    stepLabel: (current, total) => `Paso ${current} de ${total}`,
+    stepLabel: (current, total) => `PASO ${current} DE ${total}`,
     closeAriaLabel: "Cerrar",
-    visitTypeHeading: "¿Qué tipo de visita?",
-    visitTypes: {
-      masterpieces: { label: "Obras esenciales", description: "Lo imprescindible del museo" },
-      overview: { label: "Panorama general", description: "Una introducción equilibrada" },
-      in_depth: { label: "En profundidad", description: "Un recorrido con enfoque" },
+    visitBeforeHeading: "¿Has visitado antes este museo?",
+    visitBeforeOptions: {
+      first_visit: {
+        label: "Primera visita",
+        description: "Quiero ver las obras esenciales por las que es conocido este museo",
+      },
+      returning: {
+        label: "Ya he estado antes",
+        description: "Ya vi lo imprescindible y quiero profundizar",
+      },
+    },
+    interestHeading: "¿Qué te importa más?",
+    interestOptions: {
+      stories: {
+        label: "Historias y contexto",
+        description: "Por qué se hizo cada obra, quién la encargó, qué ocurría entonces",
+      },
+      artist: {
+        label: "El artista — vida y técnica",
+        description: "Entender a la persona detrás de la obra y cómo se hizo",
+      },
+      visual: {
+        label: "Belleza visual e impacto",
+        description: "Obras que te detienen en seco, detalles que merece la pena buscar",
+      },
     },
     durationHeading: "¿Cuánto tiempo tienes?",
     focusHeading: "¿En qué te gustaría centrarte?",
@@ -209,13 +255,33 @@ const pt: GuideTranslations = {
     ctaSub: "Grátis · 30 segundos",
   },
   modal: {
-    stepLabel: (current, total) => `Passo ${current} de ${total}`,
+    stepLabel: (current, total) => `PASSO ${current} DE ${total}`,
     closeAriaLabel: "Fechar",
-    visitTypeHeading: "Que tipo de visita?",
-    visitTypes: {
-      masterpieces: { label: "Destaques", description: "As obras mais emblemáticas" },
-      overview: { label: "Visão geral", description: "Uma introdução equilibrada" },
-      in_depth: { label: "Em profundidade", description: "Uma exploração focada" },
+    visitBeforeHeading: "Já visitou este museu antes?",
+    visitBeforeOptions: {
+      first_visit: {
+        label: "Primeira visita",
+        description: "Quero ver as obras essenciais pelas quais este museu é conhecido",
+      },
+      returning: {
+        label: "Já estive aqui antes",
+        description: "Já vi os destaques e quero ir mais fundo",
+      },
+    },
+    interestHeading: "O que mais importa para si?",
+    interestOptions: {
+      stories: {
+        label: "Histórias e contexto",
+        description: "Por que cada obra foi feita, quem a encomendou, o que se passava",
+      },
+      artist: {
+        label: "O artista — vida e técnica",
+        description: "Compreender a pessoa por trás da obra e como foi feita",
+      },
+      visual: {
+        label: "Beleza visual e impacto",
+        description: "Obras que o fazem parar, detalhes que vale a pena procurar",
+      },
     },
     durationHeading: "Quanto tempo tem?",
     focusHeading: "Em que gostaria de se focar?",
@@ -278,13 +344,33 @@ const fr: GuideTranslations = {
     ctaSub: "Gratuit · 30 secondes",
   },
   modal: {
-    stepLabel: (current, total) => `Étape ${current} sur ${total}`,
+    stepLabel: (current, total) => `ÉTAPE ${current} SUR ${total}`,
     closeAriaLabel: "Fermer",
-    visitTypeHeading: "Quel type de visite ?",
-    visitTypes: {
-      masterpieces: { label: "Incontournables", description: "Les œuvres emblématiques" },
-      overview: { label: "Panorama", description: "Une introduction équilibrée" },
-      in_depth: { label: "Approfondie", description: "Une exploration ciblée" },
+    visitBeforeHeading: "Avez-vous déjà visité ce musée ?",
+    visitBeforeOptions: {
+      first_visit: {
+        label: "Première visite",
+        description: "Je veux voir les œuvres essentielles pour lesquelles ce musée est connu",
+      },
+      returning: {
+        label: "J'y suis déjà allé",
+        description: "J'ai vu les incontournables et je veux aller plus loin",
+      },
+    },
+    interestHeading: "Qu'est-ce qui compte le plus pour vous ?",
+    interestOptions: {
+      stories: {
+        label: "Histoires et contexte",
+        description: "Pourquoi chaque œuvre a été faite, qui l'a commandée, ce qui se passait",
+      },
+      artist: {
+        label: "L'artiste — vie et technique",
+        description: "Comprendre la personne derrière l'œuvre et comment elle a été faite",
+      },
+      visual: {
+        label: "Beauté visuelle et impact",
+        description: "Des œuvres qui vous arrêtent net, des détails à chercher",
+      },
     },
     durationHeading: "Combien de temps avez-vous ?",
     focusHeading: "Sur quoi souhaitez-vous vous concentrer ?",
@@ -347,13 +433,33 @@ const de: GuideTranslations = {
     ctaSub: "Kostenlos · 30 Sekunden",
   },
   modal: {
-    stepLabel: (current, total) => `Schritt ${current} von ${total}`,
+    stepLabel: (current, total) => `SCHRITT ${current} VON ${total}`,
     closeAriaLabel: "Schließen",
-    visitTypeHeading: "Welche Art von Besuch?",
-    visitTypes: {
-      masterpieces: { label: "Höhepunkte", description: "Die wichtigsten Werke" },
-      overview: { label: "Überblick", description: "Ein ausgewogener Einstieg" },
-      in_depth: { label: "Vertiefend", description: "Gezielte Erkundung" },
+    visitBeforeHeading: "Warst du schon einmal in diesem Museum?",
+    visitBeforeOptions: {
+      first_visit: {
+        label: "Erster Besuch",
+        description: "Ich möchte die wesentlichen Werke sehen, für die dieses Museum bekannt ist",
+      },
+      returning: {
+        label: "Ich war schon einmal da",
+        description: "Ich habe die Höhepunkte gesehen und möchte tiefer eintauchen",
+      },
+    },
+    interestHeading: "Was ist dir am wichtigsten?",
+    interestOptions: {
+      stories: {
+        label: "Geschichten und Kontext",
+        description: "Warum jedes Werk entstand, wer es in Auftrag gab, was damals geschah",
+      },
+      artist: {
+        label: "Der Künstler — Leben und Technik",
+        description: "Die Person hinter dem Werk verstehen und wie es entstanden ist",
+      },
+      visual: {
+        label: "Visuelle Schönheit und Wirkung",
+        description: "Werke, die einen innehalten lassen, Details, die es zu entdecken gilt",
+      },
     },
     durationHeading: "Wie viel Zeit haben Sie?",
     focusHeading: "Worauf möchten Sie den Fokus legen?",
@@ -416,13 +522,33 @@ const it: GuideTranslations = {
     ctaSub: "Gratuito · 30 secondi",
   },
   modal: {
-    stepLabel: (current, total) => `Passo ${current} di ${total}`,
+    stepLabel: (current, total) => `PASSO ${current} DI ${total}`,
     closeAriaLabel: "Chiudi",
-    visitTypeHeading: "Che tipo di visita?",
-    visitTypes: {
-      masterpieces: { label: "Capolavori", description: "Le opere più iconiche" },
-      overview: { label: "Panoramica", description: "Un'introduzione equilibrata" },
-      in_depth: { label: "Approfondita", description: "Un'esplorazione mirata" },
+    visitBeforeHeading: "Hai già visitato questo museo?",
+    visitBeforeOptions: {
+      first_visit: {
+        label: "Prima visita",
+        description: "Voglio vedere le opere essenziali per cui questo museo è famoso",
+      },
+      returning: {
+        label: "Ci sono già stato",
+        description: "Ho visto i capolavori e voglio approfondire",
+      },
+    },
+    interestHeading: "Cosa conta di più per te?",
+    interestOptions: {
+      stories: {
+        label: "Storie e contesto",
+        description: "Perché ogni opera fu realizzata, chi la commissionò, cosa accadeva allora",
+      },
+      artist: {
+        label: "L'artista — vita e tecnica",
+        description: "Capire la persona dietro l'opera e come fu realizzata",
+      },
+      visual: {
+        label: "Bellezza visiva e impatto",
+        description: "Opere che ti fermano, dettagli che vale la pena cercare",
+      },
     },
     durationHeading: "Quanto tempo hai?",
     focusHeading: "Su cosa vorresti concentrarti?",
@@ -486,11 +612,31 @@ const ko: GuideTranslations = {
   modal: {
     stepLabel: (current, total) => `${total}단계 중 ${current}단계`,
     closeAriaLabel: "닫기",
-    visitTypeHeading: "어떤 관람을 원하시나요?",
-    visitTypes: {
-      masterpieces: { label: "하이라이트", description: "꼭 봐야 할 대표 작품" },
-      overview: { label: "개관", description: "균형 잡힌 소개 코스" },
-      in_depth: { label: "심층", description: "주제에 집중한 탐색" },
+    visitBeforeHeading: "이전에 이 박물관을 방문하셨나요?",
+    visitBeforeOptions: {
+      first_visit: {
+        label: "첫 방문",
+        description: "이 박물관이 유명한 핵심 작품을 보고 싶습니다",
+      },
+      returning: {
+        label: "이전에 방문한 적 있음",
+        description: "하이라이트는 봤고 더 깊이 탐색하고 싶습니다",
+      },
+    },
+    interestHeading: "가장 중요한 것은 무엇인가요?",
+    interestOptions: {
+      stories: {
+        label: "이야기와 역사",
+        description: "각 작품이 만들어진 이유, 의뢰인, 당시 상황",
+      },
+      artist: {
+        label: "작가 — 삶과 기법",
+        description: "작품 뒤의 인물과 제작 방식 이해하기",
+      },
+      visual: {
+        label: "시각적 아름다움과 임팩트",
+        description: "발길을 멈추게 하는 작품, 찾아볼 만한 디테일",
+      },
     },
     durationHeading: "얼마나 시간이 있으신가요?",
     focusHeading: "어떤 주제에 집중하고 싶으신가요?",
@@ -553,11 +699,31 @@ const zh: GuideTranslations = {
   modal: {
     stepLabel: (current, total) => `第 ${current} 步，共 ${total} 步`,
     closeAriaLabel: "关闭",
-    visitTypeHeading: "您想要哪种参观方式？",
-    visitTypes: {
-      masterpieces: { label: "精选杰作", description: "不容错过的标志性作品" },
-      overview: { label: "概览", description: "均衡的入门路线" },
-      in_depth: { label: "深度", description: "聚焦主题的探索" },
+    visitBeforeHeading: "您以前来过这座博物馆吗？",
+    visitBeforeOptions: {
+      first_visit: {
+        label: "首次参观",
+        description: "我想看这座博物馆最著名的核心作品",
+      },
+      returning: {
+        label: "我来过这里",
+        description: "我已看过精选杰作，想更深入地探索",
+      },
+    },
+    interestHeading: "您最看重什么？",
+    interestOptions: {
+      stories: {
+        label: "故事与历史",
+        description: "每件作品为何创作、谁委托、当时发生了什么",
+      },
+      artist: {
+        label: "艺术家——生平与技法",
+        description: "了解作品背后的人以及创作方式",
+      },
+      visual: {
+        label: "视觉美感与冲击力",
+        description: "令人驻足的作品，值得寻找的细节",
+      },
     },
     durationHeading: "您有多少时间？",
     focusHeading: "您想重点关注什么？",
@@ -619,13 +785,33 @@ const ru: GuideTranslations = {
     ctaSub: "Бесплатно · 30 секунд",
   },
   modal: {
-    stepLabel: (current, total) => `Шаг ${current} из ${total}`,
+    stepLabel: (current, total) => `ШАГ ${current} ИЗ ${total}`,
     closeAriaLabel: "Закрыть",
-    visitTypeHeading: "Какой тип визита?",
-    visitTypes: {
-      masterpieces: { label: "Шедевры", description: "Главные знаковые работы" },
-      overview: { label: "Обзор", description: "Сбалансированное знакомство" },
-      in_depth: { label: "Углублённо", description: "Тематическое погружение" },
+    visitBeforeHeading: "Вы уже бывали в этом музее?",
+    visitBeforeOptions: {
+      first_visit: {
+        label: "Первый визит",
+        description: "Хочу увидеть главные работы, которыми славится этот музей",
+      },
+      returning: {
+        label: "Я уже был здесь",
+        description: "Я видел шедевры и хочу пойти глубже",
+      },
+    },
+    interestHeading: "Что для вас важнее всего?",
+    interestOptions: {
+      stories: {
+        label: "Истории и контекст",
+        description: "Зачем создана работа, кто заказал, что происходило тогда",
+      },
+      artist: {
+        label: "Художник — жизнь и техника",
+        description: "Понять человека за работой и как она была создана",
+      },
+      visual: {
+        label: "Визуальная красота и впечатление",
+        description: "Работы, от которых замираешь, детали, которые стоит найти",
+      },
     },
     durationHeading: "Сколько у вас времени?",
     focusHeading: "На чём хотите сосредоточиться?",
@@ -689,11 +875,31 @@ const ja: GuideTranslations = {
   modal: {
     stepLabel: (current, total) => `ステップ ${current} / ${total}`,
     closeAriaLabel: "閉じる",
-    visitTypeHeading: "どんな観覧にしますか？",
-    visitTypes: {
-      masterpieces: { label: "名作ハイライト", description: "必見の象徴的作品" },
-      overview: { label: "概観", description: "バランスの取れた入門コース" },
-      in_depth: { label: "深掘り", description: "テーマに沿った探索" },
+    visitBeforeHeading: "以前この美術館に来たことはありますか？",
+    visitBeforeOptions: {
+      first_visit: {
+        label: "初めての訪問",
+        description: "この美術館が有名な必見の作品を見たい",
+      },
+      returning: {
+        label: "以前来たことがある",
+        description: "ハイライトは見たので、もっと深く知りたい",
+      },
+    },
+    interestHeading: "いちばん大切なのは何ですか？",
+    interestOptions: {
+      stories: {
+        label: "物語と歴史",
+        description: "なぜ作られたか、誰が依頼したか、当時何が起きていたか",
+      },
+      artist: {
+        label: "作家 — 生涯と技法",
+        description: "作品の裏にいる人物と制作の仕方を理解する",
+      },
+      visual: {
+        label: "視覚的美しさとインパクト",
+        description: "立ち止まらせる作品、探す価値のあるディテール",
+      },
     },
     durationHeading: "どのくらい時間がありますか？",
     focusHeading: "何に焦点を当てたいですか？",

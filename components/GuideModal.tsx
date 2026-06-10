@@ -1,10 +1,15 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { X } from "lucide-react";
 
-import type { TimeHours, VisitType } from "@/lib/guide-types";
+import type {
+  GuideInterest,
+  TimeHours,
+  VisitorExperience,
+  VisitType,
+} from "@/lib/guide-types";
 import { getGuideTranslations } from "@/lib/guide-translations";
 
 type GuideModalProps = {
@@ -13,13 +18,6 @@ type GuideModalProps = {
   museumSlug: string;
   museumName: string;
   locale?: string;
-};
-
-const VISIT_TYPE_ORDER: VisitType[] = ["masterpieces", "overview", "in_depth"];
-const VISIT_EMOJI: Record<VisitType, string> = {
-  masterpieces: "⭐",
-  overview: "🗺",
-  in_depth: "🔍",
 };
 
 const TIME_OPTIONS: Array<{ label: string; value: TimeHours }> = [
@@ -43,6 +41,51 @@ type GenerateResponse = {
   suggestions?: string[];
 };
 
+type RadioCardProps = {
+  selected: boolean;
+  onSelect: () => void;
+  title: string;
+  description: string;
+};
+
+function RadioCard({ selected, onSelect, title, description }: RadioCardProps) {
+  return (
+    <button
+      type="button"
+      onClick={onSelect}
+      className={
+        selected
+          ? "flex w-full gap-3 rounded-lg border-[1.5px] border-neutral-900 bg-neutral-50 px-4 py-4 text-left transition-colors"
+          : "flex w-full gap-3 rounded-lg border border-neutral-200 bg-white px-4 py-4 text-left transition-colors hover:border-neutral-400"
+      }
+    >
+      <span
+        className={
+          selected
+            ? "mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full border-2 border-neutral-900 bg-neutral-900"
+            : "mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full border-2 border-neutral-300 bg-white"
+        }
+        aria-hidden
+      >
+        {selected ? <span className="h-1.5 w-1.5 rounded-full bg-white" /> : null}
+      </span>
+      <div className="min-w-0">
+        <p className="text-sm font-medium text-neutral-900">{title}</p>
+        <p className="mt-1 text-xs text-neutral-500">{description}</p>
+      </div>
+    </button>
+  );
+}
+
+function resolveVisitType(
+  visitorExperience: VisitorExperience,
+  focus?: string,
+): VisitType {
+  if (visitorExperience === "first_visit") return "masterpieces";
+  if (focus?.trim()) return "in_depth";
+  return "overview";
+}
+
 export function GuideModal({
   open,
   onClose,
@@ -52,19 +95,10 @@ export function GuideModal({
 }: GuideModalProps) {
   const router = useRouter();
   const t = getGuideTranslations(locale);
-  const visitOptions = useMemo(
-    () =>
-      VISIT_TYPE_ORDER.map((value) => ({
-        value,
-        emoji: VISIT_EMOJI[value],
-        title: t.modal.visitTypes[value].label,
-        subtitle: t.modal.visitTypes[value].description,
-      })),
-    [t],
-  );
 
   const [step, setStep] = useState(1);
-  const [visitType, setVisitType] = useState<VisitType | null>(null);
+  const [visitorExperience, setVisitorExperience] = useState<VisitorExperience | null>(null);
+  const [interest, setInterest] = useState<GuideInterest | null>(null);
   const [timeHours, setTimeHours] = useState<TimeHours | null>(null);
   const [focusText, setFocusText] = useState("");
   const [generating, setGenerating] = useState(false);
@@ -72,14 +106,16 @@ export function GuideModal({
   const [focusError, setFocusError] = useState<FocusNotFoundError | null>(null);
   const [progressIndex, setProgressIndex] = useState(0);
 
-  const totalSteps = visitType === "in_depth" ? 3 : 2;
+  const isReturning = visitorExperience === "returning";
+  const totalSteps = isReturning ? 4 : 3;
   const isFinalStep = step === totalSteps;
   const progressMessages = t.modal.generating;
 
   useEffect(() => {
     if (!open) {
       setStep(1);
-      setVisitType(null);
+      setVisitorExperience(null);
+      setInterest(null);
       setTimeHours(null);
       setFocusText("");
       setGenerating(false);
@@ -109,12 +145,16 @@ export function GuideModal({
   }, [open, generating, onClose]);
 
   const handleNext = () => {
-    if (step === 1 && visitType) {
+    if (step === 1 && visitorExperience) {
       setStep(2);
       return;
     }
-    if (step === 2 && visitType === "in_depth") {
+    if (step === 2 && interest) {
       setStep(3);
+      return;
+    }
+    if (step === 3 && isReturning) {
+      setStep(4);
     }
   };
 
@@ -127,9 +167,10 @@ export function GuideModal({
   };
 
   const handleGenerate = async (options?: { withoutFocus?: boolean }) => {
-    if (!visitType || timeHours === null) return;
+    if (!visitorExperience || !interest || timeHours === null) return;
 
     const focus = options?.withoutFocus ? undefined : focusText.trim() || undefined;
+    const visitType = resolveVisitType(visitorExperience, focus);
 
     setGenerating(true);
     setError(null);
@@ -147,6 +188,8 @@ export function GuideModal({
           time_hours: timeHours,
           focus,
           locale,
+          interest,
+          returning_visitor: visitorExperience === "returning",
         }),
       });
 
@@ -185,7 +228,7 @@ export function GuideModal({
   const handleTryDifferentFocus = () => {
     setFocusError(null);
     setFocusText("");
-    setStep(3);
+    setStep(4);
   };
 
   const handleGenerateWithoutFocus = () => {
@@ -193,8 +236,10 @@ export function GuideModal({
     void handleGenerate({ withoutFocus: true });
   };
 
-  const canAdvanceStep1 = visitType !== null;
-  const canAdvanceStep2 = timeHours !== null;
+  const canAdvance =
+    (step === 1 && visitorExperience !== null) ||
+    (step === 2 && interest !== null) ||
+    (step === 3 && timeHours !== null);
 
   if (!open) {
     return null;
@@ -219,33 +264,33 @@ export function GuideModal({
           type="button"
           onClick={onClose}
           disabled={generating}
-          className="absolute right-4 top-4 rounded-md p-1 text-[#6b6b6b] transition-colors hover:bg-neutral-100 hover:text-[#1a1a1a] disabled:opacity-50"
+          className="absolute right-4 top-4 rounded-md p-1 text-neutral-500 transition-colors hover:bg-neutral-100 hover:text-neutral-900 disabled:opacity-50"
           aria-label={t.modal.closeAriaLabel}
         >
           <X className="size-5" />
         </button>
 
-        <p className="mb-1 text-xs font-medium uppercase tracking-wide text-[#6b6b6b]">
+        <p className="mb-1 text-xs font-medium uppercase tracking-widest text-neutral-500">
           {t.modal.stepLabel(step, totalSteps)}
         </p>
 
         {generating ? (
           <div className="py-12 text-center">
-            <div className="mx-auto mb-4 size-8 animate-spin rounded-full border-2 border-[#1a1a1a] border-t-transparent" />
-            <p className="text-sm font-medium text-[#1a1a1a]">{progressMessages[progressIndex]}</p>
+            <div className="mx-auto mb-4 size-8 animate-spin rounded-full border-2 border-neutral-900 border-t-transparent" />
+            <p className="text-sm font-medium text-neutral-900">{progressMessages[progressIndex]}</p>
           </div>
         ) : focusError ? (
           <div className="space-y-4 pt-2">
-            <h2 id="guide-modal-title" className="text-xl font-semibold text-[#1a1a1a]">
+            <h2 id="guide-modal-title" className="text-xl font-semibold text-neutral-900">
               {t.modal.focusNotFoundTitle}
             </h2>
-            <p className="text-sm leading-relaxed text-[#4a4a4a]">{focusError.message}</p>
+            <p className="text-sm leading-relaxed text-neutral-600">{focusError.message}</p>
             {focusError.suggestions.length > 0 ? (
               <div>
-                <p className="text-sm font-medium text-[#1a1a1a]">{t.modal.focusArtistsLabel}</p>
-                <ul className="mt-2 space-y-1 text-sm text-[#4a4a4a]">
+                <p className="text-sm font-medium text-neutral-900">{t.modal.focusArtistsLabel}</p>
+                <ul className="mt-2 space-y-1 text-sm text-neutral-600">
                   {focusError.suggestions.map((artist) => (
-                    <li key={artist}>• {artist}</li>
+                    <li key={artist}>{artist}</li>
                   ))}
                 </ul>
               </div>
@@ -254,14 +299,14 @@ export function GuideModal({
               <button
                 type="button"
                 onClick={handleTryDifferentFocus}
-                className="rounded-lg border border-neutral-200 px-4 py-2.5 text-sm font-medium text-[#1a1a1a] transition-colors hover:border-neutral-400"
+                className="rounded-lg border border-neutral-200 px-4 py-2.5 text-sm font-medium text-neutral-900 transition-colors hover:border-neutral-400"
               >
                 {t.modal.tryDifferent}
               </button>
               <button
                 type="button"
                 onClick={() => void handleGenerateWithoutFocus()}
-                className="rounded-lg bg-[#1a1a1a] px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-black"
+                className="rounded-lg bg-neutral-900 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-black"
               >
                 {t.modal.generateWithout}
               </button>
@@ -271,37 +316,57 @@ export function GuideModal({
           <>
             {step === 1 ? (
               <div className="space-y-4 pt-2">
-                <h2 id="guide-modal-title" className="text-xl font-semibold text-[#1a1a1a]">
-                  {t.modal.visitTypeHeading}
+                <h2 id="guide-modal-title" className="text-xl font-semibold text-neutral-900">
+                  {t.modal.visitBeforeHeading}
                 </h2>
                 <div className="space-y-3">
-                  {visitOptions.map((option) => {
-                    const selected = visitType === option.value;
-                    return (
-                      <button
-                        key={option.value}
-                        type="button"
-                        onClick={() => setVisitType(option.value)}
-                        className={
-                          selected
-                            ? "w-full rounded-lg border-2 border-neutral-900 bg-neutral-50 px-4 py-4 text-left transition-colors"
-                            : "w-full rounded-lg border border-neutral-200 bg-white px-4 py-4 text-left transition-colors hover:border-neutral-400"
-                        }
-                      >
-                        <p className="font-medium text-[#1a1a1a]">
-                          {option.emoji} {option.title}
-                        </p>
-                        <p className="mt-1 text-sm text-[#6b6b6b]">{option.subtitle}</p>
-                      </button>
-                    );
-                  })}
+                  <RadioCard
+                    selected={visitorExperience === "first_visit"}
+                    onSelect={() => setVisitorExperience("first_visit")}
+                    title={t.modal.visitBeforeOptions.first_visit.label}
+                    description={t.modal.visitBeforeOptions.first_visit.description}
+                  />
+                  <RadioCard
+                    selected={visitorExperience === "returning"}
+                    onSelect={() => setVisitorExperience("returning")}
+                    title={t.modal.visitBeforeOptions.returning.label}
+                    description={t.modal.visitBeforeOptions.returning.description}
+                  />
                 </div>
               </div>
             ) : null}
 
             {step === 2 ? (
               <div className="space-y-4 pt-2">
-                <h2 id="guide-modal-title" className="text-xl font-semibold text-[#1a1a1a]">
+                <h2 id="guide-modal-title" className="text-xl font-semibold text-neutral-900">
+                  {t.modal.interestHeading}
+                </h2>
+                <div className="space-y-3">
+                  <RadioCard
+                    selected={interest === "stories"}
+                    onSelect={() => setInterest("stories")}
+                    title={t.modal.interestOptions.stories.label}
+                    description={t.modal.interestOptions.stories.description}
+                  />
+                  <RadioCard
+                    selected={interest === "artist"}
+                    onSelect={() => setInterest("artist")}
+                    title={t.modal.interestOptions.artist.label}
+                    description={t.modal.interestOptions.artist.description}
+                  />
+                  <RadioCard
+                    selected={interest === "visual"}
+                    onSelect={() => setInterest("visual")}
+                    title={t.modal.interestOptions.visual.label}
+                    description={t.modal.interestOptions.visual.description}
+                  />
+                </div>
+              </div>
+            ) : null}
+
+            {step === 3 ? (
+              <div className="space-y-4 pt-2">
+                <h2 id="guide-modal-title" className="text-xl font-semibold text-neutral-900">
                   {t.modal.durationHeading}
                 </h2>
                 <div className="flex flex-wrap gap-2">
@@ -314,8 +379,8 @@ export function GuideModal({
                         onClick={() => setTimeHours(option.value)}
                         className={
                           selected
-                            ? "rounded-full bg-[#1a1a1a] px-4 py-2 text-sm font-medium text-white"
-                            : "rounded-full border border-neutral-200 bg-white px-4 py-2 text-sm font-medium text-[#1a1a1a] transition-colors hover:border-neutral-400"
+                            ? "rounded-full bg-neutral-900 px-4 py-2 text-sm font-medium text-white"
+                            : "rounded-full border border-neutral-200 bg-white px-4 py-2 text-sm font-medium text-neutral-900 transition-colors hover:border-neutral-400"
                         }
                       >
                         {option.label}
@@ -326,12 +391,12 @@ export function GuideModal({
               </div>
             ) : null}
 
-            {step === 3 && visitType === "in_depth" ? (
+            {step === 4 && isReturning ? (
               <div className="space-y-4 pt-2">
-                <h2 id="guide-modal-title" className="text-xl font-semibold text-[#1a1a1a]">
+                <h2 id="guide-modal-title" className="text-xl font-semibold text-neutral-900">
                   {t.modal.focusHeading}
                 </h2>
-                <p className="text-sm text-[#6b6b6b]">{t.modal.focusSubtext}</p>
+                <p className="text-sm text-neutral-500">{t.modal.focusSubtext}</p>
                 <input
                   type="text"
                   value={focusText}
@@ -340,12 +405,12 @@ export function GuideModal({
                     setFocusError(null);
                   }}
                   placeholder={t.modal.focusPlaceholder}
-                  className="w-full rounded-lg border border-[#dadada] px-4 py-3 text-sm text-[#1a1a1a] placeholder:text-[#9ca3af] focus:border-[#1a1a1a] focus:outline-none focus:ring-1 focus:ring-[#1a1a1a]"
+                  className="w-full rounded-lg border border-neutral-300 px-4 py-3 text-sm text-neutral-900 placeholder:text-neutral-400 focus:border-neutral-900 focus:outline-none focus:ring-1 focus:ring-neutral-900"
                 />
                 <button
                   type="button"
                   onClick={() => setFocusText("")}
-                  className="text-sm text-[#6b6b6b] underline underline-offset-2 hover:no-underline"
+                  className="text-sm text-neutral-500 underline underline-offset-2 hover:no-underline"
                 >
                   {t.modal.focusSkip}
                 </button>
@@ -371,7 +436,7 @@ export function GuideModal({
                   <button
                     type="button"
                     onClick={handleBack}
-                    className="text-sm font-medium text-[#6b6b6b] transition-colors hover:text-[#1a1a1a]"
+                    className="text-sm font-medium text-neutral-500 transition-colors hover:text-neutral-900"
                   >
                     {t.modal.back}
                   </button>
@@ -383,8 +448,8 @@ export function GuideModal({
                   <button
                     type="button"
                     onClick={() => void handleGenerate()}
-                    disabled={!canAdvanceStep2}
-                    className="rounded-lg bg-[#1a1a1a] px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-black disabled:cursor-not-allowed disabled:opacity-50"
+                    disabled={timeHours === null || !interest || !visitorExperience}
+                    className="rounded-lg bg-neutral-900 px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-black disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     {t.modal.generate}
                   </button>
@@ -392,8 +457,8 @@ export function GuideModal({
                   <button
                     type="button"
                     onClick={handleNext}
-                    disabled={step === 1 ? !canAdvanceStep1 : !canAdvanceStep2}
-                    className="rounded-lg bg-[#1a1a1a] px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-black disabled:cursor-not-allowed disabled:opacity-50"
+                    disabled={!canAdvance}
+                    className="rounded-lg bg-neutral-900 px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-black disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     {t.modal.next}
                   </button>

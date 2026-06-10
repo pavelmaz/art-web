@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { usePathname } from "next/navigation";
 
 import {
@@ -11,7 +11,7 @@ import {
 import { GuideLoginGate } from "@/components/GuideLoginGate";
 import { ArtworkZoomImage } from "@/components/ArtworkZoomImage";
 import type { GuideData, GuideStop } from "@/lib/guide-types";
-import { getGuideTranslations, type GuideTranslations } from "@/lib/guide-translations";
+import { getGuideTranslations } from "@/lib/guide-translations";
 import type { Locale } from "@/lib/translations";
 
 const LOCALES: Locale[] = ["en", "es", "pt", "ja", "fr", "de", "it", "ko", "ru", "zh"];
@@ -32,86 +32,71 @@ type GuideDisplayProps = {
 type StopCardProps = {
   stop: GuideStop;
   locale: Locale;
-  expanded: boolean;
-  onToggleBullets: () => void;
-  copy: GuideTranslations["guide"];
+  isLast: boolean;
 };
 
-function StopCard({ stop, locale, expanded, onToggleBullets, copy }: StopCardProps) {
+function StopCard({ stop, locale, isLast }: StopCardProps) {
   const imageSrc = stop.image_id;
 
   return (
-    <div className="relative mb-16 flex gap-6 md:gap-8">
-      <div className="relative z-10 hidden shrink-0 flex-col items-center md:flex">
-        <div className="flex h-9 w-9 items-center justify-center rounded-full bg-neutral-900 font-mono text-sm font-bold text-white">
+    <div className="mb-20 flex gap-5 md:gap-8">
+      <div className="hidden shrink-0 flex-col items-center pt-1 md:flex">
+        <div className="z-10 flex h-8 w-8 items-center justify-center rounded-full bg-neutral-900 font-mono text-xs font-bold text-white">
           {String(stop.order).padStart(2, "0")}
         </div>
+        {!isLast ? <div className="mt-3 min-h-[60px] w-px flex-1 bg-neutral-200" /> : null}
       </div>
 
-      <div className="min-w-0 flex-1 rounded-2xl border border-neutral-100 bg-white shadow-sm">
+      <div className="min-w-0 flex-1 pb-4">
+        <div className="mb-2 flex items-center gap-3 md:hidden">
+          <span className="flex h-8 w-8 items-center justify-center rounded-full bg-neutral-900 font-mono text-xs font-bold text-white">
+            {String(stop.order).padStart(2, "0")}
+          </span>
+        </div>
+
+        <p className="mb-2 text-xs font-medium uppercase tracking-widest text-neutral-400">
+          {stop.artist_display}
+        </p>
+
+        <h2 className="mb-4 font-serif text-2xl font-bold leading-tight text-neutral-900">
+          {stop.title}
+        </h2>
+
         {imageSrc ? (
-          <div className="bg-neutral-50 px-4 pb-4 pt-4">
-            <ArtworkInsightsProvider
-              artwork={{ title: stop.title, artist_display: stop.artist_display }}
-              locale={locale}
-            >
-              <div className="relative mx-auto w-fit max-w-full">
-                <ArtworkZoomImage
-                  src={imageSrc}
-                  fullSrc={imageSrc}
-                  alt={`${stop.title} by ${stop.artist_display}`}
-                />
-                <ArtworkInsightsOverlay />
-              </div>
-              <ArtworkInsightsControls />
-            </ArtworkInsightsProvider>
-          </div>
+          <ArtworkInsightsProvider
+            artwork={{ title: stop.title, artist_display: stop.artist_display }}
+            locale={locale}
+          >
+            <div className="relative mb-6 w-fit max-w-full">
+              <ArtworkZoomImage
+                src={imageSrc}
+                fullSrc={imageSrc}
+                alt={`${stop.title} by ${stop.artist_display}`}
+              />
+              <ArtworkInsightsOverlay />
+            </div>
+            <ArtworkInsightsControls />
+          </ArtworkInsightsProvider>
         ) : null}
 
-        <div className="p-6 md:p-8">
-          <div className="mb-2 flex items-center gap-3">
-            <span className="rounded bg-neutral-900 px-2 py-1 font-mono text-xs font-bold text-white md:hidden">
-              {String(stop.order).padStart(2, "0")}
-            </span>
-            <p className="text-sm font-medium text-neutral-500">{stop.artist_display}</p>
-          </div>
+        <p className="mb-6 border-l-2 border-neutral-300 pl-4 text-sm italic leading-relaxed text-neutral-600">
+          {stop.reason}
+        </p>
 
-          <h2 className="mb-4 font-serif text-xl font-bold leading-snug text-neutral-900 md:text-2xl">
-            {stop.title}
-          </h2>
-
-          <p className="mb-6 border-l-2 border-neutral-300 pl-4 italic leading-relaxed text-neutral-600">
-            {stop.reason}
-          </p>
-
-          {stop.bullets.length > 0 ? (
-            <div className="mt-6 overflow-hidden rounded-xl border border-neutral-200">
-              <button
-                type="button"
-                onClick={onToggleBullets}
-                className="flex w-full items-center justify-between bg-neutral-50 px-5 py-4 text-left transition-colors hover:bg-neutral-100"
-              >
-                <span className="text-sm font-medium text-neutral-900">
-                  {expanded ? copy.hideInsights : copy.showInsights}
-                </span>
-                <span className="text-lg text-neutral-500">{expanded ? "−" : "+"}</span>
-              </button>
-
-              {expanded ? (
-                <div className="space-y-4 bg-white px-5 py-4">
-                  {stop.bullets.map((bullet, index) => (
-                    <div key={index} className="flex gap-3">
-                      <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-neutral-900 text-xs font-bold text-white">
-                        {index + 1}
-                      </span>
-                      <p className="text-sm leading-relaxed text-neutral-700">{bullet}</p>
-                    </div>
-                  ))}
+        {stop.bullets.length > 0 ? (
+          <div className="overflow-hidden rounded-xl border border-neutral-200">
+            <div className="divide-y divide-neutral-100">
+              {stop.bullets.map((bullet, index) => (
+                <div key={index} className="flex gap-4 px-5 py-4">
+                  <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-neutral-900 text-xs font-medium text-white">
+                    {index + 1}
+                  </span>
+                  <p className="text-sm leading-relaxed text-neutral-700">{bullet}</p>
                 </div>
-              ) : null}
+              ))}
             </div>
-          ) : null}
-        </div>
+          </div>
+        ) : null}
       </div>
     </div>
   );
@@ -122,17 +107,6 @@ export function GuideDisplay({ guide, isLoggedIn, locale }: GuideDisplayProps) {
   const resolvedLocale = toLocale(locale);
   const t = getGuideTranslations(resolvedLocale);
   const heroImage = guide.stops[0]?.image_id;
-  const [expandedStops, setExpandedStops] = useState<Record<string, boolean>>(() => {
-    if (guide.stops.length === 0) return {};
-    return { [guide.stops[0].artwork_id]: true };
-  });
-
-  const toggleBullets = (artworkId: string) => {
-    setExpandedStops((prev) => ({
-      ...prev,
-      [artworkId]: !prev[artworkId],
-    }));
-  };
 
   useEffect(() => {
     if (!isLoggedIn) return;
@@ -161,7 +135,7 @@ export function GuideDisplay({ guide, isLoggedIn, locale }: GuideDisplayProps) {
 
           <div className="absolute bottom-0 left-0 right-0 p-8 md:p-12">
             <p className="mb-3 text-sm uppercase tracking-widest text-white/60">{t.guide.eyebrow}</p>
-            <h1 className="mb-6 max-w-3xl font-serif text-4xl font-bold leading-tight text-white md:text-6xl">
+            <h1 className="mb-6 max-w-3xl font-serif text-5xl font-bold leading-tight text-white md:text-6xl">
               {guide.title}
             </h1>
             <div className="flex flex-wrap gap-3">
@@ -175,9 +149,6 @@ export function GuideDisplay({ guide, isLoggedIn, locale }: GuideDisplayProps) {
                 {guide.time_hours}
                 {t.guide.hours}
               </span>
-              <span className="rounded-full bg-white/20 px-4 py-1.5 text-sm text-white backdrop-blur-sm">
-                {t.guide.visitTypes[guide.visit_type]}
-              </span>
               {guide.focus ? (
                 <span className="rounded-full bg-white/20 px-4 py-1.5 text-sm text-white backdrop-blur-sm">
                   {t.guide.focus(guide.focus)}
@@ -189,27 +160,24 @@ export function GuideDisplay({ guide, isLoggedIn, locale }: GuideDisplayProps) {
       ) : (
         <div className="bg-neutral-900 px-8 py-14 md:px-12">
           <p className="mb-3 text-sm uppercase tracking-widest text-white/60">{t.guide.eyebrow}</p>
-          <h1 className="max-w-3xl font-serif text-4xl font-bold leading-tight text-white md:text-6xl">
+          <h1 className="max-w-3xl font-serif text-5xl font-bold leading-tight text-white md:text-6xl">
             {guide.title}
           </h1>
         </div>
       )}
 
       <div className="mx-auto max-w-2xl px-6 py-10 md:py-14">
-        <p className="text-lg leading-relaxed text-neutral-600">{guide.description}</p>
+        <p className="text-center text-base leading-relaxed text-neutral-600">{guide.description}</p>
+        <hr className="mx-auto mt-10 max-w-xs border-neutral-200" />
       </div>
 
-      <div className="relative mx-auto max-w-3xl px-6 pb-20">
-        <div className="absolute bottom-0 left-[2.25rem] top-0 hidden w-px bg-neutral-200 md:block" />
-
-        {guide.stops.map((stop) => (
+      <div className="mx-auto max-w-3xl px-6 pb-20">
+        {guide.stops.map((stop, index) => (
           <StopCard
             key={stop.artwork_id}
             stop={stop}
             locale={resolvedLocale}
-            expanded={!!expandedStops[stop.artwork_id]}
-            onToggleBullets={() => toggleBullets(stop.artwork_id)}
-            copy={t.guide}
+            isLast={index === guide.stops.length - 1}
           />
         ))}
       </div>
