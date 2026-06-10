@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { ChevronRight, Eye, X } from "lucide-react";
+import { Eye, X } from "lucide-react";
 
 import { ArtworkInsightsControls, ArtworkInsightsOverlay, ArtworkInsightsProvider } from "@/components/ArtworkInsights";
 import { GuideLoginGate } from "@/components/GuideLoginGate";
@@ -68,31 +68,38 @@ type StopCardProps = {
 function StopCard({ stop, locale, copy, onOpenZoom }: StopCardProps) {
   return (
     <div
-      className="mx-2 mb-3.5 rounded-[14px] border border-white/[0.04] p-3 md:mx-4"
+      className="mb-3.5 rounded-[14px] border border-white/[0.04] p-3"
       style={{ background: CARD_GRADIENT }}
     >
       <p className="mb-2 text-xs font-semibold text-white/50">{copy.stopNumberLabel(stop.order)}</p>
 
-      <button
-        type="button"
-        onClick={() => onOpenZoom(stop.artwork_id)}
-        className="flex w-full items-center gap-2.5 rounded-[10px] border border-white/[0.08] bg-white/[0.06] p-3 text-left transition-colors hover:bg-white/[0.1]"
-      >
-        {stop.image_id ? (
+      {stop.image_id ? (
+        <div
+          className="mb-4 w-full cursor-zoom-in overflow-hidden rounded-xl"
+          onClick={() => onOpenZoom(stop.artwork_id)}
+          onKeyDown={(event) => {
+            if (event.key === "Enter" || event.key === " ") {
+              event.preventDefault();
+              onOpenZoom(stop.artwork_id);
+            }
+          }}
+          role="button"
+          tabIndex={0}
+        >
           <img
             src={stop.image_id}
-            alt=""
-            className="h-16 w-16 shrink-0 rounded-[10px] object-cover"
+            alt={`${stop.title} by ${stop.artist_display}`}
+            className="h-auto w-full object-contain"
+            loading="lazy"
           />
-        ) : (
-          <div className="h-16 w-16 shrink-0 rounded-[10px] bg-white/10" />
-        )}
-        <div className="min-w-0 flex-1">
-          <p className="line-clamp-2 text-[15px] font-semibold leading-snug text-white">{stop.title}</p>
-          <p className="mt-0.5 line-clamp-1 text-[13px] text-white/55">{stop.artist_display}</p>
         </div>
-        <ChevronRight className="size-5 shrink-0 text-white/40" aria-hidden />
-      </button>
+      ) : null}
+
+      <p className="mb-2 text-xs font-medium uppercase tracking-widest text-white/55">
+        {stop.artist_display}
+      </p>
+
+      <h3 className="mb-4 font-serif text-xl font-bold leading-tight text-white">{stop.title}</h3>
 
       {stop.bullets.length > 0 ? (
         <ul className="mt-3 space-y-1">
@@ -183,7 +190,7 @@ export function GuideDisplay({ guide, isLoggedIn, locale }: GuideDisplayProps) {
   const resolvedLocale = toLocale(locale);
   const t = getGuideTranslations(resolvedLocale);
   const copy = t.guide;
-  const heroImage = guide.stops[0]?.image_id;
+  const heroImageUrl = guide.stops[0]?.image_id ?? null;
   const [zoomedStop, setZoomedStop] = useState<string | null>(null);
 
   const artists = useMemo(() => uniqueArtists(guide.stops), [guide.stops]);
@@ -204,10 +211,10 @@ export function GuideDisplay({ guide, isLoggedIn, locale }: GuideDisplayProps) {
 
   return (
     <article className="overflow-x-hidden text-white">
-      {heroImage ? (
+      {heroImageUrl ? (
         <div className="relative h-[46vh] max-h-[320px] w-full overflow-hidden">
           <img
-            src={guide.stops[0].image_id}
+            src={heroImageUrl}
             alt=""
             className="absolute inset-0 h-full w-full object-cover"
             style={{ imageRendering: "auto" }}
@@ -244,74 +251,76 @@ export function GuideDisplay({ guide, isLoggedIn, locale }: GuideDisplayProps) {
         </div>
       )}
 
-      <div
-        className="mx-5 mb-7 rounded-2xl border border-white/[0.04] p-5"
-        style={{ background: CARD_GRADIENT }}
-      >
-        <h2 className="mb-3 text-xl font-bold text-white">{copy.exploreTitle(guide.museum_name)}</h2>
-        <p className="mb-4 text-[15px] leading-relaxed text-white/85">{guide.description}</p>
+      <div className="mx-auto max-w-2xl px-4">
+        <div
+          className="mb-7 rounded-2xl border border-white/[0.04] p-5"
+          style={{ background: CARD_GRADIENT }}
+        >
+          <h2 className="mb-3 text-xl font-bold text-white">{copy.exploreTitle(guide.museum_name)}</h2>
+          <p className="mb-4 text-[15px] leading-relaxed text-white/85">{guide.description}</p>
 
-        {highlightReasons.length > 0 ? (
-          <ul className="mb-4 space-y-1.5">
-            {highlightReasons.map((reason, index) => (
-              <li key={index} className="flex gap-2 text-sm leading-normal text-white/85">
-                <span className="shrink-0 text-[#5B9FE3]">•</span>
-                <span>{reason}</span>
-              </li>
-            ))}
-          </ul>
-        ) : null}
+          {highlightReasons.length > 0 ? (
+            <ul className="mb-4 space-y-1.5">
+              {highlightReasons.map((reason, index) => (
+                <li key={index} className="flex gap-2 text-sm leading-normal text-white/85">
+                  <span className="shrink-0 text-[#5B9FE3]">•</span>
+                  <span>{reason}</span>
+                </li>
+              ))}
+            </ul>
+          ) : null}
 
-        {keyArtists ? (
-          <div className="mb-3.5">
-            <p className="mb-1 text-xs text-white/50">{copy.keyArtistsLabel}</p>
-            <p className="text-sm text-white">{keyArtists}</p>
-          </div>
-        ) : null}
-
-        <div className="rounded-xl border border-white/10 p-3.5">
-          <p className="mb-1.5 text-[11px] text-white/50">{copy.whatToNoticeLabel}</p>
-          <p className="text-sm leading-normal text-white/85">{copy.whatToNoticeText}</p>
-        </div>
-
-        <div className="mt-2.5 flex gap-3 rounded-xl border border-white/10 p-3.5">
-          <div className="grid size-10 shrink-0 place-items-center rounded-full bg-gray-500/20">
-            <Eye className="size-[18px] text-white/60" aria-hidden />
-          </div>
-          <p className="flex-1 text-sm leading-normal text-white/85">{copy.eyeCtaText}</p>
-        </div>
-      </div>
-
-      <div className="pb-4">
-        {guide.stops.map((stop, index) => {
-          const prevArtist = index > 0 ? guide.stops[index - 1].artist_display : null;
-          const showArtistHeader = stop.artist_display !== prevArtist;
-
-          return (
-            <div key={stop.artwork_id}>
-              {showArtistHeader ? (
-                <p className="mb-1 mt-1.5 px-4 text-[13px] font-bold uppercase tracking-[0.05em] text-white/90">
-                  {stop.artist_display}
-                </p>
-              ) : null}
-              <StopCard
-                stop={stop}
-                locale={resolvedLocale}
-                copy={copy}
-                onOpenZoom={setZoomedStop}
-              />
+          {keyArtists ? (
+            <div className="mb-3.5">
+              <p className="mb-1 text-xs text-white/50">{copy.keyArtistsLabel}</p>
+              <p className="text-sm text-white">{keyArtists}</p>
             </div>
-          );
-        })}
-      </div>
+          ) : null}
 
-      <button
-        type="button"
-        onClick={() => router.push(`${localePath(resolvedLocale, "museums")}/${guide.museum_slug}`)}
-        className="mx-4 mb-8 w-[calc(100%-32px)] rounded-xl border border-white/15 bg-transparent py-3.5 text-center text-[15px] font-semibold text-white/50 transition-colors hover:border-white/25 hover:text-white/70"
-      >
-        {copy.startOver}
-      </button>
+          <div className="rounded-xl border border-white/10 p-3.5">
+            <p className="mb-1.5 text-[11px] text-white/50">{copy.whatToNoticeLabel}</p>
+            <p className="text-sm leading-normal text-white/85">{copy.whatToNoticeText}</p>
+          </div>
+
+          <div className="mt-2.5 flex gap-3 rounded-xl border border-white/10 p-3.5">
+            <div className="grid size-10 shrink-0 place-items-center rounded-full bg-gray-500/20">
+              <Eye className="size-[18px] text-white/60" aria-hidden />
+            </div>
+            <p className="flex-1 text-sm leading-normal text-white/85">{copy.eyeCtaText}</p>
+          </div>
+        </div>
+
+        <div className="pb-4">
+          {guide.stops.map((stop, index) => {
+            const prevArtist = index > 0 ? guide.stops[index - 1].artist_display : null;
+            const showArtistHeader = stop.artist_display !== prevArtist;
+
+            return (
+              <div key={stop.artwork_id}>
+                {showArtistHeader ? (
+                  <p className="mb-1 mt-1.5 text-[13px] font-bold uppercase tracking-[0.05em] text-white/90">
+                    {stop.artist_display}
+                  </p>
+                ) : null}
+                <StopCard
+                  stop={stop}
+                  locale={resolvedLocale}
+                  copy={copy}
+                  onOpenZoom={setZoomedStop}
+                />
+              </div>
+            );
+          })}
+        </div>
+
+        <button
+          type="button"
+          onClick={() => router.push(`${localePath(resolvedLocale, "museums")}/${guide.museum_slug}`)}
+          className="mb-8 w-full rounded-xl border border-white/15 bg-transparent py-3.5 text-center text-[15px] font-semibold text-white/50 transition-colors hover:border-white/25 hover:text-white/70"
+        >
+          {copy.startOver}
+        </button>
+      </div>
 
       {zoomedStopData ? (
         <ZoomOverlay
