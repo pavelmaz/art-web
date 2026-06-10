@@ -14,9 +14,6 @@ import type { Locale } from "@/lib/translations";
 
 const LOCALES: Locale[] = ["en", "es", "pt", "ja", "fr", "de", "it", "ko", "ru", "zh"];
 
-const HERO_GRADIENT =
-  "linear-gradient(to bottom, rgba(0,0,0,0.35), rgba(0,0,0,0.58), rgba(0,0,0,0.82), rgba(0,0,0,0.95))";
-
 const CARD_GRADIENT = "linear-gradient(to bottom, #2C2C2E, #1C1C1E)";
 
 function toLocale(value?: string): Locale {
@@ -212,7 +209,7 @@ export function GuideDisplay({ guide, isLoggedIn, locale }: GuideDisplayProps) {
   return (
     <article className="overflow-x-hidden text-white">
       {heroImageUrl ? (
-        <div className="relative h-[46vh] max-h-[320px] w-full overflow-hidden">
+        <div className="relative h-[55vh] max-h-[420px] w-full overflow-hidden">
           <img
             src={heroImageUrl}
             alt=""
@@ -221,7 +218,19 @@ export function GuideDisplay({ guide, isLoggedIn, locale }: GuideDisplayProps) {
             loading="eager"
             fetchPriority="high"
           />
-          <div className="absolute inset-0" style={{ background: HERO_GRADIENT }} />
+          <div
+            className="absolute inset-0"
+            style={{
+              background:
+                "linear-gradient(to bottom, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.3) 40%, rgba(0,0,0,0.75) 70%, rgba(0,0,0,0.92) 100%)",
+            }}
+          />
+          <div
+            className="absolute bottom-0 left-0 right-0 h-40"
+            style={{
+              background: "linear-gradient(to bottom, transparent 0%, #111111 100%)",
+            }}
+          />
 
           <div className="absolute inset-x-0 bottom-0 px-5 pb-6 text-center">
             <p className="mb-2 text-base font-semibold tracking-[0.05em] text-white">{copy.eyebrow}</p>
