@@ -1,6 +1,7 @@
 import { createClient } from "@supabase/supabase-js";
 
 import { escapeXml, getPublicSiteUrl } from "@/lib/sitemap-xml";
+import { supabase as blogSupabase } from "@/lib/supabase";
 import { slugify } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
@@ -205,6 +206,39 @@ export async function GET() {
         changefreq: "monthly",
         priority: 0.6,
       });
+    }
+
+    entries.push({
+      loc: `${base}/blog`,
+      lastmod: today,
+      changefreq: "weekly",
+      priority: 0.7,
+    });
+
+    const { data: blogPosts, error: blogError } = await blogSupabase
+      .from("blog_posts")
+      .select("slug, published_at")
+      .eq("locale", "en")
+      .eq("status", "published")
+      .not("published_at", "is", null)
+      .order("published_at", { ascending: false });
+
+    if (blogError) {
+      console.error("[sitemap/static] blog_posts", blogError);
+    } else {
+      for (const row of blogPosts ?? []) {
+        if (typeof row.slug !== "string" || !row.slug.trim()) continue;
+        const lastmod =
+          typeof row.published_at === "string"
+            ? row.published_at.split("T")[0]
+            : today;
+        entries.push({
+          loc: `${base}/blog/${row.slug}`,
+          lastmod,
+          changefreq: "monthly",
+          priority: 0.6,
+        });
+      }
     }
 
     return new Response(buildUrlset(entries), { status: 200, headers: XML_HEADERS });

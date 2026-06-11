@@ -88,6 +88,12 @@ export default async function RootLayout({
               <span className="mx-2 text-[#404040]" aria-hidden>
                 |
               </span>
+              <Link href="/blog" className="text-[#a3a3a3] transition-colors hover:text-white">
+                Blog
+              </Link>
+              <span className="mx-2 text-[#404040]" aria-hidden>
+                |
+              </span>
               <Link href="/terms" className="text-[#a3a3a3] transition-colors hover:text-white">
                 Terms
               </Link>
