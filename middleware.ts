@@ -6,32 +6,32 @@ import { buildHreflangLinkHeader } from "@/lib/hreflang-paths";
 
 type CookieRow = { name: string; value: string; options: CookieOptions };
 
-const rateLimitMap = new Map<string, { count: number; reset: number }>();
+const RATE_LIMIT_MAX = 45;
+const RATE_LIMIT_WINDOW_MS = 60_000;
 
-function checkRateLimit(ip: string): boolean {
+const rateLimitStore = new Map<string, { count: number; resetAt: number }>();
+
+function isRateLimited(ip: string): boolean {
   const now = Date.now();
-  const window = 60_000;
-  const limit = 30;
-
-  const entry = rateLimitMap.get(ip);
-  if (!entry || now > entry.reset) {
-    rateLimitMap.set(ip, { count: 1, reset: now + window });
+  const entry = rateLimitStore.get(ip);
+  if (!entry || now > entry.resetAt) {
+    rateLimitStore.set(ip, { count: 1, resetAt: now + RATE_LIMIT_WINDOW_MS });
     return false;
   }
   entry.count++;
-  return entry.count > limit;
+  return entry.count > RATE_LIMIT_MAX;
 }
 
 export async function middleware(request: NextRequest) {
-  const ip = request.headers.get("x-forwarded-for")?.split(",")[0].trim() ?? "unknown";
+  const ip =
+    request.headers.get("x-forwarded-for")?.split(",")[0].trim() ??
+    request.headers.get("x-real-ip") ??
+    "unknown";
 
-  if (checkRateLimit(ip)) {
+  if (ip !== "unknown" && isRateLimited(ip)) {
     return new NextResponse("Too Many Requests", {
       status: 429,
-      headers: {
-        "Retry-After": "60",
-        "Content-Type": "text/plain",
-      },
+      headers: { "Retry-After": "60" },
     });
   }
 
