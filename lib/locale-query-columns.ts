@@ -31,7 +31,7 @@ export function artistProfileSelectColumns<L extends NewLocaleSlug>(
 }
 
 const ARTWORK_DETAIL_BASE =
-  "id, slug, title, artist_display, url, image_id, museum, genre_title, style_title, score, medium_display, date_display, dimensions, alt_text, description" as const;
+  "id, slug, title, artist_display, url, image_id, museum, genre_title, style_title, score, medium_display, date_display, dimensions, alt_text, description, death_year" as const;
 
 export const ARTWORK_DETAIL_SELECT = {
   fr: `${ARTWORK_DETAIL_BASE}, description_fr`,

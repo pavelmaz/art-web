@@ -28,6 +28,10 @@ export async function generateStaticParams() {
   }
 }
 
+function siteName(): string {
+  return process.env.NEXT_PUBLIC_SITE_NAME?.trim() || "Fine Art Free";
+}
+
 export async function generateMetadata({ params }: BlogPostPageProps): Promise<Metadata> {
   const { slug } = await params;
   const post = await getPublishedBlogPostBySlug(slug);
@@ -36,11 +40,31 @@ export async function generateMetadata({ params }: BlogPostPageProps): Promise<M
     notFound();
   }
 
+  const title = post.meta_title || post.title;
+  const description = post.meta_description || undefined;
+  const canonical = absoluteUrl(`/blog/${post.slug}`);
+  const heroImage = blogPostHeroImage(post);
+
   return {
-    title: post.meta_title || post.title,
-    description: post.meta_description || undefined,
+    title,
+    description,
     alternates: {
-      canonical: absoluteUrl(`/blog/${post.slug}`),
+      canonical,
+    },
+    openGraph: {
+      title,
+      description,
+      url: canonical,
+      type: "article",
+      siteName: siteName(),
+      ...(post.published_at ? { publishedTime: post.published_at } : {}),
+      ...(heroImage ? { images: [{ url: heroImage }] } : {}),
+    },
+    twitter: {
+      card: heroImage ? "summary_large_image" : "summary",
+      title,
+      description,
+      ...(heroImage ? { images: [heroImage] } : {}),
     },
   };
 }

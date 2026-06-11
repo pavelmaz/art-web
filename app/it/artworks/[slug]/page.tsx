@@ -19,6 +19,7 @@ import { ArtworkZoomImage } from "@/components/ArtworkZoomImage";
 import { supabase } from "@/lib/supabase";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { getT } from "@/lib/translations";
+import { parseArtworkDeathYear } from "@/lib/artwork-death-year";
 import { absoluteUrl, artworkDetailImageUrl, artworkGridImageUrl, artworkImageUrl, artworkOriginalUrl, generateAltText, slugify } from "@/lib/utils";
 import type { Artwork } from "@/types/artwork";
 
@@ -39,41 +40,9 @@ type ArtworkRow = {
   dimensions: string | null;
   description: string | null;
   description_it: string | null;
+  death_year: number | null;
 };
 
-async function getArtistDeathYear(artistName: string | null): Promise<number | null> {
-  const normalized = artistName?.trim();
-  if (!normalized) {
-    return null;
-  }
-
-  const attempts = [
-    () => supabase.from("artists").select("death_year").eq("name", normalized).maybeSingle(),
-    () => supabase.from("artists").select("death_year").eq("artist_display", normalized).maybeSingle(),
-    () => supabase.from("artists").select("death_year").ilike("name", normalized).limit(1).maybeSingle(),
-    () => supabase.from("artists").select("death_year").ilike("artist_display", normalized).limit(1).maybeSingle(),
-  ] as const;
-
-  for (const query of attempts) {
-    const { data, error } = await query();
-    if (error || !data) {
-      continue;
-    }
-
-    const value = (data as { death_year?: unknown }).death_year;
-    if (typeof value === "number" && Number.isFinite(value)) {
-      return value;
-    }
-    if (typeof value === "string") {
-      const parsed = Number.parseInt(value, 10);
-      if (!Number.isNaN(parsed)) {
-        return parsed;
-      }
-    }
-  }
-
-  return null;
-}
 
 
 async function resolveGenreHubLinkLocal(
@@ -386,7 +355,7 @@ export default async function ArtworkDetailPageIt({ params }: ArtworkPageProps) 
     .eq("locale", "it")
     .single();
 
-  const artistDeathYear = await getArtistDeathYear(artwork.artist_display);
+  const artistDeathYear = parseArtworkDeathYear(artwork.death_year);
   const artistSlug = artwork.artist_display?.trim() ? slugify(artwork.artist_display) : null;
   let artistArtworkCount = 0;
 
