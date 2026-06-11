@@ -26,10 +26,10 @@ export type BlogPostRow = {
   slug: string;
   locale: string;
   title: string;
-  meta_title: string;
-  meta_description: string;
-  intro_html: string;
-  conclusion_html: string;
+  meta_title: string | null;
+  meta_description: string | null;
+  intro_html: string | null;
+  conclusion_html: string | null;
   sections: BlogSection[];
   status: BlogPostStatus;
   published_at: string | null;

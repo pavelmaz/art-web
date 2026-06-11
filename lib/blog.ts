@@ -1,4 +1,5 @@
 import { buildStyleSlugLookup, processBlogHtml } from "@/lib/blog-html";
+import { safeNullableString, safeString, safeTrim } from "@/lib/blog-helpers";
 import type {
   BlogArtwork,
   BlogPost,
@@ -13,20 +14,33 @@ import { artworkImageUrl } from "@/lib/utils";
 const BLOG_LOCALE = "en";
 const ARTWORK_COLUMNS =
   "id, slug, title, artist_display, date_display, image_id, url, alt_text";
+const BLOG_POST_COLUMNS =
+  "id, slug, locale, title, meta_title, meta_description, intro_html, conclusion_html, sections, status, published_at";
+
+function parseArtworkId(value: unknown): string | null {
+  const id = safeTrim(value);
+  return id || null;
+}
 
 function parseSections(raw: unknown): BlogSection[] {
-  if (!Array.isArray(raw)) return [];
+  let value = raw;
+  if (typeof value === "string") {
+    try {
+      value = JSON.parse(value);
+    } catch {
+      return [];
+    }
+  }
 
-  return raw
+  if (!Array.isArray(value)) return [];
+
+  return value
     .map((item) => {
       if (!item || typeof item !== "object") return null;
       const row = item as Record<string, unknown>;
-      const heading = typeof row.heading === "string" ? row.heading : "";
-      const html = typeof row.html === "string" ? row.html : "";
-      const artwork_id =
-        typeof row.artwork_id === "string" && row.artwork_id.trim()
-          ? row.artwork_id.trim()
-          : null;
+      const heading = safeString(row.heading);
+      const html = safeString(row.html);
+      const artwork_id = parseArtworkId(row.artwork_id);
       if (!heading && !html) return null;
       return { heading, html, artwork_id };
     })
@@ -37,43 +51,64 @@ async function fetchArtworksByIds(ids: string[]): Promise<Map<string, BlogArtwor
   const unique = [...new Set(ids.filter(Boolean))];
   if (!unique.length) return new Map();
 
-  const { data, error } = await supabase.from("artworks").select(ARTWORK_COLUMNS).in("id", unique);
+  try {
+    const { data, error } = await supabase
+      .from("artworks")
+      .select(ARTWORK_COLUMNS)
+      .in("id", unique);
 
-  if (error) {
-    console.error("[blog] fetch artworks:", error.message);
+    if (error) {
+      console.error("[blog] fetch artworks:", error.message);
+      return new Map();
+    }
+
+    const map = new Map<string, BlogArtwork>();
+    for (const row of data ?? []) {
+      const id = safeTrim(row.id);
+      const slug = safeTrim(row.slug);
+      const title = safeTrim(row.title);
+      if (!id || !slug || !title) continue;
+
+      map.set(id, {
+        id,
+        slug,
+        title,
+        artist_display: safeTrim(row.artist_display) || "Unknown artist",
+        date_display: safeNullableString(row.date_display),
+        image_id: safeNullableString(row.image_id),
+        url: safeNullableString(row.url),
+        alt_text: safeNullableString(row.alt_text),
+      });
+    }
+    return map;
+  } catch (err) {
+    console.error("[blog] fetch artworks exception:", err);
     return new Map();
   }
-
-  const map = new Map<string, BlogArtwork>();
-  for (const row of data ?? []) {
-    if (!row.id || !row.slug || !row.title) continue;
-    map.set(row.id, {
-      id: row.id,
-      slug: row.slug,
-      title: row.title,
-      artist_display: row.artist_display?.trim() || "Unknown artist",
-      date_display: row.date_display,
-      image_id: row.image_id,
-      url: row.url,
-      alt_text: row.alt_text,
-    });
-  }
-  return map;
 }
 
 async function getStyleSlugLookup() {
-  const { data, error } = await supabase.from("styles").select("name, slug");
-  if (error) {
-    console.error("[blog] fetch styles:", error.message);
+  try {
+    const { data, error } = await supabase.from("styles").select("name, slug");
+    if (error) {
+      console.error("[blog] fetch styles:", error.message);
+      return buildStyleSlugLookup([]);
+    }
+    return buildStyleSlugLookup((data ?? []) as Array<{ name: unknown; slug: unknown }>);
+  } catch (err) {
+    console.error("[blog] fetch styles exception:", err);
     return buildStyleSlugLookup([]);
   }
-  return buildStyleSlugLookup((data ?? []) as Array<{ name: string; slug: string }>);
 }
 
 function artworkImage(artwork: BlogArtwork | null): string | null {
   if (!artwork) return null;
-  const url = artworkImageUrl({ image_id: artwork.image_id, url: artwork.url });
-  return url || null;
+  try {
+    const url = artworkImageUrl({ image_id: artwork.image_id, url: artwork.url });
+    return url || null;
+  } catch {
+    return null;
+  }
 }
 
 function firstSectionArtworkId(sections: BlogSection[]): string | null {
@@ -86,6 +121,7 @@ function firstSectionArtworkId(sections: BlogSection[]): string | null {
 async function hydrateBlogPost(row: BlogPostRow): Promise<BlogPost> {
   const sections = parseSections(row.sections);
   const artworkIds = sections.map((s) => s.artwork_id).filter((id): id is string => !!id);
+
   const [artworks, styleSlugs] = await Promise.all([
     fetchArtworksByIds(artworkIds),
     getStyleSlugLookup(),
@@ -113,20 +149,22 @@ async function hydrateBlogPost(row: BlogPostRow): Promise<BlogPost> {
 }
 
 function rowFromDb(data: Record<string, unknown>): BlogPostRow | null {
-  if (typeof data.slug !== "string" || typeof data.title !== "string") return null;
+  const slug = safeTrim(data.slug);
+  const title = safeTrim(data.title);
+  if (!slug || !title) return null;
 
   return {
-    id: String(data.id ?? ""),
-    slug: data.slug,
-    locale: typeof data.locale === "string" ? data.locale : BLOG_LOCALE,
-    title: data.title,
-    meta_title: typeof data.meta_title === "string" ? data.meta_title : data.title,
-    meta_description: typeof data.meta_description === "string" ? data.meta_description : "",
-    intro_html: typeof data.intro_html === "string" ? data.intro_html : "",
-    conclusion_html: typeof data.conclusion_html === "string" ? data.conclusion_html : "",
+    id: safeTrim(data.id),
+    slug,
+    locale: safeTrim(data.locale) || BLOG_LOCALE,
+    title,
+    meta_title: safeNullableString(data.meta_title),
+    meta_description: safeNullableString(data.meta_description),
+    intro_html: safeNullableString(data.intro_html),
+    conclusion_html: safeNullableString(data.conclusion_html),
     sections: parseSections(data.sections),
-    status: data.status === "draft" ? "draft" : "published",
-    published_at: typeof data.published_at === "string" ? data.published_at : null,
+    status: safeTrim(data.status) === "published" ? "published" : "draft",
+    published_at: safeNullableString(data.published_at),
   };
 }
 
@@ -156,17 +194,18 @@ export async function getPublishedBlogPosts(): Promise<BlogPostListItem[]> {
       const sections = parseSections(row.sections);
       const artworkId = firstSectionArtworkId(sections);
       const artwork = artworkId ? artworks.get(artworkId) ?? null : null;
-      const published_at =
-        typeof row.published_at === "string" ? row.published_at : null;
-      if (!published_at || typeof row.slug !== "string" || typeof row.title !== "string") {
+      const published_at = safeNullableString(row.published_at);
+      const slug = safeTrim(row.slug);
+      const title = safeTrim(row.title);
+
+      if (!published_at || !slug || !title) {
         return null;
       }
 
       return {
-        slug: row.slug,
-        title: row.title,
-        meta_description:
-          typeof row.meta_description === "string" ? row.meta_description : "",
+        slug,
+        title,
+        meta_description: safeString(row.meta_description),
         published_at,
         card_image_url: artworkImage(artwork),
       };
@@ -174,33 +213,50 @@ export async function getPublishedBlogPosts(): Promise<BlogPostListItem[]> {
     .filter((item): item is BlogPostListItem => item !== null);
 }
 
-export async function getBlogPostBySlug(slug: string): Promise<BlogPost | null> {
-  const { data, error } = await supabase
-    .from("blog_posts")
-    .select("*")
-    .eq("locale", BLOG_LOCALE)
-    .eq("slug", slug)
-    .maybeSingle();
+export async function getPublishedBlogPostBySlug(slug: string): Promise<BlogPost | null> {
+  const normalizedSlug = safeTrim(slug);
+  if (!normalizedSlug) return null;
 
-  if (error) {
-    console.error("[blog] get post:", error.message);
+  try {
+    const { data, error } = await supabase
+      .from("blog_posts")
+      .select(BLOG_POST_COLUMNS)
+      .eq("locale", BLOG_LOCALE)
+      .eq("status", "published")
+      .eq("slug", normalizedSlug)
+      .maybeSingle();
+
+    if (error) {
+      console.error("[blog] get post:", error.message);
+      return null;
+    }
+
+    if (!data) return null;
+
+    const row = rowFromDb(data as Record<string, unknown>);
+    if (!row || row.status !== "published") return null;
+
+    return hydrateBlogPost(row);
+  } catch (err) {
+    console.error("[blog] get post exception:", err);
     return null;
   }
+}
 
-  if (!data) return null;
-
-  const row = rowFromDb(data as Record<string, unknown>);
-  if (!row) return null;
-
-  return hydrateBlogPost(row);
+/** @deprecated Use getPublishedBlogPostBySlug */
+export async function getBlogPostBySlug(slug: string): Promise<BlogPost | null> {
+  return getPublishedBlogPostBySlug(slug);
 }
 
 export function blogArtworkCaption(artwork: BlogArtwork): string {
-  const date = artwork.date_display?.trim();
+  const title = safeTrim(artwork.title) || "Untitled";
+  const artist = safeTrim(artwork.artist_display) || "Unknown artist";
+  const date = safeNullableString(artwork.date_display);
+
   if (date) {
-    return `${artwork.title} — ${artwork.artist_display}, ${date}`;
+    return `${title} — ${artist}, ${date}`;
   }
-  return `${artwork.title} — ${artwork.artist_display}`;
+  return `${title} — ${artist}`;
 }
 
 export function blogPostHeroImage(post: BlogPost): string | null {
@@ -224,6 +280,6 @@ export async function getPublishedBlogSlugs(): Promise<string[]> {
   }
 
   return (data ?? [])
-    .map((row) => (typeof row.slug === "string" ? row.slug : null))
+    .map((row) => safeTrim(row.slug))
     .filter((slug): slug is string => !!slug);
 }

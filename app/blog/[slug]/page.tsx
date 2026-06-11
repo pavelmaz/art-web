@@ -7,7 +7,7 @@ import { BlogPostingJsonLd } from "@/components/BlogPostingJsonLd";
 import {
   blogArtworkCaption,
   blogPostHeroImage,
-  getBlogPostBySlug,
+  getPublishedBlogPostBySlug,
   getPublishedBlogSlugs,
 } from "@/lib/blog";
 import { artworkDetailPath } from "@/lib/locale-routes";
@@ -20,19 +20,21 @@ type BlogPostPageProps = {
 };
 
 export async function generateStaticParams() {
-  const slugs = await getPublishedBlogSlugs();
-  return slugs.map((slug) => ({ slug }));
+  try {
+    const slugs = await getPublishedBlogSlugs();
+    return slugs.map((slug) => ({ slug }));
+  } catch {
+    return [];
+  }
 }
 
 export async function generateMetadata({ params }: BlogPostPageProps): Promise<Metadata> {
   const { slug } = await params;
-  const post = await getBlogPostBySlug(slug);
+  const post = await getPublishedBlogPostBySlug(slug);
 
   if (!post) {
-    return { title: "Post not found" };
+    notFound();
   }
-
-  const isDraft = post.status === "draft";
 
   return {
     title: post.meta_title || post.title,
@@ -40,55 +42,51 @@ export async function generateMetadata({ params }: BlogPostPageProps): Promise<M
     alternates: {
       canonical: absoluteUrl(`/blog/${post.slug}`),
     },
-    ...(isDraft
-      ? {
-          robots: {
-            index: false,
-            follow: false,
-          },
-        }
-      : {}),
   };
 }
 
 export default async function BlogPostPage({ params }: BlogPostPageProps) {
   const { slug } = await params;
-  const post = await getBlogPostBySlug(slug);
+  const post = await getPublishedBlogPostBySlug(slug);
 
   if (!post) {
     notFound();
   }
 
-  const isDraft = post.status === "draft";
   const heroImage = blogPostHeroImage(post);
+  const datePublished = post.published_at ?? undefined;
 
   return (
     <>
-      {!isDraft && post.published_at ? (
+      {datePublished ? (
         <BlogPostingJsonLd
           headline={post.title}
           slug={post.slug}
-          datePublished={post.published_at}
+          datePublished={datePublished}
           imageUrl={heroImage}
         />
       ) : null}
 
       <main className="mx-auto max-w-3xl px-4 py-12">
-        {isDraft ? (
-          <p className="mb-4 inline-block rounded bg-amber-100 px-2 py-0.5 text-xs font-semibold uppercase tracking-wide text-amber-900">
-            Draft
-          </p>
-        ) : null}
-
         <h1 className="mb-8 text-2xl font-semibold text-[#1a1a1a]">{post.title}</h1>
 
-        <BlogHtml html={post.intro_html} className="mb-10" />
+        {post.intro_html ? <BlogHtml html={post.intro_html} className="mb-10" /> : null}
 
         {post.sections.map((section, index) => {
           const artwork = section.artwork;
-          const imageSrc = artwork
-            ? artworkImageUrl({ image_id: artwork.image_id, url: artwork.url })
-            : "";
+          const artworkSlug = artwork?.slug?.trim();
+          let imageSrc = "";
+
+          if (artwork) {
+            try {
+              imageSrc = artworkImageUrl({
+                image_id: artwork.image_id,
+                url: artwork.url,
+              });
+            } catch {
+              imageSrc = "";
+            }
+          }
 
           return (
             <section key={`${section.heading}-${index}`} className="mb-10">
@@ -96,12 +94,9 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
                 <h2 className="mb-4 text-lg font-semibold text-[#1a1a1a]">{section.heading}</h2>
               ) : null}
 
-              {artwork && imageSrc ? (
+              {artwork && artworkSlug && imageSrc ? (
                 <figure className="mb-4">
-                  <Link
-                    href={artworkDetailPath("en", artwork.slug)}
-                    className="block overflow-hidden"
-                  >
+                  <Link href={artworkDetailPath("en", artworkSlug)} className="block overflow-hidden">
                     <img
                       src={imageSrc}
                       alt={artwork.alt_text?.trim() || artwork.title}
@@ -116,7 +111,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
                 </figure>
               ) : null}
 
-              <BlogHtml html={section.html} />
+              {section.html ? <BlogHtml html={section.html} /> : null}
             </section>
           );
         })}
