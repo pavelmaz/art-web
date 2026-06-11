@@ -30,11 +30,57 @@ export default function robots(): MetadataRoute.Robots {
   }
 
   return {
-    rules: {
-      userAgent: "*",
-      allow: "/",
-      disallow: ["/app/", "/_next/static/", ...wrongLocalePaths],
-    },
+    rules: [
+      {
+        userAgent: "*",
+        allow: "/",
+        disallow: ["/app/", "/_next/static/", ...wrongLocalePaths],
+      },
+      {
+        userAgent: "GPTBot",
+        disallow: ["/"],
+      },
+      {
+        userAgent: "ChatGPT-User",
+        disallow: ["/"],
+      },
+      {
+        userAgent: "CCBot",
+        disallow: ["/"],
+      },
+      {
+        userAgent: "anthropic-ai",
+        disallow: ["/"],
+      },
+      {
+        userAgent: "Claude-Web",
+        disallow: ["/"],
+      },
+      {
+        userAgent: "Omgilibot",
+        disallow: ["/"],
+      },
+      {
+        userAgent: "FacebookBot",
+        disallow: ["/"],
+      },
+      {
+        userAgent: "Diffbot",
+        disallow: ["/"],
+      },
+      {
+        userAgent: "Bytespider",
+        disallow: ["/"],
+      },
+      {
+        userAgent: "ImagesiftBot",
+        disallow: ["/"],
+      },
+      {
+        userAgent: "cohere-ai",
+        disallow: ["/"],
+      },
+    ],
     sitemap: `${baseUrl}/sitemap.xml`,
   };
 };

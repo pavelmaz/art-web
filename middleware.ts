@@ -6,7 +6,35 @@ import { buildHreflangLinkHeader } from "@/lib/hreflang-paths";
 
 type CookieRow = { name: string; value: string; options: CookieOptions };
 
+const rateLimitMap = new Map<string, { count: number; reset: number }>();
+
+function checkRateLimit(ip: string): boolean {
+  const now = Date.now();
+  const window = 60_000;
+  const limit = 30;
+
+  const entry = rateLimitMap.get(ip);
+  if (!entry || now > entry.reset) {
+    rateLimitMap.set(ip, { count: 1, reset: now + window });
+    return false;
+  }
+  entry.count++;
+  return entry.count > limit;
+}
+
 export async function middleware(request: NextRequest) {
+  const ip = request.headers.get("x-forwarded-for")?.split(",")[0].trim() ?? "unknown";
+
+  if (checkRateLimit(ip)) {
+    return new NextResponse("Too Many Requests", {
+      status: 429,
+      headers: {
+        "Retry-After": "60",
+        "Content-Type": "text/plain",
+      },
+    });
+  }
+
   const { pathname } = request.nextUrl;
 
   // Sitemaps must stay fast and must not get hreflang Link headers (e.g. /es/sitemap/...).
