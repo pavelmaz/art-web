@@ -1,5 +1,6 @@
 import { buildHubLanguageAlternates, canonicalHubUrl } from "@/lib/locale-routes";
 import type { Metadata } from "next";
+import { hubListPageMetadata } from "@/lib/list-page-metadata";
 
 import { ArtworkGrid } from "@/components/ArtworkGrid";
 import { Pagination } from "@/components/Pagination";
@@ -10,20 +11,23 @@ import type { Artwork } from "@/types/artwork";
 
 export const revalidate = 86400;
 
-export const metadata: Metadata = {
-  title: { absolute: "浏览全部作品 — 免费公共领域艺术 | Fine Art Free" },
-  description:
-    "下载72,000+幅公共领域作品高清图像。经典绘画、版画与插图，可免费用于任何用途。",
-  alternates: {
-    canonical: canonicalHubUrl("zh", "artworks"),
-    languages: buildHubLanguageAlternates("artworks"),
-  },
-  openGraph: {
+export async function generateMetadata({ searchParams }: ArtworksPageProps): Promise<Metadata> {
+  const { page, q } = await searchParams;
+  return hubListPageMetadata({
+    canonicalPath: "/zh/artworks",
+    hub: "artworks",
+    title: { absolute: "浏览全部作品 — 免费公共领域艺术 | Fine Art Free" },
+    description: "下载72,000+幅公共领域作品高清图像。经典绘画、版画与插图，可免费用于任何用途。",
+    page,
+    q,
+    openGraph: {
     title: "浏览全部作品 — 免费公共领域艺术 | Fine Art Free",
     description:
       "下载72,000+幅公共领域作品高清图像。经典绘画、版画与插图，可免费用于任何用途。",
   },
-};
+  });
+}
+
 
 function toImageUrl(imageId: string | null): string {
   if (!imageId) return "";

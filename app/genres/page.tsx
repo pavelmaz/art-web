@@ -4,25 +4,27 @@ import { BrowseHubGrid } from "@/components/BrowseHubGrid";
 import { Pagination } from "@/components/Pagination";
 import { getCachedGenreHub } from "@/lib/cached-hub-data";
 import { getPaginationParams, getTotalPages } from "@/lib/pagination";
-import { buildHubLanguageAlternates } from "@/lib/locale-routes";
+import { hubListPageMetadata } from "@/lib/list-page-metadata";
 import { slugify } from "@/lib/utils";
 
 export const revalidate = 86400;
 
-export const metadata: Metadata = {
-  title: "Art Genres — Free Public Domain Downloads | Fine Art Free",
-  description:
-    "Browse public domain art by genre. Landscape, Portrait, Still Life, Religious and more — all free to download in high resolution.",
-  alternates: {
-    canonical: "https://fineartfree.com/genres",
-    languages: buildHubLanguageAlternates("genres"),
-  },
-  openGraph: {
+export async function generateMetadata({ searchParams }: GenresPageProps): Promise<Metadata> {
+  const { page } = await searchParams;
+  return hubListPageMetadata({
+    canonicalPath: "/genres",
+    hub: "genres",
+    title: "Art Genres — Free Public Domain Downloads | Fine Art Free",
+    description: "Browse public domain art by genre. Landscape, Portrait, Still Life, Religious and more — all free to download in high resolution.",
+    page,
+    openGraph: {
     title: "Art Genres — Free Public Domain Downloads | Fine Art Free",
     description:
       "Browse public domain art by genre. Landscape, Portrait, Still Life, Religious and more — all free to download in high resolution.",
   },
-};
+  });
+}
+
 
 type GenresPageProps = {
   searchParams: Promise<{ page?: string }>;

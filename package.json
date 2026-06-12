@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "seo:audit": "npx tsx scripts/seo-full-audit.ts"
   },
   "dependencies": {
     "@supabase/ssr": "^0.6.1",

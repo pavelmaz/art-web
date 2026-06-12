@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { paginatedAlternates } from "@/lib/list-page-metadata";
 import { notFound } from "next/navigation";
 
 import { ArtworkGrid } from "@/components/ArtworkGrid";
@@ -82,8 +83,9 @@ async function getStyleBySlug(slug: string): Promise<StyleRow | null> {
   return null;
 }
 
-export async function generateMetadata({ params }: StylePageProps): Promise<Metadata> {
+export async function generateMetadata({ params, searchParams }: StylePageProps): Promise<Metadata> {
   const { slug } = await params;
+  const { page } = await searchParams;
   const style = await getStyleBySlug(slug);
   const styleName = style?.name ?? unslugifyStyle(slug);
 
@@ -104,10 +106,7 @@ export async function generateMetadata({ params }: StylePageProps): Promise<Meta
   return {
     title,
     description,
-    alternates: {
-      canonical: absoluteUrl(`/styles/${slug}`),
-      languages: buildStyleLanguageAlternates(slug),
-    },
+    alternates: paginatedAlternates(`/styles/${slug}`, page, buildStyleLanguageAlternates(slug)),
     openGraph: {
       title,
       description,

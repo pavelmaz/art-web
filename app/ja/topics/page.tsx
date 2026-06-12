@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { topicsCountriesPageMetadata } from "@/lib/topics-countries-seo";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -12,25 +13,22 @@ export const revalidate = 86400;
 
 const t = getT("ja");
 
-export const metadata: Metadata = {
-  title: "話題・タグから探す — パブリックドメイン無料 | Fine Art Free",
-  description:
-    "夕焼け、馬、花、森など、人気のタグから7万件以上のパブリックドメイン作品を無料で高解像度ダウンロード。",
-  alternates: {
-    canonical: absoluteUrl("/ja/topics"),
-    languages: {
-      en: absoluteUrl("/topics"),
-      es: absoluteUrl("/es/temas"),
-      pt: absoluteUrl("/pt/temas"),
-      ja: absoluteUrl("/ja/topics"),
-    },
-  },
-  openGraph: {
+export async function generateMetadata({ searchParams }: TopicsPageProps): Promise<Metadata> {
+  const { page } = await searchParams;
+  return topicsCountriesPageMetadata({
+    canonicalPath: "/ja/topics",
+    kind: "topics",
+    title: "話題・タグから探す — パブリックドメイン無料 | Fine Art Free",
+    description: "夕焼け、馬、花、森など、人気のタグから7万件以上のパブリックドメイン作品を無料で高解像度ダウンロード。",
+    page,
+    openGraph: {
     title: "話題・タグから探す — パブリックドメイン無料 | Fine Art Free",
     description:
       "夕焼け、馬、花、森など、人気のタグから7万件以上のパブリックドメイン作品を無料で高解像度ダウンロード。",
   },
-};
+  });
+}
+
 
 const EXCLUDED_TAGS = new Set([
   "nature", "light", "tranquility", "serenity", "reflection", "shadow",

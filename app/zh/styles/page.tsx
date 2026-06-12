@@ -1,5 +1,6 @@
 import { buildHubLanguageAlternates, canonicalHubUrl } from "@/lib/locale-routes";
 import type { Metadata } from "next";
+import { hubListPageMetadata } from "@/lib/list-page-metadata";
 
 import { BrowseHubGrid, type BrowseHubItem } from "@/components/BrowseHubGrid";
 import { Pagination } from "@/components/Pagination";
@@ -10,20 +11,22 @@ import { absoluteUrl } from "@/lib/utils";
 
 export const revalidate = 86400;
 
-export const metadata: Metadata = {
-  title: { absolute: "艺术风格与运动 — 免费下载 | Fine Art Free" },
-  description:
-    "按风格浏览。巴洛克、印象派、荷兰黄金时代、文艺复兴等 — 免费下载。",
-  alternates: {
-    canonical: canonicalHubUrl("zh", "styles"),
-    languages: buildHubLanguageAlternates("styles"),
-  },
-  openGraph: {
+export async function generateMetadata({ searchParams }: StylesPageProps): Promise<Metadata> {
+  const { page } = await searchParams;
+  return hubListPageMetadata({
+    canonicalPath: "/zh/styles",
+    hub: "styles",
+    title: { absolute: "艺术风格与运动 — 免费下载 | Fine Art Free" },
+    description: "按风格浏览。巴洛克、印象派、荷兰黄金时代、文艺复兴等 — 免费下载。",
+    page,
+    openGraph: {
     title: "艺术风格与运动 — 免费下载 | Fine Art Free",
     description:
       "按风格浏览。巴洛克、印象派、荷兰黄金时代、文艺复兴等 — 免费下载。",
   },
-};
+  });
+}
+
 
 type StylesPageProps = {
   searchParams: Promise<{ page?: string }>;

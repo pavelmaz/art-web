@@ -1,5 +1,6 @@
 import { buildHubLanguageAlternates, canonicalHubUrl } from "@/lib/locale-routes";
 import type { Metadata } from "next";
+import { hubListPageMetadata } from "@/lib/list-page-metadata";
 
 import { BrowseHubGrid, type BrowseHubItem } from "@/components/BrowseHubGrid";
 import { Pagination } from "@/components/Pagination";
@@ -10,20 +11,22 @@ import { absoluteUrl } from "@/lib/utils";
 
 export const revalidate = 86400;
 
-export const metadata: Metadata = {
-  title: { absolute: "Styles et mouvements artistiques — Téléchargement gratuit | Fine Art Free" },
-  description:
-    "Art par mouvement. Baroque, impressionnisme, siècle d'or hollandais, Renaissance et plus — gratuit à télécharger.",
-  alternates: {
-    canonical: canonicalHubUrl("fr", "styles"),
-    languages: buildHubLanguageAlternates("styles"),
-  },
-  openGraph: {
+export async function generateMetadata({ searchParams }: StylesPageProps): Promise<Metadata> {
+  const { page } = await searchParams;
+  return hubListPageMetadata({
+    canonicalPath: "/fr/styles",
+    hub: "styles",
+    title: { absolute: "Styles et mouvements artistiques — Téléchargement gratuit | Fine Art Free" },
+    description: "Art par mouvement. Baroque, impressionnisme, siècle d'or hollandais, Renaissance et plus — gratuit à télécharger.",
+    page,
+    openGraph: {
     title: "Styles et mouvements artistiques — Téléchargement gratuit | Fine Art Free",
     description:
       "Art par mouvement. Baroque, impressionnisme, siècle d'or hollandais, Renaissance et plus — gratuit à télécharger.",
   },
-};
+  });
+}
+
 
 type StylesPageProps = {
   searchParams: Promise<{ page?: string }>;

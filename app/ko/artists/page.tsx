@@ -1,5 +1,6 @@
 import { buildHubLanguageAlternates, canonicalHubUrl } from "@/lib/locale-routes";
 import type { Metadata } from "next";
+import { hubListPageMetadata } from "@/lib/list-page-metadata";
 
 import { BrowseHubGrid } from "@/components/BrowseHubGrid";
 import { Pagination } from "@/components/Pagination";
@@ -9,20 +10,22 @@ import { absoluteUrl, slugify } from "@/lib/utils";
 
 export const revalidate = 86400;
 
-export const metadata: Metadata = {
-  title: { absolute: "예술가 — 전 작품 무료 다운로드 | Fine Art Free" },
-  description:
-    "예술가별 퍼블릭 도메인 예술. 모네, 렘브란트, 반 고흐, 뒤러 등 수백 명 — 무료 다운로드.",
-  alternates: {
-    canonical: canonicalHubUrl("ko", "artists"),
-    languages: buildHubLanguageAlternates("artists"),
-  },
-  openGraph: {
+export async function generateMetadata({ searchParams }: ArtistsPageProps): Promise<Metadata> {
+  const { page } = await searchParams;
+  return hubListPageMetadata({
+    canonicalPath: "/ko/artists",
+    hub: "artists",
+    title: { absolute: "예술가 — 전 작품 무료 다운로드 | Fine Art Free" },
+    description: "예술가별 퍼블릭 도메인 예술. 모네, 렘브란트, 반 고흐, 뒤러 등 수백 명 — 무료 다운로드.",
+    page,
+    openGraph: {
     title: "예술가 — 전 작품 무료 다운로드 | Fine Art Free",
     description:
       "예술가별 퍼블릭 도메인 예술. 모네, 렘브란트, 반 고흐, 뒤러 등 수백 명 — 무료 다운로드.",
   },
-};
+  });
+}
+
 
 type ArtistsPageProps = {
   searchParams: Promise<{ page?: string }>;

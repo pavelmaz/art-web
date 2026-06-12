@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { paginatedAlternates } from "@/lib/list-page-metadata";
 import { notFound } from "next/navigation";
 
 import { ArtworkGrid } from "@/components/ArtworkGrid";
@@ -95,8 +96,9 @@ async function getStyleByLocalizedSlug(slug: string): Promise<StyleRow | null> {
   return null;
 }
 
-export async function generateMetadata({ params }: StylePageProps): Promise<Metadata> {
+export async function generateMetadata({ params, searchParams }: StylePageProps): Promise<Metadata> {
   const { slug } = await params;
+  const { page } = await searchParams;
   const style = await getStyleByLocalizedSlug(slug);
   const englishName = style?.name ?? unslugifyStyle(slug);
 
@@ -126,10 +128,7 @@ export async function generateMetadata({ params }: StylePageProps): Promise<Meta
   return {
     title,
     description,
-    alternates: {
-      canonical: absoluteUrl(`/ja/styles/${jaSlug}`),
-      languages: buildStyleLanguageAlternates(enSlug),
-    },
+    alternates: paginatedAlternates(`/ja/styles/${jaSlug}`, page, buildStyleLanguageAlternates(enSlug)),
     openGraph: { title, description },
   };
 }

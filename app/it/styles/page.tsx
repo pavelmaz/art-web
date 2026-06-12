@@ -1,5 +1,6 @@
 import { buildHubLanguageAlternates, canonicalHubUrl } from "@/lib/locale-routes";
 import type { Metadata } from "next";
+import { hubListPageMetadata } from "@/lib/list-page-metadata";
 
 import { BrowseHubGrid, type BrowseHubItem } from "@/components/BrowseHubGrid";
 import { Pagination } from "@/components/Pagination";
@@ -10,20 +11,22 @@ import { absoluteUrl } from "@/lib/utils";
 
 export const revalidate = 86400;
 
-export const metadata: Metadata = {
-  title: { absolute: "Stili e movimenti artistici — Download gratuito | Fine Art Free" },
-  description:
-    "Arte per stile. Barocco, impressionismo, Secolo d'oro olandese, Rinascimento e altro — gratis da scaricare.",
-  alternates: {
-    canonical: canonicalHubUrl("it", "styles"),
-    languages: buildHubLanguageAlternates("styles"),
-  },
-  openGraph: {
+export async function generateMetadata({ searchParams }: StylesPageProps): Promise<Metadata> {
+  const { page } = await searchParams;
+  return hubListPageMetadata({
+    canonicalPath: "/it/styles",
+    hub: "styles",
+    title: { absolute: "Stili e movimenti artistici — Download gratuito | Fine Art Free" },
+    description: "Arte per stile. Barocco, impressionismo, Secolo d'oro olandese, Rinascimento e altro — gratis da scaricare.",
+    page,
+    openGraph: {
     title: "Stili e movimenti artistici — Download gratuito | Fine Art Free",
     description:
       "Arte per stile. Barocco, impressionismo, Secolo d'oro olandese, Rinascimento e altro — gratis da scaricare.",
   },
-};
+  });
+}
+
 
 type StylesPageProps = {
   searchParams: Promise<{ page?: string }>;

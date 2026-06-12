@@ -1,6 +1,12 @@
+import { isPaginatedListPage } from "@/lib/list-page-metadata";
+import {
+  buildTopicsCountriesLanguageAlternates,
+  parseTopicsCountriesPathname,
+} from "@/lib/topics-countries-seo";
 import {
   HREFLANG_LOCALES,
   LOCALE_ROUTE_CONFIG,
+  buildHomeLanguageAlternates,
   buildHubLanguageAlternates,
   getSegments,
   type LocaleSegments,
@@ -189,9 +195,35 @@ export function detectLocaleFromPathname(pathname: string): SiteLocale {
   return "en";
 }
 
-export function buildHreflangLinkHeader(pathname: string): string {
+function isHomePathname(pathname: string): boolean {
+  if (pathname === "/") return true;
+  return /^\/(es|pt|ja|fr|de|it|ko|ru|zh)$/.test(pathname);
+}
+
+function topicsCountriesLinkHeader(pathname: string): string | null {
+  const route = parseTopicsCountriesPathname(pathname);
+  if (!route) return null;
+  return languageAlternatesToLinkHeader(
+    buildTopicsCountriesLanguageAlternates(route.kind, route.slug)
+  );
+}
+
+export function buildHreflangLinkHeader(pathname: string, page?: string): string {
+  if (isPaginatedListPage(page)) {
+    return "";
+  }
+
   if (isEnOnlyPathname(pathname)) {
     return languageAlternatesToLinkHeader(buildEnOnlyLanguageAlternates(pathname));
+  }
+
+  if (isHomePathname(pathname)) {
+    return languageAlternatesToLinkHeader(buildHomeLanguageAlternates());
+  }
+
+  const topicsCountries = topicsCountriesLinkHeader(pathname);
+  if (topicsCountries) {
+    return topicsCountries;
   }
 
   const hub = detectHubFromPathname(pathname);

@@ -4,29 +4,31 @@ import { BrowseHubGrid } from "@/components/BrowseHubGrid";
 import { Pagination } from "@/components/Pagination";
 import { fillArtistHubPreviewImages, getCachedArtistsHubList } from "@/lib/cached-hub-data";
 import { getPaginationParams, getTotalPages } from "@/lib/pagination";
-import { buildHubLanguageAlternates } from "@/lib/locale-routes";
+import { hubListPageMetadata } from "@/lib/list-page-metadata";
 import { slugify } from "@/lib/utils";
 
 export const revalidate = 86400;
 
-export const metadata: Metadata = {
-  title: "Artists — Complete Works Free to Download | Fine Art Free",
-  description:
-    "Browse public domain artworks by artist. Monet, Rembrandt, Van Gogh, Dürer and hundreds more — all free to download.",
-  alternates: {
-    canonical: "https://fineartfree.com/artists",
-    languages: buildHubLanguageAlternates("artists"),
-  },
-  openGraph: {
-    title: "Artists — Complete Works Free to Download | Fine Art Free",
-    description:
-      "Browse public domain artworks by artist. Monet, Rembrandt, Van Gogh, Dürer and hundreds more — all free to download.",
-  },
-};
-
 type ArtistsPageProps = {
   searchParams: Promise<{ page?: string }>;
 };
+
+export async function generateMetadata({ searchParams }: ArtistsPageProps): Promise<Metadata> {
+  const { page } = await searchParams;
+  return hubListPageMetadata({
+    canonicalPath: "/artists",
+    hub: "artists",
+    title: "Artists — Complete Works Free to Download | Fine Art Free",
+    description:
+      "Browse public domain artworks by artist. Monet, Rembrandt, Van Gogh, Dürer and hundreds more — all free to download.",
+    page,
+    openGraph: {
+      title: "Artists — Complete Works Free to Download | Fine Art Free",
+      description:
+        "Browse public domain artworks by artist. Monet, Rembrandt, Van Gogh, Dürer and hundreds more — all free to download.",
+    },
+  });
+}
 
 export default async function ArtistsPage({ searchParams }: ArtistsPageProps) {
   const resolvedSearchParams = await searchParams;

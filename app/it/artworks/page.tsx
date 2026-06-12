@@ -1,5 +1,6 @@
 import { buildHubLanguageAlternates, canonicalHubUrl } from "@/lib/locale-routes";
 import type { Metadata } from "next";
+import { hubListPageMetadata } from "@/lib/list-page-metadata";
 
 import { ArtworkGrid } from "@/components/ArtworkGrid";
 import { Pagination } from "@/components/Pagination";
@@ -10,20 +11,23 @@ import type { Artwork } from "@/types/artwork";
 
 export const revalidate = 86400;
 
-export const metadata: Metadata = {
-  title: { absolute: "Sfoglia tutte le opere — Arte di pubblico dominio gratuita | Fine Art Free" },
-  description:
-    "Scarica 72.000+ opere di pubblico dominio in alta risoluzione. Dipinti classici, stampe e illustrazioni gratis per qualsiasi uso.",
-  alternates: {
-    canonical: canonicalHubUrl("it", "artworks"),
-    languages: buildHubLanguageAlternates("artworks"),
-  },
-  openGraph: {
+export async function generateMetadata({ searchParams }: ArtworksPageProps): Promise<Metadata> {
+  const { page, q } = await searchParams;
+  return hubListPageMetadata({
+    canonicalPath: "/it/artworks",
+    hub: "artworks",
+    title: { absolute: "Sfoglia tutte le opere — Arte di pubblico dominio gratuita | Fine Art Free" },
+    description: "Scarica 72.000+ opere di pubblico dominio in alta risoluzione. Dipinti classici, stampe e illustrazioni gratis per qualsiasi uso.",
+    page,
+    q,
+    openGraph: {
     title: "Sfoglia tutte le opere — Arte di pubblico dominio gratuita | Fine Art Free",
     description:
       "Scarica 72.000+ opere di pubblico dominio in alta risoluzione. Dipinti classici, stampe e illustrazioni gratis per qualsiasi uso.",
   },
-};
+  });
+}
+
 
 function toImageUrl(imageId: string | null): string {
   if (!imageId) return "";

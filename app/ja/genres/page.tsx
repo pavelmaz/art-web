@@ -4,7 +4,7 @@ import { BrowseHubGrid } from "@/components/BrowseHubGrid";
 import { Pagination } from "@/components/Pagination";
 import { getCachedGenreHub } from "@/lib/cached-hub-data";
 import { getPaginationParams, getTotalPages } from "@/lib/pagination";
-import { buildHubLanguageAlternates } from "@/lib/locale-routes";
+import { hubListPageMetadata } from "@/lib/list-page-metadata";
 import { supabase } from "@/lib/supabase";
 import { absoluteUrl } from "@/lib/utils";
 import { getT } from "@/lib/translations";
@@ -13,20 +13,22 @@ export const revalidate = 86400;
 
 const t = getT("ja");
 
-export const metadata: Metadata = {
-  title: "ジャンル一覧 — パブリックドメイン無料 | Fine Art Free",
-  description:
-    "風景、肖像、静物、宗教画など、ジャンル別にパブリックドメインの名作を高解像度で無料ダウンロード。",
-  alternates: {
-    canonical: absoluteUrl("/ja/genres"),
-    languages: buildHubLanguageAlternates("genres"),
-  },
-  openGraph: {
+export async function generateMetadata({ searchParams }: GenresPageProps): Promise<Metadata> {
+  const { page } = await searchParams;
+  return hubListPageMetadata({
+    canonicalPath: "/ja/genres",
+    hub: "genres",
+    title: "ジャンル一覧 — パブリックドメイン無料 | Fine Art Free",
+    description: "風景、肖像、静物、宗教画など、ジャンル別にパブリックドメインの名作を高解像度で無料ダウンロード。",
+    page,
+    openGraph: {
     title: "ジャンル一覧 — パブリックドメイン無料 | Fine Art Free",
     description:
       "風景、肖像、静物、宗教画など、ジャンル別にパブリックドメインの名作を高解像度で無料ダウンロード。",
   },
-};
+  });
+}
+
 
 type GenresPageProps = {
   searchParams: Promise<{ page?: string }>;

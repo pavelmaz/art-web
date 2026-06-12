@@ -4,25 +4,27 @@ import { BrowseHubGrid } from "@/components/BrowseHubGrid";
 import { Pagination } from "@/components/Pagination";
 import { getCachedMuseumHub } from "@/lib/cached-hub-data";
 import { getPaginationParams, getTotalPages } from "@/lib/pagination";
-import { buildHubLanguageAlternates } from "@/lib/locale-routes";
+import { hubListPageMetadata } from "@/lib/list-page-metadata";
 import { slugify } from "@/lib/utils";
 
 export const revalidate = 86400;
 
-export const metadata: Metadata = {
-  title: "Museum Collections — Free Art Downloads | Fine Art Free",
-  description:
-    "Browse public domain art by museum. Prado, Rijksmuseum, MFA Boston, National Gallery and more — free to download.",
-  alternates: {
-    canonical: "https://fineartfree.com/museums",
-    languages: buildHubLanguageAlternates("museums"),
-  },
-  openGraph: {
+export async function generateMetadata({ searchParams }: MuseumsPageProps): Promise<Metadata> {
+  const { page } = await searchParams;
+  return hubListPageMetadata({
+    canonicalPath: "/museums",
+    hub: "museums",
+    title: "Museum Collections — Free Art Downloads | Fine Art Free",
+    description: "Browse public domain art by museum. Prado, Rijksmuseum, MFA Boston, National Gallery and more — free to download.",
+    page,
+    openGraph: {
     title: "Museum Collections — Free Art Downloads | Fine Art Free",
     description:
       "Browse public domain art by museum. Prado, Rijksmuseum, MFA Boston, National Gallery and more — free to download.",
   },
-};
+  });
+}
+
 
 type MuseumsPageProps = {
   searchParams: Promise<{ page?: string }>;

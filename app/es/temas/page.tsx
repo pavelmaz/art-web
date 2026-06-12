@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { topicsCountriesPageMetadata } from "@/lib/topics-countries-seo";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -9,24 +10,22 @@ import { absoluteUrl, artworkImageUrl } from "@/lib/utils";
 
 export const revalidate = 86400;
 
-export const metadata: Metadata = {
-  title: "Temas Artísticos — Explorar por Tema | Fine Art Free",
-  description:
-    "Explora 72.000+ obras de arte de dominio público por tema. Atardeceres, caballos, flores, bosques y cientos más — gratis para descargar.",
-  alternates: {
-    canonical: absoluteUrl("/es/temas"),
-    languages: {
-      en: absoluteUrl("/topics"),
-      es: absoluteUrl("/es/temas"),
-      pt: absoluteUrl("/pt/temas"),
-    },
-  },
-  openGraph: {
+export async function generateMetadata({ searchParams }: TopicsPageProps): Promise<Metadata> {
+  const { page } = await searchParams;
+  return topicsCountriesPageMetadata({
+    canonicalPath: "/es/temas",
+    kind: "topics",
+    title: "Temas Artísticos — Explorar por Tema | Fine Art Free",
+    description: "Explora 72.000+ obras de arte de dominio público por tema. Atardeceres, caballos, flores, bosques y cientos más — gratis para descargar.",
+    page,
+    openGraph: {
     title: "Temas Artísticos — Explorar por Tema | Fine Art Free",
     description:
       "Explora 72.000+ obras de arte de dominio público por tema. Atardeceres, caballos, flores, bosques y cientos más — gratis para descargar.",
   },
-};
+  });
+}
+
 
 const EXCLUDED_TAGS = new Set([
   "nature", "light", "tranquility", "serenity", "reflection", "shadow",

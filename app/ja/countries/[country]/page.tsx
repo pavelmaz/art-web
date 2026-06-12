@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { topicsCountriesPageMetadata } from "@/lib/topics-countries-seo";
 import { notFound } from "next/navigation";
 
 import { ArtworkGrid } from "@/components/ArtworkGrid";
@@ -45,8 +46,9 @@ function unslugify(slug: string): string {
     .join(" ");
 }
 
-export async function generateMetadata({ params }: CountryPageProps): Promise<Metadata> {
+export async function generateMetadata({ params, searchParams }: CountryPageProps): Promise<Metadata> {
   const { country: slug } = await params;
+  const { page } = await searchParams;
   const countryName = unslugify(decodeURIComponent(slug));
 
   const countQuery = await supabase
@@ -63,23 +65,18 @@ export async function generateMetadata({ params }: CountryPageProps): Promise<Me
   const title = `${countryName} — パブリックドメイン無料 | Fine Art Free`;
   const description = `${countryName}のパブリックドメイン作品を${totalCount}点以上、高解像度で無料ダウンロード。`;
 
-  return {
+  return topicsCountriesPageMetadata({
+    canonicalPath: `/ja/countries/${slug}`,
+    kind: "countries",
+    slug,
     title,
     description,
-    alternates: {
-      canonical: absoluteUrl(`/ja/countries/${slug}`),
-      languages: {
-        en: absoluteUrl(`/countries/${slug}`),
-        es: absoluteUrl(`/es/paises/${slug}`),
-        pt: absoluteUrl(`/pt/paises/${slug}`),
-        ja: absoluteUrl(`/ja/countries/${slug}`),
-      },
-    },
+    page,
     openGraph: {
       title,
       description,
     },
-  };
+  });
 }
 
 export default async function CountryPageJa({ params, searchParams }: CountryPageProps) {

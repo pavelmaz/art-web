@@ -4,7 +4,7 @@ import { BrowseHubGrid, type BrowseHubItem } from "@/components/BrowseHubGrid";
 import { Pagination } from "@/components/Pagination";
 import { getCachedStylesHubData } from "@/lib/cached-hub-data";
 import { getPaginationParams, getTotalPages } from "@/lib/pagination";
-import { buildHubLanguageAlternates } from "@/lib/locale-routes";
+import { hubListPageMetadata } from "@/lib/list-page-metadata";
 import { slugify } from "@/lib/utils";
 
 export const revalidate = 86400;
@@ -15,20 +15,22 @@ type StyleRow = {
   description: string | null;
 };
 
-export const metadata: Metadata = {
-  title: "Art Movements & Styles — Free Downloads | Fine Art Free",
-  description:
-    "Browse public domain art by movement. Baroque, Impressionism, Dutch Golden Age, Renaissance and more — all free to download.",
-  alternates: {
-    canonical: "https://fineartfree.com/styles",
-    languages: buildHubLanguageAlternates("styles"),
-  },
-  openGraph: {
+export async function generateMetadata({ searchParams }: StylesPageProps): Promise<Metadata> {
+  const { page } = await searchParams;
+  return hubListPageMetadata({
+    canonicalPath: "/styles",
+    hub: "styles",
+    title: "Art Movements & Styles — Free Downloads | Fine Art Free",
+    description: "Browse public domain art by movement. Baroque, Impressionism, Dutch Golden Age, Renaissance and more — all free to download.",
+    page,
+    openGraph: {
     title: "Art Movements & Styles — Free Downloads | Fine Art Free",
     description:
       "Browse public domain art by movement. Baroque, Impressionism, Dutch Golden Age, Renaissance and more — all free to download.",
   },
-};
+  });
+}
+
 
 type StylesPageProps = {
   searchParams: Promise<{ page?: string }>;

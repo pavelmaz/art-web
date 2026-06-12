@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 import { ArtworkGrid } from "@/components/ArtworkGrid";
-import { buildHubLanguageAlternates } from "@/lib/locale-routes";
+import { hubListPageMetadata } from "@/lib/list-page-metadata";
 import { Pagination } from "@/components/Pagination";
 import { getCachedArtworksBrowseSlice, getCachedArtworksSearchResults } from "@/lib/cached-artworks-page";
 import { getPaginationParams, getTotalPages } from "@/lib/pagination";
@@ -9,20 +9,27 @@ import type { Artwork } from "@/types/artwork";
 
 export const revalidate = 86400;
 
-export const metadata: Metadata = {
-  title: "Browse All Artworks — Free Public Domain Art | Fine Art Free",
-  description:
-    "Download 72,000+ public domain artworks in high resolution. Classic paintings, prints and illustrations free for any use.",
-  alternates: {
-    canonical: "https://fineartfree.com/artworks",
-    languages: buildHubLanguageAlternates("artworks"),
-  },
-  openGraph: {
+type ArtworksPageProps = {
+  searchParams: Promise<{ page?: string; q?: string }>;
+};
+
+export async function generateMetadata({ searchParams }: ArtworksPageProps): Promise<Metadata> {
+  const { page, q } = await searchParams;
+  return hubListPageMetadata({
+    canonicalPath: "/artworks",
+    hub: "artworks",
     title: "Browse All Artworks — Free Public Domain Art | Fine Art Free",
     description:
       "Download 72,000+ public domain artworks in high resolution. Classic paintings, prints and illustrations free for any use.",
-  },
-};
+    page,
+    q,
+    openGraph: {
+      title: "Browse All Artworks — Free Public Domain Art | Fine Art Free",
+      description:
+        "Download 72,000+ public domain artworks in high resolution. Classic paintings, prints and illustrations free for any use.",
+    },
+  });
+}
 
 function toImageUrl(imageId: string | null): string {
   if (!imageId) {
@@ -35,10 +42,6 @@ function toImageUrl(imageId: string | null): string {
 
   return `https://www.artic.edu/iiif/2/${imageId}/full/400,/0/default.jpg`;
 }
-
-type ArtworksPageProps = {
-  searchParams: Promise<{ page?: string; q?: string }>;
-};
 
 export default async function ArtworksPage({ searchParams }: ArtworksPageProps) {
   const resolvedSearchParams = await searchParams;

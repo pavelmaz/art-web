@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { topicsCountriesPageMetadata } from "@/lib/topics-countries-seo";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -9,25 +10,22 @@ import { artworkImageUrl } from "@/lib/utils";
 
 export const revalidate = 86400;
 
-export const metadata: Metadata = {
-  title: "Art by Country — Free Public Domain Downloads | Fine Art Free",
-  description:
-    "Browse public domain art by country of origin. French, Dutch, Italian, German paintings and more — all free to download.",
-  alternates: {
-    canonical: "https://fineartfree.com/countries",
-    languages: {
-      en: "https://fineartfree.com/countries",
-      es: "https://fineartfree.com/es/paises",
-      pt: "https://fineartfree.com/pt/paises",
-      ja: "https://fineartfree.com/ja/countries",
-    },
-  },
-  openGraph: {
+export async function generateMetadata({ searchParams }: CountriesPageProps): Promise<Metadata> {
+  const { page } = await searchParams;
+  return topicsCountriesPageMetadata({
+    canonicalPath: "/countries",
+    kind: "countries",
+    title: "Art by Country — Free Public Domain Downloads | Fine Art Free",
+    description: "Browse public domain art by country of origin. French, Dutch, Italian, German paintings and more — all free to download.",
+    page,
+    openGraph: {
     title: "Art by Country — Free Public Domain Downloads | Fine Art Free",
     description:
       "Browse public domain art by country of origin. French, Dutch, Italian, German paintings and more — all free to download.",
   },
-};
+  });
+}
+
 
 const EXCLUDED_WORDS = ["museum", "gallery", "institute", "collection", "university", "library", "foundation", "society", "academy"];
 

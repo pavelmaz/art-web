@@ -13,6 +13,9 @@ export const metadata: Metadata = {
   title: "Fine Art Free — Download 500,000+ Public Domain Artworks",
   description:
     "Browse and download 500,000+ classic paintings, prints and illustrations free. Public domain art from the world's top museums. Free for personal and commercial use.",
+  alternates: {
+    canonical: "https://fineartfree.com",
+  },
   openGraph: {
     title: "Fine Art Free — Download 500,000+ Public Domain Artworks",
     description:

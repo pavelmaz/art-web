@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { topicsCountriesPageMetadata } from "@/lib/topics-countries-seo";
 import { notFound } from "next/navigation";
 
 import { ArtworkGrid } from "@/components/ArtworkGrid";
@@ -42,8 +43,9 @@ function capitalize(s: string): string {
     .join(" ");
 }
 
-export async function generateMetadata({ params }: TopicPageProps): Promise<Metadata> {
+export async function generateMetadata({ params, searchParams }: TopicPageProps): Promise<Metadata> {
   const { tag: slug } = await params;
+  const { page } = await searchParams;
   const tag = decodeURIComponent(slug).replace(/-/g, " ");
   const capitalizedTag = capitalize(tag);
 
@@ -61,23 +63,18 @@ export async function generateMetadata({ params }: TopicPageProps): Promise<Meta
   const title = `${capitalizedTag} — Pinturas de Domínio Público Grátis | Fine Art Free`;
   const description = `Explore ${totalCount} obras de arte em domínio público sobre «${tag}» em alta resolução, grátis para baixar.`;
 
-  return {
+  return topicsCountriesPageMetadata({
+    canonicalPath: `/pt/temas/${slug}`,
+    kind: "topics",
+    slug,
     title,
     description,
-    alternates: {
-      canonical: absoluteUrl(`/pt/temas/${slug}`),
-      languages: {
-        en: absoluteUrl(`/topics/${slug}`),
-        es: absoluteUrl(`/es/temas/${slug}`),
-        pt: absoluteUrl(`/pt/temas/${slug}`),
-        ja: absoluteUrl(`/ja/topics/${slug}`),
-      },
-    },
+    page,
     openGraph: {
       title,
       description,
     },
-  };
+  });
 }
 
 export default async function TopicPagePt({ params, searchParams }: TopicPageProps) {

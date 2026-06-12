@@ -1,5 +1,6 @@
 import { buildHubLanguageAlternates, canonicalHubUrl } from "@/lib/locale-routes";
 import type { Metadata } from "next";
+import { hubListPageMetadata } from "@/lib/list-page-metadata";
 
 import { ArtworkGrid } from "@/components/ArtworkGrid";
 import { Pagination } from "@/components/Pagination";
@@ -10,20 +11,23 @@ import type { Artwork } from "@/types/artwork";
 
 export const revalidate = 86400;
 
-export const metadata: Metadata = {
-  title: { absolute: "Alle Kunstwerke erkunden — Kostenlose gemeinfreie Kunst | Fine Art Free" },
-  description:
-    "Laden Sie 72.000+ gemeinfreie Kunstwerke in hoher Auflösung herunter. Klassische Gemälde, Drucke und Illustrationen gratis für jede Nutzung.",
-  alternates: {
-    canonical: canonicalHubUrl("de", "artworks"),
-    languages: buildHubLanguageAlternates("artworks"),
-  },
-  openGraph: {
+export async function generateMetadata({ searchParams }: ArtworksPageProps): Promise<Metadata> {
+  const { page, q } = await searchParams;
+  return hubListPageMetadata({
+    canonicalPath: "/de/artworks",
+    hub: "artworks",
+    title: { absolute: "Alle Kunstwerke erkunden — Kostenlose gemeinfreie Kunst | Fine Art Free" },
+    description: "Laden Sie 72.000+ gemeinfreie Kunstwerke in hoher Auflösung herunter. Klassische Gemälde, Drucke und Illustrationen gratis für jede Nutzung.",
+    page,
+    q,
+    openGraph: {
     title: "Alle Kunstwerke erkunden — Kostenlose gemeinfreie Kunst | Fine Art Free",
     description:
       "Laden Sie 72.000+ gemeinfreie Kunstwerke in hoher Auflösung herunter. Klassische Gemälde, Drucke und Illustrationen gratis für jede Nutzung.",
   },
-};
+  });
+}
+
 
 function toImageUrl(imageId: string | null): string {
   if (!imageId) return "";

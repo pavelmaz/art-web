@@ -1,5 +1,6 @@
 import { buildHubLanguageAlternates, canonicalHubUrl } from "@/lib/locale-routes";
 import type { Metadata } from "next";
+import { hubListPageMetadata } from "@/lib/list-page-metadata";
 
 import { BrowseHubGrid } from "@/components/BrowseHubGrid";
 import { Pagination } from "@/components/Pagination";
@@ -9,20 +10,22 @@ import { absoluteUrl, slugify } from "@/lib/utils";
 
 export const revalidate = 86400;
 
-export const metadata: Metadata = {
-  title: { absolute: "Künstler — Vollständige Werke kostenlos | Fine Art Free" },
-  description:
-    "Gemeinfreie Kunst nach Künstler. Monet, Rembrandt, Van Gogh, Dürer und Hunderte mehr — kostenlos zum Download.",
-  alternates: {
-    canonical: canonicalHubUrl("de", "artists"),
-    languages: buildHubLanguageAlternates("artists"),
-  },
-  openGraph: {
+export async function generateMetadata({ searchParams }: ArtistsPageProps): Promise<Metadata> {
+  const { page } = await searchParams;
+  return hubListPageMetadata({
+    canonicalPath: "/de/artists",
+    hub: "artists",
+    title: { absolute: "Künstler — Vollständige Werke kostenlos | Fine Art Free" },
+    description: "Gemeinfreie Kunst nach Künstler. Monet, Rembrandt, Van Gogh, Dürer und Hunderte mehr — kostenlos zum Download.",
+    page,
+    openGraph: {
     title: "Künstler — Vollständige Werke kostenlos | Fine Art Free",
     description:
       "Gemeinfreie Kunst nach Künstler. Monet, Rembrandt, Van Gogh, Dürer und Hunderte mehr — kostenlos zum Download.",
   },
-};
+  });
+}
+
 
 type ArtistsPageProps = {
   searchParams: Promise<{ page?: string }>;

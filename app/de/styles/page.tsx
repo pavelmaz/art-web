@@ -1,5 +1,6 @@
 import { buildHubLanguageAlternates, canonicalHubUrl } from "@/lib/locale-routes";
 import type { Metadata } from "next";
+import { hubListPageMetadata } from "@/lib/list-page-metadata";
 
 import { BrowseHubGrid, type BrowseHubItem } from "@/components/BrowseHubGrid";
 import { Pagination } from "@/components/Pagination";
@@ -10,20 +11,22 @@ import { absoluteUrl } from "@/lib/utils";
 
 export const revalidate = 86400;
 
-export const metadata: Metadata = {
-  title: { absolute: "Kunststile und Bewegungen — Kostenloser Download | Fine Art Free" },
-  description:
-    "Gemeinfreie Kunst nach Stil. Barock, Impressionismus, Goldenes Zeitalter, Renaissance und mehr — kostenlos zum Download.",
-  alternates: {
-    canonical: canonicalHubUrl("de", "styles"),
-    languages: buildHubLanguageAlternates("styles"),
-  },
-  openGraph: {
+export async function generateMetadata({ searchParams }: StylesPageProps): Promise<Metadata> {
+  const { page } = await searchParams;
+  return hubListPageMetadata({
+    canonicalPath: "/de/styles",
+    hub: "styles",
+    title: { absolute: "Kunststile und Bewegungen — Kostenloser Download | Fine Art Free" },
+    description: "Gemeinfreie Kunst nach Stil. Barock, Impressionismus, Goldenes Zeitalter, Renaissance und mehr — kostenlos zum Download.",
+    page,
+    openGraph: {
     title: "Kunststile und Bewegungen — Kostenloser Download | Fine Art Free",
     description:
       "Gemeinfreie Kunst nach Stil. Barock, Impressionismus, Goldenes Zeitalter, Renaissance und mehr — kostenlos zum Download.",
   },
-};
+  });
+}
+
 
 type StylesPageProps = {
   searchParams: Promise<{ page?: string }>;

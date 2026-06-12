@@ -4,26 +4,29 @@ import { ArtworkGrid } from "@/components/ArtworkGrid";
 import { Pagination } from "@/components/Pagination";
 import { getCachedArtworksBrowseSlice, getCachedArtworksSearchResults } from "@/lib/cached-artworks-page";
 import { getPaginationParams, getTotalPages } from "@/lib/pagination";
-import { buildHubLanguageAlternates } from "@/lib/locale-routes";
+import { hubListPageMetadata } from "@/lib/list-page-metadata";
 import { absoluteUrl } from "@/lib/utils";
 import type { Artwork } from "@/types/artwork";
 
 export const revalidate = 86400;
 
-export const metadata: Metadata = {
-  title: "Explorar Todas las Obras — Arte de Dominio Público Gratis | Fine Art Free",
-  description:
-    "Descarga 72.000+ obras de arte de dominio público en alta resolución. Pinturas clásicas, grabados e ilustraciones gratis para cualquier uso.",
-  alternates: {
-    canonical: absoluteUrl("/es/obras"),
-    languages: buildHubLanguageAlternates("artworks"),
-  },
-  openGraph: {
+export async function generateMetadata({ searchParams }: ArtworksPageProps): Promise<Metadata> {
+  const { page, q } = await searchParams;
+  return hubListPageMetadata({
+    canonicalPath: "/es/obras",
+    hub: "artworks",
+    title: "Explorar Todas las Obras — Arte de Dominio Público Gratis | Fine Art Free",
+    description: "Descarga 72.000+ obras de arte de dominio público en alta resolución. Pinturas clásicas, grabados e ilustraciones gratis para cualquier uso.",
+    page,
+    q,
+    openGraph: {
     title: "Explorar Todas las Obras — Arte de Dominio Público Gratis | Fine Art Free",
     description:
       "Descarga 72.000+ obras de arte de dominio público en alta resolución. Pinturas clásicas, grabados e ilustraciones gratis para cualquier uso.",
   },
-};
+  });
+}
+
 
 function toImageUrl(imageId: string | null): string {
   if (!imageId) return "";

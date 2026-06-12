@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { topicsCountriesPageMetadata } from "@/lib/topics-countries-seo";
 import { notFound } from "next/navigation";
 
 import { ArtworkGrid } from "@/components/ArtworkGrid";
@@ -42,8 +43,9 @@ function unslugify(slug: string): string {
     .join(" ");
 }
 
-export async function generateMetadata({ params }: CountryPageProps): Promise<Metadata> {
+export async function generateMetadata({ params, searchParams }: CountryPageProps): Promise<Metadata> {
   const { country: slug } = await params;
+  const { page } = await searchParams;
   const countryName = unslugify(decodeURIComponent(slug));
 
   const countQuery = await supabase
@@ -60,23 +62,18 @@ export async function generateMetadata({ params }: CountryPageProps): Promise<Me
   const title = `${countryName} — Pinturas de Dominio Público Gratis | Fine Art Free`;
   const description = `Explora ${totalCount} obras de arte de dominio público de ${countryName} en alta resolución, gratis para descargar.`;
 
-  return {
+  return topicsCountriesPageMetadata({
+    canonicalPath: `/es/paises/${slug}`,
+    kind: "countries",
+    slug,
     title,
     description,
-    alternates: {
-      canonical: absoluteUrl(`/es/paises/${slug}`),
-      languages: {
-        en: absoluteUrl(`/countries/${slug}`),
-        es: absoluteUrl(`/es/paises/${slug}`),
-        pt: absoluteUrl(`/pt/paises/${slug}`),
-        ja: absoluteUrl(`/ja/countries/${slug}`),
-      },
-    },
+    page,
     openGraph: {
       title,
       description,
     },
-  };
+  });
 }
 
 export default async function CountryPageEs({ params, searchParams }: CountryPageProps) {

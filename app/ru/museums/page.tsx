@@ -1,5 +1,6 @@
 import { buildHubLanguageAlternates, canonicalHubUrl } from "@/lib/locale-routes";
 import type { Metadata } from "next";
+import { hubListPageMetadata } from "@/lib/list-page-metadata";
 
 import { BrowseHubGrid } from "@/components/BrowseHubGrid";
 import { Pagination } from "@/components/Pagination";
@@ -9,20 +10,22 @@ import { absoluteUrl, slugify } from "@/lib/utils";
 
 export const revalidate = 86400;
 
-export const metadata: Metadata = {
-  title: { absolute: "Коллекции музеев — Бесплатная загрузка | Fine Art Free" },
-  description:
-    "Искусство по музеям. Прадо, Рейксмузеум, MFA Бостон, National Gallery и другие — бесплатно.",
-  alternates: {
-    canonical: canonicalHubUrl("ru", "museums"),
-    languages: buildHubLanguageAlternates("museums"),
-  },
-  openGraph: {
+export async function generateMetadata({ searchParams }: MuseumsPageProps): Promise<Metadata> {
+  const { page } = await searchParams;
+  return hubListPageMetadata({
+    canonicalPath: "/ru/museums",
+    hub: "museums",
+    title: { absolute: "Коллекции музеев — Бесплатная загрузка | Fine Art Free" },
+    description: "Искусство по музеям. Прадо, Рейксмузеум, MFA Бостон, National Gallery и другие — бесплатно.",
+    page,
+    openGraph: {
     title: "Коллекции музеев — Бесплатная загрузка | Fine Art Free",
     description:
       "Искусство по музеям. Прадо, Рейксмузеум, MFA Бостон, National Gallery и другие — бесплатно.",
   },
-};
+  });
+}
+
 
 type MuseumsPageProps = {
   searchParams: Promise<{ page?: string }>;

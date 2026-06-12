@@ -1,5 +1,6 @@
 import { buildStyleLanguageAlternates, localePath } from "@/lib/locale-routes";
 import type { Metadata } from "next";
+import { paginatedAlternates } from "@/lib/list-page-metadata";
 import { notFound } from "next/navigation";
 
 import { ArtworkGrid } from "@/components/ArtworkGrid";
@@ -86,8 +87,9 @@ async function getStyleByLocalizedSlug(slug: string): Promise<StyleRow | null> {
   return null;
 }
 
-export async function generateMetadata({ params }: StylePageProps): Promise<Metadata> {
+export async function generateMetadata({ params, searchParams }: StylePageProps): Promise<Metadata> {
   const { slug } = await params;
+  const { page } = await searchParams;
   const style = await getStyleByLocalizedSlug(slug);
   const englishName = style?.name ?? unslugifyStyle(slug);
   const displayName = style?.name_de?.trim() || englishName;
@@ -114,10 +116,7 @@ export async function generateMetadata({ params }: StylePageProps): Promise<Meta
   return {
     title: { absolute: title },
     description,
-    alternates: {
-      canonical: `https://fineartfree.com${localePath("de", "styles")}/${linkSlug}`,
-      languages: buildStyleLanguageAlternates(style?.slug || slug),
-    },
+    alternates: paginatedAlternates(`${localePath("de", "styles")}/${linkSlug}`, page, buildStyleLanguageAlternates(style?.slug || slug)),
     openGraph: { title, description },
   };
 }

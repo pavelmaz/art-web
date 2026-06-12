@@ -4,7 +4,7 @@ import { BrowseHubGrid, type BrowseHubItem } from "@/components/BrowseHubGrid";
 import { Pagination } from "@/components/Pagination";
 import { getCachedStylesHubData } from "@/lib/cached-hub-data";
 import { getPaginationParams, getTotalPages } from "@/lib/pagination";
-import { buildHubLanguageAlternates } from "@/lib/locale-routes";
+import { hubListPageMetadata } from "@/lib/list-page-metadata";
 import { supabase } from "@/lib/supabase";
 import { absoluteUrl } from "@/lib/utils";
 import { getT } from "@/lib/translations";
@@ -13,20 +13,22 @@ export const revalidate = 86400;
 
 const t = getT("ja");
 
-export const metadata: Metadata = {
-  title: "スタイル・美術運動 — パブリックドメイン無料 | Fine Art Free",
-  description:
-    "バロック、印象派、オランダ黄金時代、ルネサンスなど、スタイル別にパブリックドメインの名作を無料で高解像度ダウンロード。",
-  alternates: {
-    canonical: absoluteUrl("/ja/styles"),
-    languages: buildHubLanguageAlternates("styles"),
-  },
-  openGraph: {
+export async function generateMetadata({ searchParams }: StylesPageProps): Promise<Metadata> {
+  const { page } = await searchParams;
+  return hubListPageMetadata({
+    canonicalPath: "/ja/styles",
+    hub: "styles",
+    title: "スタイル・美術運動 — パブリックドメイン無料 | Fine Art Free",
+    description: "バロック、印象派、オランダ黄金時代、ルネサンスなど、スタイル別にパブリックドメインの名作を無料で高解像度ダウンロード。",
+    page,
+    openGraph: {
     title: "スタイル・美術運動 — パブリックドメイン無料 | Fine Art Free",
     description:
       "バロック、印象派、オランダ黄金時代、ルネサンスなど、スタイル別にパブリックドメインの名作を無料で高解像度ダウンロード。",
   },
-};
+  });
+}
+
 
 type StylesPageProps = {
   searchParams: Promise<{ page?: string }>;

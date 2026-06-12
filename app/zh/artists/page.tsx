@@ -1,5 +1,6 @@
 import { buildHubLanguageAlternates, canonicalHubUrl } from "@/lib/locale-routes";
 import type { Metadata } from "next";
+import { hubListPageMetadata } from "@/lib/list-page-metadata";
 
 import { BrowseHubGrid } from "@/components/BrowseHubGrid";
 import { Pagination } from "@/components/Pagination";
@@ -9,20 +10,22 @@ import { absoluteUrl, slugify } from "@/lib/utils";
 
 export const revalidate = 86400;
 
-export const metadata: Metadata = {
-  title: { absolute: "艺术家 — 全集免费下载 | Fine Art Free" },
-  description:
-    "按艺术家浏览公共领域艺术。莫奈、伦勃朗、梵高、丢勒等数百位 — 免费下载。",
-  alternates: {
-    canonical: canonicalHubUrl("zh", "artists"),
-    languages: buildHubLanguageAlternates("artists"),
-  },
-  openGraph: {
+export async function generateMetadata({ searchParams }: ArtistsPageProps): Promise<Metadata> {
+  const { page } = await searchParams;
+  return hubListPageMetadata({
+    canonicalPath: "/zh/artists",
+    hub: "artists",
+    title: { absolute: "艺术家 — 全集免费下载 | Fine Art Free" },
+    description: "按艺术家浏览公共领域艺术。莫奈、伦勃朗、梵高、丢勒等数百位 — 免费下载。",
+    page,
+    openGraph: {
     title: "艺术家 — 全集免费下载 | Fine Art Free",
     description:
       "按艺术家浏览公共领域艺术。莫奈、伦勃朗、梵高、丢勒等数百位 — 免费下载。",
   },
-};
+  });
+}
+
 
 type ArtistsPageProps = {
   searchParams: Promise<{ page?: string }>;

@@ -1,5 +1,6 @@
 import { buildHubLanguageAlternates, canonicalHubUrl } from "@/lib/locale-routes";
 import type { Metadata } from "next";
+import { hubListPageMetadata } from "@/lib/list-page-metadata";
 
 import { BrowseHubGrid } from "@/components/BrowseHubGrid";
 import { Pagination } from "@/components/Pagination";
@@ -9,20 +10,22 @@ import { absoluteUrl, slugify } from "@/lib/utils";
 
 export const revalidate = 86400;
 
-export const metadata: Metadata = {
-  title: { absolute: "Художники — Все работы бесплатно | Fine Art Free" },
-  description:
-    "Искусство по художникам. Моне, Рембрандт, Ван Гог, Дюрер и сотни других — бесплатная загрузка.",
-  alternates: {
-    canonical: canonicalHubUrl("ru", "artists"),
-    languages: buildHubLanguageAlternates("artists"),
-  },
-  openGraph: {
+export async function generateMetadata({ searchParams }: ArtistsPageProps): Promise<Metadata> {
+  const { page } = await searchParams;
+  return hubListPageMetadata({
+    canonicalPath: "/ru/artists",
+    hub: "artists",
+    title: { absolute: "Художники — Все работы бесплатно | Fine Art Free" },
+    description: "Искусство по художникам. Моне, Рембрандт, Ван Гог, Дюрер и сотни других — бесплатная загрузка.",
+    page,
+    openGraph: {
     title: "Художники — Все работы бесплатно | Fine Art Free",
     description:
       "Искусство по художникам. Моне, Рембрандт, Ван Гог, Дюрер и сотни других — бесплатная загрузка.",
   },
-};
+  });
+}
+
 
 type ArtistsPageProps = {
   searchParams: Promise<{ page?: string }>;

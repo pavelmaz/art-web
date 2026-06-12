@@ -1,5 +1,6 @@
 import { buildHubLanguageAlternates, canonicalHubUrl } from "@/lib/locale-routes";
 import type { Metadata } from "next";
+import { hubListPageMetadata } from "@/lib/list-page-metadata";
 
 import { BrowseHubGrid } from "@/components/BrowseHubGrid";
 import { Pagination } from "@/components/Pagination";
@@ -10,20 +11,22 @@ import { absoluteUrl } from "@/lib/utils";
 
 export const revalidate = 86400;
 
-export const metadata: Metadata = {
-  title: { absolute: "Genres artistiques — Téléchargement gratuit | Fine Art Free" },
-  description:
-    "Art par genre. Paysage, portrait, nature morte, religieux et plus — gratuit en haute résolution.",
-  alternates: {
-    canonical: canonicalHubUrl("fr", "genres"),
-    languages: buildHubLanguageAlternates("genres"),
-  },
-  openGraph: {
+export async function generateMetadata({ searchParams }: GenresPageProps): Promise<Metadata> {
+  const { page } = await searchParams;
+  return hubListPageMetadata({
+    canonicalPath: "/fr/genres",
+    hub: "genres",
+    title: { absolute: "Genres artistiques — Téléchargement gratuit | Fine Art Free" },
+    description: "Art par genre. Paysage, portrait, nature morte, religieux et plus — gratuit en haute résolution.",
+    page,
+    openGraph: {
     title: "Genres artistiques — Téléchargement gratuit | Fine Art Free",
     description:
       "Art par genre. Paysage, portrait, nature morte, religieux et plus — gratuit en haute résolution.",
   },
-};
+  });
+}
+
 
 type GenresPageProps = {
   searchParams: Promise<{ page?: string }>;

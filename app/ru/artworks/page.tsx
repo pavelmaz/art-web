@@ -1,5 +1,6 @@
 import { buildHubLanguageAlternates, canonicalHubUrl } from "@/lib/locale-routes";
 import type { Metadata } from "next";
+import { hubListPageMetadata } from "@/lib/list-page-metadata";
 
 import { ArtworkGrid } from "@/components/ArtworkGrid";
 import { Pagination } from "@/components/Pagination";
@@ -10,20 +11,23 @@ import type { Artwork } from "@/types/artwork";
 
 export const revalidate = 86400;
 
-export const metadata: Metadata = {
-  title: { absolute: "Все произведения — Бесплатное искусство общественного достояния | Fine Art Free" },
-  description:
-    "Скачайте 72 000+ произведений общественного достояния в высоком разрешении. Классическая живопись, гравюры и иллюстрации бесплатно.",
-  alternates: {
-    canonical: canonicalHubUrl("ru", "artworks"),
-    languages: buildHubLanguageAlternates("artworks"),
-  },
-  openGraph: {
+export async function generateMetadata({ searchParams }: ArtworksPageProps): Promise<Metadata> {
+  const { page, q } = await searchParams;
+  return hubListPageMetadata({
+    canonicalPath: "/ru/artworks",
+    hub: "artworks",
+    title: { absolute: "Все произведения — Бесплатное искусство общественного достояния | Fine Art Free" },
+    description: "Скачайте 72 000+ произведений общественного достояния в высоком разрешении. Классическая живопись, гравюры и иллюстрации бесплатно.",
+    page,
+    q,
+    openGraph: {
     title: "Все произведения — Бесплатное искусство общественного достояния | Fine Art Free",
     description:
       "Скачайте 72 000+ произведений общественного достояния в высоком разрешении. Классическая живопись, гравюры и иллюстрации бесплатно.",
   },
-};
+  });
+}
+
 
 function toImageUrl(imageId: string | null): string {
   if (!imageId) return "";

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { paginatedAlternates } from "@/lib/list-page-metadata";
 import { notFound } from "next/navigation";
 
 import { ArtworkGrid } from "@/components/ArtworkGrid";
@@ -69,8 +70,9 @@ function toImageUrl(imageId: string | null): string {
   return `https://www.artic.edu/iiif/2/${imageId}/full/400,/0/default.jpg`;
 }
 
-export async function generateMetadata({ params }: GenrePageProps): Promise<Metadata> {
+export async function generateMetadata({ params, searchParams }: GenrePageProps): Promise<Metadata> {
   const { slug } = await params;
+  const { page } = await searchParams;
   const genre = await getGenreByLocalizedSlug(slug);
   if (!genre) notFound();
 
@@ -94,10 +96,7 @@ export async function generateMetadata({ params }: GenrePageProps): Promise<Meta
   return {
     title,
     description,
-    alternates: {
-      canonical: absoluteUrl(`/es/generos/${esSlug}`),
-      languages: buildGenreLanguageAlternates(genre.slug),
-    },
+    alternates: paginatedAlternates(`/es/generos/${esSlug}`, page, buildGenreLanguageAlternates(genre.slug)),
     openGraph: { title, description },
   };
 }

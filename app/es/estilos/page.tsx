@@ -5,25 +5,27 @@ import { Pagination } from "@/components/Pagination";
 import { getCachedStylesHubData } from "@/lib/cached-hub-data";
 import { getPaginationParams, getTotalPages } from "@/lib/pagination";
 import { supabase } from "@/lib/supabase";
-import { buildHubLanguageAlternates } from "@/lib/locale-routes";
+import { hubListPageMetadata } from "@/lib/list-page-metadata";
 import { absoluteUrl } from "@/lib/utils";
 
 export const revalidate = 86400;
 
-export const metadata: Metadata = {
-  title: "Movimientos y Estilos Artísticos — Descarga Gratuita | Fine Art Free",
-  description:
-    "Explora arte de dominio público por movimiento. Barroco, Impresionismo, Siglo de Oro Holandés, Renacimiento y más — gratis para descargar.",
-  alternates: {
-    canonical: absoluteUrl("/es/estilos"),
-    languages: buildHubLanguageAlternates("styles"),
-  },
-  openGraph: {
+export async function generateMetadata({ searchParams }: StylesPageProps): Promise<Metadata> {
+  const { page } = await searchParams;
+  return hubListPageMetadata({
+    canonicalPath: "/es/estilos",
+    hub: "styles",
+    title: "Movimientos y Estilos Artísticos — Descarga Gratuita | Fine Art Free",
+    description: "Explora arte de dominio público por movimiento. Barroco, Impresionismo, Siglo de Oro Holandés, Renacimiento y más — gratis para descargar.",
+    page,
+    openGraph: {
     title: "Movimientos y Estilos Artísticos — Descarga Gratuita | Fine Art Free",
     description:
       "Explora arte de dominio público por movimiento. Barroco, Impresionismo, Siglo de Oro Holandés, Renacimiento y más — gratis para descargar.",
   },
-};
+  });
+}
+
 
 type StylesPageProps = {
   searchParams: Promise<{ page?: string }>;

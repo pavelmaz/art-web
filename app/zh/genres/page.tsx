@@ -1,5 +1,6 @@
 import { buildHubLanguageAlternates, canonicalHubUrl } from "@/lib/locale-routes";
 import type { Metadata } from "next";
+import { hubListPageMetadata } from "@/lib/list-page-metadata";
 
 import { BrowseHubGrid } from "@/components/BrowseHubGrid";
 import { Pagination } from "@/components/Pagination";
@@ -10,20 +11,22 @@ import { absoluteUrl } from "@/lib/utils";
 
 export const revalidate = 86400;
 
-export const metadata: Metadata = {
-  title: { absolute: "艺术流派 — 免费下载 | Fine Art Free" },
-  description:
-    "按流派浏览。风景、肖像、静物、宗教等 — 高分辨率免费下载。",
-  alternates: {
-    canonical: canonicalHubUrl("zh", "genres"),
-    languages: buildHubLanguageAlternates("genres"),
-  },
-  openGraph: {
+export async function generateMetadata({ searchParams }: GenresPageProps): Promise<Metadata> {
+  const { page } = await searchParams;
+  return hubListPageMetadata({
+    canonicalPath: "/zh/genres",
+    hub: "genres",
+    title: { absolute: "艺术流派 — 免费下载 | Fine Art Free" },
+    description: "按流派浏览。风景、肖像、静物、宗教等 — 高分辨率免费下载。",
+    page,
+    openGraph: {
     title: "艺术流派 — 免费下载 | Fine Art Free",
     description:
       "按流派浏览。风景、肖像、静物、宗教等 — 高分辨率免费下载。",
   },
-};
+  });
+}
+
 
 type GenresPageProps = {
   searchParams: Promise<{ page?: string }>;

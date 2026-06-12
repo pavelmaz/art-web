@@ -81,7 +81,11 @@ export async function middleware(request: NextRequest) {
     !pathname.startsWith("/api") &&
     !pathname.includes(".")
   ) {
-    response.headers.set("Link", buildHreflangLinkHeader(pathname));
+    const page = request.nextUrl.searchParams.get("page") ?? undefined;
+    const linkHeader = buildHreflangLinkHeader(pathname, page);
+    if (linkHeader) {
+      response.headers.set("Link", linkHeader);
+    }
   }
 
   return response;

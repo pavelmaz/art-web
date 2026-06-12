@@ -5,25 +5,27 @@ import { Pagination } from "@/components/Pagination";
 import { getCachedGenreHub } from "@/lib/cached-hub-data";
 import { getPaginationParams, getTotalPages } from "@/lib/pagination";
 import { supabase } from "@/lib/supabase";
-import { buildHubLanguageAlternates } from "@/lib/locale-routes";
+import { hubListPageMetadata } from "@/lib/list-page-metadata";
 import { absoluteUrl } from "@/lib/utils";
 
 export const revalidate = 86400;
 
-export const metadata: Metadata = {
-  title: "Géneros Artísticos — Descarga Gratuita Dominio Público | Fine Art Free",
-  description:
-    "Explora arte de dominio público por género. Paisaje, Retrato, Naturaleza Muerta, Religioso y más — gratis para descargar en alta resolución.",
-  alternates: {
-    canonical: absoluteUrl("/es/generos"),
-    languages: buildHubLanguageAlternates("genres"),
-  },
-  openGraph: {
+export async function generateMetadata({ searchParams }: GenresPageProps): Promise<Metadata> {
+  const { page } = await searchParams;
+  return hubListPageMetadata({
+    canonicalPath: "/es/generos",
+    hub: "genres",
+    title: "Géneros Artísticos — Descarga Gratuita Dominio Público | Fine Art Free",
+    description: "Explora arte de dominio público por género. Paisaje, Retrato, Naturaleza Muerta, Religioso y más — gratis para descargar en alta resolución.",
+    page,
+    openGraph: {
     title: "Géneros Artísticos — Descarga Gratuita Dominio Público | Fine Art Free",
     description:
       "Explora arte de dominio público por género. Paisaje, Retrato, Naturaleza Muerta, Religioso y más — gratis para descargar en alta resolución.",
   },
-};
+  });
+}
+
 
 type GenresPageProps = {
   searchParams: Promise<{ page?: string }>;

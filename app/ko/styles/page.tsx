@@ -1,5 +1,6 @@
 import { buildHubLanguageAlternates, canonicalHubUrl } from "@/lib/locale-routes";
 import type { Metadata } from "next";
+import { hubListPageMetadata } from "@/lib/list-page-metadata";
 
 import { BrowseHubGrid, type BrowseHubItem } from "@/components/BrowseHubGrid";
 import { Pagination } from "@/components/Pagination";
@@ -10,20 +11,22 @@ import { absoluteUrl } from "@/lib/utils";
 
 export const revalidate = 86400;
 
-export const metadata: Metadata = {
-  title: { absolute: "예술 스타일과 운동 — 무료 다운로드 | Fine Art Free" },
-  description:
-    "스타일별 예술. 바로크, 인상주의, 네덜란드 황금시대, 르네상스 등 — 무료 다운로드.",
-  alternates: {
-    canonical: canonicalHubUrl("ko", "styles"),
-    languages: buildHubLanguageAlternates("styles"),
-  },
-  openGraph: {
+export async function generateMetadata({ searchParams }: StylesPageProps): Promise<Metadata> {
+  const { page } = await searchParams;
+  return hubListPageMetadata({
+    canonicalPath: "/ko/styles",
+    hub: "styles",
+    title: { absolute: "예술 스타일과 운동 — 무료 다운로드 | Fine Art Free" },
+    description: "스타일별 예술. 바로크, 인상주의, 네덜란드 황금시대, 르네상스 등 — 무료 다운로드.",
+    page,
+    openGraph: {
     title: "예술 스타일과 운동 — 무료 다운로드 | Fine Art Free",
     description:
       "스타일별 예술. 바로크, 인상주의, 네덜란드 황금시대, 르네상스 등 — 무료 다운로드.",
   },
-};
+  });
+}
+
 
 type StylesPageProps = {
   searchParams: Promise<{ page?: string }>;

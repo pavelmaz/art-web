@@ -3,26 +3,28 @@ import type { Metadata } from "next";
 import { BrowseHubGrid } from "@/components/BrowseHubGrid";
 import { Pagination } from "@/components/Pagination";
 import { getCachedMuseumHub } from "@/lib/cached-hub-data";
-import { buildHubLanguageAlternates } from "@/lib/locale-routes";
+import { hubListPageMetadata } from "@/lib/list-page-metadata";
 import { getPaginationParams, getTotalPages } from "@/lib/pagination";
 import { absoluteUrl, slugify } from "@/lib/utils";
 
 export const revalidate = 86400;
 
-export const metadata: Metadata = {
-  title: "Colecciones de Museos — Arte Gratis para Descargar | Fine Art Free",
-  description:
-    "Explora arte de dominio público por museo. Prado, Rijksmuseum, MFA Boston, National Gallery y más — gratis para descargar.",
-  alternates: {
-    canonical: absoluteUrl("/es/museos"),
-    languages: buildHubLanguageAlternates("museums"),
-  },
-  openGraph: {
+export async function generateMetadata({ searchParams }: MuseumsPageProps): Promise<Metadata> {
+  const { page } = await searchParams;
+  return hubListPageMetadata({
+    canonicalPath: "/es/museos",
+    hub: "museums",
+    title: "Colecciones de Museos — Arte Gratis para Descargar | Fine Art Free",
+    description: "Explora arte de dominio público por museo. Prado, Rijksmuseum, MFA Boston, National Gallery y más — gratis para descargar.",
+    page,
+    openGraph: {
     title: "Colecciones de Museos — Arte Gratis para Descargar | Fine Art Free",
     description:
       "Explora arte de dominio público por museo. Prado, Rijksmuseum, MFA Boston, National Gallery y más — gratis para descargar.",
   },
-};
+  });
+}
+
 
 type MuseumsPageProps = {
   searchParams: Promise<{ page?: string }>;

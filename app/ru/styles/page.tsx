@@ -1,5 +1,6 @@
 import { buildHubLanguageAlternates, canonicalHubUrl } from "@/lib/locale-routes";
 import type { Metadata } from "next";
+import { hubListPageMetadata } from "@/lib/list-page-metadata";
 
 import { BrowseHubGrid, type BrowseHubItem } from "@/components/BrowseHubGrid";
 import { Pagination } from "@/components/Pagination";
@@ -10,20 +11,22 @@ import { absoluteUrl } from "@/lib/utils";
 
 export const revalidate = 86400;
 
-export const metadata: Metadata = {
-  title: { absolute: "Стили и направления — Бесплатная загрузка | Fine Art Free" },
-  description:
-    "Искусство по стилям. Барокко, импрессионизм, золотой век Голландии, Ренессанс и др. — бесплатно.",
-  alternates: {
-    canonical: canonicalHubUrl("ru", "styles"),
-    languages: buildHubLanguageAlternates("styles"),
-  },
-  openGraph: {
+export async function generateMetadata({ searchParams }: StylesPageProps): Promise<Metadata> {
+  const { page } = await searchParams;
+  return hubListPageMetadata({
+    canonicalPath: "/ru/styles",
+    hub: "styles",
+    title: { absolute: "Стили и направления — Бесплатная загрузка | Fine Art Free" },
+    description: "Искусство по стилям. Барокко, импрессионизм, золотой век Голландии, Ренессанс и др. — бесплатно.",
+    page,
+    openGraph: {
     title: "Стили и направления — Бесплатная загрузка | Fine Art Free",
     description:
       "Искусство по стилям. Барокко, импрессионизм, золотой век Голландии, Ренессанс и др. — бесплатно.",
   },
-};
+  });
+}
+
 
 type StylesPageProps = {
   searchParams: Promise<{ page?: string }>;

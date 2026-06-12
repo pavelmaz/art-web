@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { topicsCountriesPageMetadata } from "@/lib/topics-countries-seo";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -9,25 +10,22 @@ import { absoluteUrl, artworkImageUrl } from "@/lib/utils";
 
 export const revalidate = 86400;
 
-export const metadata: Metadata = {
-  title: "Arte por País — Download Gratuito Domínio Público | Fine Art Free",
-  description:
-    "Explore arte de domínio público por país de origem. Pinturas francesas, holandesas, italianas, alemãs e mais — grátis para baixar.",
-  alternates: {
-    canonical: absoluteUrl("/pt/paises"),
-    languages: {
-      en: absoluteUrl("/countries"),
-      es: absoluteUrl("/es/paises"),
-      pt: absoluteUrl("/pt/paises"),
-      ja: absoluteUrl("/ja/countries"),
-    },
-  },
-  openGraph: {
+export async function generateMetadata({ searchParams }: CountriesPageProps): Promise<Metadata> {
+  const { page } = await searchParams;
+  return topicsCountriesPageMetadata({
+    canonicalPath: "/pt/paises",
+    kind: "countries",
+    title: "Arte por País — Download Gratuito Domínio Público | Fine Art Free",
+    description: "Explore arte de domínio público por país de origem. Pinturas francesas, holandesas, italianas, alemãs e mais — grátis para baixar.",
+    page,
+    openGraph: {
     title: "Arte por País — Download Gratuito Domínio Público | Fine Art Free",
     description:
       "Explore arte de domínio público por país de origem. Pinturas francesas, holandesas, italianas, alemãs e mais — grátis para baixar.",
   },
-};
+  });
+}
+
 
 const EXCLUDED_WORDS = ["museum", "gallery", "institute", "collection", "university", "library", "foundation", "society", "academy"];
 

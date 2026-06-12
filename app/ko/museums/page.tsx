@@ -1,5 +1,6 @@
 import { buildHubLanguageAlternates, canonicalHubUrl } from "@/lib/locale-routes";
 import type { Metadata } from "next";
+import { hubListPageMetadata } from "@/lib/list-page-metadata";
 
 import { BrowseHubGrid } from "@/components/BrowseHubGrid";
 import { Pagination } from "@/components/Pagination";
@@ -9,20 +10,22 @@ import { absoluteUrl, slugify } from "@/lib/utils";
 
 export const revalidate = 86400;
 
-export const metadata: Metadata = {
-  title: { absolute: "박물관 컬렉션 — 무료 다운로드 | Fine Art Free" },
-  description:
-    "박물관별 퍼블릭 도메인 예술. 프라도, 릭스뮤지엄, MFA 보스턴, 내셔널 갤러리 등 — 무료 다운로드.",
-  alternates: {
-    canonical: canonicalHubUrl("ko", "museums"),
-    languages: buildHubLanguageAlternates("museums"),
-  },
-  openGraph: {
+export async function generateMetadata({ searchParams }: MuseumsPageProps): Promise<Metadata> {
+  const { page } = await searchParams;
+  return hubListPageMetadata({
+    canonicalPath: "/ko/museums",
+    hub: "museums",
+    title: { absolute: "박물관 컬렉션 — 무료 다운로드 | Fine Art Free" },
+    description: "박물관별 퍼블릭 도메인 예술. 프라도, 릭스뮤지엄, MFA 보스턴, 내셔널 갤러리 등 — 무료 다운로드.",
+    page,
+    openGraph: {
     title: "박물관 컬렉션 — 무료 다운로드 | Fine Art Free",
     description:
       "박물관별 퍼블릭 도메인 예술. 프라도, 릭스뮤지엄, MFA 보스턴, 내셔널 갤러리 등 — 무료 다운로드.",
   },
-};
+  });
+}
+
 
 type MuseumsPageProps = {
   searchParams: Promise<{ page?: string }>;

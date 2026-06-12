@@ -4,7 +4,7 @@ import { BrowseHubGrid } from "@/components/BrowseHubGrid";
 import { Pagination } from "@/components/Pagination";
 import { getCachedMuseumHub } from "@/lib/cached-hub-data";
 import { getPaginationParams, getTotalPages } from "@/lib/pagination";
-import { buildHubLanguageAlternates } from "@/lib/locale-routes";
+import { hubListPageMetadata } from "@/lib/list-page-metadata";
 import { absoluteUrl, slugify } from "@/lib/utils";
 import { getT } from "@/lib/translations";
 
@@ -12,20 +12,22 @@ export const revalidate = 86400;
 
 const t = getT("ja");
 
-export const metadata: Metadata = {
-  title: "美術館コレクション — パブリックドメイン無料 | Fine Art Free",
-  description:
-    "プラド美術館、ライクスミュージアム、ボストン美術館、ナショナル・ギャラリーなど、世界の美術館所蔵のパブリックドメイン作品を無料ダウンロード。",
-  alternates: {
-    canonical: absoluteUrl("/ja/museums"),
-    languages: buildHubLanguageAlternates("museums"),
-  },
-  openGraph: {
+export async function generateMetadata({ searchParams }: MuseumsPageProps): Promise<Metadata> {
+  const { page } = await searchParams;
+  return hubListPageMetadata({
+    canonicalPath: "/ja/museums",
+    hub: "museums",
+    title: "美術館コレクション — パブリックドメイン無料 | Fine Art Free",
+    description: "プラド美術館、ライクスミュージアム、ボストン美術館、ナショナル・ギャラリーなど、世界の美術館所蔵のパブリックドメイン作品を無料ダウンロード。",
+    page,
+    openGraph: {
     title: "美術館コレクション — パブリックドメイン無料 | Fine Art Free",
     description:
       "プラド美術館、ライクスミュージアム、ボストン美術館、ナショナル・ギャラリーなど、世界の美術館所蔵のパブリックドメイン作品を無料ダウンロード。",
   },
-};
+  });
+}
+
 
 type MuseumsPageProps = {
   searchParams: Promise<{ page?: string }>;

@@ -4,7 +4,7 @@ import { ArtworkGrid } from "@/components/ArtworkGrid";
 import { Pagination } from "@/components/Pagination";
 import { getCachedArtworksBrowseSlice, getCachedArtworksSearchResults } from "@/lib/cached-artworks-page";
 import { getPaginationParams, getTotalPages } from "@/lib/pagination";
-import { buildHubLanguageAlternates } from "@/lib/locale-routes";
+import { hubListPageMetadata } from "@/lib/list-page-metadata";
 import { absoluteUrl } from "@/lib/utils";
 import { getT } from "@/lib/translations";
 import type { Artwork } from "@/types/artwork";
@@ -13,20 +13,23 @@ export const revalidate = 86400;
 
 const t = getT("ja");
 
-export const metadata: Metadata = {
-  title: "作品一覧 — パブリックドメイン無料ダウンロード | Fine Art Free",
-  description:
-    "7万件以上のパブリックドメイン美術作品を高解像度で無料ダウンロード。古典絵画、版画、イラストを個人・商用にご利用いただけます。",
-  alternates: {
-    canonical: absoluteUrl("/ja/artworks"),
-    languages: buildHubLanguageAlternates("artworks"),
-  },
-  openGraph: {
+export async function generateMetadata({ searchParams }: ArtworksPageProps): Promise<Metadata> {
+  const { page, q } = await searchParams;
+  return hubListPageMetadata({
+    canonicalPath: "/ja/artworks",
+    hub: "artworks",
+    title: "作品一覧 — パブリックドメイン無料ダウンロード | Fine Art Free",
+    description: "7万件以上のパブリックドメイン美術作品を高解像度で無料ダウンロード。古典絵画、版画、イラストを個人・商用にご利用いただけます。",
+    page,
+    q,
+    openGraph: {
     title: "作品一覧 — パブリックドメイン無料ダウンロード | Fine Art Free",
     description:
       "7万件以上のパブリックドメイン美術作品を高解像度で無料ダウンロード。古典絵画、版画、イラストを個人・商用にご利用いただけます。",
   },
-};
+  });
+}
+
 
 function toImageUrl(imageId: string | null): string {
   if (!imageId) return "";

@@ -1,5 +1,6 @@
 import { buildHubLanguageAlternates, canonicalHubUrl } from "@/lib/locale-routes";
 import type { Metadata } from "next";
+import { hubListPageMetadata } from "@/lib/list-page-metadata";
 
 import { BrowseHubGrid } from "@/components/BrowseHubGrid";
 import { Pagination } from "@/components/Pagination";
@@ -10,20 +11,22 @@ import { absoluteUrl } from "@/lib/utils";
 
 export const revalidate = 86400;
 
-export const metadata: Metadata = {
-  title: { absolute: "Kunstgenres — Kostenloser Download | Fine Art Free" },
-  description:
-    "Gemeinfreie Kunst nach Genre. Landschaft, Porträt, Stillleben, Religiös und mehr — kostenlos in hoher Auflösung.",
-  alternates: {
-    canonical: canonicalHubUrl("de", "genres"),
-    languages: buildHubLanguageAlternates("genres"),
-  },
-  openGraph: {
+export async function generateMetadata({ searchParams }: GenresPageProps): Promise<Metadata> {
+  const { page } = await searchParams;
+  return hubListPageMetadata({
+    canonicalPath: "/de/genres",
+    hub: "genres",
+    title: { absolute: "Kunstgenres — Kostenloser Download | Fine Art Free" },
+    description: "Gemeinfreie Kunst nach Genre. Landschaft, Porträt, Stillleben, Religiös und mehr — kostenlos in hoher Auflösung.",
+    page,
+    openGraph: {
     title: "Kunstgenres — Kostenloser Download | Fine Art Free",
     description:
       "Gemeinfreie Kunst nach Genre. Landschaft, Porträt, Stillleben, Religiös und mehr — kostenlos in hoher Auflösung.",
   },
-};
+  });
+}
+
 
 type GenresPageProps = {
   searchParams: Promise<{ page?: string }>;

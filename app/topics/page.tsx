@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { topicsCountriesPageMetadata } from "@/lib/topics-countries-seo";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -10,19 +11,22 @@ import { artworkImageUrl } from "@/lib/utils";
 
 export const revalidate = 86400;
 
-export const metadata: Metadata = {
-  title: "Art Topics — Browse by Subject | Fine Art Free",
-  description:
-    "Browse 72,000+ public domain artworks by topic. Sunset, horses, flowers, forests and hundreds more — all free to download.",
-  alternates: {
-    canonical: "https://fineartfree.com/topics",
-  },
-  openGraph: {
+export async function generateMetadata({ searchParams }: TopicsPageProps): Promise<Metadata> {
+  const { page } = await searchParams;
+  return topicsCountriesPageMetadata({
+    canonicalPath: "/topics",
+    kind: "topics",
+    title: "Art Topics — Browse by Subject | Fine Art Free",
+    description: "Browse 72,000+ public domain artworks by topic. Sunset, horses, flowers, forests and hundreds more — all free to download.",
+    page,
+    openGraph: {
     title: "Art Topics — Browse by Subject | Fine Art Free",
     description:
       "Browse 72,000+ public domain artworks by topic. Sunset, horses, flowers, forests and hundreds more — all free to download.",
   },
-};
+  });
+}
+
 
 const EXCLUDED_TAGS = new Set([
   "nature",

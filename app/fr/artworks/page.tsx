@@ -1,4 +1,4 @@
-import { buildHubLanguageAlternates } from "@/lib/locale-routes";
+import { hubListPageMetadata } from "@/lib/list-page-metadata";
 import type { Metadata } from "next";
 
 import { ArtworkGrid } from "@/components/ArtworkGrid";
@@ -10,20 +10,23 @@ import type { Artwork } from "@/types/artwork";
 
 export const revalidate = 86400;
 
-export const metadata: Metadata = {
-  title: { absolute: "Parcourir toutes les œuvres — Art du domaine public gratuit | Fine Art Free" },
-  description:
-    "Téléchargez 72 000+ œuvres du domaine public en haute résolution. Peintures classiques, gravures et illustrations gratuites pour tout usage.",
-  alternates: {
-    canonical: "https://fineartfree.com/fr/artworks",
-    languages: buildHubLanguageAlternates("artworks"),
-  },
-  openGraph: {
+export async function generateMetadata({ searchParams }: ArtworksPageProps): Promise<Metadata> {
+  const { page, q } = await searchParams;
+  return hubListPageMetadata({
+    canonicalPath: "/fr/artworks",
+    hub: "artworks",
+    title: { absolute: "Parcourir toutes les œuvres — Art du domaine public gratuit | Fine Art Free" },
+    description: "Téléchargez 72 000+ œuvres du domaine public en haute résolution. Peintures classiques, gravures et illustrations gratuites pour tout usage.",
+    page,
+    q,
+    openGraph: {
     title: "Parcourir toutes les œuvres — Art du domaine public gratuit | Fine Art Free",
     description:
       "Téléchargez 72 000+ œuvres du domaine public en haute résolution. Peintures classiques, gravures et illustrations gratuites pour tout usage.",
   },
-};
+  });
+}
+
 
 function toImageUrl(imageId: string | null): string {
   if (!imageId) return "";

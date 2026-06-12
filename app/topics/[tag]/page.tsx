@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { topicsCountriesPageMetadata } from "@/lib/topics-countries-seo";
 import { notFound } from "next/navigation";
 
 import { ArtworkGrid } from "@/components/ArtworkGrid";
@@ -42,8 +43,9 @@ function capitalize(s: string): string {
     .join(" ");
 }
 
-export async function generateMetadata({ params }: TopicPageProps): Promise<Metadata> {
+export async function generateMetadata({ params, searchParams }: TopicPageProps): Promise<Metadata> {
   const { tag: slug } = await params;
+  const { page } = await searchParams;
   const tag = decodeURIComponent(slug).replace(/-/g, " ");
   const capitalizedTag = capitalize(tag);
 
@@ -61,23 +63,18 @@ export async function generateMetadata({ params }: TopicPageProps): Promise<Meta
   const title = `${capitalizedTag} Paintings — Free Download | Fine Art Free`;
   const description = `Browse ${totalCount} public domain ${tag} paintings free to download in high resolution.`;
 
-  return {
+  return topicsCountriesPageMetadata({
+    canonicalPath: `/topics/${slug}`,
+    kind: "topics",
+    slug,
     title,
     description,
-    alternates: {
-      canonical: absoluteUrl(`/topics/${slug}`),
-      languages: {
-        en: absoluteUrl(`/topics/${slug}`),
-        es: absoluteUrl(`/es/temas/${slug}`),
-        pt: absoluteUrl(`/pt/temas/${slug}`),
-        ja: absoluteUrl(`/ja/topics/${slug}`),
-      },
-    },
+    page,
     openGraph: {
       title,
       description,
     },
-  };
+  });
 }
 
 export default async function TopicPage({ params, searchParams }: TopicPageProps) {

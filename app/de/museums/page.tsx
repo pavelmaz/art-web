@@ -1,5 +1,6 @@
 import { buildHubLanguageAlternates, canonicalHubUrl } from "@/lib/locale-routes";
 import type { Metadata } from "next";
+import { hubListPageMetadata } from "@/lib/list-page-metadata";
 
 import { BrowseHubGrid } from "@/components/BrowseHubGrid";
 import { Pagination } from "@/components/Pagination";
@@ -9,20 +10,22 @@ import { absoluteUrl, slugify } from "@/lib/utils";
 
 export const revalidate = 86400;
 
-export const metadata: Metadata = {
-  title: { absolute: "Museumssammlungen — Kostenlos herunterladen | Fine Art Free" },
-  description:
-    "Gemeinfreie Kunst nach Museum. Prado, Rijksmuseum, MFA Boston, National Gallery und mehr — kostenlos zum Download.",
-  alternates: {
-    canonical: canonicalHubUrl("de", "museums"),
-    languages: buildHubLanguageAlternates("museums"),
-  },
-  openGraph: {
+export async function generateMetadata({ searchParams }: MuseumsPageProps): Promise<Metadata> {
+  const { page } = await searchParams;
+  return hubListPageMetadata({
+    canonicalPath: "/de/museums",
+    hub: "museums",
+    title: { absolute: "Museumssammlungen — Kostenlos herunterladen | Fine Art Free" },
+    description: "Gemeinfreie Kunst nach Museum. Prado, Rijksmuseum, MFA Boston, National Gallery und mehr — kostenlos zum Download.",
+    page,
+    openGraph: {
     title: "Museumssammlungen — Kostenlos herunterladen | Fine Art Free",
     description:
       "Gemeinfreie Kunst nach Museum. Prado, Rijksmuseum, MFA Boston, National Gallery und mehr — kostenlos zum Download.",
   },
-};
+  });
+}
+
 
 type MuseumsPageProps = {
   searchParams: Promise<{ page?: string }>;

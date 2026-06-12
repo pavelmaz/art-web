@@ -1,5 +1,6 @@
 import { buildHubLanguageAlternates, canonicalHubUrl } from "@/lib/locale-routes";
 import type { Metadata } from "next";
+import { hubListPageMetadata } from "@/lib/list-page-metadata";
 
 import { BrowseHubGrid } from "@/components/BrowseHubGrid";
 import { Pagination } from "@/components/Pagination";
@@ -10,20 +11,22 @@ import { absoluteUrl } from "@/lib/utils";
 
 export const revalidate = 86400;
 
-export const metadata: Metadata = {
-  title: { absolute: "Художественные жанры — Бесплатная загрузка | Fine Art Free" },
-  description:
-    "Искусство по жанрам. Пейзаж, портрет, натюрморт, религиозное и др. — бесплатно в высоком разрешении.",
-  alternates: {
-    canonical: canonicalHubUrl("ru", "genres"),
-    languages: buildHubLanguageAlternates("genres"),
-  },
-  openGraph: {
+export async function generateMetadata({ searchParams }: GenresPageProps): Promise<Metadata> {
+  const { page } = await searchParams;
+  return hubListPageMetadata({
+    canonicalPath: "/ru/genres",
+    hub: "genres",
+    title: { absolute: "Художественные жанры — Бесплатная загрузка | Fine Art Free" },
+    description: "Искусство по жанрам. Пейзаж, портрет, натюрморт, религиозное и др. — бесплатно в высоком разрешении.",
+    page,
+    openGraph: {
     title: "Художественные жанры — Бесплатная загрузка | Fine Art Free",
     description:
       "Искусство по жанрам. Пейзаж, портрет, натюрморт, религиозное и др. — бесплатно в высоком разрешении.",
   },
-};
+  });
+}
+
 
 type GenresPageProps = {
   searchParams: Promise<{ page?: string }>;

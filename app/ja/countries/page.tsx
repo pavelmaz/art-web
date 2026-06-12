@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { topicsCountriesPageMetadata } from "@/lib/topics-countries-seo";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -12,25 +13,22 @@ export const revalidate = 86400;
 
 const t = getT("ja");
 
-export const metadata: Metadata = {
-  title: "国・地域別の美術 — パブリックドメイン無料 | Fine Art Free",
-  description:
-    "フランス、オランダ、イタリア、ドイツなど、国・地域別にパブリックドメインの絵画を無料で高解像度ダウンロード。",
-  alternates: {
-    canonical: absoluteUrl("/ja/countries"),
-    languages: {
-      en: absoluteUrl("/countries"),
-      es: absoluteUrl("/es/paises"),
-      pt: absoluteUrl("/pt/paises"),
-      ja: absoluteUrl("/ja/countries"),
-    },
-  },
-  openGraph: {
+export async function generateMetadata({ searchParams }: CountriesPageProps): Promise<Metadata> {
+  const { page } = await searchParams;
+  return topicsCountriesPageMetadata({
+    canonicalPath: "/ja/countries",
+    kind: "countries",
+    title: "国・地域別の美術 — パブリックドメイン無料 | Fine Art Free",
+    description: "フランス、オランダ、イタリア、ドイツなど、国・地域別にパブリックドメインの絵画を無料で高解像度ダウンロード。",
+    page,
+    openGraph: {
     title: "国・地域別の美術 — パブリックドメイン無料 | Fine Art Free",
     description:
       "フランス、オランダ、イタリア、ドイツなど、国・地域別にパブリックドメインの絵画を無料で高解像度ダウンロード。",
   },
-};
+  });
+}
+
 
 const EXCLUDED_WORDS = ["museum", "gallery", "institute", "collection", "university", "library", "foundation", "society", "academy"];
 

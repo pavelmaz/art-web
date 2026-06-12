@@ -3,26 +3,28 @@ import type { Metadata } from "next";
 import { BrowseHubGrid } from "@/components/BrowseHubGrid";
 import { Pagination } from "@/components/Pagination";
 import { getArtistsHubPage } from "@/lib/cached-hub-data";
-import { buildHubLanguageAlternates } from "@/lib/locale-routes";
+import { hubListPageMetadata } from "@/lib/list-page-metadata";
 import { getPaginationParams, getTotalPages } from "@/lib/pagination";
 import { absoluteUrl, slugify } from "@/lib/utils";
 
 export const revalidate = 86400;
 
-export const metadata: Metadata = {
-  title: "Artistas — Obras Completas Gratis para Descargar | Fine Art Free",
-  description:
-    "Explora obras de arte de dominio público por artista. Monet, Rembrandt, Van Gogh, Dürer y cientos más — gratis para descargar.",
-  alternates: {
-    canonical: absoluteUrl("/es/artistas"),
-    languages: buildHubLanguageAlternates("artists"),
-  },
-  openGraph: {
+export async function generateMetadata({ searchParams }: ArtistsPageProps): Promise<Metadata> {
+  const { page } = await searchParams;
+  return hubListPageMetadata({
+    canonicalPath: "/es/artistas",
+    hub: "artists",
+    title: "Artistas — Obras Completas Gratis para Descargar | Fine Art Free",
+    description: "Explora obras de arte de dominio público por artista. Monet, Rembrandt, Van Gogh, Dürer y cientos más — gratis para descargar.",
+    page,
+    openGraph: {
     title: "Artistas — Obras Completas Gratis para Descargar | Fine Art Free",
     description:
       "Explora obras de arte de dominio público por artista. Monet, Rembrandt, Van Gogh, Dürer y cientos más — gratis para descargar.",
   },
-};
+  });
+}
+
 
 type ArtistsPageProps = {
   searchParams: Promise<{ page?: string }>;

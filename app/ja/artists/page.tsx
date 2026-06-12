@@ -4,7 +4,7 @@ import { BrowseHubGrid } from "@/components/BrowseHubGrid";
 import { Pagination } from "@/components/Pagination";
 import { getArtistsHubPage } from "@/lib/cached-hub-data";
 import { getPaginationParams, getTotalPages } from "@/lib/pagination";
-import { buildHubLanguageAlternates } from "@/lib/locale-routes";
+import { hubListPageMetadata } from "@/lib/list-page-metadata";
 import { absoluteUrl, slugify } from "@/lib/utils";
 import { getT } from "@/lib/translations";
 
@@ -12,20 +12,22 @@ export const revalidate = 86400;
 
 const t = getT("ja");
 
-export const metadata: Metadata = {
-  title: "芸術家一覧 — 全作品無料ダウンロード | Fine Art Free",
-  description:
-    "モネ、レンブラント、ゴッホ、デューラーなど、パブリックドメインの名作を作家別に無料で高解像度ダウンロード。",
-  alternates: {
-    canonical: absoluteUrl("/ja/artists"),
-    languages: buildHubLanguageAlternates("artists"),
-  },
-  openGraph: {
+export async function generateMetadata({ searchParams }: ArtistsPageProps): Promise<Metadata> {
+  const { page } = await searchParams;
+  return hubListPageMetadata({
+    canonicalPath: "/ja/artists",
+    hub: "artists",
+    title: "芸術家一覧 — 全作品無料ダウンロード | Fine Art Free",
+    description: "モネ、レンブラント、ゴッホ、デューラーなど、パブリックドメインの名作を作家別に無料で高解像度ダウンロード。",
+    page,
+    openGraph: {
     title: "芸術家一覧 — 全作品無料ダウンロード | Fine Art Free",
     description:
       "モネ、レンブラント、ゴッホ、デューラーなど、パブリックドメインの名作を作家別に無料で高解像度ダウンロード。",
   },
-};
+  });
+}
+
 
 type ArtistsPageProps = {
   searchParams: Promise<{ page?: string }>;

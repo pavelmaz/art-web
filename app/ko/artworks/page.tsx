@@ -1,5 +1,6 @@
 import { buildHubLanguageAlternates, canonicalHubUrl } from "@/lib/locale-routes";
 import type { Metadata } from "next";
+import { hubListPageMetadata } from "@/lib/list-page-metadata";
 
 import { ArtworkGrid } from "@/components/ArtworkGrid";
 import { Pagination } from "@/components/Pagination";
@@ -10,20 +11,23 @@ import type { Artwork } from "@/types/artwork";
 
 export const revalidate = 86400;
 
-export const metadata: Metadata = {
-  title: { absolute: "모든 작품 탐색 — 무료 퍼블릭 도메인 아트 | Fine Art Free" },
-  description:
-    "72,000점 이상의 퍼블릭 도메인 작품을 고해상도로 다운로드하세요. 클래식 회화, 판화, 일러스트를 무료로 이용하세요.",
-  alternates: {
-    canonical: canonicalHubUrl("ko", "artworks"),
-    languages: buildHubLanguageAlternates("artworks"),
-  },
-  openGraph: {
+export async function generateMetadata({ searchParams }: ArtworksPageProps): Promise<Metadata> {
+  const { page, q } = await searchParams;
+  return hubListPageMetadata({
+    canonicalPath: "/ko/artworks",
+    hub: "artworks",
+    title: { absolute: "모든 작품 탐색 — 무료 퍼블릭 도메인 아트 | Fine Art Free" },
+    description: "72,000점 이상의 퍼블릭 도메인 작품을 고해상도로 다운로드하세요. 클래식 회화, 판화, 일러스트를 무료로 이용하세요.",
+    page,
+    q,
+    openGraph: {
     title: "모든 작품 탐색 — 무료 퍼블릭 도메인 아트 | Fine Art Free",
     description:
       "72,000점 이상의 퍼블릭 도메인 작품을 고해상도로 다운로드하세요. 클래식 회화, 판화, 일러스트를 무료로 이용하세요.",
   },
-};
+  });
+}
+
 
 function toImageUrl(imageId: string | null): string {
   if (!imageId) return "";
