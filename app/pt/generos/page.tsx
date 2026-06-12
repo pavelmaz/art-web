@@ -4,6 +4,7 @@ import { BrowseHubGrid } from "@/components/BrowseHubGrid";
 import { Pagination } from "@/components/Pagination";
 import { getCachedGenreHub } from "@/lib/cached-hub-data";
 import { getPaginationParams, getTotalPages } from "@/lib/pagination";
+import { buildHubLanguageAlternates } from "@/lib/locale-routes";
 import { supabase } from "@/lib/supabase";
 import { absoluteUrl } from "@/lib/utils";
 
@@ -15,11 +16,7 @@ export const metadata: Metadata = {
     "Explore arte de domínio público por género. Paisagem, Retrato, Natureza Morta, Religioso e mais — grátis para baixar em alta resolução.",
   alternates: {
     canonical: absoluteUrl("/pt/generos"),
-    languages: {
-      en: absoluteUrl("/genres"),
-      es: absoluteUrl("/es/generos"),
-      pt: absoluteUrl("/pt/generos"),
-    },
+    languages: buildHubLanguageAlternates("genres"),
   },
   openGraph: {
     title: "Géneros Artísticos — Download Gratuito Domínio Público | Fine Art Free",

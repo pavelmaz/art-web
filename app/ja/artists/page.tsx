@@ -4,6 +4,7 @@ import { BrowseHubGrid } from "@/components/BrowseHubGrid";
 import { Pagination } from "@/components/Pagination";
 import { getArtistsHubPage } from "@/lib/cached-hub-data";
 import { getPaginationParams, getTotalPages } from "@/lib/pagination";
+import { buildHubLanguageAlternates } from "@/lib/locale-routes";
 import { absoluteUrl, slugify } from "@/lib/utils";
 import { getT } from "@/lib/translations";
 
@@ -17,12 +18,7 @@ export const metadata: Metadata = {
     "モネ、レンブラント、ゴッホ、デューラーなど、パブリックドメインの名作を作家別に無料で高解像度ダウンロード。",
   alternates: {
     canonical: absoluteUrl("/ja/artists"),
-    languages: {
-      en: absoluteUrl("/artists"),
-      es: absoluteUrl("/es/artistas"),
-      pt: absoluteUrl("/pt/artistas"),
-      ja: absoluteUrl("/ja/artists"),
-    },
+    languages: buildHubLanguageAlternates("artists"),
   },
   openGraph: {
     title: "芸術家一覧 — 全作品無料ダウンロード | Fine Art Free",

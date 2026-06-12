@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 
 import { ArtworkGrid } from "@/components/ArtworkGrid";
+import { buildHubLanguageAlternates } from "@/lib/locale-routes";
 import { Pagination } from "@/components/Pagination";
 import { getCachedArtworksBrowseSlice, getCachedArtworksSearchResults } from "@/lib/cached-artworks-page";
 import { getPaginationParams, getTotalPages } from "@/lib/pagination";
@@ -14,6 +15,7 @@ export const metadata: Metadata = {
     "Download 72,000+ public domain artworks in high resolution. Classic paintings, prints and illustrations free for any use.",
   alternates: {
     canonical: "https://fineartfree.com/artworks",
+    languages: buildHubLanguageAlternates("artworks"),
   },
   openGraph: {
     title: "Browse All Artworks — Free Public Domain Art | Fine Art Free",

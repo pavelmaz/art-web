@@ -4,6 +4,7 @@ import { BrowseHubGrid } from "@/components/BrowseHubGrid";
 import { Pagination } from "@/components/Pagination";
 import { getCachedMuseumHub } from "@/lib/cached-hub-data";
 import { getPaginationParams, getTotalPages } from "@/lib/pagination";
+import { buildHubLanguageAlternates } from "@/lib/locale-routes";
 import { absoluteUrl, slugify } from "@/lib/utils";
 import { getT } from "@/lib/translations";
 
@@ -17,12 +18,7 @@ export const metadata: Metadata = {
     "プラド美術館、ライクスミュージアム、ボストン美術館、ナショナル・ギャラリーなど、世界の美術館所蔵のパブリックドメイン作品を無料ダウンロード。",
   alternates: {
     canonical: absoluteUrl("/ja/museums"),
-    languages: {
-      en: absoluteUrl("/museums"),
-      es: absoluteUrl("/es/museos"),
-      pt: absoluteUrl("/pt/museus"),
-      ja: absoluteUrl("/ja/museums"),
-    },
+    languages: buildHubLanguageAlternates("museums"),
   },
   openGraph: {
     title: "美術館コレクション — パブリックドメイン無料 | Fine Art Free",

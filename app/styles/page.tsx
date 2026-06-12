@@ -4,6 +4,7 @@ import { BrowseHubGrid, type BrowseHubItem } from "@/components/BrowseHubGrid";
 import { Pagination } from "@/components/Pagination";
 import { getCachedStylesHubData } from "@/lib/cached-hub-data";
 import { getPaginationParams, getTotalPages } from "@/lib/pagination";
+import { buildHubLanguageAlternates } from "@/lib/locale-routes";
 import { slugify } from "@/lib/utils";
 
 export const revalidate = 86400;
@@ -20,6 +21,7 @@ export const metadata: Metadata = {
     "Browse public domain art by movement. Baroque, Impressionism, Dutch Golden Age, Renaissance and more — all free to download.",
   alternates: {
     canonical: "https://fineartfree.com/styles",
+    languages: buildHubLanguageAlternates("styles"),
   },
   openGraph: {
     title: "Art Movements & Styles — Free Downloads | Fine Art Free",

@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { BrowseHubGrid } from "@/components/BrowseHubGrid";
 import { Pagination } from "@/components/Pagination";
 import { getCachedMuseumHub } from "@/lib/cached-hub-data";
+import { buildHubLanguageAlternates } from "@/lib/locale-routes";
 import { getPaginationParams, getTotalPages } from "@/lib/pagination";
 import { absoluteUrl, slugify } from "@/lib/utils";
 
@@ -14,11 +15,7 @@ export const metadata: Metadata = {
     "Explora arte de dominio público por museo. Prado, Rijksmuseum, MFA Boston, National Gallery y más — gratis para descargar.",
   alternates: {
     canonical: absoluteUrl("/es/museos"),
-    languages: {
-      en: absoluteUrl("/museums"),
-      es: absoluteUrl("/es/museos"),
-      pt: absoluteUrl("/pt/museus"),
-    },
+    languages: buildHubLanguageAlternates("museums"),
   },
   openGraph: {
     title: "Colecciones de Museos — Arte Gratis para Descargar | Fine Art Free",

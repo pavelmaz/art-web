@@ -4,6 +4,7 @@ import { BrowseHubGrid, type BrowseHubItem } from "@/components/BrowseHubGrid";
 import { Pagination } from "@/components/Pagination";
 import { getCachedStylesHubData } from "@/lib/cached-hub-data";
 import { getPaginationParams, getTotalPages } from "@/lib/pagination";
+import { buildHubLanguageAlternates } from "@/lib/locale-routes";
 import { supabase } from "@/lib/supabase";
 import { absoluteUrl } from "@/lib/utils";
 import { getT } from "@/lib/translations";
@@ -18,12 +19,7 @@ export const metadata: Metadata = {
     "バロック、印象派、オランダ黄金時代、ルネサンスなど、スタイル別にパブリックドメインの名作を無料で高解像度ダウンロード。",
   alternates: {
     canonical: absoluteUrl("/ja/styles"),
-    languages: {
-      en: absoluteUrl("/styles"),
-      es: absoluteUrl("/es/estilos"),
-      pt: absoluteUrl("/pt/estilos"),
-      ja: absoluteUrl("/ja/styles"),
-    },
+    languages: buildHubLanguageAlternates("styles"),
   },
   openGraph: {
     title: "スタイル・美術運動 — パブリックドメイン無料 | Fine Art Free",

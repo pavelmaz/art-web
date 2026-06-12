@@ -4,6 +4,7 @@ import { BrowseHubGrid, type BrowseHubItem } from "@/components/BrowseHubGrid";
 import { Pagination } from "@/components/Pagination";
 import { getCachedStylesHubData } from "@/lib/cached-hub-data";
 import { getPaginationParams, getTotalPages } from "@/lib/pagination";
+import { buildHubLanguageAlternates } from "@/lib/locale-routes";
 import { supabase } from "@/lib/supabase";
 import { absoluteUrl } from "@/lib/utils";
 
@@ -15,11 +16,7 @@ export const metadata: Metadata = {
     "Explore arte de domínio público por movimento. Barroco, Impressionismo, Idade de Ouro Holandesa, Renascimento e mais — grátis para baixar.",
   alternates: {
     canonical: absoluteUrl("/pt/estilos"),
-    languages: {
-      en: absoluteUrl("/styles"),
-      es: absoluteUrl("/es/estilos"),
-      pt: absoluteUrl("/pt/estilos"),
-    },
+    languages: buildHubLanguageAlternates("styles"),
   },
   openGraph: {
     title: "Movimentos e Estilos Artísticos — Download Gratuito | Fine Art Free",

@@ -307,7 +307,7 @@ export function buildHubLanguageAlternates(
     const path = localePath(loc, hub);
     out[loc] = `${site}${path === "/" ? "" : path}`;
   }
-  out["x-default"] = absoluteUrl(localePath("en", hub));
+  out["x-default"] = `${site}${localePath("en", hub)}`;
   return out;
 }
 

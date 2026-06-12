@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 
 import { BlogPostCard } from "@/components/BlogPostCard";
 import { getPublishedBlogPosts } from "@/lib/blog";
+import { buildEnOnlyLanguageAlternates } from "@/lib/hreflang-paths";
 import { absoluteUrl } from "@/lib/utils";
 
 export const revalidate = 3600;
@@ -12,6 +13,7 @@ export const metadata: Metadata = {
     "Articles about public domain art, artists, and art history from Fine Art Free.",
   alternates: {
     canonical: absoluteUrl("/blog"),
+    languages: buildEnOnlyLanguageAlternates("/blog"),
   },
 };
 

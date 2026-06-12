@@ -1,10 +1,13 @@
 import {
   HREFLANG_LOCALES,
   LOCALE_ROUTE_CONFIG,
+  buildHubLanguageAlternates,
   getSegments,
   type LocaleSegments,
   type SiteLocale,
 } from "@/lib/locale-routes";
+
+const SITE = "https://fineartfree.com";
 
 const EN_SEGMENTS: LocaleSegments = {
   artworks: "artworks",
@@ -14,6 +17,38 @@ const EN_SEGMENTS: LocaleSegments = {
   styles: "styles",
   search: "search",
 };
+
+const HUB_KEYS: (keyof LocaleSegments)[] = [
+  "artworks",
+  "artists",
+  "museums",
+  "genres",
+  "styles",
+];
+
+/** Paths that exist only in English — no localized equivalents. */
+const EN_ONLY_EXACT = new Set([
+  "/about",
+  "/terms",
+  "/blog",
+  "/fineart-pro",
+  "/fineart-pro/join",
+  "/fineart-pro/success",
+]);
+
+const EN_ONLY_PREFIXES = ["/blog/", "/guides/", "/fineart-pro/"] as const;
+
+export function isEnOnlyPathname(pathname: string): boolean {
+  if (EN_ONLY_EXACT.has(pathname)) {
+    return true;
+  }
+  return EN_ONLY_PREFIXES.some((prefix) => pathname.startsWith(prefix));
+}
+
+export function buildEnOnlyLanguageAlternates(pathname: string): Record<string, string> {
+  const url = `${SITE}${pathname}`;
+  return { en: url, "x-default": url };
+}
 
 function mapSegmentPath(
   rest: string,
@@ -44,6 +79,41 @@ function mapSegmentPath(
     return `/${extra.toCountries}${path.slice(extra.fromCountries.length + 1)}`;
   }
   return path;
+}
+
+export function detectHubFromPathname(pathname: string): keyof LocaleSegments | null {
+  for (const hub of HUB_KEYS) {
+    const enSeg = EN_SEGMENTS[hub];
+    if (pathname === `/${enSeg}`) {
+      return hub;
+    }
+  }
+  for (const loc of HREFLANG_LOCALES) {
+    if (loc === "en") continue;
+    const config = LOCALE_ROUTE_CONFIG[loc];
+    for (const hub of HUB_KEYS) {
+      const seg = config.segments[hub];
+      if (pathname === `${config.prefix}/${seg}`) {
+        return hub;
+      }
+    }
+  }
+  return null;
+}
+
+function languageAlternatesToLinkHeader(languages: Record<string, string>): string {
+  const parts: string[] = [];
+  for (const loc of HREFLANG_LOCALES) {
+    const url = languages[loc];
+    if (url) {
+      parts.push(`<${url}>; rel="alternate"; hreflang="${loc}"`);
+    }
+  }
+  const xDefault = languages["x-default"];
+  if (xDefault) {
+    parts.push(`<${xDefault}>; rel="alternate"; hreflang="x-default"`);
+  }
+  return parts.join(", ");
 }
 
 export function enPathToLocalized(pathname: string, locale: SiteLocale): string {
@@ -120,17 +190,25 @@ export function detectLocaleFromPathname(pathname: string): SiteLocale {
 }
 
 export function buildHreflangLinkHeader(pathname: string): string {
-  const site = "https://fineartfree.com";
+  if (isEnOnlyPathname(pathname)) {
+    return languageAlternatesToLinkHeader(buildEnOnlyLanguageAlternates(pathname));
+  }
+
+  const hub = detectHubFromPathname(pathname);
+  if (hub) {
+    return languageAlternatesToLinkHeader(buildHubLanguageAlternates(hub));
+  }
+
   const current = detectLocaleFromPathname(pathname);
   const enPath = localizedPathToEn(pathname, current);
 
   const parts = HREFLANG_LOCALES.map((loc) => {
     const localized = enPathToLocalized(enPath, loc);
-    const url = `${site}${localized === "/" ? "" : localized}`;
+    const url = `${SITE}${localized === "/" ? "" : localized}`;
     return `<${url}>; rel="alternate"; hreflang="${loc}"`;
   });
 
-  const enUrl = `${site}${enPath === "/" ? "" : enPath}`;
+  const enUrl = `${SITE}${enPath === "/" ? "" : enPath}`;
   parts.push(`<${enUrl}>; rel="alternate"; hreflang="x-default"`);
 
   return parts.join(", ");

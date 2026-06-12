@@ -4,6 +4,7 @@ import { BrowseHubGrid } from "@/components/BrowseHubGrid";
 import { Pagination } from "@/components/Pagination";
 import { getCachedMuseumHub } from "@/lib/cached-hub-data";
 import { getPaginationParams, getTotalPages } from "@/lib/pagination";
+import { buildHubLanguageAlternates } from "@/lib/locale-routes";
 import { slugify } from "@/lib/utils";
 
 export const revalidate = 86400;
@@ -14,6 +15,7 @@ export const metadata: Metadata = {
     "Browse public domain art by museum. Prado, Rijksmuseum, MFA Boston, National Gallery and more — free to download.",
   alternates: {
     canonical: "https://fineartfree.com/museums",
+    languages: buildHubLanguageAlternates("museums"),
   },
   openGraph: {
     title: "Museum Collections — Free Art Downloads | Fine Art Free",

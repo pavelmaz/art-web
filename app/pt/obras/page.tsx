@@ -4,6 +4,7 @@ import { ArtworkGrid } from "@/components/ArtworkGrid";
 import { Pagination } from "@/components/Pagination";
 import { getCachedArtworksBrowseSlice, getCachedArtworksSearchResults } from "@/lib/cached-artworks-page";
 import { getPaginationParams, getTotalPages } from "@/lib/pagination";
+import { buildHubLanguageAlternates } from "@/lib/locale-routes";
 import { absoluteUrl } from "@/lib/utils";
 import type { Artwork } from "@/types/artwork";
 
@@ -15,11 +16,7 @@ export const metadata: Metadata = {
     "Baixe 72.000+ obras de arte de domínio público em alta resolução. Pinturas clássicas, gravuras e ilustrações grátis para qualquer uso.",
   alternates: {
     canonical: absoluteUrl("/pt/obras"),
-    languages: {
-      en: absoluteUrl("/artworks"),
-      es: absoluteUrl("/es/obras"),
-      pt: absoluteUrl("/pt/obras"),
-    },
+    languages: buildHubLanguageAlternates("artworks"),
   },
   openGraph: {
     title: "Explorar Todas as Obras — Arte de Domínio Público Grátis | Fine Art Free",

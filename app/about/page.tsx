@@ -1,9 +1,16 @@
 import type { Metadata } from "next";
 
+import { buildEnOnlyLanguageAlternates } from "@/lib/hreflang-paths";
+import { absoluteUrl } from "@/lib/utils";
+
 export const metadata: Metadata = {
   title: "About Fine Art Free — Public Domain Art Downloads",
   description:
     "Fine Art Free aggregates public domain artwork from the world's top museums. All artworks are free to download and use for personal and commercial purposes.",
+  alternates: {
+    canonical: absoluteUrl("/about"),
+    languages: buildEnOnlyLanguageAlternates("/about"),
+  },
 };
 
 export default function AboutPage() {

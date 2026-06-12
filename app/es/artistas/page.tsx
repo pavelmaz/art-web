@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { BrowseHubGrid } from "@/components/BrowseHubGrid";
 import { Pagination } from "@/components/Pagination";
 import { getArtistsHubPage } from "@/lib/cached-hub-data";
+import { buildHubLanguageAlternates } from "@/lib/locale-routes";
 import { getPaginationParams, getTotalPages } from "@/lib/pagination";
 import { absoluteUrl, slugify } from "@/lib/utils";
 
@@ -14,11 +15,7 @@ export const metadata: Metadata = {
     "Explora obras de arte de dominio público por artista. Monet, Rembrandt, Van Gogh, Dürer y cientos más — gratis para descargar.",
   alternates: {
     canonical: absoluteUrl("/es/artistas"),
-    languages: {
-      en: absoluteUrl("/artists"),
-      es: absoluteUrl("/es/artistas"),
-      pt: absoluteUrl("/pt/artistas"),
-    },
+    languages: buildHubLanguageAlternates("artists"),
   },
   openGraph: {
     title: "Artistas — Obras Completas Gratis para Descargar | Fine Art Free",

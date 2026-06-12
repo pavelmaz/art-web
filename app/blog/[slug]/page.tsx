@@ -10,6 +10,7 @@ import {
   getPublishedBlogPostBySlug,
   getPublishedBlogSlugs,
 } from "@/lib/blog";
+import { buildEnOnlyLanguageAlternates } from "@/lib/hreflang-paths";
 import { artworkDetailPath } from "@/lib/locale-routes";
 import { absoluteUrl, artworkImageUrl } from "@/lib/utils";
 
@@ -50,6 +51,7 @@ export async function generateMetadata({ params }: BlogPostPageProps): Promise<M
     description,
     alternates: {
       canonical,
+      languages: buildEnOnlyLanguageAlternates(`/blog/${post.slug}`),
     },
     openGraph: {
       title,

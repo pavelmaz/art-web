@@ -4,6 +4,7 @@ import { BrowseHubGrid } from "@/components/BrowseHubGrid";
 import { Pagination } from "@/components/Pagination";
 import { fillArtistHubPreviewImages, getCachedArtistsHubList } from "@/lib/cached-hub-data";
 import { getPaginationParams, getTotalPages } from "@/lib/pagination";
+import { buildHubLanguageAlternates } from "@/lib/locale-routes";
 import { slugify } from "@/lib/utils";
 
 export const revalidate = 86400;
@@ -14,6 +15,7 @@ export const metadata: Metadata = {
     "Browse public domain artworks by artist. Monet, Rembrandt, Van Gogh, Dürer and hundreds more — all free to download.",
   alternates: {
     canonical: "https://fineartfree.com/artists",
+    languages: buildHubLanguageAlternates("artists"),
   },
   openGraph: {
     title: "Artists — Complete Works Free to Download | Fine Art Free",

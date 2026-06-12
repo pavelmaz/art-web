@@ -4,6 +4,7 @@ import { BrowseHubGrid } from "@/components/BrowseHubGrid";
 import { Pagination } from "@/components/Pagination";
 import { getCachedGenreHub } from "@/lib/cached-hub-data";
 import { getPaginationParams, getTotalPages } from "@/lib/pagination";
+import { buildHubLanguageAlternates } from "@/lib/locale-routes";
 import { supabase } from "@/lib/supabase";
 import { absoluteUrl } from "@/lib/utils";
 import { getT } from "@/lib/translations";
@@ -18,12 +19,7 @@ export const metadata: Metadata = {
     "風景、肖像、静物、宗教画など、ジャンル別にパブリックドメインの名作を高解像度で無料ダウンロード。",
   alternates: {
     canonical: absoluteUrl("/ja/genres"),
-    languages: {
-      en: absoluteUrl("/genres"),
-      es: absoluteUrl("/es/generos"),
-      pt: absoluteUrl("/pt/generos"),
-      ja: absoluteUrl("/ja/genres"),
-    },
+    languages: buildHubLanguageAlternates("genres"),
   },
   openGraph: {
     title: "ジャンル一覧 — パブリックドメイン無料 | Fine Art Free",
