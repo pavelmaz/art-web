@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "seo:audit": "npx tsx scripts/seo-full-audit.ts"
+    "seo:audit": "npx tsx scripts/seo-full-audit.ts",
+    "test:rate-limit": "npx tsx scripts/test-verified-search-bot.ts"
   },
   "dependencies": {
     "@supabase/ssr": "^0.6.1",

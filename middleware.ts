@@ -3,35 +3,21 @@ import type { CookieOptions } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
 import { buildHreflangLinkHeader } from "@/lib/hreflang-paths";
+import { retryAfterSeconds, shouldRateLimit } from "@/lib/rate-limit";
 
 type CookieRow = { name: string; value: string; options: CookieOptions };
-
-const RATE_LIMIT_MAX = 45;
-const RATE_LIMIT_WINDOW_MS = 60_000;
-
-const rateLimitStore = new Map<string, { count: number; resetAt: number }>();
-
-function isRateLimited(ip: string): boolean {
-  const now = Date.now();
-  const entry = rateLimitStore.get(ip);
-  if (!entry || now > entry.resetAt) {
-    rateLimitStore.set(ip, { count: 1, resetAt: now + RATE_LIMIT_WINDOW_MS });
-    return false;
-  }
-  entry.count++;
-  return entry.count > RATE_LIMIT_MAX;
-}
 
 export async function middleware(request: NextRequest) {
   const ip =
     request.headers.get("x-forwarded-for")?.split(",")[0].trim() ??
     request.headers.get("x-real-ip") ??
     "unknown";
+  const userAgent = request.headers.get("user-agent") ?? "";
 
-  if (ip !== "unknown" && isRateLimited(ip)) {
+  if (await shouldRateLimit(ip, userAgent)) {
     return new NextResponse("Too Many Requests", {
       status: 429,
-      headers: { "Retry-After": "60" },
+      headers: { "Retry-After": retryAfterSeconds() },
     });
   }
 
