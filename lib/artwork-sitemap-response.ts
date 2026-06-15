@@ -27,9 +27,30 @@ function emptyImageUrlset(): string {
 `;
 }
 
-function buildUrlset(locs: string[]): string {
-  const inner = locs
-    .map((loc) => `  <url>\n    <loc>${escapeXml(loc)}</loc>\n  </url>`)
+type ArtworkUrlEntry = { loc: string; lastmod?: string };
+
+/** Convert a Postgres timestamp string to a W3C/ISO-8601 <lastmod> value. */
+function toLastmod(value: string | null | undefined): string | undefined {
+  if (typeof value !== "string" || !value.trim()) {
+    return undefined;
+  }
+  const d = new Date(value);
+  if (Number.isNaN(d.getTime())) {
+    return undefined;
+  }
+  return d.toISOString();
+}
+
+function buildUrlset(entries: ArtworkUrlEntry[]): string {
+  const inner = entries
+    .map((e) => {
+      let xml = `  <url>\n    <loc>${escapeXml(e.loc)}</loc>`;
+      if (e.lastmod) {
+        xml += `\n    <lastmod>${e.lastmod}</lastmod>`;
+      }
+      xml += `\n  </url>`;
+      return xml;
+    })
     .join("\n");
   return `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
@@ -111,7 +132,7 @@ export async function buildArtworkSitemapPageResponse(
 
     const { data, error } = await supabase
       .from("artworks")
-      .select("slug")
+      .select("slug, created_at")
       .not("slug", "is", null)
       .order("score", { ascending: false })
       .order("id", { ascending: true })
@@ -126,13 +147,18 @@ export async function buildArtworkSitemapPageResponse(
     }
 
     const base = getPublicSiteUrl();
-    const rows = (data as { slug: string | null }[] | null) ?? [];
-    const locs = rows
-      .map((r) => r.slug?.trim())
-      .filter((s): s is string => Boolean(s))
-      .map((slug) => artworkLoc(base, locale, slug));
+    const rows =
+      (data as { slug: string | null; created_at: string | null }[] | null) ?? [];
+    const entries: ArtworkUrlEntry[] = rows
+      .filter((r): r is { slug: string; created_at: string | null } =>
+        Boolean(r.slug?.trim())
+      )
+      .map((r) => ({
+        loc: artworkLoc(base, locale, r.slug.trim()),
+        lastmod: toLastmod(r.created_at),
+      }));
 
-    if (!locs.length && page === 0) {
+    if (!entries.length && page === 0) {
       console.error(`[sitemap/${label}]`, page, "no URLs returned");
       return new Response(emptyUrlset(), {
         status: 503,
@@ -140,7 +166,7 @@ export async function buildArtworkSitemapPageResponse(
       });
     }
 
-    return new Response(buildUrlset(locs), {
+    return new Response(buildUrlset(entries), {
       status: 200,
       headers: ARTWORK_SITEMAP_XML_HEADERS,
     });
