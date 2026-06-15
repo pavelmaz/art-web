@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "eslint",
     "seo:audit": "npx tsx scripts/seo-full-audit.ts",
-    "test:rate-limit": "npx tsx scripts/test-verified-search-bot.ts"
+    "test:rate-limit": "npx tsx scripts/test-verified-search-bot.ts",
+    "images:renditions": "node --env-file=.env.local scripts/generate-image-renditions.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "^0.6.1",
@@ -27,6 +28,7 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.2.4",
+    "sharp": "^0.34.5",
     "tailwindcss": "^4",
     "typescript": "^5"
   }

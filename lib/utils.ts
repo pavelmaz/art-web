@@ -170,11 +170,49 @@ export const ARTWORK_HERO_IMAGE_QUALITY = 90;
 export const ARTWORK_GRID_IMAGE_WIDTH = 800;
 export const ARTWORK_HERO_IMAGE_WIDTH = 1600;
 
+/**
+ * Pre-generated WebP renditions live in the `art-images` bucket under
+ * `renditions/<variant>/…`, produced by scripts/generate-image-renditions.mjs.
+ * Keys/widths here MUST stay in sync with that script. Renditions are only served
+ * when NEXT_PUBLIC_USE_IMAGE_RENDITIONS=1, so the switch can be flipped after the
+ * backfill completes (default off = original full-size behaviour, unchanged).
+ */
+export const IMAGE_RENDITIONS = {
+  grid: "w800",
+  detail: "w1400",
+} as const;
+export type ImageRendition = keyof typeof IMAGE_RENDITIONS;
+
+const USE_IMAGE_RENDITIONS = process.env.NEXT_PUBLIC_USE_IMAGE_RENDITIONS === "1";
+const SUPABASE_PUBLIC_MARKER = "/object/public/art-images/";
+
+/**
+ * Map a Supabase public original URL to its pre-generated WebP rendition.
+ * Returns null for non-Supabase URLs (e.g. artic.edu/IIIF) or already-rendition URLs,
+ * so the caller falls back to its normal optimized URL.
+ */
+function supabaseRenditionUrl(url: string, rendition: ImageRendition): string | null {
+  const idx = url.indexOf(SUPABASE_PUBLIC_MARKER);
+  if (idx === -1) {
+    return null;
+  }
+  const prefixEnd = idx + SUPABASE_PUBLIC_MARKER.length;
+  const prefix = url.slice(0, prefixEnd); // …/object/public/art-images/
+  const objectPath = url.slice(prefixEnd).split("?")[0]; // artworks/<hash>.jpg
+  if (!objectPath || objectPath.startsWith("renditions/")) {
+    return null;
+  }
+  const webpPath = objectPath.replace(/\.[a-z0-9]+$/i, ".webp");
+  return `${prefix}renditions/${IMAGE_RENDITIONS[rendition]}/${webpPath}`;
+}
+
 export type ArtworkImageUrlOptions = {
   /** JPEG/WebP quality for Supabase `/render/image/` URLs (1–100). Ignored for other hosts. */
   quality?: number;
   /** Max width in pixels for resized delivery (Supabase render, IIIF, Wikimedia). */
   width?: number;
+  /** Serve a pre-generated rendition instead of the full-size original (Supabase-hosted images only). */
+  rendition?: ImageRendition;
 };
 
 export function artworkImageUrl(artwork: ArtworkImageSource, options?: ArtworkImageUrlOptions): string {
@@ -184,12 +222,24 @@ export function artworkImageUrl(artwork: ArtworkImageSource, options?: ArtworkIm
   // ALWAYS use image_id first - our Supabase storage
   const fromImageId = toImageUrl(artwork.image_id);
   if (fromImageId && !isBlockedDirectImageHost(fromImageId)) {
+    if (USE_IMAGE_RENDITIONS && options?.rendition) {
+      const rendition = supabaseRenditionUrl(fromImageId, options.rendition);
+      if (rendition) {
+        return rendition;
+      }
+    }
     return optimizeImageUrl(fromImageId, quality, width);
   }
 
   // Fallback to url only if no image_id
   const rawUrl = artwork.url?.trim();
   if (rawUrl && isLikelyImageUrl(rawUrl) && !isBlockedDirectImageHost(rawUrl)) {
+    if (USE_IMAGE_RENDITIONS && options?.rendition) {
+      const rendition = supabaseRenditionUrl(rawUrl, options.rendition);
+      if (rendition) {
+        return rendition;
+      }
+    }
     return optimizeImageUrl(rawUrl, quality, width);
   }
 
@@ -201,6 +251,7 @@ export function artworkGridImageUrl(artwork: ArtworkImageSource): string {
   return artworkImageUrl(artwork, {
     quality: ARTWORK_GRID_IMAGE_QUALITY,
     width: ARTWORK_GRID_IMAGE_WIDTH,
+    rendition: "grid",
   });
 }
 
@@ -209,6 +260,7 @@ export function artworkDetailImageUrl(artwork: ArtworkImageSource): string {
   return artworkImageUrl(artwork, {
     quality: ARTWORK_HERO_IMAGE_QUALITY,
     width: ARTWORK_HERO_IMAGE_WIDTH,
+    rendition: "detail",
   });
 }
 
