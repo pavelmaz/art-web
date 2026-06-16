@@ -3,6 +3,7 @@ import Link from "next/link";
 import { ArtworkGrid } from "@/components/ArtworkGrid";
 import { BrowseHubGrid } from "@/components/BrowseHubGrid";
 import { getMatchingTagsFromArtworks, runSiteSearch, type SiteSearchArtworkRow } from "@/lib/site-search";
+import { SearchAnalytics } from "@/components/SearchAnalytics";
 import { slugify } from "@/lib/utils";
 import type { Artwork } from "@/types/artwork";
 
@@ -78,6 +79,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
 
   return (
     <div className="mx-auto max-w-7xl space-y-8 px-5 py-10">
+      <SearchAnalytics query={q} locale="pt" results={artworks.length} />
       <div className="space-y-2">
         <h1 className="text-3xl font-semibold text-[#1a1a1a]">Resultados para &quot;{q}&quot;</h1>
       </div>
