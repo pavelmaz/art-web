@@ -83,34 +83,65 @@ function renditionKey(variantKey, sourceKey) {
   return `${RENDITION_PREFIX}/${variantKey}/${webp}`;
 }
 
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+/** Network blips (ECONNRESET, undici "terminated", timeouts, 5xx) — worth retrying. */
+function isTransient(err) {
+  const msg = String(err?.message ?? err ?? "");
+  return /terminated|ECONNRESET|ETIMEDOUT|EPIPE|fetch failed|socket hang up|network|timeout|\b5\d\d\b/i.test(msg);
+}
+
+/** Retry an async op with exponential backoff, but only for transient errors. */
+async function withRetry(fn, attempts = 5) {
+  for (let i = 0; ; i++) {
+    try {
+      return await fn();
+    } catch (e) {
+      if (!isTransient(e) || i >= attempts - 1) throw e;
+      await sleep(Math.min(500 * 2 ** i, 8000));
+    }
+  }
+}
+
 async function processOne(sourceKey, existing) {
   const missing = VARIANTS.filter((v) => !existing.has(renditionKey(v.key, sourceKey)));
   if (missing.length === 0) return { status: "skip" };
 
-  const { data, error } = await supabase.storage.from(BUCKET).download(sourceKey);
-  if (error) return { status: "error", key: sourceKey, error: `download: ${error.message}` };
-  const input = Buffer.from(await data.arrayBuffer());
+  try {
+    // Download (with the array-buffer read) is retried as a unit so a mid-stream
+    // abort just starts the download over rather than crashing the run.
+    const input = await withRetry(async () => {
+      const { data, error } = await supabase.storage.from(BUCKET).download(sourceKey);
+      if (error) throw new Error(`download: ${error.message}`);
+      return Buffer.from(await data.arrayBuffer());
+    });
 
-  for (const v of missing) {
-    let out;
-    try {
-      out = await sharp(input)
-        .rotate() // honour EXIF orientation
-        .resize({ width: v.width, withoutEnlargement: true })
-        .webp({ quality: v.quality })
-        .toBuffer();
-    } catch (e) {
-      return { status: "error", key: sourceKey, error: `sharp(${v.key}): ${e.message}` };
-    }
-    const up = await supabase.storage
-      .from(BUCKET)
-      .upload(renditionKey(v.key, sourceKey), out, {
-        contentType: "image/webp",
-        upsert: true,
+    for (const v of missing) {
+      let out;
+      try {
+        out = await sharp(input)
+          .rotate() // honour EXIF orientation
+          .resize({ width: v.width, withoutEnlargement: true })
+          .webp({ quality: v.quality })
+          .toBuffer();
+      } catch (e) {
+        return { status: "error", key: sourceKey, error: `sharp(${v.key}): ${e.message}` };
+      }
+      await withRetry(async () => {
+        const { error } = await supabase.storage
+          .from(BUCKET)
+          .upload(renditionKey(v.key, sourceKey), out, {
+            contentType: "image/webp",
+            upsert: true,
+          });
+        if (error) throw new Error(`upload(${v.key}): ${error.message}`);
       });
-    if (up.error) return { status: "error", key: sourceKey, error: `upload(${v.key}): ${up.error.message}` };
+    }
+    return { status: "done" };
+  } catch (e) {
+    // Never let a single image take down the whole run.
+    return { status: "error", key: sourceKey, error: e?.message ?? String(e) };
   }
-  return { status: "done" };
 }
 
 async function run() {
