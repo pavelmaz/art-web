@@ -1,0 +1,37 @@
+name: Image renditions
+
+# Keeps WebP renditions in sync for newly-ingested artworks. The backfill script
+# (scripts/generate-image-renditions.mjs) is resumable and skips images that already
+# have renditions, so each scheduled run only processes what's new.
+
+on:
+  schedule:
+    - cron: "0 3 * * *" # daily at 03:00 UTC
+  workflow_dispatch: {} # allow manual runs from the Actions tab
+
+# Never let two runs overlap (a long run shouldn't collide with the next schedule).
+concurrency:
+  group: image-renditions
+  cancel-in-progress: false
+
+jobs:
+  renditions:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+
+      - run: npm ci
+
+      - name: Generate renditions for new images
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+        # Call the script directly (the npm script uses --env-file=.env.local, which
+        # doesn't exist in CI); env comes from repo secrets instead.
+        run: node scripts/generate-image-renditions.mjs
