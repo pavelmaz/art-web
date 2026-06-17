@@ -11,6 +11,9 @@ import {
   type ReactNode,
 } from "react";
 
+import Link from "next/link";
+
+import { fineArtProPath } from "@/lib/fineart-pro-path";
 import { getT, type Locale } from "@/lib/translations";
 
 export type ArtworkRow = {
@@ -130,13 +133,40 @@ Return ONLY valid JSON:
 }`;
 }
 
+const FREE_INSIGHT_STORAGE_KEY = "faf-insights-free-used";
+
+/** Free (non-Pro) visitors get one Discover per browser; tracked client-side in localStorage. */
+function hasUsedFreeInsight(): boolean {
+  if (typeof window === "undefined") {
+    return false;
+  }
+  try {
+    return window.localStorage.getItem(FREE_INSIGHT_STORAGE_KEY) === "1";
+  } catch {
+    return false;
+  }
+}
+
+function markFreeInsightUsed(): void {
+  if (typeof window === "undefined") {
+    return;
+  }
+  try {
+    window.localStorage.setItem(FREE_INSIGHT_STORAGE_KEY, "1");
+  } catch {
+    // storage unavailable (private mode etc.) — fail open
+  }
+}
+
 export function ArtworkInsightsProvider({
   artwork,
   locale,
+  isPro = false,
   children,
 }: {
   artwork: ArtworkRow;
   locale: Locale;
+  isPro?: boolean;
   children: ReactNode;
 }) {
   const labels = getT(locale);
@@ -145,6 +175,7 @@ export function ArtworkInsightsProvider({
   const [insights, setInsights] = useState<Insight[]>([]);
   const [visibleCount, setVisibleCount] = useState(0);
   const [openPopupId, setOpenPopupId] = useState<number | null>(null);
+  const [showProModal, setShowProModal] = useState(false);
   const hasInsights = insights.length > 0;
 
   const closePopup = useCallback(() => {
@@ -162,6 +193,12 @@ export function ArtworkInsightsProvider({
   }, [hasInsights, insights.length, visibleCount]);
 
   const handleDiscover = useCallback(async () => {
+    if (!isPro && hasUsedFreeInsight()) {
+      setShowProModal(true);
+      track("Artwork Insights Locked", { locale });
+      return;
+    }
+
     const apiKey = process.env.NEXT_PUBLIC_OPENAI_API_KEY;
     if (!apiKey) {
       setError(labels.insightsApiKeyMissing);
@@ -205,6 +242,9 @@ export function ArtworkInsightsProvider({
       const list = Array.isArray(parsed.insights) ? parsed.insights.slice(0, 4) : [];
       setInsights(list);
       setVisibleCount(0);
+      if (!isPro) {
+        markFreeInsightUsed();
+      }
       track("Artwork Insights Generated", {
         locale,
         count: list.length,
@@ -215,7 +255,7 @@ export function ArtworkInsightsProvider({
     } finally {
       setLoading(false);
     }
-  }, [artwork, locale, labels.insightsApiKeyMissing, labels.insightsGenerateFailed]);
+  }, [artwork, isPro, locale, labels.insightsApiKeyMissing, labels.insightsGenerateFailed]);
 
   return (
     <ArtworkInsightsContext.Provider
@@ -246,6 +286,37 @@ export function ArtworkInsightsProvider({
         }}
       />
       {children}
+      {showProModal ? (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+          role="dialog"
+          aria-modal="true"
+          onClick={() => setShowProModal(false)}
+        >
+          <div
+            className="relative w-full max-w-sm rounded-2xl bg-white p-6 text-center shadow-xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              type="button"
+              onClick={() => setShowProModal(false)}
+              className="absolute right-3 top-3 rounded p-1 text-[#9e9e9e] transition-colors hover:bg-[#f0ede8] hover:text-[#1a1a1a]"
+              aria-label={labels.insightsClose}
+            >
+              <X className="size-4" aria-hidden />
+            </button>
+            <h3 className="mb-2 text-lg font-semibold text-[#1a1a1a]">{labels.insightsLimitTitle}</h3>
+            <p className="mb-5 text-sm leading-relaxed text-[#6b6b6b]">{labels.insightsLimitBody}</p>
+            <Link
+              href={fineArtProPath(locale)}
+              onClick={() => track("Artwork Insights Upsell Click", { locale })}
+              className="inline-flex w-full items-center justify-center rounded-md bg-[#1a1a1a] px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[#333]"
+            >
+              {labels.insightsLimitCta}
+            </Link>
+          </div>
+        </div>
+      ) : null}
     </ArtworkInsightsContext.Provider>
   );
 }

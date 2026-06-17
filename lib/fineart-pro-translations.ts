@@ -11,7 +11,7 @@ export type FineArtProCopy = {
   heroImageAlt: string;
   moonriseImageAlt: string;
   heroH1: string;
-  heroBullets: readonly [string, string, string];
+  heroBullets: readonly string[];
   yearlyPlan: string;
   monthlyPlan: string;
   yearlyPrice: string;
@@ -70,6 +70,8 @@ const en: FineArtProCopy = {
     "Access over 400,000 paintings, drawings, posters and illustrations",
     "Download images at the highest resolution available",
     "Free from copyright restrictions and ready to be used in your projects.",
+    "Unlimited AI insights on every artwork",
+    "Unlock personalized museum visit guides",
   ],
   yearlyPlan: "Yearly Plan",
   monthlyPlan: "Monthly Plan",
@@ -156,6 +158,8 @@ const es: FineArtProCopy = {
     "Más de 400.000 pinturas, dibujos, pósters e ilustraciones",
     "Descarga en la máxima resolución disponible",
     "Sin restricciones de copyright; listas para tus proyectos.",
+    "Información con IA ilimitada en cada obra",
+    "Desbloquea guías personalizadas para tu visita al museo",
   ],
   yearlyPlan: "Plan anual",
   monthlyPlan: "Plan mensual",
@@ -240,6 +244,8 @@ const pt: FineArtProCopy = {
     "Mais de 400.000 pinturas, desenhos, pôsteres e ilustrações",
     "Download na resolução máxima disponível",
     "Sem restrições de copyright; prontas para seus projetos.",
+    "Insights com IA ilimitados em cada obra",
+    "Desbloqueie guias personalizados para a sua visita ao museu",
   ],
   yearlyPlan: "Plano anual",
   monthlyPlan: "Plano mensal",
@@ -313,6 +319,8 @@ const ja: FineArtProCopy = {
     "40万点以上の絵画・素描・ポスター・イラスト",
     "利用可能な最高解像度でダウンロード",
     "著作権の制限なく、プロジェクトにすぐ使えます。",
+    "すべての作品でAIインサイトを無制限に",
+    "美術館訪問のためのパーソナルガイドを解放",
   ],
   yearlyPlan: "年間プラン",
   monthlyPlan: "月額プラン",
@@ -388,6 +396,8 @@ const fr: FineArtProCopy = {
     "Plus de 400 000 peintures, dessins, affiches et illustrations",
     "Téléchargement en résolution maximale disponible",
     "Sans restriction de droits d'auteur, prêtes pour vos projets.",
+    "Informations IA illimitées sur chaque œuvre",
+    "Débloquez des guides de visite de musée personnalisés",
   ],
   yearlyPlan: "Abonnement annuel",
   monthlyPlan: "Abonnement mensuel",
@@ -469,6 +479,8 @@ const de: FineArtProCopy = {
     "Über 400.000 Gemälde, Zeichnungen, Poster und Illustrationen",
     "Download in höchster verfügbarer Auflösung",
     "Gemeinfrei und sofort in Ihren Projekten nutzbar.",
+    "Unbegrenzte KI-Einblicke zu jedem Kunstwerk",
+    "Personalisierte Museumsbesuchs-Guides freischalten",
   ],
   yearlyPlan: "Jahresabo",
   monthlyPlan: "Monatsabo",
@@ -549,6 +561,8 @@ const it: FineArtProCopy = {
     "Oltre 400.000 dipinti, disegni, poster e illustrazioni",
     "Download alla massima risoluzione disponibile",
     "Di pubblico dominio, pronte per i tuoi progetti.",
+    "Approfondimenti IA illimitati su ogni opera",
+    "Sblocca guide personalizzate alla visita del museo",
   ],
   yearlyPlan: "Piano annuale",
   monthlyPlan: "Piano mensile",
@@ -629,6 +643,8 @@ const ko: FineArtProCopy = {
     "40만 점 이상의 회화·소묘·포스터·일러스트",
     "이용 가능한 최고 해상도로 다운로드",
     "저작권 제한 없이 프로젝트에 바로 사용.",
+    "모든 작품에 대한 무제한 AI 인사이트",
+    "맞춤형 미술관 방문 가이드 잠금 해제",
   ],
   yearlyPlan: "연간 플랜",
   monthlyPlan: "월간 플랜",
@@ -704,6 +720,8 @@ const ru: FineArtProCopy = {
     "Более 400 000 картин, рисунков, плакатов и иллюстраций",
     "Скачивание в максимально доступном разрешении",
     "Общественное достояние — свободно для ваших проектов.",
+    "Безлимитные AI-инсайты к каждой работе",
+    "Откройте персональные гиды для посещения музея",
   ],
   yearlyPlan: "Годовая подписка",
   monthlyPlan: "Месячная подписка",
@@ -784,6 +802,8 @@ const zh: FineArtProCopy = {
     "40万+绘画、素描、海报与插图",
     "以最高可用分辨率下载",
     "公有领域，可直接用于您的项目。",
+    "每件作品的无限 AI 解读",
+    "解锁个性化的博物馆参观指南",
   ],
   yearlyPlan: "年付方案",
   monthlyPlan: "月付方案",

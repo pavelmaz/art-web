@@ -484,7 +484,7 @@ export default async function ArtworkDetailPageZh({ params }: ArtworkPageProps) 
         <BreadcrumbJsonLd artwork={artwork} category={category} />
 
         <div className="flex flex-col gap-8 lg:flex-row lg:items-start">
-          <ArtworkInsightsProvider artwork={artwork} locale="zh">
+          <ArtworkInsightsProvider artwork={artwork} locale="zh" isPro={isPro}>
             <div className="flex-1 space-y-4">
               <div className="bg-white p-2 sm:p-6">
                 {imageUrl ? (
