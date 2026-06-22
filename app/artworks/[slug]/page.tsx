@@ -222,22 +222,7 @@ async function getArtworkBySlug(slug: string): Promise<ArtworkRow | null> {
     throw primary.error;
   }
 
-  const fallback = await supabase
-    .from("daily_artworks")
-    .select(
-      selectColumns
-    )
-    .eq("slug", slug)
-    .single();
-
-  if (fallback.error) {
-    if (fallback.error.code === "PGRST116") {
-      return null;
-    }
-    throw fallback.error;
-  }
-
-  return fallback.data as ArtworkRow;
+  return null;
 }
 
 export async function generateMetadata({ params }: ArtworkPageProps): Promise<Metadata> {
