@@ -2,6 +2,7 @@ import { buildHubLanguageAlternates, canonicalHubUrl } from "@/lib/locale-routes
 import type { Metadata } from "next";
 import { hubListPageMetadata } from "@/lib/list-page-metadata";
 
+import { ArtistAzNav } from "@/components/ArtistAzNav";
 import { BrowseHubGrid } from "@/components/BrowseHubGrid";
 import { Pagination } from "@/components/Pagination";
 import { getArtistsHubPage } from "@/lib/cached-hub-data";
@@ -42,7 +43,8 @@ export default async function ArtistsPage({ searchParams }: ArtistsPageProps) {
     <div className="space-y-8 px-5">
       <div>
         <h1 className="mb-2 text-2xl font-semibold">Künstler</h1>
-        <p className="mb-8 text-sm text-[#6b6b6b]">Werke nach Künstler entdecken</p>
+        <p className="mb-5 text-sm text-[#6b6b6b]">Werke nach Künstler entdecken</p>
+        <ArtistAzNav basePath="/de/artists/letter" />
       </div>
 
       {artists.length ? (

@@ -9,9 +9,9 @@ import {
 export const revalidate = 86400;
 
 export function generateMetadata(props: ArtistLetterRouteProps): Promise<Metadata> {
-  return artistLetterMetadata("en", props);
+  return artistLetterMetadata("ko", props);
 }
 
 export default function Page(props: ArtistLetterRouteProps) {
-  return <ArtistLetterIndex locale="en" {...props} />;
+  return <ArtistLetterIndex locale="ko" {...props} />;
 }

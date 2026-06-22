@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 
+import { ArtistAzNav } from "@/components/ArtistAzNav";
 import { BrowseHubGrid } from "@/components/BrowseHubGrid";
 import { Pagination } from "@/components/Pagination";
 import { getArtistsHubPage } from "@/lib/cached-hub-data";
@@ -41,7 +42,8 @@ export default async function ArtistsPage({ searchParams }: ArtistsPageProps) {
     <div className="space-y-8 px-5">
       <div>
         <h1 className="mb-2 text-2xl font-semibold">Artistas</h1>
-        <p className="mb-8 text-sm text-[#6b6b6b]">Explorar obras de arte por artista</p>
+        <p className="mb-5 text-sm text-[#6b6b6b]">Explorar obras de arte por artista</p>
+        <ArtistAzNav basePath="/pt/artistas/letter" />
       </div>
 
       {artists.length ? (
