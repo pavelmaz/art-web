@@ -1,5 +1,6 @@
 import { createClient } from "@supabase/supabase-js";
 
+import { ARTIST_INDEX_LETTERS } from "@/lib/artist-index";
 import { escapeXml, getPublicSiteUrl } from "@/lib/sitemap-xml";
 import { supabase as blogSupabase } from "@/lib/supabase";
 import { slugify } from "@/lib/utils";
@@ -119,6 +120,14 @@ export async function GET() {
       if (seg) {
         entries.push({ loc: `${base}/artists/${seg}` });
       }
+    }
+
+    for (const letter of ARTIST_INDEX_LETTERS) {
+      entries.push({
+        loc: `${base}/artists/letter/${letter}`,
+        changefreq: "weekly",
+        priority: 0.6,
+      });
     }
 
     const GENRE_SLUGS = [

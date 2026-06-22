@@ -1,4 +1,4 @@
-export const PAGE_SIZE = 30;
+export const PAGE_SIZE = 90;
 
 export function getPaginationParams(searchParams: { page?: string }) {
   const parsed = Number.parseInt(searchParams.page ?? "1", 10);
