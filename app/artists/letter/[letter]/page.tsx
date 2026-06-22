@@ -6,11 +6,12 @@ import { BrowseHubGrid } from "@/components/BrowseHubGrid";
 import { Pagination } from "@/components/Pagination";
 import {
   artistLetterBucket,
-  artistLetterLabel,
   getAllArtistsForIndex,
   isArtistIndexLetter,
 } from "@/lib/artist-index";
+import { fillArtistHubPreviewImages } from "@/lib/cached-hub-data";
 import { getPaginationParams, getTotalPages } from "@/lib/pagination";
+import { slugify } from "@/lib/utils";
 
 export const revalidate = 86400;
 
@@ -57,7 +58,16 @@ export default async function ArtistsByLetterPage({ params, searchParams }: Lett
   }
 
   const totalPages = Math.max(1, getTotalPages(matches.length));
-  const pageItems = matches.slice(from, to + 1);
+  const pageSlice = matches.slice(from, to + 1);
+  const withPreviews = await fillArtistHubPreviewImages(
+    pageSlice.map((a) => ({
+      display: a.display,
+      count: a.count,
+      slug: a.slug,
+      image_id: a.imageId,
+      url: null,
+    })),
+  );
   const label = letter === "other" ? "0–9 & other" : letter.toUpperCase();
 
   return (
@@ -69,12 +79,12 @@ export default async function ArtistsByLetterPage({ params, searchParams }: Lett
       </div>
 
       <BrowseHubGrid
-        items={pageItems.map((a) => ({
+        items={withPreviews.map((a) => ({
           name: a.display,
-          href: `/artists/${a.slug}`,
+          href: a.slug ? `/artists/${a.slug}` : `/artists/${slugify(a.display)}`,
           count: a.count,
-          imageId: a.imageId,
-          url: null,
+          imageId: a.image_id,
+          url: a.url,
         }))}
       />
 
