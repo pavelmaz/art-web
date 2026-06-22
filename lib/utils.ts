@@ -206,6 +206,17 @@ function supabaseRenditionUrl(url: string, rendition: ImageRendition): string | 
   return `${prefix}renditions/${IMAGE_RENDITIONS[rendition]}/${webpPath}`;
 }
 
+/** Optional image CDN (e.g. Cloudflare-cached `cdn.fineartfree.com`) that proxies Supabase Storage. */
+const IMAGE_CDN_HOST = process.env.NEXT_PUBLIC_IMAGE_CDN_HOST?.trim();
+
+/** Route Supabase Storage URLs through the image CDN when configured; leave other hosts untouched. */
+function cdnRewrite(url: string): string {
+  if (!IMAGE_CDN_HOST || !url) {
+    return url;
+  }
+  return url.replace(/^https:\/\/[a-z0-9-]+\.supabase\.co\//i, `https://${IMAGE_CDN_HOST}/`);
+}
+
 export type ArtworkImageUrlOptions = {
   /** JPEG/WebP quality for Supabase `/render/image/` URLs (1–100). Ignored for other hosts. */
   quality?: number;
@@ -225,10 +236,10 @@ export function artworkImageUrl(artwork: ArtworkImageSource, options?: ArtworkIm
     if (USE_IMAGE_RENDITIONS && options?.rendition) {
       const rendition = supabaseRenditionUrl(fromImageId, options.rendition);
       if (rendition) {
-        return rendition;
+        return cdnRewrite(rendition);
       }
     }
-    return optimizeImageUrl(fromImageId, quality, width);
+    return cdnRewrite(optimizeImageUrl(fromImageId, quality, width));
   }
 
   // Fallback to url only if no image_id
@@ -237,10 +248,10 @@ export function artworkImageUrl(artwork: ArtworkImageSource, options?: ArtworkIm
     if (USE_IMAGE_RENDITIONS && options?.rendition) {
       const rendition = supabaseRenditionUrl(rawUrl, options.rendition);
       if (rendition) {
-        return rendition;
+        return cdnRewrite(rendition);
       }
     }
-    return optimizeImageUrl(rawUrl, quality, width);
+    return cdnRewrite(optimizeImageUrl(rawUrl, quality, width));
   }
 
   return "";
@@ -267,12 +278,12 @@ export function artworkDetailImageUrl(artwork: ArtworkImageSource): string {
 export function artworkOriginalUrl(artwork: ArtworkImageSource): string {
   const rawUrl = artwork.url?.trim();
   if (rawUrl && isLikelyImageUrl(rawUrl) && !isBlockedDirectImageHost(rawUrl)) {
-    return rawUrl;
+    return cdnRewrite(rawUrl);
   }
   const id = artwork.image_id;
   if (!id) return "";
   if (id.startsWith("http://") || id.startsWith("https://")) {
-    return isBlockedDirectImageHost(id) ? "" : id;
+    return isBlockedDirectImageHost(id) ? "" : cdnRewrite(id);
   }
   return `https://www.artic.edu/iiif/2/${id}/full/1200,/0/default.jpg`;
 }
