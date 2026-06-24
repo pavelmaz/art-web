@@ -5,15 +5,24 @@ import { useState, type FormEvent } from "react";
 import type { FineArtProCopy } from "@/lib/fineart-pro-translations";
 import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
 
+/**
+ * Serializable shape of the join copy: the two interpolating functions
+ * (selectedPlan / signedInAs) are resolved to strings on the server before being
+ * passed here, because functions cannot cross the server→client boundary.
+ */
+type JoinAuthCopy = Omit<FineArtProCopy["joinAuth"], "selectedPlan" | "signedInAs"> & {
+  selectedPlanLabel: string;
+  signedInAsLabel: string;
+};
+
 type FineArtProJoinAuthProps = {
   nextPath: string;
   plan: "monthly" | "yearly" | null;
   isLoggedIn: boolean;
-  email: string | null;
-  copy: FineArtProCopy["joinAuth"];
+  copy: JoinAuthCopy;
 };
 
-export function FineArtProJoinAuth({ nextPath, plan, isLoggedIn, email, copy }: FineArtProJoinAuthProps) {
+export function FineArtProJoinAuth({ nextPath, plan, isLoggedIn, copy }: FineArtProJoinAuthProps) {
   const [otpEmail, setOtpEmail] = useState("");
   const [busy, setBusy] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
@@ -97,7 +106,7 @@ export function FineArtProJoinAuth({ nextPath, plan, isLoggedIn, email, copy }: 
     <div className="mt-8 space-y-6">
       {plan ? (
         <p className="text-sm text-[#4a4a4a]">
-          <span className="font-semibold text-[#1a1a1a]">{copy.selectedPlan(plan)}</span>
+          <span className="font-semibold text-[#1a1a1a]">{copy.selectedPlanLabel}</span>
         </p>
       ) : (
         <p className="text-sm text-[#6b6b6b]">{copy.pickPlanHint}</p>
@@ -105,7 +114,7 @@ export function FineArtProJoinAuth({ nextPath, plan, isLoggedIn, email, copy }: 
 
       {isLoggedIn ? (
         <div className="space-y-4 rounded-lg border border-[#e8e6e1] bg-[#f5f5f5] px-4 py-3 text-sm text-[#1a1a1a]">
-          <p>{copy.signedInAs(email ?? "")}</p>
+          <p>{copy.signedInAsLabel}</p>
           {plan ? (
             <button
               type="button"

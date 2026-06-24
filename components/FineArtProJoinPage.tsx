@@ -51,6 +51,15 @@ export async function FineArtProJoinPage({ locale, searchParams }: FineArtProJoi
 
   const nextPath = fineArtProJoinPath(locale, plan);
 
+  // Resolve the locale's interpolating copy server-side: functions can't be passed
+  // to a Client Component, so the client receives plain strings instead.
+  const { selectedPlan, signedInAs, ...joinAuthRest } = c.joinAuth;
+  const joinAuthCopy = {
+    ...joinAuthRest,
+    selectedPlanLabel: plan ? selectedPlan(plan) : "",
+    signedInAsLabel: signedInAs(user?.email ?? ""),
+  };
+
   return (
     <div className="min-h-[50vh] bg-white px-3 py-10 md:px-6 md:py-14">
       <div className="mx-auto max-w-md">
@@ -70,8 +79,7 @@ export async function FineArtProJoinPage({ locale, searchParams }: FineArtProJoi
           nextPath={nextPath}
           plan={plan}
           isLoggedIn={!!user}
-          email={user?.email ?? null}
-          copy={c.joinAuth}
+          copy={joinAuthCopy}
         />
 
         <p className="mt-8 text-center text-sm text-[#6b6b6b]">
