@@ -388,12 +388,8 @@ export function ArtworkInsightsOverlay() {
                   e.stopPropagation();
                   setOpenPopupId(insight.id);
                 }}
-                className="flex size-7 shrink-0 items-center justify-center rounded-full bg-white text-xs font-bold text-[#1a1a1a] shadow-md transition-transform hover:scale-110"
-                style={{
-                  borderWidth: 2,
-                  borderStyle: "solid",
-                  borderColor: "#4CAF50",
-                }}
+                className="flex size-7 shrink-0 items-center justify-center rounded-full border border-white/30 bg-black/35 text-xs font-bold text-white shadow-lg transition-transform hover:scale-110"
+                style={{ backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)" }}
                 aria-label={`${number}. ${insight.title}`}
               >
                 {number}
@@ -431,34 +427,11 @@ export function ArtworkInsightsOverlay() {
 
 /** Info box and Discover button — place under the main artwork image. */
 export function ArtworkInsightsControls() {
-  const { loading, error, handleDiscover, labels } = useArtworkInsights();
+  const { error } = useArtworkInsights();
 
-  return (
-    <div className="mt-4">
-      <div className="flex flex-wrap items-center gap-3">
-        <div className="flex min-w-0 flex-1 items-center gap-2.5 rounded-lg bg-[#eceff3] p-3">
-          <Eye className="size-4 shrink-0 text-[#6b6b6b]" aria-hidden />
-          <p className="text-sm font-medium text-[#1a1a1a]">{labels.insightsDiscoverAbout}</p>
-        </div>
+  if (!error) {
+    return null;
+  }
 
-        <button
-          type="button"
-          onClick={handleDiscover}
-          disabled={loading}
-          className="inline-flex shrink-0 items-center justify-center gap-2 rounded-md bg-[#9e9e9e] px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[#8a8a8a] disabled:cursor-not-allowed disabled:opacity-60"
-        >
-          {loading ? (
-            <>
-              <Loader2 className="size-4 animate-spin" aria-hidden />
-              {labels.insightsGenerating}
-            </>
-          ) : (
-            labels.insightsDiscover
-          )}
-        </button>
-      </div>
-
-      {error ? <p className="mt-2 text-xs text-red-600">{error}</p> : null}
-    </div>
-  );
+  return <p className="mt-3 text-xs text-red-600">{error}</p>;
 }
