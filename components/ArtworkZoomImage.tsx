@@ -10,182 +10,205 @@ type ArtworkZoomImageProps = {
 };
 
 const MIN_ZOOM = 1;
-const MAX_ZOOM = 4;
-const ZOOM_STEP = 0.25;
+const MAX_ZOOM = 5;
+const WHEEL_STEP = 0.5;
+const BUTTON_STEP = 0.5;
+const DOUBLE_TAP_ZOOM = 2.5;
+const DOUBLE_TAP_MS = 300;
+
+function clampNum(value: number, lo: number, hi: number): number {
+  return Math.min(hi, Math.max(lo, value));
+}
+
+function distance(a: { x: number; y: number }, b: { x: number; y: number }): number {
+  return Math.hypot(a.x - b.x, a.y - b.y);
+}
 
 export function ArtworkZoomImage({ src, fullSrc, alt }: ArtworkZoomImageProps) {
   const [open, setOpen] = useState(false);
-  const [zoom, setZoom] = useState(1);
-  const [magnifyMode, setMagnifyMode] = useState(false);
-  const [origin, setOrigin] = useState("center center");
-  const [pan, setPan] = useState({ x: 0, y: 0 });
-  const [isDragging, setIsDragging] = useState(false);
+  const [scale, setScale] = useState(1);
+  const [tx, setTx] = useState(0);
+  const [ty, setTy] = useState(0);
+  const [dragging, setDragging] = useState(false);
+
   const viewportRef = useRef<HTMLDivElement | null>(null);
-  const zoomRef = useRef(zoom);
-  zoomRef.current = zoom;
+  const imgRef = useRef<HTMLImageElement | null>(null);
+  const pointers = useRef(new Map<number, { x: number; y: number }>());
+  const pinchRef = useRef<{ dist: number; scale: number } | null>(null);
+  const lastTapRef = useRef<{ t: number; x: number; y: number }>({ t: 0, x: 0, y: 0 });
+  const view = useRef({ scale: 1, tx: 0, ty: 0 });
 
-  const dragStateRef = useRef({
-    active: false,
-    pointerId: -1,
-    startX: 0,
-    startY: 0,
-    startPanX: 0,
-    startPanY: 0,
-    moved: false,
-  });
+  const commit = useCallback((s: number, x: number, y: number) => {
+    view.current = { scale: s, tx: x, ty: y };
+    setScale(s);
+    setTx(x);
+    setTy(y);
+  }, []);
 
-  const clampZoom = useCallback((z: number) => Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, +z.toFixed(2))), []);
+  const reset = useCallback(() => {
+    commit(MIN_ZOOM, 0, 0);
+    pinchRef.current = null;
+    pointers.current.clear();
+    setDragging(false);
+  }, [commit]);
 
-  useEffect(() => {
-    if (!open) return;
+  const close = useCallback(() => {
+    reset();
+    setOpen(false);
+  }, [reset]);
 
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        setOpen(false);
-      }
-      if (event.key === "+" || event.key === "=") {
-        setZoom((z) => clampZoom(z + ZOOM_STEP));
-      }
-      if (event.key === "-") {
-        setZoom((z) => {
-          const nz = clampZoom(z - ZOOM_STEP);
-          if (nz === 1) setPan({ x: 0, y: 0 });
-          return nz;
-        });
-      }
-      if (event.key === "0") {
-        setZoom(1);
-        setOrigin("center center");
-        setPan({ x: 0, y: 0 });
-      }
-    };
-
-    window.addEventListener("keydown", onKeyDown);
-    return () => window.removeEventListener("keydown", onKeyDown);
-  }, [open, clampZoom]);
-
-  useEffect(() => {
-    if (open) return;
-    setZoom(1);
-    setOrigin("center center");
-    setPan({ x: 0, y: 0 });
-    setMagnifyMode(false);
-    setIsDragging(false);
-    dragStateRef.current.active = false;
-  }, [open]);
-
-  const resetZoom = () => {
-    setZoom(1);
-    setOrigin("center center");
-    setPan({ x: 0, y: 0 });
-    setMagnifyMode(false);
-    setIsDragging(false);
-    dragStateRef.current.active = false;
-  };
-
-  const zoomIn = () => setZoom((z) => clampZoom(z + ZOOM_STEP));
-  const zoomOut = () =>
-    setZoom((z) => {
-      const nz = clampZoom(z - ZOOM_STEP);
-      if (nz === 1) setPan({ x: 0, y: 0 });
-      return nz;
-    });
-
-  const zoomAtPoint = (clientX: number, clientY: number, element: HTMLElement) => {
-    const rect = element.getBoundingClientRect();
-    if (!rect.width || !rect.height) return;
-    const x = ((clientX - rect.left) / rect.width) * 100;
-    const y = ((clientY - rect.top) / rect.height) * 100;
-    setOrigin(`${x.toFixed(2)}% ${y.toFixed(2)}%`);
-    setZoom((z) => clampZoom(z + ZOOM_STEP));
-  };
-
-  /** Pan whenever zoomed — works with magnify mode: drag moves, click (no drag) zooms at point. */
-  const beginPan = (event: ReactPointerEvent<HTMLDivElement>) => {
-    if (zoom <= 1) return;
-    if (event.button !== 0) return;
-
-    dragStateRef.current = {
-      active: true,
-      pointerId: event.pointerId,
-      startX: event.clientX,
-      startY: event.clientY,
-      startPanX: pan.x,
-      startPanY: pan.y,
-      moved: false,
-    };
-    setIsDragging(true);
-    event.currentTarget.setPointerCapture(event.pointerId);
-  };
-
-  const updatePan = (event: ReactPointerEvent<HTMLDivElement>) => {
-    const d = dragStateRef.current;
-    if (!d.active || d.pointerId !== event.pointerId) return;
-    const dx = event.clientX - d.startX;
-    const dy = event.clientY - d.startY;
-    if (Math.abs(dx) > 2 || Math.abs(dy) > 2) {
-      d.moved = true;
+  /** Keep the image from being dragged completely out of view. */
+  const clampOffset = useCallback((nx: number, ny: number, s: number) => {
+    const vp = viewportRef.current?.getBoundingClientRect();
+    const img = imgRef.current;
+    if (!vp || !img) {
+      return { x: nx, y: ny };
     }
-    setPan({
-      x: d.startPanX + dx,
-      y: d.startPanY + dy,
-    });
-  };
+    const maxX = Math.max(0, (img.clientWidth * s - vp.width) / 2);
+    const maxY = Math.max(0, (img.clientHeight * s - vp.height) / 2);
+    return { x: clampNum(nx, -maxX, maxX), y: clampNum(ny, -maxY, maxY) };
+  }, []);
 
-  const endPan = (event: ReactPointerEvent<HTMLDivElement>) => {
-    const d = dragStateRef.current;
-    if (d.active && d.pointerId === event.pointerId) {
-      dragStateRef.current.active = false;
-      dragStateRef.current.pointerId = -1;
-      setIsDragging(false);
-      try {
-        event.currentTarget.releasePointerCapture(event.pointerId);
-      } catch {
-        // ignore
-      }
-    }
-  };
-
-  useEffect(() => {
-    if (!open) return;
-    const node = viewportRef.current;
-    if (!node) return;
-
-    const handler = (event: WheelEvent) => {
-      const surface = node.querySelector<HTMLElement>("[data-zoom-surface]");
-      if (!surface) return;
-      event.preventDefault();
-
-      const rect = surface.getBoundingClientRect();
-      const cx = event.clientX;
-      const cy = event.clientY;
-
-      const prevZoom = zoomRef.current;
-      const direction = event.deltaY > 0 ? -1 : 1;
-      const nextZoom = clampZoom(prevZoom + direction * ZOOM_STEP);
-      if (nextZoom === prevZoom) return;
-
-      if (nextZoom === 1) {
-        setPan({ x: 0, y: 0 });
-        setOrigin("center center");
-        zoomRef.current = 1;
-        setZoom(1);
+  /** Zoom to a new scale while keeping the focal screen point stationary. */
+  const zoomTo = useCallback(
+    (rawScale: number, focalX: number, focalY: number) => {
+      const vp = viewportRef.current?.getBoundingClientRect();
+      if (!vp) {
         return;
       }
+      const next = clampNum(Number(rawScale.toFixed(3)), MIN_ZOOM, MAX_ZOOM);
+      const { scale: s, tx: cx, ty: cy } = view.current;
+      if (next === s) {
+        return;
+      }
+      if (next === MIN_ZOOM) {
+        commit(MIN_ZOOM, 0, 0);
+        return;
+      }
+      const centerX = vp.left + vp.width / 2;
+      const centerY = vp.top + vp.height / 2;
+      const focalVecX = focalX - (centerX + cx);
+      const focalVecY = focalY - (centerY + cy);
+      const factor = 1 - next / s;
+      const clamped = clampOffset(cx + focalVecX * factor, cy + focalVecY * factor, next);
+      commit(next, clamped.x, clamped.y);
+    },
+    [clampOffset, commit],
+  );
 
-      const ox = ((cx - rect.left) / rect.width) * 100;
-      const oy = ((cy - rect.top) / rect.height) * 100;
-      setOrigin(`${ox.toFixed(2)}% ${oy.toFixed(2)}%`);
-      zoomRef.current = nextZoom;
-      setZoom(nextZoom);
+  const zoomAtCenter = useCallback(
+    (rawScale: number) => {
+      const vp = viewportRef.current?.getBoundingClientRect();
+      if (!vp) {
+        return;
+      }
+      zoomTo(rawScale, vp.left + vp.width / 2, vp.top + vp.height / 2);
+    },
+    [zoomTo],
+  );
+
+  useEffect(() => {
+    if (!open) {
+      return;
+    }
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        close();
+      } else if (event.key === "+" || event.key === "=") {
+        zoomAtCenter(view.current.scale + BUTTON_STEP);
+      } else if (event.key === "-") {
+        zoomAtCenter(view.current.scale - BUTTON_STEP);
+      } else if (event.key === "0") {
+        reset();
+      }
     };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [open, zoomAtCenter, reset, close]);
 
-    node.addEventListener("wheel", handler, { passive: false });
-    return () => node.removeEventListener("wheel", handler);
-  }, [open, clampZoom]);
+  useEffect(() => {
+    if (!open) {
+      return;
+    }
+    const node = viewportRef.current;
+    if (!node) {
+      return;
+    }
+    const onWheel = (event: WheelEvent) => {
+      event.preventDefault();
+      const direction = event.deltaY > 0 ? -1 : 1;
+      zoomTo(view.current.scale + direction * WHEEL_STEP, event.clientX, event.clientY);
+    };
+    node.addEventListener("wheel", onWheel, { passive: false });
+    return () => node.removeEventListener("wheel", onWheel);
+  }, [open, zoomTo]);
 
-  const cursorClass =
-    zoom > 1 ? (isDragging ? "cursor-grabbing" : "cursor-grab") : magnifyMode ? "cursor-zoom-in" : "";
+  const onPointerDown = (event: ReactPointerEvent<HTMLDivElement>) => {
+    event.currentTarget.setPointerCapture?.(event.pointerId);
+    pointers.current.set(event.pointerId, { x: event.clientX, y: event.clientY });
+
+    if (pointers.current.size === 2) {
+      const [p1, p2] = [...pointers.current.values()];
+      pinchRef.current = { dist: distance(p1, p2), scale: view.current.scale };
+      return;
+    }
+
+    if (pointers.current.size === 1) {
+      setDragging(true);
+      const now = Date.now();
+      const last = lastTapRef.current;
+      const isDoubleTap =
+        now - last.t < DOUBLE_TAP_MS &&
+        Math.hypot(event.clientX - last.x, event.clientY - last.y) < 30;
+      if (isDoubleTap) {
+        if (view.current.scale > MIN_ZOOM) {
+          reset();
+        } else {
+          zoomTo(DOUBLE_TAP_ZOOM, event.clientX, event.clientY);
+        }
+        lastTapRef.current = { t: 0, x: 0, y: 0 };
+      } else {
+        lastTapRef.current = { t: now, x: event.clientX, y: event.clientY };
+      }
+    }
+  };
+
+  const onPointerMove = (event: ReactPointerEvent<HTMLDivElement>) => {
+    const prev = pointers.current.get(event.pointerId);
+    if (!prev) {
+      return;
+    }
+    const current = { x: event.clientX, y: event.clientY };
+    pointers.current.set(event.pointerId, current);
+
+    if (pointers.current.size >= 2 && pinchRef.current) {
+      const [p1, p2] = [...pointers.current.values()];
+      const mid = { x: (p1.x + p2.x) / 2, y: (p1.y + p2.y) / 2 };
+      const nextScale = pinchRef.current.scale * (distance(p1, p2) / pinchRef.current.dist);
+      zoomTo(nextScale, mid.x, mid.y);
+      return;
+    }
+
+    if (pointers.current.size === 1) {
+      const dx = current.x - prev.x;
+      const dy = current.y - prev.y;
+      const { tx: cx, ty: cy, scale: s } = view.current;
+      const clamped = clampOffset(cx + dx, cy + dy, s);
+      commit(s, clamped.x, clamped.y);
+    }
+  };
+
+  const onPointerUp = (event: ReactPointerEvent<HTMLDivElement>) => {
+    pointers.current.delete(event.pointerId);
+    if (pointers.current.size < 2) {
+      pinchRef.current = null;
+    }
+    if (pointers.current.size === 0) {
+      setDragging(false);
+    }
+  };
+
+  const cursorClass = scale > 1 ? (dragging ? "cursor-grabbing" : "cursor-grab") : "cursor-zoom-in";
 
   return (
     <>
@@ -193,6 +216,7 @@ export function ArtworkZoomImage({ src, fullSrc, alt }: ArtworkZoomImageProps) {
         type="button"
         onClick={(event) => {
           event.stopPropagation();
+          reset();
           setOpen(true);
         }}
         className="group flex w-full cursor-zoom-in justify-center"
@@ -205,93 +229,65 @@ export function ArtworkZoomImage({ src, fullSrc, alt }: ArtworkZoomImageProps) {
       </button>
 
       {open ? (
-        <div className="fixed inset-0 z-50 bg-black/90" onClick={() => setOpen(false)}>
-          <div className="absolute right-4 top-4 z-10 flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
+        <div className="fixed inset-0 z-50 bg-black/90">
+          <div className="absolute right-4 top-4 z-10 flex items-center gap-2">
             <button
               type="button"
-              onClick={zoomOut}
-              className="rounded-md bg-white/15 px-3 py-2 text-sm text-white hover:bg-white/25"
+              onClick={() => zoomAtCenter(view.current.scale - BUTTON_STEP)}
+              className="rounded-md bg-white/15 px-3 py-2 text-sm text-white transition-colors hover:bg-white/25"
               aria-label="Zoom out"
             >
               -
             </button>
             <button
               type="button"
-              onClick={zoomIn}
-              className="rounded-md bg-white/15 px-3 py-2 text-sm text-white hover:bg-white/25"
+              onClick={() => zoomAtCenter(view.current.scale + BUTTON_STEP)}
+              className="rounded-md bg-white/15 px-3 py-2 text-sm text-white transition-colors hover:bg-white/25"
               aria-label="Zoom in"
             >
               +
             </button>
             <button
               type="button"
-              onClick={() => setMagnifyMode((v) => !v)}
-              className={
-                magnifyMode
-                  ? "rounded-md bg-white px-3 py-2 text-sm text-black"
-                  : "rounded-md bg-white/15 px-3 py-2 text-sm text-white hover:bg-white/25"
-              }
-              aria-label="Toggle point zoom mode"
-              title="Click image to zoom at a point"
+              onClick={reset}
+              className="rounded-md bg-white/15 px-3 py-2 text-sm text-white transition-colors hover:bg-white/25"
+              aria-label="Reset zoom"
             >
-              <svg
-                viewBox="0 0 24 24"
-                width="16"
-                height="16"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-                aria-hidden
-              >
-                <circle cx="10.5" cy="10.5" r="6.5" stroke="currentColor" strokeWidth="2" />
-                <path d="M15.5 15.5L21 21" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-                <path d="M10.5 7.5V13.5M7.5 10.5H13.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-              </svg>
+              {Math.round(scale * 100)}%
             </button>
             <button
               type="button"
-              onClick={resetZoom}
-              className="rounded-md bg-white/15 px-3 py-2 text-sm text-white hover:bg-white/25"
-            >
-              {Math.round(zoom * 100)}%
-            </button>
-            <button
-              type="button"
-              onClick={() => setOpen(false)}
-              className="rounded-md bg-white/15 px-3 py-2 text-sm text-white hover:bg-white/25"
+              onClick={close}
+              className="rounded-md bg-white/15 px-3 py-2 text-sm text-white transition-colors hover:bg-white/25"
             >
               Close
             </button>
           </div>
 
           <p className="pointer-events-none absolute bottom-4 left-1/2 z-10 -translate-x-1/2 text-center text-xs text-white/70">
-            {zoom > 1 ? "Drag with the mouse to move around · Scroll wheel to zoom" : "Scroll wheel or + to zoom"}
+            Scroll or pinch to zoom · drag to move · double-click to zoom
           </p>
 
           <div
             ref={viewportRef}
-            className="relative z-[1] flex h-full w-full items-center justify-center overflow-hidden p-8 touch-none"
-            onClick={(e) => e.stopPropagation()}
+            className={`flex h-full w-full touch-none items-center justify-center overflow-hidden p-4 sm:p-8 ${cursorClass}`}
+            onPointerDown={onPointerDown}
+            onPointerMove={onPointerMove}
+            onPointerUp={onPointerUp}
+            onPointerCancel={onPointerUp}
           >
-            <div
-              data-zoom-surface
-              style={{ transform: `translate3d(${pan.x}px, ${pan.y}px, 0) scale(${zoom})`, transformOrigin: origin }}
-              className={cursorClass}
-              onPointerDown={beginPan}
-              onPointerMove={updatePan}
-              onPointerUp={endPan}
-              onPointerCancel={endPan}
-              onClick={(event) => {
-                if (!magnifyMode || dragStateRef.current.moved) return;
-                zoomAtPoint(event.clientX, event.clientY, event.currentTarget as HTMLElement);
+            <img
+              ref={imgRef}
+              src={fullSrc || src}
+              alt={alt}
+              draggable={false}
+              className="max-h-full max-w-full select-none object-contain"
+              style={{
+                transform: `translate(${tx}px, ${ty}px) scale(${scale})`,
+                transformOrigin: "center center",
+                willChange: "transform",
               }}
-            >
-              <img
-                src={fullSrc || src}
-                alt={alt}
-                style={{ width: "100%", height: "auto", objectFit: "contain" }}
-                className="max-w-full"
-              />
-            </div>
+            />
           </div>
         </div>
       ) : null}
