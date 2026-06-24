@@ -1,13 +1,13 @@
 import type { Metadata } from "next";
 import { artworkDetailSelectColumns } from "@/lib/locale-query-columns";
 import { artworkDetailPath, buildArtworkLanguageAlternates } from "@/lib/locale-routes";
-import { fineArtProPath } from "@/lib/fineart-pro-path";
 import type { ReactNode } from "react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { DownloadButton } from "@/components/DownloadButton";
+import { ProDownloadRow } from "@/components/ProDownloadRow";
 import { ArtworkJsonLd } from "@/components/ArtworkJsonLd";
 import {
   ArtworkInsightsControls,
@@ -522,28 +522,7 @@ export default async function ArtworkDetailPageIt({ params }: ArtworkPageProps) 
                   <DownloadButton imageUrl={imageUrl} label={t.downloadStandard} />
                 </div>
 
-                <div className="flex items-center justify-between gap-4 rounded-lg bg-[#eceff3] p-3">
-                  <div>
-                    <p className="text-sm font-medium text-[#1a1a1a]">🔒 {t.downloadMaxSize}</p>
-                    <p className="text-xs text-[#999]">{t.downloadMaxFormat}</p>
-                  </div>
-                  {isPro ? (
-                    <a
-                      href={maxDownloadHref}
-                      download
-                      className="inline-flex items-center justify-center rounded-md bg-[#9e9e9e] px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-[#8a8a8a] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#6b6b6b] focus-visible:ring-offset-2"
-                    >
-                      {t.downloadStandard}
-                    </a>
-                  ) : (
-                    <Link
-                      href={fineArtProPath("it")}
-                      className="inline-flex items-center justify-center rounded-md bg-[#9e9e9e] px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-[#8a8a8a] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#6b6b6b] focus-visible:ring-offset-2"
-                    >
-                      {t.downloadStandard}
-                    </Link>
-                  )}
-                </div>
+                <ProDownloadRow locale="it" isPro={isPro} downloadHref={maxDownloadHref} />
               </div>
 
               <div className="my-4 border-t border-[#e8e6e1]" />
