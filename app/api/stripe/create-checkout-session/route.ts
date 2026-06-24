@@ -75,7 +75,7 @@ export async function POST(req: NextRequest) {
       customer: customerId,
       mode: "subscription",
       line_items: [{ price: priceId, quantity: 1 }],
-      metadata: { supabase_user_id: user.id },
+      metadata: { supabase_user_id: user.id, plan: plan === "yearly" ? "yearly" : "monthly" },
       success_url: `${process.env.NEXT_PUBLIC_SITE_URL}/fineart-pro/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${process.env.NEXT_PUBLIC_SITE_URL}/fineart-pro`,
     });
