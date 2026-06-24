@@ -89,7 +89,7 @@ export async function GET() {
         museum: string | null;
       }>) {
         const a = row.artist_display?.trim();
-        if (a) {
+        if (a && !/^https?:\/\//i.test(a)) {
           artists.add(a);
         }
         const g = row.genre_title?.trim();

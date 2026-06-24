@@ -98,6 +98,7 @@ export async function getCachedArtistsHubList(): Promise<ArtistHubListItem[]> {
     .from("artists")
     .select("name, slug, image_url, artwork_count")
     .gt("artwork_count", 0)
+    .not("name", "ilike", "http%") // skip junk records whose "name" is a source URI
     .order("artwork_count", { ascending: false });
 
   if (error || !data || data.length === 0) {

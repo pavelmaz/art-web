@@ -282,7 +282,7 @@ export function ArtworkInsightsProvider({
     >
       <style
         dangerouslySetInnerHTML={{
-          __html: `@keyframes insight-dot-in{from{opacity:0;transform:translate(-50%,-50%) scale(.75)}to{opacity:1;transform:translate(-50%,-50%) scale(1)}}`,
+          __html: `@keyframes insight-dot-in{from{opacity:0;transform:translate(-50%,-50%) scale(.75)}to{opacity:1;transform:translate(-50%,-50%) scale(1)}}@keyframes insight-cta-pulse{0%{box-shadow:0 0 0 0 rgba(76,175,80,.5)}70%{box-shadow:0 0 0 9px rgba(76,175,80,0)}100%{box-shadow:0 0 0 0 rgba(76,175,80,0)}}.insight-cta{animation:insight-cta-pulse 2s ease-out infinite}.insight-cta:hover{animation:none}@media (prefers-reduced-motion:reduce){.insight-cta{animation:none}}`,
         }}
       />
       {children}
@@ -339,6 +339,7 @@ export function ArtworkInsightsOverlay() {
     <div className="pointer-events-none absolute inset-0 z-10">
       {visibleInsights.map((insight) => {
         const isOpen = openPopupId === insight.id;
+        const number = insights.findIndex((i) => i.id === insight.id) + 1;
         return (
           <div
             key={insight.id}
@@ -356,15 +357,16 @@ export function ArtworkInsightsOverlay() {
                   e.stopPropagation();
                   setOpenPopupId(insight.id);
                 }}
-                className="box-border size-6 shrink-0 rounded-full transition-opacity hover:opacity-90"
+                className="flex size-7 shrink-0 items-center justify-center rounded-full bg-white text-xs font-bold text-[#1a1a1a] shadow-md transition-transform hover:scale-110"
                 style={{
-                  backgroundColor: "rgba(140, 140, 140, 0.4)",
                   borderWidth: 2,
                   borderStyle: "solid",
                   borderColor: "#4CAF50",
                 }}
-                aria-label={insight.title}
-              />
+                aria-label={`${number}. ${insight.title}`}
+              >
+                {number}
+              </button>
             ) : null}
             {isOpen ? (
               <div
@@ -412,7 +414,7 @@ export function ArtworkInsightsControls() {
           type="button"
           onClick={handleDiscover}
           disabled={loading}
-          className="inline-flex shrink-0 items-center justify-center gap-2 rounded-md bg-[#9e9e9e] px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[#8a8a8a] disabled:cursor-not-allowed disabled:opacity-60"
+          className={`inline-flex shrink-0 items-center justify-center gap-2 rounded-md bg-[#9e9e9e] px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[#8a8a8a] disabled:cursor-not-allowed disabled:opacity-60 ${loading ? "" : "insight-cta"}`}
         >
           {loading ? (
             <>
