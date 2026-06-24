@@ -282,7 +282,7 @@ export function ArtworkInsightsProvider({
     >
       <style
         dangerouslySetInnerHTML={{
-          __html: `@keyframes insight-dot-in{from{opacity:0;transform:translate(-50%,-50%) scale(.75)}to{opacity:1;transform:translate(-50%,-50%) scale(1)}}@keyframes insight-cta-pulse{0%{box-shadow:0 0 0 0 rgba(76,175,80,.5)}70%{box-shadow:0 0 0 9px rgba(76,175,80,0)}100%{box-shadow:0 0 0 0 rgba(76,175,80,0)}}.insight-cta{animation:insight-cta-pulse 2s ease-out infinite}.insight-cta:hover{animation:none}@media (prefers-reduced-motion:reduce){.insight-cta{animation:none}}`,
+          __html: `@keyframes insight-dot-in{from{opacity:0;transform:translate(-50%,-50%) scale(.75)}to{opacity:1;transform:translate(-50%,-50%) scale(1)}}`,
         }}
       />
       {children}
@@ -323,8 +323,39 @@ export function ArtworkInsightsProvider({
 
 /** Overlay insight dots on the main artwork image (place inside a `relative` wrapper). */
 export function ArtworkInsightsOverlay() {
-  const { insights, visibleCount, openPopupId, setOpenPopupId, closePopup, labels } =
+  const { insights, visibleCount, openPopupId, setOpenPopupId, closePopup, labels, loading, handleDiscover } =
     useArtworkInsights();
+
+  // Before any insights exist, show a frosted-glass "Discover" pill on the painting itself.
+  if (insights.length === 0) {
+    return (
+      <div className="pointer-events-none absolute inset-0 z-10">
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            handleDiscover();
+          }}
+          disabled={loading}
+          aria-label={labels.insightsDiscoverAbout}
+          className="pointer-events-auto absolute bottom-3 left-3 inline-flex items-center gap-2 rounded-full border border-white/30 bg-black/35 px-4 py-2 text-sm font-medium text-white shadow-lg transition-colors hover:bg-black/50 disabled:cursor-not-allowed disabled:opacity-70"
+          style={{ backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)" }}
+        >
+          {loading ? (
+            <>
+              <Loader2 className="size-4 animate-spin" aria-hidden />
+              {labels.insightsGenerating}
+            </>
+          ) : (
+            <>
+              <Eye className="size-4" aria-hidden />
+              {labels.insightsDiscover}
+            </>
+          )}
+        </button>
+      </div>
+    );
+  }
 
   if (visibleCount === 0) {
     return null;
@@ -414,7 +445,7 @@ export function ArtworkInsightsControls() {
           type="button"
           onClick={handleDiscover}
           disabled={loading}
-          className={`inline-flex shrink-0 items-center justify-center gap-2 rounded-md bg-[#9e9e9e] px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[#8a8a8a] disabled:cursor-not-allowed disabled:opacity-60 ${loading ? "" : "insight-cta"}`}
+          className="inline-flex shrink-0 items-center justify-center gap-2 rounded-md bg-[#9e9e9e] px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[#8a8a8a] disabled:cursor-not-allowed disabled:opacity-60"
         >
           {loading ? (
             <>
