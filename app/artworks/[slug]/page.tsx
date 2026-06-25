@@ -474,6 +474,23 @@ export default async function ArtworkDetailPage({ params }: ArtworkPageProps) {
                 )}
               </div>
               <Breadcrumbs items={breadcrumbItems} currentPath={`/artworks/${artwork.slug}`} includeJsonLd={false} />
+
+              {artwork.description?.trim() ? (
+                <section className="max-w-2xl pt-4">
+                  <p className="mb-2 text-xs font-medium uppercase tracking-wide text-[#9a9a9a]">
+                    History &amp; facts
+                  </p>
+                  <h2 className="mb-5 text-2xl font-semibold tracking-tight text-[#1a1a1a]">
+                    {artwork.title}
+                  </h2>
+                  <div>
+                    <ArtworkDescriptionFormatted description={artwork.description.trim()} />
+                  </div>
+                  {artistSlug && relatedArtworks.length === 0 ? (
+                    <SectionCtaLink href={`/artists/${artistSlug}`}>Browse all</SectionCtaLink>
+                  ) : null}
+                </section>
+              ) : null}
             </div>
           </ArtworkInsightsProvider>
 
@@ -573,23 +590,6 @@ export default async function ArtworkDetailPage({ params }: ArtworkPageProps) {
             </div>
           </aside>
         </div>
-
-        {artwork.description?.trim() ? (
-          <section className="mt-12 max-w-2xl">
-            <p className="mb-2 text-xs font-medium uppercase tracking-wide text-[#9a9a9a]">
-              History &amp; facts
-            </p>
-            <h2 className="mb-5 text-2xl font-semibold tracking-tight text-[#1a1a1a]">
-              {artwork.title}
-            </h2>
-            <div>
-              <ArtworkDescriptionFormatted description={artwork.description.trim()} />
-            </div>
-            {artistSlug && relatedArtworks.length === 0 ? (
-              <SectionCtaLink href={`/artists/${artistSlug}`}>Browse all</SectionCtaLink>
-            ) : null}
-          </section>
-        ) : null}
 
         {relatedArtworks.length > 0 && artistSlug ? (
           <section className="mt-10">
