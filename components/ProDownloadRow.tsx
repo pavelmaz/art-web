@@ -72,7 +72,7 @@ export function ProDownloadRow({ locale, isPro, downloadHref, glass = false }: P
       <span
         className={
           glass
-            ? "glass-primary inline-flex shrink-0 items-center gap-1 rounded-md px-4 py-2 text-sm font-medium"
+            ? "inline-flex shrink-0 items-center gap-1 rounded-md bg-[#4CAF50] px-4 py-2 text-sm font-medium text-white shadow-sm transition-colors hover:bg-[#43A047]"
             : "inline-flex shrink-0 items-center gap-1 rounded-md bg-[#1a1a1a] px-4 py-2 text-sm font-medium text-white"
         }
       >

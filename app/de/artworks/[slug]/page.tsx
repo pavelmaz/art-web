@@ -505,13 +505,8 @@ export default async function ArtworkDetailPageDe({ params }: ArtworkPageProps) 
 
               {descriptionText?.trim() ? (
                 <section className="max-w-2xl pt-4">
-                  <h2 className="mb-5">
-                    <span className="mb-2 block text-xs font-medium uppercase tracking-wide text-[#9a9a9a]">
-                      {t.historyAndFacts}
-                    </span>
-                    <span className="block text-2xl font-semibold tracking-tight text-[#1a1a1a]">
-                      {artwork.title}
-                    </span>
+                  <h2 className="mb-5 text-2xl font-semibold tracking-tight text-[#1a1a1a]">
+                    {artwork.title} — {t.historyAndFacts}
                   </h2>
                   <div>
                     <ArtworkDescriptionFormatted description={descriptionText.trim()} />
