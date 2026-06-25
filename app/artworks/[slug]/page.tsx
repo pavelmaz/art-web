@@ -194,9 +194,9 @@ function ArtworkDescriptionFormatted({ description }: { description: string }) {
   const paragraphs = groupEveryThreeSentences(sentences);
 
   return (
-    <div className="space-y-4 mt-4">
+    <div className="space-y-4">
       {paragraphs.map((para, index) => (
-        <p key={index} className="text-sm leading-relaxed text-[#3a3a3a]">
+        <p key={index} className="text-[15px] leading-7 text-[#3a3a3a]">
           {parseBoldAsterisk(para)}
         </p>
       ))}
@@ -575,9 +575,12 @@ export default async function ArtworkDetailPage({ params }: ArtworkPageProps) {
         </div>
 
         {artwork.description?.trim() ? (
-          <section className="mt-10">
-            <h2 className="mb-4 text-base font-semibold text-[#1a1a1a]">
-              {artwork.title} — History & Facts
+          <section className="mt-12 max-w-2xl">
+            <p className="mb-2 text-xs font-medium uppercase tracking-wide text-[#9a9a9a]">
+              History &amp; facts
+            </p>
+            <h2 className="mb-5 text-2xl font-semibold tracking-tight text-[#1a1a1a]">
+              {artwork.title}
             </h2>
             <div>
               <ArtworkDescriptionFormatted description={artwork.description.trim()} />
