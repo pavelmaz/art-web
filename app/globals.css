@@ -52,3 +52,65 @@ img {
 .scrollbar-hide::-webkit-scrollbar {
   display: none;
 }
+
+/* ── Glass design system ───────────────────────────────────────────────
+   Glass needs something behind it to refract, so pages set `.art-backdrop`
+   to a blurred wash of the artwork. Hierarchy comes from opacity, not colour:
+   surface (panels) → inset (inner boxes) → primary/secondary (actions).      */
+.art-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background-size: cover;
+  background-position: center;
+  transform: scale(1.1);
+  filter: blur(64px);
+  pointer-events: none;
+}
+
+.glass-surface {
+  background: rgba(255, 255, 255, 0.45);
+  backdrop-filter: blur(20px) saturate(150%);
+  -webkit-backdrop-filter: blur(20px) saturate(150%);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+}
+
+.glass-inset {
+  background: rgba(255, 255, 255, 0.34);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.45);
+}
+
+.glass-primary {
+  background: rgba(20, 20, 22, 0.55);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  color: #fff;
+  transition: background-color 0.15s ease;
+}
+.glass-primary:hover {
+  background: rgba(20, 20, 22, 0.72);
+}
+
+.glass-secondary {
+  background: rgba(255, 255, 255, 0.32);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.65);
+  color: #1a1a1a;
+  transition: background-color 0.15s ease;
+}
+.glass-secondary:hover {
+  background: rgba(255, 255, 255, 0.5);
+}
+
+.glass-chip {
+  background: rgba(34, 120, 70, 0.2);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  color: #0e3a22;
+}

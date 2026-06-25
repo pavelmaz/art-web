@@ -435,7 +435,16 @@ export default async function ArtworkDetailPage({ params }: ArtworkPageProps) {
   }
 
   return (
-    <article className="bg-[#faf9f7] py-8">
+    <article className="py-8">
+      {imageUrl ? (
+        <div
+          aria-hidden
+          className="art-backdrop"
+          style={{
+            backgroundImage: `linear-gradient(rgba(250,249,247,0.72), rgba(250,249,247,0.72)), url("${imageUrl}")`,
+          }}
+        />
+      ) : null}
       <div className="mx-auto max-w-7xl px-5">
         <ArtworkJsonLd artwork={artwork} />
         <BreadcrumbJsonLd artwork={artwork} />
@@ -469,7 +478,7 @@ export default async function ArtworkDetailPage({ params }: ArtworkPageProps) {
           </ArtworkInsightsProvider>
 
           <aside className="w-full lg:w-80">
-            <div className="space-y-4 rounded-2xl bg-[#f5f5f5] p-5 lg:sticky lg:top-6">
+            <div className="glass-surface space-y-4 rounded-2xl p-5 lg:sticky lg:top-6">
               <div>
                 <h1 className="mb-1 text-lg font-semibold text-[#1a1a1a]">{artwork.title}</h1>
                 {artistSlug ? (
@@ -486,20 +495,20 @@ export default async function ArtworkDetailPage({ params }: ArtworkPageProps) {
               <div className="my-4 border-t border-[#e8e6e1]" />
 
               <div className="space-y-3">
-                <div className="flex items-center justify-between gap-4 rounded-lg bg-[#eceff3] p-3">
+                <div className="flex items-center justify-between gap-4 rounded-lg glass-inset p-3">
                   <div>
                     <p className="text-sm font-medium text-[#1a1a1a]">Standard</p>
                     <p className="text-xs text-[#999]">JPG</p>
                   </div>
-                  <DownloadButton imageUrl={imageUrl} />
+                  <DownloadButton imageUrl={imageUrl} variant="glass" />
                 </div>
 
-                <ProDownloadRow locale="en" isPro={isPro} downloadHref={maxDownloadHref} />
+                <ProDownloadRow locale="en" isPro={isPro} downloadHref={maxDownloadHref} glass />
               </div>
 
               <div className="my-4 border-t border-[#e8e6e1]" />
 
-              <div className="rounded-lg bg-[#eceff3] p-3">
+              <div className="glass-inset rounded-lg p-3">
                 <p className="text-xs leading-relaxed text-[#4a4a4a]">
                   License: All public domain files can be freely used for personal and commercial
                   projects.
@@ -520,7 +529,7 @@ export default async function ArtworkDetailPage({ params }: ArtworkPageProps) {
 
               <div className="my-4 border-t border-[#e8e6e1]" />
 
-              <div className="space-y-3 rounded-lg bg-[#eceff3] p-3">
+              <div className="glass-inset space-y-3 rounded-lg p-3">
                 {artwork.medium_display?.trim() ? (
                   <div>
                     <p className="text-xs text-[#999]">Medium</p>
@@ -557,7 +566,7 @@ export default async function ArtworkDetailPage({ params }: ArtworkPageProps) {
 
               <div className="border-t border-[#e8e6e1]" />
 
-              <span className="inline-flex items-center gap-1 rounded-full bg-green-50 px-2 py-1 text-xs text-green-700">
+              <span className="glass-chip inline-flex items-center gap-1 rounded-full px-2 py-1 text-xs">
                 <span aria-hidden>✓</span>
                 Public Domain
               </span>
