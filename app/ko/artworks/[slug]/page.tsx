@@ -233,9 +233,9 @@ function ArtworkDescriptionFormatted({ description }: { description: string }) {
   const paragraphs = groupEveryThreeSentences(sentences);
 
   return (
-    <div className="space-y-4 mt-4">
+    <div className="space-y-4">
       {paragraphs.map((para, index) => (
-        <p key={index} className="text-sm leading-relaxed text-[#3a3a3a]">
+        <p key={index} className="text-[15px] leading-7 text-[#3a3a3a]">
           {parseBoldAsterisk(para)}
         </p>
       ))}
@@ -463,7 +463,16 @@ export default async function ArtworkDetailPageKo({ params }: ArtworkPageProps) 
   const descriptionText = artwork.description_ko || artwork.description;
 
   return (
-    <article className="bg-[#faf9f7] py-8">
+    <article className="py-8">
+      {imageUrl ? (
+        <div
+          aria-hidden
+          className="art-backdrop"
+          style={{
+            backgroundImage: `linear-gradient(rgba(250,249,247,0.72), rgba(250,249,247,0.72)), url("${imageUrl}")`,
+          }}
+        />
+      ) : null}
       <div className="mx-auto max-w-7xl px-5">
         <ArtworkJsonLd artwork={artwork} pageUrl={`https://fineartfree.com${artworkDetailPath("ko", artwork.slug)}`} inLanguage="ko" />
         <BreadcrumbJsonLd artwork={artwork} category={category} />
@@ -471,7 +480,7 @@ export default async function ArtworkDetailPageKo({ params }: ArtworkPageProps) 
         <div className="flex flex-col gap-8 lg:flex-row lg:items-start">
           <ArtworkInsightsProvider artwork={artwork} locale="ko" isPro={isPro}>
             <div className="flex-1 space-y-4">
-              <div className="bg-white p-2 sm:p-6">
+              <div>
                 {imageUrl ? (
                   <>
                     <div className="flex justify-center">
@@ -493,11 +502,30 @@ export default async function ArtworkDetailPageKo({ params }: ArtworkPageProps) 
                 )}
               </div>
               <Breadcrumbs items={breadcrumbItems} currentPath={`/ko/artworks/${artwork.slug}`} includeJsonLd={false} />
+
+              {descriptionText?.trim() ? (
+                <section className="max-w-2xl pt-4">
+                  <h2 className="mb-5">
+                    <span className="mb-2 block text-xs font-medium uppercase tracking-wide text-[#9a9a9a]">
+                      {t.historyAndFacts}
+                    </span>
+                    <span className="block text-2xl font-semibold tracking-tight text-[#1a1a1a]">
+                      {artwork.title}
+                    </span>
+                  </h2>
+                  <div>
+                    <ArtworkDescriptionFormatted description={descriptionText.trim()} />
+                  </div>
+                  {artistSlug && relatedArtworks.length === 0 ? (
+                    <SectionCtaLink href={`/ko/artists/${artistSlug}`}>{t.browseAll}</SectionCtaLink>
+                  ) : null}
+                </section>
+              ) : null}
             </div>
           </ArtworkInsightsProvider>
 
           <aside className="w-full lg:w-80">
-            <div className="space-y-4 rounded-2xl bg-[#f5f5f5] p-5 lg:sticky lg:top-6">
+            <div className="glass-surface space-y-4 rounded-2xl p-5 lg:sticky lg:top-6">
               <div>
                 <h1 className="mb-1 text-lg font-semibold text-[#1a1a1a]">{artwork.title}</h1>
                 {artistSlug ? (
@@ -514,20 +542,20 @@ export default async function ArtworkDetailPageKo({ params }: ArtworkPageProps) 
               <div className="my-4 border-t border-[#e8e6e1]" />
 
               <div className="space-y-3">
-                <div className="flex items-center justify-between gap-4 rounded-lg bg-[#eceff3] p-3">
+                <div className="flex items-center justify-between gap-4 rounded-lg glass-inset p-3">
                   <div>
                     <p className="text-sm font-medium text-[#1a1a1a]">Standard</p>
                     <p className="text-xs text-[#999]">JPG</p>
                   </div>
-                  <DownloadButton imageUrl={imageUrl} label={t.downloadStandard} />
+                  <DownloadButton imageUrl={imageUrl} label={t.downloadStandard} variant="glass" />
                 </div>
 
-                <ProDownloadRow locale="ko" isPro={isPro} downloadHref={maxDownloadHref} />
+                <ProDownloadRow locale="ko" isPro={isPro} downloadHref={maxDownloadHref} glass />
               </div>
 
               <div className="my-4 border-t border-[#e8e6e1]" />
 
-              <div className="rounded-lg bg-[#eceff3] p-3">
+              <div className="rounded-lg glass-inset p-3">
                 <p className="text-xs leading-relaxed text-[#4a4a4a]">
                   {t.licenseText}
                 </p>
@@ -555,7 +583,7 @@ export default async function ArtworkDetailPageKo({ params }: ArtworkPageProps) 
 
               <div className="my-4 border-t border-[#e8e6e1]" />
 
-              <div className="space-y-3 rounded-lg bg-[#eceff3] p-3">
+              <div className="space-y-3 rounded-lg glass-inset p-3">
                 {artwork.medium_display?.trim() ? (
                   <div>
                     <p className="text-xs text-[#999]">{t.medium}</p>
@@ -592,26 +620,12 @@ export default async function ArtworkDetailPageKo({ params }: ArtworkPageProps) 
 
               <div className="border-t border-[#e8e6e1]" />
 
-              <span className="inline-flex items-center gap-1 rounded-full bg-green-50 px-2 py-1 text-xs text-green-700">
+              <span className="glass-chip inline-flex items-center gap-1 rounded-full px-2 py-1 text-xs">
                 {t.publicDomain}
               </span>
             </div>
           </aside>
         </div>
-
-        {descriptionText?.trim() ? (
-          <section className="mt-10">
-            <h2 className="mb-4 text-base font-semibold text-[#1a1a1a]">
-              {artwork.title} — {t.historyAndFacts}
-            </h2>
-            <div>
-              <ArtworkDescriptionFormatted description={descriptionText.trim()} />
-            </div>
-            {artistSlug && relatedArtworks.length === 0 ? (
-              <SectionCtaLink href={`/ko/artists/${artistSlug}`}>{t.browseAll}</SectionCtaLink>
-            ) : null}
-          </section>
-        ) : null}
 
         {relatedArtworks.length > 0 && artistSlug ? (
           <section className="mt-10">
