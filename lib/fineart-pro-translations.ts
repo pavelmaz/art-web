@@ -19,6 +19,16 @@ export type FineArtProCopy = {
   monthlyPrice: string;
   monthlyBilling: string;
   cta: string;
+  heroSub: string;
+  yearlyBadge: string;
+  yearlySave: string;
+  valueNote: string;
+  ctaNote: string;
+  compareFreeTitle: string;
+  compareProTitle: string;
+  compareFree: readonly string[];
+  comparePro: readonly string[];
+  socialProof: string;
   freshH2: string;
   freshBody: string;
   faq: readonly FineArtProFaqCopy[];
@@ -65,7 +75,7 @@ const en: FineArtProCopy = {
     "Wanderer above the Sea of Fog by Caspar David Friedrich, circa 1818",
   moonriseImageAlt:
     "Oil painting Moonrise over the Sea by Caspar David Friedrich, showing three figures on rocks by the shore watching sailing ships at twilight",
-  heroH1: "Get Full Access to Hi-Res Images",
+  heroH1: "Download 400,000+ masterpieces in stunning 4K",
   heroBullets: [
     "Access over 400,000 paintings, drawings, posters and illustrations",
     "Download images at the highest resolution available",
@@ -80,6 +90,16 @@ const en: FineArtProCopy = {
   monthlyPrice: "$9.99 USD /mo",
   monthlyBilling: "$9.99 Every Month",
   cta: "Get Fine Art Pro",
+  heroSub: "Unlimited, copyright-free, and ready for any project — personal or commercial.",
+  yearlyBadge: "Best value",
+  yearlySave: "Save 20% — 2 months free",
+  valueNote: "Less than the price of a single stock photo — for unlimited 4K downloads of 400,000+ artworks.",
+  ctaNote: "Cancel anytime · Instant access · Secure checkout",
+  compareFreeTitle: "Free",
+  compareProTitle: "Pro",
+  compareFree: ["Web-size images","Personal use only"],
+  comparePro: ["4K original files","Unlimited downloads","Full commercial use","Unlimited AI insights & museum guides"],
+  socialProof: "Sourced from the world's leading museums and libraries",
   freshH2: "Fresh Content Every Month",
   freshBody:
     "Our ever-growing library is constantly updated with the latest public domain discoveries from the archives of some of the best museums and libraries in the world.",
@@ -153,7 +173,7 @@ const es: FineArtProCopy = {
   heroImageAlt: "El caminante sobre el mar de nubes, Caspar David Friedrich, ca. 1818",
   moonriseImageAlt:
     "Óleo Salida de la luna en el mar de Caspar David Friedrich, con tres figuras en la orilla observando barcos al crepúsculo",
-  heroH1: "Acceso completo a imágenes en alta resolución",
+  heroH1: "Descarga más de 400.000 obras maestras en 4K",
   heroBullets: [
     "Más de 400.000 pinturas, dibujos, pósters e ilustraciones",
     "Descarga en la máxima resolución disponible",
@@ -168,6 +188,16 @@ const es: FineArtProCopy = {
   monthlyPrice: "9,99 USD /mes",
   monthlyBilling: "9,99 USD cada mes",
   cta: "Obtener Fine Art Pro",
+  heroSub: "Ilimitadas, libres de derechos y listas para cualquier proyecto, personal o comercial.",
+  yearlyBadge: "Mejor valor",
+  yearlySave: "Ahorra 20% — 2 meses gratis",
+  valueNote: "Menos que el precio de una sola foto de stock — por descargas 4K ilimitadas de más de 400.000 obras.",
+  ctaNote: "Cancela cuando quieras · Acceso inmediato · Pago seguro",
+  compareFreeTitle: "Gratis",
+  compareProTitle: "Pro",
+  compareFree: ["Imágenes tamaño web","Solo uso personal"],
+  comparePro: ["Archivos originales en 4K","Descargas ilimitadas","Uso comercial completo","Insights de IA y guías de museo ilimitados"],
+  socialProof: "Procedente de los principales museos y bibliotecas del mundo",
   freshH2: "Contenido nuevo cada mes",
   freshBody:
     "Nuestra biblioteca crece constantemente con los últimos descubrimientos de dominio público en archivos de algunos de los mejores museos y bibliotecas del mundo.",
@@ -239,7 +269,7 @@ const pt: FineArtProCopy = {
     ogDescription:
       "Baixe imagens na resolução máxima. Sem restrições de copyright e prontas para seus projetos.",
   },
-  heroH1: "Acesso total a imagens em alta resolução",
+  heroH1: "Baixe mais de 400.000 obras-primas em 4K",
   heroBullets: [
     "Mais de 400.000 pinturas, desenhos, pôsteres e ilustrações",
     "Download na resolução máxima disponível",
@@ -252,6 +282,16 @@ const pt: FineArtProCopy = {
   yearlyBilling: "95,88 USD a cada 12 meses",
   monthlyBilling: "9,99 USD por mês",
   cta: "Obter Fine Art Pro",
+  heroSub: "Ilimitadas, livres de direitos e prontas para qualquer projeto, pessoal ou comercial.",
+  yearlyBadge: "Melhor valor",
+  yearlySave: "Economize 20% — 2 meses grátis",
+  valueNote: "Menos que o preço de uma única foto de banco de imagens — por downloads 4K ilimitados de mais de 400.000 obras.",
+  ctaNote: "Cancele quando quiser · Acesso imediato · Pagamento seguro",
+  compareFreeTitle: "Grátis",
+  compareProTitle: "Pro",
+  compareFree: ["Imagens tamanho web","Apenas uso pessoal"],
+  comparePro: ["Arquivos originais em 4K","Downloads ilimitados","Uso comercial completo","Insights de IA e guias de museu ilimitados"],
+  socialProof: "Proveniente dos principais museus e bibliotecas do mundo",
   freshH2: "Conteúdo novo todo mês",
   freshBody:
     "Nossa biblioteca cresce com as últimas descobertas de domínio público em arquivos dos melhores museus e bibliotecas do mundo.",
@@ -314,7 +354,7 @@ const ja: FineArtProCopy = {
     ogDescription:
       "最高解像度でダウンロード。著作権の制限なく、プロジェクトですぐに使えます。",
   },
-  heroH1: "高解像度画像へのフルアクセス",
+  heroH1: "40万点以上の名画を4Kでダウンロード",
   heroBullets: [
     "40万点以上の絵画・素描・ポスター・イラスト",
     "利用可能な最高解像度でダウンロード",
@@ -327,6 +367,16 @@ const ja: FineArtProCopy = {
   yearlyBilling: "12か月ごとに95.88 USD",
   monthlyBilling: "毎月9.99 USD",
   cta: "Fine Art Proを始める",
+  heroSub: "無制限・著作権フリー。個人でも商用でも、あらゆるプロジェクトにすぐ使えます。",
+  yearlyBadge: "おすすめ",
+  yearlySave: "20%お得 — 2か月分無料",
+  valueNote: "ストック写真1枚より安く、40万点以上の作品を4Kで無制限ダウンロード。",
+  ctaNote: "いつでも解約可能 · 即時アクセス · 安全な決済",
+  compareFreeTitle: "無料",
+  compareProTitle: "Pro",
+  compareFree: ["ウェブサイズの画像","個人利用のみ"],
+  comparePro: ["4Kオリジナルファイル","無制限ダウンロード","商用利用可","無制限のAIインサイトと美術館ガイド"],
+  socialProof: "世界有数の美術館・図書館から収録",
   freshH2: "毎月新しいコンテンツ",
   freshBody:
     "世界有数の美術館・図書館のアーカイブから見つかった最新のパブリックドメイン作品を、常にライブラリに追加しています。",
@@ -391,7 +441,7 @@ const fr: FineArtProCopy = {
     ogDescription:
       "Téléchargez en résolution maximale. Sans restriction de droits d'auteur, prêt pour vos projets.",
   },
-  heroH1: "Accès complet aux images haute résolution",
+  heroH1: "Téléchargez plus de 400 000 chefs-d'œuvre en 4K",
   heroBullets: [
     "Plus de 400 000 peintures, dessins, affiches et illustrations",
     "Téléchargement en résolution maximale disponible",
@@ -404,6 +454,16 @@ const fr: FineArtProCopy = {
   yearlyBilling: "95,88 USD tous les 12 mois",
   monthlyBilling: "9,99 USD par mois",
   cta: "Obtenir Fine Art Pro",
+  heroSub: "Illimités, libres de droits et prêts pour tous vos projets, personnels ou commerciaux.",
+  yearlyBadge: "Meilleure offre",
+  yearlySave: "Économisez 20% — 2 mois offerts",
+  valueNote: "Moins cher qu'une seule photo de banque d'images — pour des téléchargements 4K illimités de plus de 400 000 œuvres.",
+  ctaNote: "Annulable à tout moment · Accès immédiat · Paiement sécurisé",
+  compareFreeTitle: "Gratuit",
+  compareProTitle: "Pro",
+  compareFree: ["Images taille web","Usage personnel uniquement"],
+  comparePro: ["Fichiers originaux en 4K","Téléchargements illimités","Usage commercial complet","Insights IA et guides de musée illimités"],
+  socialProof: "Issu des plus grands musées et bibliothèques du monde",
   freshH2: "Nouveau contenu chaque mois",
   freshBody:
     "Notre bibliothèque s'enrichit en permanence des dernières découvertes du domaine public dans les archives des plus grands musées et bibliothèques.",
@@ -474,7 +534,7 @@ const de: FineArtProCopy = {
     ogDescription:
       "Downloads in höchster Auflösung. Ohne Urheberrechtsbeschränkungen, bereit für Ihre Projekte.",
   },
-  heroH1: "Voller Zugang zu hochauflösenden Bildern",
+  heroH1: "Über 400.000 Meisterwerke in 4K herunterladen",
   heroBullets: [
     "Über 400.000 Gemälde, Zeichnungen, Poster und Illustrationen",
     "Download in höchster verfügbarer Auflösung",
@@ -487,6 +547,16 @@ const de: FineArtProCopy = {
   yearlyBilling: "95,88 USD alle 12 Monate",
   monthlyBilling: "9,99 USD pro Monat",
   cta: "Fine Art Pro holen",
+  heroSub: "Unbegrenzt, lizenzfrei und bereit für jedes Projekt – privat oder kommerziell.",
+  yearlyBadge: "Bestes Angebot",
+  yearlySave: "20% sparen — 2 Monate gratis",
+  valueNote: "Günstiger als ein einzelnes Stockfoto – für unbegrenzte 4K-Downloads von über 400.000 Werken.",
+  ctaNote: "Jederzeit kündbar · Sofortiger Zugang · Sichere Zahlung",
+  compareFreeTitle: "Kostenlos",
+  compareProTitle: "Pro",
+  compareFree: ["Bilder in Web-Größe","Nur private Nutzung"],
+  comparePro: ["4K-Originaldateien","Unbegrenzte Downloads","Volle kommerzielle Nutzung","Unbegrenzte KI-Insights & Museumsführer"],
+  socialProof: "Aus den führenden Museen und Bibliotheken der Welt",
   freshH2: "Jeden Monat neuer Inhalt",
   freshBody:
     "Unsere Bibliothek wächst ständig mit neuen gemeinfreien Funden aus Archiven der besten Museen und Bibliotheken der Welt.",
@@ -556,7 +626,7 @@ const it: FineArtProCopy = {
     ogDescription:
       "Scarica alla massima risoluzione. Senza vincoli di copyright, pronte per i tuoi progetti.",
   },
-  heroH1: "Accesso completo a immagini ad alta risoluzione",
+  heroH1: "Scarica oltre 400.000 capolavori in 4K",
   heroBullets: [
     "Oltre 400.000 dipinti, disegni, poster e illustrazioni",
     "Download alla massima risoluzione disponibile",
@@ -569,6 +639,16 @@ const it: FineArtProCopy = {
   yearlyBilling: "95,88 USD ogni 12 mesi",
   monthlyBilling: "9,99 USD al mese",
   cta: "Ottieni Fine Art Pro",
+  heroSub: "Illimitati, liberi da copyright e pronti per ogni progetto, personale o commerciale.",
+  yearlyBadge: "Miglior offerta",
+  yearlySave: "Risparmia il 20% — 2 mesi gratis",
+  valueNote: "Meno del prezzo di una sola foto stock — per download 4K illimitati di oltre 400.000 opere.",
+  ctaNote: "Disdici quando vuoi · Accesso immediato · Pagamento sicuro",
+  compareFreeTitle: "Gratis",
+  compareProTitle: "Pro",
+  compareFree: ["Immagini formato web","Solo uso personale"],
+  comparePro: ["File originali in 4K","Download illimitati","Pieno uso commerciale","Insights IA e guide ai musei illimitati"],
+  socialProof: "Provenienti dai principali musei e biblioteche del mondo",
   freshH2: "Nuovi contenuti ogni mese",
   freshBody:
     "La biblioteca cresce con le ultime scoperte di pubblico dominio negli archivi dei migliori musei e biblioteche.",
@@ -638,7 +718,7 @@ const ko: FineArtProCopy = {
     ogDescription:
       "최고 해상도로 다운로드. 저작권 제한 없이 프로젝트에 바로 사용할 수 있습니다.",
   },
-  heroH1: "고해상도 이미지 전체 이용",
+  heroH1: "40만 점 이상의 명작을 4K로 다운로드",
   heroBullets: [
     "40만 점 이상의 회화·소묘·포스터·일러스트",
     "이용 가능한 최고 해상도로 다운로드",
@@ -651,6 +731,16 @@ const ko: FineArtProCopy = {
   yearlyBilling: "12개월마다 95.88 USD",
   monthlyBilling: "매월 9.99 USD",
   cta: "Fine Art Pro 시작하기",
+  heroSub: "무제한, 저작권 무료 — 개인이든 상업이든 모든 프로젝트에 바로 사용하세요.",
+  yearlyBadge: "최고 가성비",
+  yearlySave: "20% 할인 — 2개월 무료",
+  valueNote: "스톡 사진 한 장보다 저렴하게, 40만 점 이상의 작품을 4K로 무제한 다운로드.",
+  ctaNote: "언제든 해지 가능 · 즉시 이용 · 안전한 결제",
+  compareFreeTitle: "무료",
+  compareProTitle: "Pro",
+  compareFree: ["웹 크기 이미지","개인용으로만"],
+  comparePro: ["4K 원본 파일","무제한 다운로드","상업적 사용 가능","무제한 AI 인사이트 및 미술관 가이드"],
+  socialProof: "세계 유수의 미술관과 도서관에서 수집",
   freshH2: "매달 새로운 콘텐츠",
   freshBody:
     "세계 최고의 박물관·도서관 아카이브에서 발견된 최신 퍼블릭 도메인 작품을 지속적으로 추가합니다.",
@@ -715,7 +805,7 @@ const ru: FineArtProCopy = {
     ogDescription:
       "Скачивайте в максимальном разрешении. Без ограничений авторского права, готово для ваших проектов.",
   },
-  heroH1: "Полный доступ к изображениям в высоком разрешении",
+  heroH1: "Скачивайте более 400 000 шедевров в 4K",
   heroBullets: [
     "Более 400 000 картин, рисунков, плакатов и иллюстраций",
     "Скачивание в максимально доступном разрешении",
@@ -728,6 +818,16 @@ const ru: FineArtProCopy = {
   yearlyBilling: "95,88 USD каждые 12 месяцев",
   monthlyBilling: "9,99 USD в месяц",
   cta: "Получить Fine Art Pro",
+  heroSub: "Безлимитно, без авторских ограничений и готово для любого проекта — личного или коммерческого.",
+  yearlyBadge: "Выгоднее всего",
+  yearlySave: "Экономия 20% — 2 месяца бесплатно",
+  valueNote: "Дешевле одной стоковой фотографии — за безлимитные 4K-загрузки более 400 000 работ.",
+  ctaNote: "Отмена в любой момент · Мгновенный доступ · Безопасная оплата",
+  compareFreeTitle: "Бесплатно",
+  compareProTitle: "Pro",
+  compareFree: ["Изображения веб-размера","Только личное использование"],
+  comparePro: ["Оригиналы в 4K","Безлимитные загрузки","Полное коммерческое использование","Безлимитные AI-инсайты и гиды по музеям"],
+  socialProof: "Из ведущих музеев и библиотек мира",
   freshH2: "Новый контент каждый месяц",
   freshBody:
     "Библиотека постоянно пополняется новыми находками общественного достояния из архивов лучших музеев и библиотек мира.",
@@ -797,7 +897,7 @@ const zh: FineArtProCopy = {
     ogDescription:
       "以最高分辨率下载。无版权限制，可直接用于您的项目。",
   },
-  heroH1: "完整访问高分辨率图像",
+  heroH1: "下载超过 40 万件 4K 高清名作",
   heroBullets: [
     "40万+绘画、素描、海报与插图",
     "以最高可用分辨率下载",
@@ -810,6 +910,16 @@ const zh: FineArtProCopy = {
   yearlyBilling: "每12个月 95.88 USD",
   monthlyBilling: "每月 9.99 USD",
   cta: "获取 Fine Art Pro",
+  heroSub: "无限量、无版权限制，随时用于任何个人或商业项目。",
+  yearlyBadge: "超值之选",
+  yearlySave: "省 20% — 立省两个月",
+  valueNote: "比一张图库照片还便宜，即可无限下载 40 万件作品的 4K 原图。",
+  ctaNote: "随时取消 · 即时访问 · 安全支付",
+  compareFreeTitle: "免费",
+  compareProTitle: "Pro",
+  compareFree: ["网页尺寸图像","仅限个人使用"],
+  comparePro: ["4K 原始文件","无限下载","完整商用授权","无限 AI 洞察与博物馆导览"],
+  socialProof: "来自全球顶级博物馆与图书馆",
   freshH2: "每月更新内容",
   freshBody:
     "馆藏持续增加来自世界顶尖博物馆与图书馆档案的最新公有领域发现。",
