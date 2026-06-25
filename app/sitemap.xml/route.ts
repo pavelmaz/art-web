@@ -1,10 +1,27 @@
+import { ARTWORK_SITEMAP_PAGE_SIZE } from "@/lib/artwork-sitemap-response";
 import { getPublicSiteUrl, escapeXml } from "@/lib/sitemap-xml";
+import { supabase } from "@/lib/supabase";
 
 export const dynamic = "force-dynamic";
 
-/** 82,372 artworks / 500 → pages 0–164 (165 child sitemaps). */
-const ARTWORK_SITEMAP_COUNT = 165;
-const IMAGE_SITEMAP_COUNT = 165;
+/** Used only if the live count can't be read; keeps the index covering all artworks. */
+const FALLBACK_SITEMAP_COUNT = 180;
+
+/** Number of artwork sitemap pages = ceil(total artworks / page size), read live so
+ *  the index never drops newly added artworks. */
+async function artworkSitemapPageCount(): Promise<number> {
+  try {
+    const { count, error } = await supabase
+      .from("artworks")
+      .select("id", { count: "exact", head: true });
+    if (error || !count || count <= 0) {
+      return FALLBACK_SITEMAP_COUNT;
+    }
+    return Math.ceil(count / ARTWORK_SITEMAP_PAGE_SIZE);
+  } catch {
+    return FALLBACK_SITEMAP_COUNT;
+  }
+}
 
 function emptySitemapIndex(): string {
   return `<?xml version="1.0" encoding="UTF-8"?>
@@ -16,21 +33,22 @@ function emptySitemapIndex(): string {
 export async function GET() {
   try {
     const base = getPublicSiteUrl();
+    const pageCount = await artworkSitemapPageCount();
     const locs: string[] = [`${base}/sitemap/static`];
-    for (let i = 0; i < ARTWORK_SITEMAP_COUNT; i++) {
+    for (let i = 0; i < pageCount; i++) {
       locs.push(`${base}/sitemap/artworks/${i}`);
     }
-    for (let i = 0; i < ARTWORK_SITEMAP_COUNT; i++) {
+    for (let i = 0; i < pageCount; i++) {
       locs.push(`${base}/sitemap/es/artworks/${i}`);
     }
-    for (let i = 0; i < ARTWORK_SITEMAP_COUNT; i++) {
+    for (let i = 0; i < pageCount; i++) {
       locs.push(`${base}/sitemap/pt/artworks/${i}`);
     }
-    for (let i = 0; i < ARTWORK_SITEMAP_COUNT; i++) {
+    for (let i = 0; i < pageCount; i++) {
       locs.push(`${base}/sitemap/ja/artworks/${i}`);
     }
     for (const loc of ["fr", "de", "it", "ko", "ru", "zh"] as const) {
-      for (let i = 0; i < ARTWORK_SITEMAP_COUNT; i++) {
+      for (let i = 0; i < pageCount; i++) {
         locs.push(`${base}/sitemap/${loc}/artworks/${i}`);
       }
       locs.push(`${base}/sitemap/${loc}`);
@@ -38,7 +56,7 @@ export async function GET() {
     locs.push(`${base}/sitemap/es`);
     locs.push(`${base}/sitemap/pt`);
     locs.push(`${base}/sitemap/ja`);
-    for (let i = 0; i < IMAGE_SITEMAP_COUNT; i++) {
+    for (let i = 0; i < pageCount; i++) {
       locs.push(`${base}/sitemap/images/${i}`);
     }
 

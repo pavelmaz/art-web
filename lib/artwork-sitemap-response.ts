@@ -5,8 +5,10 @@ import { escapeXml, getPublicSiteUrl } from "@/lib/sitemap-xml";
 import { artworkGridImageUrl } from "@/lib/utils";
 
 export const ARTWORK_SITEMAP_PAGE_SIZE = 500;
-export const ARTWORK_SITEMAP_MAX_PAGE_INDEX = 164;
-export const IMAGE_SITEMAP_MAX_PAGE_INDEX = 164;
+// Generous abuse cap only. The sitemap index lists the real page count dynamically,
+// and out-of-range pages return an empty (valid) urlset via the keyset logic below.
+export const ARTWORK_SITEMAP_MAX_PAGE_INDEX = 1000;
+export const IMAGE_SITEMAP_MAX_PAGE_INDEX = 1000;
 
 export const ARTWORK_SITEMAP_XML_HEADERS = {
   "Content-Type": "application/xml; charset=utf-8",
@@ -99,6 +101,40 @@ function artworkLoc(base: string, locale: SiteLocale, slug: string): string {
   return `${base}${prefix}/${segments.artworks}/${encoded}`;
 }
 
+function makeSitemapClient(url: string, key: string) {
+  return createClient(url, key);
+}
+type SitemapClient = ReturnType<typeof makeSitemapClient>;
+
+/**
+ * Cursor for offset-style pagination without a slow OFFSET: the id of the row
+ * immediately before `offset` in id order, read via an index-only scan on the
+ * primary key. Lets the page query use `id > cursor` (~30ms) instead of
+ * `OFFSET 82000` (~15s, which hits the statement timeout). `pastEnd` is true when
+ * the offset is beyond the table, so the caller can serve an empty (valid) sitemap.
+ */
+async function keysetCursor(
+  supabase: SitemapClient,
+  offset: number,
+): Promise<{ cursor: string | null; pastEnd: boolean }> {
+  if (offset <= 0) {
+    return { cursor: null, pastEnd: false };
+  }
+  const { data, error } = await supabase
+    .from("artworks")
+    .select("id")
+    .order("id", { ascending: true })
+    .range(offset - 1, offset - 1);
+  if (error) {
+    throw error;
+  }
+  const rows = (data as { id: string }[] | null) ?? [];
+  if (!rows.length) {
+    return { cursor: null, pastEnd: true };
+  }
+  return { cursor: rows[0].id, pastEnd: false };
+}
+
 export async function buildArtworkSitemapPageResponse(
   locale: SiteLocale,
   rawPage: string
@@ -126,17 +162,28 @@ export async function buildArtworkSitemapPageResponse(
       });
     }
 
-    const supabase = createClient(supabaseUrl, supabaseKey);
-    const from = page * ARTWORK_SITEMAP_PAGE_SIZE;
-    const to = page * ARTWORK_SITEMAP_PAGE_SIZE + (ARTWORK_SITEMAP_PAGE_SIZE - 1);
+    const supabase = makeSitemapClient(supabaseUrl, supabaseKey);
+    const offset = page * ARTWORK_SITEMAP_PAGE_SIZE;
 
-    const { data, error } = await supabase
-      .from("artworks")
-      .select("slug, created_at")
-      .not("slug", "is", null)
-      .order("score", { ascending: false })
+    let cursor: string | null;
+    try {
+      const c = await keysetCursor(supabase, offset);
+      if (c.pastEnd) {
+        return new Response(emptyUrlset(), { status: 200, headers: ARTWORK_SITEMAP_XML_HEADERS });
+      }
+      cursor = c.cursor;
+    } catch (cursorErr) {
+      console.error(`[sitemap/${label}]`, page, cursorErr);
+      return new Response(emptyUrlset(), { status: 503, headers: ARTWORK_SITEMAP_XML_HEADERS });
+    }
+
+    let pageQuery = supabase.from("artworks").select("slug, created_at");
+    if (cursor !== null) {
+      pageQuery = pageQuery.gt("id", cursor);
+    }
+    const { data, error } = await pageQuery
       .order("id", { ascending: true })
-      .range(from, to);
+      .limit(ARTWORK_SITEMAP_PAGE_SIZE);
 
     if (error) {
       console.error(`[sitemap/${label}]`, page, error);
@@ -206,17 +253,28 @@ export async function buildArtworkImageSitemapPageResponse(
       });
     }
 
-    const supabase = createClient(supabaseUrl, supabaseKey);
-    const from = page * ARTWORK_SITEMAP_PAGE_SIZE;
-    const to = page * ARTWORK_SITEMAP_PAGE_SIZE + (ARTWORK_SITEMAP_PAGE_SIZE - 1);
+    const supabase = makeSitemapClient(supabaseUrl, supabaseKey);
+    const offset = page * ARTWORK_SITEMAP_PAGE_SIZE;
 
-    const { data, error } = await supabase
-      .from("artworks")
-      .select("slug, title, artist_display, image_id")
-      .not("slug", "is", null)
-      .order("score", { ascending: false })
+    let cursor: string | null;
+    try {
+      const c = await keysetCursor(supabase, offset);
+      if (c.pastEnd) {
+        return new Response(emptyImageUrlset(), { status: 200, headers: ARTWORK_SITEMAP_XML_HEADERS });
+      }
+      cursor = c.cursor;
+    } catch (cursorErr) {
+      console.error(`[sitemap/${label}]`, page, cursorErr);
+      return new Response(emptyImageUrlset(), { status: 503, headers: ARTWORK_SITEMAP_XML_HEADERS });
+    }
+
+    let pageQuery = supabase.from("artworks").select("slug, title, artist_display, image_id");
+    if (cursor !== null) {
+      pageQuery = pageQuery.gt("id", cursor);
+    }
+    const { data, error } = await pageQuery
       .order("id", { ascending: true })
-      .range(from, to);
+      .limit(ARTWORK_SITEMAP_PAGE_SIZE);
 
     if (error) {
       console.error(`[sitemap/${label}]`, page, error);
