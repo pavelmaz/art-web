@@ -114,3 +114,9 @@ img {
   border: 1px solid rgba(255, 255, 255, 0.4);
   color: #0e3a22;
 }
+
+.glass-nav {
+  background: rgba(255, 255, 255, 0.72);
+  backdrop-filter: blur(16px) saturate(140%);
+  -webkit-backdrop-filter: blur(16px) saturate(140%);
+}

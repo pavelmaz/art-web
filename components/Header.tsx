@@ -139,7 +139,7 @@ export default function Header({ browseGenres = [] }: HeaderProps) {
       className={
         isHome
           ? "absolute inset-x-0 top-0 z-20 bg-transparent"
-          : "mb-4 border-b border-[#e8e6e1] bg-white"
+          : "glass-nav sticky top-0 z-30 mb-4 border-b border-[#e8e6e1]"
       }
     >
       <div className="flex w-full items-center gap-3 px-3 py-3 md:gap-4 md:px-6">
@@ -162,7 +162,7 @@ export default function Header({ browseGenres = [] }: HeaderProps) {
             <label htmlFor="header-search" className="sr-only">
               {t.searchPlaceholder}
             </label>
-            <div className="flex h-9 items-center gap-2 rounded-full bg-[#f3f4f6] px-3 py-1 focus-within:ring-2 focus-within:ring-[#d1d5db] md:h-10 md:px-4">
+            <div className="flex h-9 items-center gap-2 rounded-full glass-inset px-3 py-1 focus-within:ring-2 focus-within:ring-[#d1d5db] md:h-10 md:px-4">
               <SearchIcon className="size-4 shrink-0 text-[#9ca3af]" />
               <input
                 id="header-search"
@@ -191,7 +191,7 @@ export default function Header({ browseGenres = [] }: HeaderProps) {
               <ChevronDown className="mt-px" />
             </button>
             <div className="absolute top-full left-0 hidden group-hover:block pt-2 z-50">
-              <div className="rounded-lg bg-white p-6 shadow-lg w-80">
+              <div className="glass-surface rounded-lg p-6 w-80">
                 <div className="grid grid-cols-2 gap-x-8 gap-y-3">
                   {BROWSE_LINKS.map((link) => (
                     <Link key={link.href} href={link.href} className="text-sm text-[#6b6b6b] hover:text-[#1a1a1a]">
@@ -213,7 +213,7 @@ export default function Header({ browseGenres = [] }: HeaderProps) {
               <ChevronDown className="mt-px" />
             </button>
             <div className="absolute top-full left-0 hidden group-hover/explore:block pt-2 z-50">
-              <div className="rounded-lg bg-white p-6 shadow-lg w-48">
+              <div className="glass-surface rounded-lg p-6 w-48">
                 <div className="flex flex-col gap-4">
                   {EXPLORE_LINKS.map((link) => (
                     <Link key={link.href} href={link.href} className="text-sm text-[#6b6b6b] hover:text-[#1a1a1a]">
@@ -261,7 +261,7 @@ export default function Header({ browseGenres = [] }: HeaderProps) {
             {/* Mobile search */}
             {!isHome ? (
               <form action={searchPath} method="get" className="mb-6">
-                <div className="flex h-10 items-center gap-2 rounded-full bg-[#f3f4f6] px-4 focus-within:ring-2 focus-within:ring-[#d1d5db]">
+                <div className="flex h-10 items-center gap-2 rounded-full glass-inset px-4 focus-within:ring-2 focus-within:ring-[#d1d5db]">
                   <SearchIcon className="size-4 shrink-0 text-[#9ca3af]" />
                   <input
                     type="search"

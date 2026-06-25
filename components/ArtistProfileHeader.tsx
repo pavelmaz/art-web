@@ -29,8 +29,10 @@ export function ArtistProfileHeader({
   return (
     <header className="flex flex-col gap-8 sm:flex-row sm:items-start">
       {portraitSrc ? (
-        <div className="relative h-40 w-40 shrink-0 overflow-hidden rounded-full sm:h-44 sm:w-44">
-          <img src={portraitSrc} alt={name} className="h-full w-full object-cover" />
+        <div className="glass-surface shrink-0 rounded-full p-2">
+          <div className="relative h-40 w-40 overflow-hidden rounded-full sm:h-44 sm:w-44">
+            <img src={portraitSrc} alt={name} className="h-full w-full object-cover" />
+          </div>
         </div>
       ) : null}
       <div className="min-w-0 flex-1">
