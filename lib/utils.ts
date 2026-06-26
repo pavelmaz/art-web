@@ -199,7 +199,10 @@ function supabaseRenditionUrl(url: string, rendition: ImageRendition): string | 
   const prefixEnd = idx + SUPABASE_PUBLIC_MARKER.length;
   const prefix = url.slice(0, prefixEnd); // …/object/public/art-images/
   const objectPath = url.slice(prefixEnd).split("?")[0]; // artworks/<hash>.jpg
-  if (!objectPath || objectPath.startsWith("renditions/")) {
+  // Renditions were only generated under the `artworks/` tree. For any other path
+  // (e.g. `artists/` portraits, which have no rendition) return null so the caller
+  // falls back to the original — otherwise the constructed URL 404s (broken image).
+  if (!objectPath || !objectPath.startsWith("artworks/")) {
     return null;
   }
   const webpPath = objectPath.replace(/\.[a-z0-9]+$/i, ".webp");
