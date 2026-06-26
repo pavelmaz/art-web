@@ -153,7 +153,7 @@ export async function buildArtworkSitemapPageResponse(
     }
 
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+    const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
     if (!supabaseUrl?.trim() || !supabaseKey?.trim()) {
       console.error(`[sitemap/${label}]`, page, "missing Supabase env");
       return new Response(emptyUrlset(), {
@@ -244,7 +244,7 @@ export async function buildArtworkImageSitemapPageResponse(
     }
 
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+    const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
     if (!supabaseUrl?.trim() || !supabaseKey?.trim()) {
       console.error(`[sitemap/${label}]`, page, "missing Supabase env");
       return new Response(emptyImageUrlset(), {
