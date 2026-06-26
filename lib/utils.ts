@@ -229,14 +229,17 @@ export type ArtworkImageUrlOptions = {
 export function artworkImageUrl(artwork: ArtworkImageSource, options?: ArtworkImageUrlOptions): string {
   const quality = options?.quality ?? ARTWORK_GRID_IMAGE_QUALITY;
   const width = options?.width ?? ARTWORK_GRID_IMAGE_WIDTH;
+  // Default to a rendition so a bare call never serves the multi-MB original. The full
+  // master file is only ever exposed deliberately via artworkOriginalUrl (Pro download).
+  const rendition = options?.rendition ?? "grid";
 
   // ALWAYS use image_id first - our Supabase storage
   const fromImageId = toImageUrl(artwork.image_id);
   if (fromImageId && !isBlockedDirectImageHost(fromImageId)) {
-    if (USE_IMAGE_RENDITIONS && options?.rendition) {
-      const rendition = supabaseRenditionUrl(fromImageId, options.rendition);
-      if (rendition) {
-        return cdnRewrite(rendition);
+    if (USE_IMAGE_RENDITIONS) {
+      const renditionUrl = supabaseRenditionUrl(fromImageId, rendition);
+      if (renditionUrl) {
+        return cdnRewrite(renditionUrl);
       }
     }
     return cdnRewrite(optimizeImageUrl(fromImageId, quality, width));
@@ -245,10 +248,10 @@ export function artworkImageUrl(artwork: ArtworkImageSource, options?: ArtworkIm
   // Fallback to url only if no image_id
   const rawUrl = artwork.url?.trim();
   if (rawUrl && isLikelyImageUrl(rawUrl) && !isBlockedDirectImageHost(rawUrl)) {
-    if (USE_IMAGE_RENDITIONS && options?.rendition) {
-      const rendition = supabaseRenditionUrl(rawUrl, options.rendition);
-      if (rendition) {
-        return cdnRewrite(rendition);
+    if (USE_IMAGE_RENDITIONS) {
+      const renditionUrl = supabaseRenditionUrl(rawUrl, rendition);
+      if (renditionUrl) {
+        return cdnRewrite(renditionUrl);
       }
     }
     return cdnRewrite(optimizeImageUrl(rawUrl, quality, width));

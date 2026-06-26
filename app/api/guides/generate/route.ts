@@ -136,6 +136,23 @@ async function fetchMuseumArtworks(museumName: string): Promise<GuideArtworkCand
     }));
 }
 
+/** Basic, always-valid overview built straight from the selection — used when the AI
+ *  overview call fails or returns unusable stops, so a visitor never gets an error. */
+function buildFallbackOverview(
+  request: GenerateGuideRequest,
+  selected: GuideArtworkCandidate[],
+): GeneratedOverview {
+  return {
+    title: `${request.museum_name} — Highlights`,
+    description: `A hand-picked route through standout works at ${request.museum_name}.`,
+    stops: selected.map((artwork, index) => ({
+      artwork_id: artwork.id,
+      order: index + 1,
+      reason: `A notable work by ${artwork.artist_display}.`,
+    })),
+  };
+}
+
 function assembleGuide(
   request: GenerateGuideRequest,
   selected: GuideArtworkCandidate[],
@@ -244,28 +261,32 @@ export async function POST(req: NextRequest) {
       generateGuideInsights(selected, interest),
     ]);
 
+    // The overview is the core. If it fails (timeout, rate limit, bad JSON), fall back
+    // to a basic highlights guide instead of erroring — the visitor always gets a guide.
+    let overview: GeneratedOverview;
     if ("error" in overviewResult) {
-      console.error("[guides/generate] OpenAI overview error:", overviewResult.error);
-      return NextResponse.json({ error: overviewResult.error }, { status: 500 });
+      console.error("[guides/generate] overview failed, using fallback:", overviewResult.error);
+      overview = buildFallbackOverview(parsed, selected);
+    } else {
+      overview = overviewResult.data;
     }
 
+    // Per-stop insight bullets are an enhancement, not a requirement: if they fail, the
+    // guide still renders (the on-demand Discover control fills them in later).
+    let insights: Map<string, string[]>;
     if ("error" in insightsResult) {
-      console.error("[guides/generate] OpenAI insights error:", insightsResult.error);
-      return NextResponse.json({ error: insightsResult.error }, { status: 500 });
+      console.error("[guides/generate] insights failed (non-fatal):", insightsResult.error);
+      insights = new Map();
+    } else {
+      insights = insightsResult.data;
     }
 
-    const guideData = assembleGuide(
-      parsed,
-      selected,
-      overviewResult.data,
-      insightsResult.data,
-    );
+    let guideData = assembleGuide(parsed, selected, overview, insights);
 
+    // If the AI returned stop IDs that don't match our selection, rebuild from the
+    // selected artworks directly so we never end up with an empty guide.
     if (guideData.stops.length === 0) {
-      return NextResponse.json(
-        { error: "Failed to assemble guide: no matching stops from AI response" },
-        { status: 500 },
-      );
+      guideData = assembleGuide(parsed, selected, buildFallbackOverview(parsed, selected), insights);
     }
 
     const { data: inserted, error: insertError } = await supabaseAdmin

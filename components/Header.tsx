@@ -9,7 +9,7 @@ import {
   getGenreLabelForLocale,
   getGenreSlugForLocale,
   type BrowseGenreRow,
-} from "@/lib/browse-genres";
+} from "@/lib/browse-genres-helpers";
 import { fineArtProPath } from "@/lib/fineart-pro-path";
 import { detectLocaleFromPathname } from "@/lib/hreflang-paths";
 import { HREFLANG_LOCALES, LOCALE_ROUTE_CONFIG, getSegments, localePath } from "@/lib/locale-routes";

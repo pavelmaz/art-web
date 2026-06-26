@@ -54,6 +54,30 @@ export default function robots(): MetadataRoute.Robots {
         userAgent: "cohere-ai",
         disallow: ["/"],
       },
+      {
+        userAgent: "ClaudeBot",
+        disallow: ["/"],
+      },
+      {
+        userAgent: "Google-Extended",
+        disallow: ["/"],
+      },
+      {
+        userAgent: "PerplexityBot",
+        disallow: ["/"],
+      },
+      {
+        userAgent: "meta-externalagent",
+        disallow: ["/"],
+      },
+      {
+        userAgent: "Applebot-Extended",
+        disallow: ["/"],
+      },
+      {
+        userAgent: "Amazonbot",
+        disallow: ["/"],
+      },
     ],
     sitemap: `${baseUrl}/sitemap.xml`,
   };

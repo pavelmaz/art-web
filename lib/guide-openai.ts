@@ -10,45 +10,83 @@ function getOpenAiApiKey(): string {
 
 type OpenAiJsonResult<T> = { data: T } | { error: string };
 
+const OPENAI_TIMEOUT_MS = 20000;
+const OPENAI_MAX_ATTEMPTS = 2;
+
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+/**
+ * Calls OpenAI for a JSON response with a hard per-attempt timeout (so a slow call
+ * can't silently eat the whole 60s function budget and leave the user hanging) and a
+ * retry on transient failures — timeouts, rate limits (429), 5xx, and empty/invalid
+ * JSON. Bounded so the worst case stays within the route budget even with two
+ * concurrent calls.
+ */
 async function callOpenAiJson<T>(prompt: string, maxTokens: number): Promise<OpenAiJsonResult<T>> {
   const apiKey = getOpenAiApiKey();
   if (!apiKey) {
     return { error: "OpenAI API key is not configured" };
   }
 
-  try {
-    const response = await fetch("https://api.openai.com/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${apiKey}`,
-      },
-      body: JSON.stringify({
-        model: "gpt-4o-mini",
-        max_tokens: maxTokens,
-        response_format: { type: "json_object" },
-        messages: [{ role: "user", content: prompt }],
-      }),
-    });
+  let lastError = "OpenAI request failed";
 
-    if (!response.ok) {
-      const body = await response.text();
-      return { error: `OpenAI request failed (${response.status}): ${body.slice(0, 200)}` };
+  for (let attempt = 1; attempt <= OPENAI_MAX_ATTEMPTS; attempt += 1) {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), OPENAI_TIMEOUT_MS);
+    try {
+      const response = await fetch("https://api.openai.com/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${apiKey}`,
+        },
+        body: JSON.stringify({
+          model: "gpt-4o-mini",
+          max_tokens: maxTokens,
+          response_format: { type: "json_object" },
+          messages: [{ role: "user", content: prompt }],
+        }),
+        signal: controller.signal,
+      });
+
+      if (!response.ok) {
+        const body = await response.text();
+        lastError = `OpenAI request failed (${response.status}): ${body.slice(0, 200)}`;
+        if (response.status === 429 || response.status >= 500) {
+          await sleep(500 * attempt);
+          continue;
+        }
+        return { error: lastError };
+      }
+
+      const payload = (await response.json()) as {
+        choices?: Array<{ message?: { content?: string } }>;
+      };
+      const content = payload.choices?.[0]?.message?.content;
+      if (!content) {
+        lastError = "OpenAI returned an empty response";
+        await sleep(500 * attempt);
+        continue;
+      }
+
+      try {
+        return { data: JSON.parse(content) as T };
+      } catch {
+        lastError = "OpenAI returned invalid JSON";
+        await sleep(500 * attempt);
+        continue;
+      }
+    } catch (error: unknown) {
+      lastError = error instanceof Error ? error.message : String(error);
+      await sleep(500 * attempt);
+    } finally {
+      clearTimeout(timer);
     }
-
-    const payload = (await response.json()) as {
-      choices?: Array<{ message?: { content?: string } }>;
-    };
-    const content = payload.choices?.[0]?.message?.content;
-    if (!content) {
-      return { error: "OpenAI returned an empty response" };
-    }
-
-    return { data: JSON.parse(content) as T };
-  } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : String(error);
-    return { error: message };
   }
+
+  return { error: lastError };
 }
 
 type OverviewResponse = {
