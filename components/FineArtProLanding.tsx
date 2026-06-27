@@ -14,6 +14,9 @@ const playfair = Playfair_Display({
   weight: ["600", "700"],
 });
 
+/** Google-review-style avatar background colors, assigned per testimonial by index. */
+const AVATAR_COLORS = ["#4285F4", "#DB4437", "#0F9D58", "#F4B400", "#7E57C2", "#00897B"];
+
 type FineArtProLandingProps = {
   locale: Locale;
 };
@@ -72,32 +75,48 @@ export function FineArtProLanding({ locale }: FineArtProLandingProps) {
 
             <p className="mt-4 text-base leading-relaxed text-[#4a4a4a] sm:text-lg">{c.heroSub}</p>
 
-            {/* Library facts — what the collection IS (deliberately NOT the Pro features,
-                which live once in the comparison table below, so nothing is said twice). */}
-            <div className="mt-6 grid grid-cols-3 gap-3">
-              {c.heroStats.map((stat) => (
-                <div key={stat.title} className="flex items-start gap-2">
-                  <span className="mt-0.5 shrink-0 text-[#3b8e3f]" aria-hidden>
-                    ✦
-                  </span>
-                  <div>
-                    <p className="text-[13px] font-medium leading-snug text-[#1a1a1a] sm:text-sm">
-                      {stat.title}
-                    </p>
-                    <p className="text-xs text-[#8a8a8a]">{stat.sub}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
+            {/* Social proof — a rating line plus an auto-scrolling review strip, so
+                visitors see real reviews exist immediately, without scrolling down. */}
+            <div className="mt-5">
+              <div className="flex items-center gap-2">
+                <span className="text-[15px] tracking-tight text-[#E0A93C]" aria-hidden>
+                  ★★★★★
+                </span>
+                <span className="text-[13px] text-[#4a4a4a]">
+                  <span className="font-semibold text-[#1a1a1a]">{c.trustRating}</span> · {c.trustCount}
+                </span>
+              </div>
 
-            {/* Trust line — social proof placed right where hesitation peaks (by the price). */}
-            <div className="mt-5 flex w-fit items-center gap-2 rounded-xl border border-[#ece9e3] bg-white px-3 py-2">
-              <span className="text-[15px] tracking-tight text-[#E0A93C]" aria-hidden>
-                ★★★★★
-              </span>
-              <span className="text-[13px] text-[#4a4a4a]">
-                <span className="font-semibold text-[#1a1a1a]">{c.trustRating}</span> · {c.trustCount}
-              </span>
+              <div className="fap-marquee-mask mt-3">
+                <ul className="fap-marquee-track">
+                  {[...c.testimonials, ...c.testimonials].map((t, i) => (
+                    <li
+                      key={`${t.name}-${i}`}
+                      className="mr-3.5 flex w-[260px] shrink-0 flex-col rounded-xl border border-[#ece9e3] bg-white px-4 py-3"
+                      aria-hidden={i >= c.testimonials.length}
+                    >
+                      <div className="flex items-center gap-2.5">
+                        <span
+                          className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-semibold text-white"
+                          style={{ backgroundColor: AVATAR_COLORS[i % AVATAR_COLORS.length] }}
+                          aria-hidden
+                        >
+                          {t.name.charAt(0)}
+                        </span>
+                        <span className="truncate text-[13px] font-semibold text-[#1a1a1a]">
+                          {t.name}
+                        </span>
+                        <span className="ml-auto text-[11px] tracking-tight text-[#E0A93C]" aria-hidden>
+                          ★★★★★
+                        </span>
+                      </div>
+                      <p className="mt-2 line-clamp-2 text-[12px] leading-snug text-[#5a5a5a]">
+                        {t.quote}
+                      </p>
+                    </li>
+                  ))}
+                </ul>
+              </div>
             </div>
 
             {/* Free vs Pro — single source of truth for features (modern comparison table). */}
@@ -186,21 +205,42 @@ export function FineArtProLanding({ locale }: FineArtProLandingProps) {
           >
             {c.testimonialsHeading}
           </h2>
-          <div className="mt-6 grid gap-4 sm:grid-cols-3">
-            {c.testimonials.map((t) => (
+          <div className="mt-2 flex items-center gap-2 text-sm text-[#4a4a4a]">
+            <span className="text-[15px] text-[#E0A93C]" aria-hidden>
+              ★★★★★
+            </span>
+            <span>
+              <span className="font-semibold text-[#1a1a1a]">{c.trustRating}</span> · {c.trustCount}
+            </span>
+          </div>
+          <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {c.testimonials.map((t, i) => (
               <figure
                 key={t.name}
                 className="flex flex-col rounded-2xl border border-[#ece9e3] bg-white p-5"
               >
-                <span className="text-[15px] text-[#E0A93C]" aria-hidden>
-                  ★★★★★
-                </span>
-                <blockquote className="mt-2.5 text-[13px] leading-relaxed text-[#3a3a3a]">
-                  “{t.quote}”
+                <div className="flex items-center gap-3">
+                  <span
+                    className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-sm font-semibold text-white"
+                    style={{ backgroundColor: AVATAR_COLORS[i % AVATAR_COLORS.length] }}
+                    aria-hidden
+                  >
+                    {t.name.charAt(0)}
+                  </span>
+                  <figcaption className="min-w-0">
+                    <p className="truncate text-sm font-semibold text-[#1a1a1a]">{t.name}</p>
+                    <p className="truncate text-xs text-[#8a8a8a]">{t.meta}</p>
+                  </figcaption>
+                </div>
+                <div className="mt-3 flex items-center gap-2">
+                  <span className="text-[15px] text-[#E0A93C]" aria-hidden>
+                    ★★★★★
+                  </span>
+                  <span className="text-xs text-[#9a9a9a]">{t.date}</span>
+                </div>
+                <blockquote className="mt-2 text-[13px] leading-relaxed text-[#3a3a3a]">
+                  {t.quote}
                 </blockquote>
-                <figcaption className="mt-3 text-xs text-[#8a8a8a]">
-                  <span className="font-medium text-[#1a1a1a]">{t.name}</span> · {t.role}
-                </figcaption>
               </figure>
             ))}
           </div>

@@ -120,3 +120,34 @@ img {
   backdrop-filter: blur(16px) saturate(140%);
   -webkit-backdrop-filter: blur(16px) saturate(140%);
 }
+
+/* ── Auto-scrolling review marquee (Fine Art Pro hero) ─────────────────
+   The track renders the reviews twice; translating it -50% loops seamlessly.
+   Each card carries its own right margin so the wrap-around gap is even.
+   Pauses on hover and is disabled under prefers-reduced-motion. */
+.fap-marquee-mask {
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(to right, transparent, #000 6%, #000 94%, transparent);
+  mask-image: linear-gradient(to right, transparent, #000 6%, #000 94%, transparent);
+}
+.fap-marquee-track {
+  display: flex;
+  width: max-content;
+  animation: fap-marquee 48s linear infinite;
+}
+.fap-marquee-mask:hover .fap-marquee-track {
+  animation-play-state: paused;
+}
+@keyframes fap-marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .fap-marquee-track {
+    animation: none;
+  }
+}

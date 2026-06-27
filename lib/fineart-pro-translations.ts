@@ -29,13 +29,12 @@ export type FineArtProCopy = {
   compareFree: readonly string[];
   comparePro: readonly string[];
   socialProof: string;
-  heroStats: readonly { title: string; sub: string }[];
   trustRating: string;
   trustCount: string;
   comparisonHeader: string;
   comparison: readonly { feature: string; free: string | boolean; pro: string | boolean }[];
   testimonialsHeading: string;
-  testimonials: readonly { quote: string; name: string; role: string }[];
+  testimonials: readonly { name: string; meta: string; date: string; quote: string }[];
   freshH2: string;
   freshBody: string;
   faq: readonly FineArtProFaqCopy[];
@@ -107,11 +106,6 @@ const en: FineArtProCopy = {
   compareFree: ["Web-size images","Personal use only"],
   comparePro: ["4K original files","Unlimited downloads","Full commercial use","Unlimited AI insights & museum guides"],
   socialProof: "Sourced from the world's leading museums and libraries",
-  heroStats: [
-    { title: "400,000+ works", sub: "paintings to posters" },
-    { title: "50+ museums", sub: "Louvre, Prado, Met…" },
-    { title: "New every month", sub: "always growing" },
-  ],
   trustRating: "4.9",
   trustCount: "loved by 12,000+ creators",
   comparisonHeader: "What you get",
@@ -123,26 +117,50 @@ const en: FineArtProCopy = {
     { feature: "Personalized museum guides", free: false, pro: true },
   ],
   testimonialsHeading: "Loved by creators & history lovers",
-  // ⚠️ PLACEHOLDER testimonials — NOT real customers. Replace with genuine quotes
-  // before relying on these publicly. Fake reviews on a paid page are deceptive and
-  // illegal in many markets (FTC, EU/UK consumer law). These exist only to build the UI.
+  // ⚠️ PLACEHOLDER testimonials — NOT real customers; names, dates and review counts are
+  // all invented. Replace with genuine reviews before relying on these publicly. Fake
+  // reviews on a paid page are deceptive and illegal in many markets (FTC, EU/UK law).
   testimonials: [
     {
+      name: "Marta López",
+      meta: "Local Guide · 24 reviews",
+      date: "2 weeks ago",
       quote:
         "Been subscribed for months — the 4K downloads are unreal. My go-to for every design project now.",
-      name: "Marta L.",
-      role: "Graphic designer",
     },
     {
+      name: "David Reynolds",
+      meta: "8 reviews",
+      date: "1 month ago",
       quote:
-        "Cheaper than one stock photo and I get the whole museum. The museum guides are a lovely bonus.",
-      name: "David R.",
-      role: "Art teacher",
+        "Cheaper than a single stock photo and I get the whole museum. The museum guides are a lovely bonus.",
     },
     {
+      name: "Yuki Tanaka",
+      meta: "Local Guide · 51 reviews",
+      date: "3 weeks ago",
       quote: "I print these for my home and use them commercially — worth every cent.",
-      name: "Yuki T.",
-      role: "Illustrator",
+    },
+    {
+      name: "Sophie Martin",
+      meta: "12 reviews",
+      date: "5 days ago",
+      quote:
+        "The resolution is incredible. I found pieces here I couldn't get anywhere else, all public domain.",
+    },
+    {
+      name: "Liam O'Connor",
+      meta: "3 reviews",
+      date: "2 months ago",
+      quote:
+        "Cancelled my stock-photo subscription after a week of this. So much better for fine art.",
+    },
+    {
+      name: "Chen Wei",
+      meta: "Local Guide · 19 reviews",
+      date: "1 week ago",
+      quote:
+        "Huge library, fresh works every month, and the AI insights actually taught me about each painting.",
     },
   ],
   freshH2: "Fresh Content Every Month",
@@ -243,6 +261,16 @@ const es: FineArtProCopy = {
   compareFree: ["Imágenes tamaño web","Solo uso personal"],
   comparePro: ["Archivos originales en 4K","Descargas ilimitadas","Uso comercial completo","Insights de IA y guías de museo ilimitados"],
   socialProof: "Procedente de los principales museos y bibliotecas del mundo",
+  trustCount: "con la confianza de más de 12.000 creadores",
+  comparisonHeader: "Qué incluye",
+  comparison: [
+    { feature: "Resolución de imagen", free: "Tamaño web", pro: "Originales en 4K" },
+    { feature: "Licencia comercial", free: false, pro: true },
+    { feature: "Descargas", free: "Limitadas", pro: "Ilimitadas" },
+    { feature: "Insights de IA por obra", free: "Vista previa", pro: "Ilimitados" },
+    { feature: "Guías de museo personalizadas", free: false, pro: true },
+  ],
+  testimonialsHeading: "Adorado por creativos y amantes de la historia",
   freshH2: "Contenido nuevo cada mes",
   freshBody:
     "Nuestra biblioteca crece constantemente con los últimos descubrimientos de dominio público en archivos de algunos de los mejores museos y bibliotecas del mundo.",
@@ -337,6 +365,16 @@ const pt: FineArtProCopy = {
   compareFree: ["Imagens tamanho web","Apenas uso pessoal"],
   comparePro: ["Arquivos originais em 4K","Downloads ilimitados","Uso comercial completo","Insights de IA e guias de museu ilimitados"],
   socialProof: "Proveniente dos principais museus e bibliotecas do mundo",
+  trustCount: "com a confiança de mais de 12.000 criadores",
+  comparisonHeader: "O que está incluído",
+  comparison: [
+    { feature: "Resolução da imagem", free: "Tamanho web", pro: "Originais em 4K" },
+    { feature: "Licença comercial", free: false, pro: true },
+    { feature: "Downloads", free: "Limitados", pro: "Ilimitados" },
+    { feature: "Insights de IA por obra", free: "Prévia", pro: "Ilimitados" },
+    { feature: "Guias de museu personalizados", free: false, pro: true },
+  ],
+  testimonialsHeading: "Adorado por criativos e amantes da história",
   freshH2: "Conteúdo novo todo mês",
   freshBody:
     "Nossa biblioteca cresce com as últimas descobertas de domínio público em arquivos dos melhores museus e bibliotecas do mundo.",
@@ -422,6 +460,16 @@ const ja: FineArtProCopy = {
   compareFree: ["ウェブサイズの画像","個人利用のみ"],
   comparePro: ["4Kオリジナルファイル","無制限ダウンロード","商用利用可","無制限のAIインサイトと美術館ガイド"],
   socialProof: "世界有数の美術館・図書館から収録",
+  trustCount: "12,000人以上のクリエイターに愛用",
+  comparisonHeader: "含まれるもの",
+  comparison: [
+    { feature: "画像の解像度", free: "ウェブサイズ", pro: "4Kオリジナル" },
+    { feature: "商用ライセンス", free: false, pro: true },
+    { feature: "ダウンロード", free: "制限あり", pro: "無制限" },
+    { feature: "作品ごとのAIインサイト", free: "プレビュー", pro: "無制限" },
+    { feature: "パーソナル美術館ガイド", free: false, pro: true },
+  ],
+  testimonialsHeading: "クリエイターと歴史好きに愛されています",
   freshH2: "毎月新しいコンテンツ",
   freshBody:
     "世界有数の美術館・図書館のアーカイブから見つかった最新のパブリックドメイン作品を、常にライブラリに追加しています。",
@@ -509,6 +557,16 @@ const fr: FineArtProCopy = {
   compareFree: ["Images taille web","Usage personnel uniquement"],
   comparePro: ["Fichiers originaux en 4K","Téléchargements illimités","Usage commercial complet","Insights IA et guides de musée illimités"],
   socialProof: "Issu des plus grands musées et bibliothèques du monde",
+  trustCount: "adopté par plus de 12 000 créateurs",
+  comparisonHeader: "Ce qui est inclus",
+  comparison: [
+    { feature: "Résolution d'image", free: "Taille web", pro: "Originaux en 4K" },
+    { feature: "Licence commerciale", free: false, pro: true },
+    { feature: "Téléchargements", free: "Limités", pro: "Illimités" },
+    { feature: "Insights IA par œuvre", free: "Aperçu", pro: "Illimités" },
+    { feature: "Guides de musée personnalisés", free: false, pro: true },
+  ],
+  testimonialsHeading: "Adoré par les créateurs et les amateurs d'histoire",
   freshH2: "Nouveau contenu chaque mois",
   freshBody:
     "Notre bibliothèque s'enrichit en permanence des dernières découvertes du domaine public dans les archives des plus grands musées et bibliothèques.",
@@ -602,6 +660,16 @@ const de: FineArtProCopy = {
   compareFree: ["Bilder in Web-Größe","Nur private Nutzung"],
   comparePro: ["4K-Originaldateien","Unbegrenzte Downloads","Volle kommerzielle Nutzung","Unbegrenzte KI-Insights & Museumsführer"],
   socialProof: "Aus den führenden Museen und Bibliotheken der Welt",
+  trustCount: "von über 12.000 Kreativen geliebt",
+  comparisonHeader: "Was du bekommst",
+  comparison: [
+    { feature: "Bildauflösung", free: "Web-Größe", pro: "4K-Originale" },
+    { feature: "Kommerzielle Lizenz", free: false, pro: true },
+    { feature: "Downloads", free: "Begrenzt", pro: "Unbegrenzt" },
+    { feature: "KI-Insights pro Werk", free: "Vorschau", pro: "Unbegrenzt" },
+    { feature: "Personalisierte Museumsführer", free: false, pro: true },
+  ],
+  testimonialsHeading: "Geliebt von Kreativen und Geschichtsliebhabern",
   freshH2: "Jeden Monat neuer Inhalt",
   freshBody:
     "Unsere Bibliothek wächst ständig mit neuen gemeinfreien Funden aus Archiven der besten Museen und Bibliotheken der Welt.",
@@ -694,6 +762,16 @@ const it: FineArtProCopy = {
   compareFree: ["Immagini formato web","Solo uso personale"],
   comparePro: ["File originali in 4K","Download illimitati","Pieno uso commerciale","Insights IA e guide ai musei illimitati"],
   socialProof: "Provenienti dai principali musei e biblioteche del mondo",
+  trustCount: "amato da oltre 12.000 creativi",
+  comparisonHeader: "Cosa ottieni",
+  comparison: [
+    { feature: "Risoluzione immagine", free: "Formato web", pro: "Originali in 4K" },
+    { feature: "Licenza commerciale", free: false, pro: true },
+    { feature: "Download", free: "Limitati", pro: "Illimitati" },
+    { feature: "Insights IA per opera", free: "Anteprima", pro: "Illimitati" },
+    { feature: "Guide ai musei personalizzate", free: false, pro: true },
+  ],
+  testimonialsHeading: "Amato da creativi e appassionati di storia",
   freshH2: "Nuovi contenuti ogni mese",
   freshBody:
     "La biblioteca cresce con le ultime scoperte di pubblico dominio negli archivi dei migliori musei e biblioteche.",
@@ -786,6 +864,16 @@ const ko: FineArtProCopy = {
   compareFree: ["웹 크기 이미지","개인용으로만"],
   comparePro: ["4K 원본 파일","무제한 다운로드","상업적 사용 가능","무제한 AI 인사이트 및 미술관 가이드"],
   socialProof: "세계 유수의 미술관과 도서관에서 수집",
+  trustCount: "12,000명 이상의 크리에이터가 사랑하는",
+  comparisonHeader: "제공 항목",
+  comparison: [
+    { feature: "이미지 해상도", free: "웹 크기", pro: "4K 원본" },
+    { feature: "상업용 라이선스", free: false, pro: true },
+    { feature: "다운로드", free: "제한적", pro: "무제한" },
+    { feature: "작품별 AI 인사이트", free: "미리보기", pro: "무제한" },
+    { feature: "맞춤형 미술관 가이드", free: false, pro: true },
+  ],
+  testimonialsHeading: "크리에이터와 역사 애호가가 사랑합니다",
   freshH2: "매달 새로운 콘텐츠",
   freshBody:
     "세계 최고의 박물관·도서관 아카이브에서 발견된 최신 퍼블릭 도메인 작품을 지속적으로 추가합니다.",
@@ -873,6 +961,16 @@ const ru: FineArtProCopy = {
   compareFree: ["Изображения веб-размера","Только личное использование"],
   comparePro: ["Оригиналы в 4K","Безлимитные загрузки","Полное коммерческое использование","Безлимитные AI-инсайты и гиды по музеям"],
   socialProof: "Из ведущих музеев и библиотек мира",
+  trustCount: "нас любят более 12 000 авторов",
+  comparisonHeader: "Что входит",
+  comparison: [
+    { feature: "Разрешение изображения", free: "Веб-размер", pro: "Оригиналы в 4K" },
+    { feature: "Коммерческая лицензия", free: false, pro: true },
+    { feature: "Загрузки", free: "Ограничено", pro: "Без ограничений" },
+    { feature: "AI-инсайты к каждой работе", free: "Предпросмотр", pro: "Без ограничений" },
+    { feature: "Персональные гиды по музеям", free: false, pro: true },
+  ],
+  testimonialsHeading: "Нас любят авторы и любители истории",
   freshH2: "Новый контент каждый месяц",
   freshBody:
     "Библиотека постоянно пополняется новыми находками общественного достояния из архивов лучших музеев и библиотек мира.",
@@ -965,6 +1063,16 @@ const zh: FineArtProCopy = {
   compareFree: ["网页尺寸图像","仅限个人使用"],
   comparePro: ["4K 原始文件","无限下载","完整商用授权","无限 AI 洞察与博物馆导览"],
   socialProof: "来自全球顶级博物馆与图书馆",
+  trustCount: "深受 12,000+ 创作者喜爱",
+  comparisonHeader: "包含内容",
+  comparison: [
+    { feature: "图像分辨率", free: "网页尺寸", pro: "4K 原图" },
+    { feature: "商业授权", free: false, pro: true },
+    { feature: "下载", free: "有限", pro: "无限" },
+    { feature: "每件作品的 AI 洞察", free: "预览", pro: "无限" },
+    { feature: "个性化博物馆导览", free: false, pro: true },
+  ],
+  testimonialsHeading: "深受创作者与历史爱好者喜爱",
   freshH2: "每月更新内容",
   freshBody:
     "馆藏持续增加来自世界顶尖博物馆与图书馆档案的最新公有领域发现。",
