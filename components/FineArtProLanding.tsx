@@ -18,6 +18,31 @@ type FineArtProLandingProps = {
   locale: Locale;
 };
 
+/** Render a Free/Pro comparison cell: true → check, false → dash, string → the value. */
+function comparisonCell(value: string | boolean) {
+  if (value === true) {
+    return (
+      <>
+        <span className="text-[#3b8e3f]" aria-hidden>
+          ✓
+        </span>
+        <span className="sr-only">Included</span>
+      </>
+    );
+  }
+  if (value === false) {
+    return (
+      <>
+        <span className="text-[#c4c4c4]" aria-hidden>
+          –
+        </span>
+        <span className="sr-only">Not included</span>
+      </>
+    );
+  }
+  return value;
+}
+
 export function FineArtProLanding({ locale }: FineArtProLandingProps) {
   const c = getFineArtProT(locale);
 
@@ -47,50 +72,68 @@ export function FineArtProLanding({ locale }: FineArtProLandingProps) {
 
             <p className="mt-4 text-base leading-relaxed text-[#4a4a4a] sm:text-lg">{c.heroSub}</p>
 
-            <p className="mt-3 text-xs font-medium uppercase tracking-wide text-[#9a8f7d]">
-              {c.socialProof}
-            </p>
-
-            <ul className="mt-7 space-y-3.5 text-[15px] leading-relaxed text-[#1a1a1a] sm:text-base">
-              {c.heroBullets.map((line) => (
-                <li key={line} className="flex gap-3">
-                  <span className="mt-0.5 shrink-0 text-[#4CAF50]" aria-hidden>
-                    ✓
+            {/* Library facts — what the collection IS (deliberately NOT the Pro features,
+                which live once in the comparison table below, so nothing is said twice). */}
+            <div className="mt-6 grid grid-cols-3 gap-3">
+              {c.heroStats.map((stat) => (
+                <div key={stat.title} className="flex items-start gap-2">
+                  <span className="mt-0.5 shrink-0 text-[#3b8e3f]" aria-hidden>
+                    ✦
                   </span>
-                  <span>{line}</span>
-                </li>
+                  <div>
+                    <p className="text-[13px] font-medium leading-snug text-[#1a1a1a] sm:text-sm">
+                      {stat.title}
+                    </p>
+                    <p className="text-xs text-[#8a8a8a]">{stat.sub}</p>
+                  </div>
+                </div>
               ))}
-            </ul>
+            </div>
 
-            <div className="mt-8 grid grid-cols-2 overflow-hidden rounded-2xl border border-[#e8e6e1]">
-              <div className="border-r border-[#e8e6e1] bg-[#faf9f7] p-4">
-                <p className="text-xs font-semibold uppercase tracking-wide text-[#9a9a9a]">
-                  {c.compareFreeTitle}
-                </p>
-                <ul className="mt-3 space-y-2 text-[13px] text-[#6b6b6b]">
-                  {c.compareFree.map((line) => (
-                    <li key={line} className="flex gap-2">
-                      <span aria-hidden>·</span>
-                      <span>{line}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-              <div className="bg-white p-4">
-                <p className="text-xs font-semibold uppercase tracking-wide text-[#4CAF50]">
-                  {c.compareProTitle}
-                </p>
-                <ul className="mt-3 space-y-2 text-[13px] font-medium text-[#1a1a1a]">
-                  {c.comparePro.map((line) => (
-                    <li key={line} className="flex gap-2">
-                      <span className="text-[#4CAF50]" aria-hidden>
-                        ✓
+            {/* Trust line — social proof placed right where hesitation peaks (by the price). */}
+            <div className="mt-5 flex w-fit items-center gap-2 rounded-xl border border-[#ece9e3] bg-white px-3 py-2">
+              <span className="text-[15px] tracking-tight text-[#E0A93C]" aria-hidden>
+                ★★★★★
+              </span>
+              <span className="text-[13px] text-[#4a4a4a]">
+                <span className="font-semibold text-[#1a1a1a]">{c.trustRating}</span> · {c.trustCount}
+              </span>
+            </div>
+
+            {/* Free vs Pro — single source of truth for features (modern comparison table). */}
+            <div className="mt-7 overflow-hidden rounded-2xl border border-[#e3e0d9] bg-white">
+              <table className="w-full table-fixed border-collapse">
+                <thead>
+                  <tr>
+                    <th className="w-[46%] px-4 py-3.5 text-left text-xs font-medium text-[#9a9a9a]">
+                      {c.comparisonHeader}
+                    </th>
+                    <th className="w-[27%] px-2 py-3.5 text-center text-[13px] font-medium text-[#8a8a8a]">
+                      {c.compareFreeTitle}
+                    </th>
+                    <th className="w-[27%] bg-[#f4faf4] px-2 py-3.5 text-center">
+                      <span className="inline-block rounded-full bg-[#e7f4e7] px-2.5 py-1 text-xs font-semibold text-[#2c6e30]">
+                        {c.compareProTitle}
                       </span>
-                      <span>{line}</span>
-                    </li>
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {c.comparison.map((row) => (
+                    <tr key={row.feature}>
+                      <td className="border-t border-[#ece9e3] px-4 py-3 text-sm text-[#4a4a4a]">
+                        {row.feature}
+                      </td>
+                      <td className="border-t border-[#ece9e3] px-2 py-3 text-center text-sm text-[#9a9a9a]">
+                        {comparisonCell(row.free)}
+                      </td>
+                      <td className="border-t border-[#ece9e3] bg-[#f4faf4] px-2 py-3 text-center text-sm font-medium text-[#1a1a1a]">
+                        {comparisonCell(row.pro)}
+                      </td>
+                    </tr>
                   ))}
-                </ul>
-              </div>
+                </tbody>
+              </table>
             </div>
 
             <p className="mt-8 text-sm font-medium text-[#1a1a1a]">{c.valueNote}</p>
@@ -130,6 +173,36 @@ export function FineArtProLanding({ locale }: FineArtProLandingProps) {
             </div>
 
             <p className="mt-4 text-center text-xs text-[#6b6b6b]">{c.ctaNote}</p>
+          </div>
+        </div>
+      </section>
+
+      {/* Social proof. NOTE: testimonials are PLACEHOLDERS (see fineart-pro-translations.ts) —
+          replace with real customer quotes before treating them as genuine. */}
+      <section className="px-3 py-12 md:px-6 md:py-16">
+        <div className="mr-auto max-w-7xl">
+          <h2
+            className={`${playfair.className} text-2xl font-bold tracking-tight text-[#1a1a1a] sm:text-3xl`}
+          >
+            {c.testimonialsHeading}
+          </h2>
+          <div className="mt-6 grid gap-4 sm:grid-cols-3">
+            {c.testimonials.map((t) => (
+              <figure
+                key={t.name}
+                className="flex flex-col rounded-2xl border border-[#ece9e3] bg-white p-5"
+              >
+                <span className="text-[15px] text-[#E0A93C]" aria-hidden>
+                  ★★★★★
+                </span>
+                <blockquote className="mt-2.5 text-[13px] leading-relaxed text-[#3a3a3a]">
+                  “{t.quote}”
+                </blockquote>
+                <figcaption className="mt-3 text-xs text-[#8a8a8a]">
+                  <span className="font-medium text-[#1a1a1a]">{t.name}</span> · {t.role}
+                </figcaption>
+              </figure>
+            ))}
           </div>
         </div>
       </section>

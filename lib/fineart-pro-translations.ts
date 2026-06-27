@@ -29,6 +29,13 @@ export type FineArtProCopy = {
   compareFree: readonly string[];
   comparePro: readonly string[];
   socialProof: string;
+  heroStats: readonly { title: string; sub: string }[];
+  trustRating: string;
+  trustCount: string;
+  comparisonHeader: string;
+  comparison: readonly { feature: string; free: string | boolean; pro: string | boolean }[];
+  testimonialsHeading: string;
+  testimonials: readonly { quote: string; name: string; role: string }[];
   freshH2: string;
   freshBody: string;
   faq: readonly FineArtProFaqCopy[];
@@ -100,6 +107,44 @@ const en: FineArtProCopy = {
   compareFree: ["Web-size images","Personal use only"],
   comparePro: ["4K original files","Unlimited downloads","Full commercial use","Unlimited AI insights & museum guides"],
   socialProof: "Sourced from the world's leading museums and libraries",
+  heroStats: [
+    { title: "400,000+ works", sub: "paintings to posters" },
+    { title: "50+ museums", sub: "Louvre, Prado, Met…" },
+    { title: "New every month", sub: "always growing" },
+  ],
+  trustRating: "4.9",
+  trustCount: "loved by 12,000+ creators",
+  comparisonHeader: "What you get",
+  comparison: [
+    { feature: "Image resolution", free: "Web size", pro: "4K originals" },
+    { feature: "Commercial license", free: false, pro: true },
+    { feature: "Downloads", free: "Limited", pro: "Unlimited" },
+    { feature: "AI insights per artwork", free: "Preview", pro: "Unlimited" },
+    { feature: "Personalized museum guides", free: false, pro: true },
+  ],
+  testimonialsHeading: "Loved by creators & history lovers",
+  // ⚠️ PLACEHOLDER testimonials — NOT real customers. Replace with genuine quotes
+  // before relying on these publicly. Fake reviews on a paid page are deceptive and
+  // illegal in many markets (FTC, EU/UK consumer law). These exist only to build the UI.
+  testimonials: [
+    {
+      quote:
+        "Been subscribed for months — the 4K downloads are unreal. My go-to for every design project now.",
+      name: "Marta L.",
+      role: "Graphic designer",
+    },
+    {
+      quote:
+        "Cheaper than one stock photo and I get the whole museum. The museum guides are a lovely bonus.",
+      name: "David R.",
+      role: "Art teacher",
+    },
+    {
+      quote: "I print these for my home and use them commercially — worth every cent.",
+      name: "Yuki T.",
+      role: "Illustrator",
+    },
+  ],
   freshH2: "Fresh Content Every Month",
   freshBody:
     "Our ever-growing library is constantly updated with the latest public domain discoveries from the archives of some of the best museums and libraries in the world.",
