@@ -397,11 +397,8 @@ export function ArtworkInsightsOverlay() {
             ) : null}
             {isOpen ? (
               <div
-                className="absolute left-1/2 top-1/2 z-20 w-56 -translate-x-1/2 -translate-y-1/2 rounded-lg border-2 px-3 py-2.5 pr-8 text-left text-xs leading-relaxed text-white shadow-lg backdrop-blur-sm sm:w-64"
-                style={{
-                  background: "rgba(90, 90, 90, 0.88)",
-                  borderColor: "rgba(120, 120, 120, 0.9)",
-                }}
+                className="absolute left-1/2 top-1/2 z-20 w-56 -translate-x-1/2 -translate-y-1/2 rounded-lg border border-white/30 bg-black/35 px-3 py-2.5 pr-8 text-left text-xs leading-relaxed text-white shadow-lg sm:w-64"
+                style={{ backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)" }}
               >
                 <button
                   type="button"
