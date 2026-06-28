@@ -209,8 +209,13 @@ function supabaseRenditionUrl(url: string, rendition: ImageRendition): string | 
   return `${prefix}renditions/${IMAGE_RENDITIONS[rendition]}/${webpPath}`;
 }
 
-/** Optional image CDN (e.g. Cloudflare-cached `cdn.fineartfree.com`) that proxies Supabase Storage. */
-const IMAGE_CDN_HOST = process.env.NEXT_PUBLIC_IMAGE_CDN_HOST?.trim();
+/**
+ * Image CDN (Cloudflare Worker `cdn.fineartfree.com`, R2-first with Supabase fallback)
+ * that all Supabase Storage URLs are routed through. Hardcoded default so routing never
+ * silently depends on a NEXT_PUBLIC_ build-time env var being baked into the build —
+ * set NEXT_PUBLIC_IMAGE_CDN_HOST only to override it.
+ */
+const IMAGE_CDN_HOST = process.env.NEXT_PUBLIC_IMAGE_CDN_HOST?.trim() || "cdn.fineartfree.com";
 
 /** Route Supabase Storage URLs through the image CDN when configured; leave other hosts untouched. */
 function cdnRewrite(url: string): string {
