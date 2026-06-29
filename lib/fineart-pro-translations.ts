@@ -91,14 +91,14 @@ const en: FineArtProCopy = {
   ],
   yearlyPlan: "Yearly Plan",
   monthlyPlan: "Monthly Plan",
-  yearlyPrice: "$7.99 USD /mo",
-  yearlyBilling: "$95.88 Every 12 Months",
+  yearlyPrice: "$3.75 USD /mo",
+  yearlyBilling: "$45 Every 12 Months",
   monthlyPrice: "$9.99 USD /mo",
   monthlyBilling: "$9.99 Every Month",
   cta: "Get Fine Art Pro",
   heroSub: "Unlimited, copyright-free, and ready for any project — personal or commercial.",
   yearlyBadge: "Best value",
-  yearlySave: "Save 20% — 2 months free",
+  yearlySave: "Save 62%",
   valueNote: "Less than the price of a single stock photo — for unlimited 4K downloads of 400,000+ artworks.",
   ctaNote: "Cancel anytime · Instant access · Secure checkout",
   compareFreeTitle: "Free",
@@ -179,7 +179,7 @@ const en: FineArtProCopy = {
     {
       question: "Is my subscription recurring?",
       answer:
-        "Yes. You will be charged $9.99 every month or $95.88 every year on a yearly plan until you cancel. You can cancel at any time.",
+        "Yes. You will be charged $9.99 every month or $45 every year on a yearly plan until you cancel. You can cancel at any time.",
     },
     {
       question: "How do I cancel my subscription?",
@@ -246,14 +246,14 @@ const es: FineArtProCopy = {
   ],
   yearlyPlan: "Plan anual",
   monthlyPlan: "Plan mensual",
-  yearlyPrice: "7,99 USD /mes",
-  yearlyBilling: "95,88 USD cada 12 meses",
+  yearlyPrice: "3,75 USD /mes",
+  yearlyBilling: "45 USD cada 12 meses",
   monthlyPrice: "9,99 USD /mes",
   monthlyBilling: "9,99 USD cada mes",
   cta: "Obtener Fine Art Pro",
   heroSub: "Ilimitadas, libres de derechos y listas para cualquier proyecto, personal o comercial.",
   yearlyBadge: "Mejor valor",
-  yearlySave: "Ahorra 20% — 2 meses gratis",
+  yearlySave: "Ahorra 62%",
   valueNote: "Menos que el precio de una sola foto de stock — por descargas 4K ilimitadas de más de 400.000 obras.",
   ctaNote: "Cancela cuando quieras · Acceso inmediato · Pago seguro",
   compareFreeTitle: "Gratis",
@@ -287,7 +287,7 @@ const es: FineArtProCopy = {
     {
       question: "¿La suscripción se renueva automáticamente?",
       answer:
-        "Sí. Se cobrará 9,99 USD al mes o 95,88 USD al año en el plan anual hasta que canceles. Puedes cancelar en cualquier momento.",
+        "Sí. Se cobrará 9,99 USD al mes o 45 USD al año en el plan anual hasta que canceles. Puedes cancelar en cualquier momento.",
     },
     {
       question: "¿Cómo cancelo mi suscripción?",
@@ -352,12 +352,12 @@ const pt: FineArtProCopy = {
   ],
   yearlyPlan: "Plano anual",
   monthlyPlan: "Plano mensal",
-  yearlyBilling: "95,88 USD a cada 12 meses",
+  yearlyBilling: "45 USD a cada 12 meses",
   monthlyBilling: "9,99 USD por mês",
   cta: "Obter Fine Art Pro",
   heroSub: "Ilimitadas, livres de direitos e prontas para qualquer projeto, pessoal ou comercial.",
   yearlyBadge: "Melhor valor",
-  yearlySave: "Economize 20% — 2 meses grátis",
+  yearlySave: "Economize 62%",
   valueNote: "Menos que o preço de uma única foto de banco de imagens — por downloads 4K ilimitados de mais de 400.000 obras.",
   ctaNote: "Cancele quando quiser · Acesso imediato · Pagamento seguro",
   compareFreeTitle: "Grátis",
@@ -391,7 +391,7 @@ const pt: FineArtProCopy = {
     {
       question: "A assinatura é recorrente?",
       answer:
-        "Sim. Cobrança de 9,99 USD/mês ou 95,88 USD/ano no plano anual até cancelar. Cancele quando quiser.",
+        "Sim. Cobrança de 9,99 USD/mês ou 45 USD/ano no plano anual até cancelar. Cancele quando quiser.",
     },
     {
       question: "Como cancelo minha assinatura?",
@@ -447,12 +447,12 @@ const ja: FineArtProCopy = {
   ],
   yearlyPlan: "年間プラン",
   monthlyPlan: "月額プラン",
-  yearlyBilling: "12か月ごとに95.88 USD",
+  yearlyBilling: "12か月ごとに45 USD",
   monthlyBilling: "毎月9.99 USD",
   cta: "Fine Art Proを始める",
   heroSub: "無制限・著作権フリー。個人でも商用でも、あらゆるプロジェクトにすぐ使えます。",
   yearlyBadge: "おすすめ",
-  yearlySave: "20%お得 — 2か月分無料",
+  yearlySave: "62%お得",
   valueNote: "ストック写真1枚より安く、40万点以上の作品を4Kで無制限ダウンロード。",
   ctaNote: "いつでも解約可能 · 即時アクセス · 安全な決済",
   compareFreeTitle: "無料",
@@ -485,7 +485,7 @@ const ja: FineArtProCopy = {
     {
       question: "サブスクリプションは自動更新されますか？",
       answer:
-        "はい。月額9.99 USD、または年間プランでは年間95.88 USDが、解約するまで請求されます。いつでも解約できます。",
+        "はい。月額9.99 USD、または年間プランでは年間45 USDが、解約するまで請求されます。いつでも解約できます。",
     },
     {
       question: "サブスクリプションを解約するには？",
@@ -544,12 +544,12 @@ const fr: FineArtProCopy = {
   ],
   yearlyPlan: "Abonnement annuel",
   monthlyPlan: "Abonnement mensuel",
-  yearlyBilling: "95,88 USD tous les 12 mois",
+  yearlyBilling: "45 USD tous les 12 mois",
   monthlyBilling: "9,99 USD par mois",
   cta: "Obtenir Fine Art Pro",
   heroSub: "Illimités, libres de droits et prêts pour tous vos projets, personnels ou commerciaux.",
   yearlyBadge: "Meilleure offre",
-  yearlySave: "Économisez 20% — 2 mois offerts",
+  yearlySave: "Économisez 62%",
   valueNote: "Moins cher qu'une seule photo de banque d'images — pour des téléchargements 4K illimités de plus de 400 000 œuvres.",
   ctaNote: "Annulable à tout moment · Accès immédiat · Paiement sécurisé",
   compareFreeTitle: "Gratuit",
@@ -583,7 +583,7 @@ const fr: FineArtProCopy = {
     {
       question: "L'abonnement est-il récurrent ?",
       answer:
-        "Oui : 9,99 USD/mois ou 95,88 USD/an pour l'abonnement annuel, jusqu'à annulation. Vous pouvez annuler à tout moment.",
+        "Oui : 9,99 USD/mois ou 45 USD/an pour l'abonnement annuel, jusqu'à annulation. Vous pouvez annuler à tout moment.",
     },
     {
       question: "Comment annuler mon abonnement ?",
@@ -647,12 +647,12 @@ const de: FineArtProCopy = {
   ],
   yearlyPlan: "Jahresabo",
   monthlyPlan: "Monatsabo",
-  yearlyBilling: "95,88 USD alle 12 Monate",
+  yearlyBilling: "45 USD alle 12 Monate",
   monthlyBilling: "9,99 USD pro Monat",
   cta: "Fine Art Pro holen",
   heroSub: "Unbegrenzt, lizenzfrei und bereit für jedes Projekt – privat oder kommerziell.",
   yearlyBadge: "Bestes Angebot",
-  yearlySave: "20% sparen — 2 Monate gratis",
+  yearlySave: "62% sparen",
   valueNote: "Günstiger als ein einzelnes Stockfoto – für unbegrenzte 4K-Downloads von über 400.000 Werken.",
   ctaNote: "Jederzeit kündbar · Sofortiger Zugang · Sichere Zahlung",
   compareFreeTitle: "Kostenlos",
@@ -685,7 +685,7 @@ const de: FineArtProCopy = {
     {
       question: "Ist das Abo wiederkehrend?",
       answer:
-        "Ja: 9,99 USD/Monat oder 95,88 USD/Jahr beim Jahresabo, bis Sie kündigen. Jederzeit kündbar.",
+        "Ja: 9,99 USD/Monat oder 45 USD/Jahr beim Jahresabo, bis Sie kündigen. Jederzeit kündbar.",
     },
     {
       question: "Wie kündige ich?",
@@ -749,12 +749,12 @@ const it: FineArtProCopy = {
   ],
   yearlyPlan: "Piano annuale",
   monthlyPlan: "Piano mensile",
-  yearlyBilling: "95,88 USD ogni 12 mesi",
+  yearlyBilling: "45 USD ogni 12 mesi",
   monthlyBilling: "9,99 USD al mese",
   cta: "Ottieni Fine Art Pro",
   heroSub: "Illimitati, liberi da copyright e pronti per ogni progetto, personale o commerciale.",
   yearlyBadge: "Miglior offerta",
-  yearlySave: "Risparmia il 20% — 2 mesi gratis",
+  yearlySave: "Risparmia il 62%",
   valueNote: "Meno del prezzo di una sola foto stock — per download 4K illimitati di oltre 400.000 opere.",
   ctaNote: "Disdici quando vuoi · Accesso immediato · Pagamento sicuro",
   compareFreeTitle: "Gratis",
@@ -787,7 +787,7 @@ const it: FineArtProCopy = {
     {
       question: "L'abbonamento è ricorrente?",
       answer:
-        "Sì: 9,99 USD/mese o 95,88 USD/anno sul piano annuale, fino a disdetta. Puoi disdire quando vuoi.",
+        "Sì: 9,99 USD/mese o 45 USD/anno sul piano annuale, fino a disdetta. Puoi disdire quando vuoi.",
     },
     {
       question: "Come disdico l'abbonamento?",
@@ -851,12 +851,12 @@ const ko: FineArtProCopy = {
   ],
   yearlyPlan: "연간 플랜",
   monthlyPlan: "월간 플랜",
-  yearlyBilling: "12개월마다 95.88 USD",
+  yearlyBilling: "12개월마다 45 USD",
   monthlyBilling: "매월 9.99 USD",
   cta: "Fine Art Pro 시작하기",
   heroSub: "무제한, 저작권 무료 — 개인이든 상업이든 모든 프로젝트에 바로 사용하세요.",
   yearlyBadge: "최고 가성비",
-  yearlySave: "20% 할인 — 2개월 무료",
+  yearlySave: "62% 할인",
   valueNote: "스톡 사진 한 장보다 저렴하게, 40만 점 이상의 작품을 4K로 무제한 다운로드.",
   ctaNote: "언제든 해지 가능 · 즉시 이용 · 안전한 결제",
   compareFreeTitle: "무료",
@@ -889,7 +889,7 @@ const ko: FineArtProCopy = {
     {
       question: "구독은 자동 갱신되나요?",
       answer:
-        "예. 월 9.99 USD 또는 연간 플랜은 연 95.88 USD가 해지할 때까지 청구됩니다. 언제든 해지할 수 있습니다.",
+        "예. 월 9.99 USD 또는 연간 플랜은 연 45 USD가 해지할 때까지 청구됩니다. 언제든 해지할 수 있습니다.",
     },
     {
       question: "구독을 해지하려면?",
@@ -948,12 +948,12 @@ const ru: FineArtProCopy = {
   ],
   yearlyPlan: "Годовая подписка",
   monthlyPlan: "Месячная подписка",
-  yearlyBilling: "95,88 USD каждые 12 месяцев",
+  yearlyBilling: "45 USD каждые 12 месяцев",
   monthlyBilling: "9,99 USD в месяц",
   cta: "Получить Fine Art Pro",
   heroSub: "Безлимитно, без авторских ограничений и готово для любого проекта — личного или коммерческого.",
   yearlyBadge: "Выгоднее всего",
-  yearlySave: "Экономия 20% — 2 месяца бесплатно",
+  yearlySave: "Экономия 62%",
   valueNote: "Дешевле одной стоковой фотографии — за безлимитные 4K-загрузки более 400 000 работ.",
   ctaNote: "Отмена в любой момент · Мгновенный доступ · Безопасная оплата",
   compareFreeTitle: "Бесплатно",
@@ -986,7 +986,7 @@ const ru: FineArtProCopy = {
     {
       question: "Подписка продлевается автоматически?",
       answer:
-        "Да: 9,99 USD/мес. или 95,88 USD/год по годовому плану, пока не отмените. Отмена в любой момент.",
+        "Да: 9,99 USD/мес. или 45 USD/год по годовому плану, пока не отмените. Отмена в любой момент.",
     },
     {
       question: "Как отменить подписку?",
@@ -1050,12 +1050,12 @@ const zh: FineArtProCopy = {
   ],
   yearlyPlan: "年付方案",
   monthlyPlan: "月付方案",
-  yearlyBilling: "每12个月 95.88 USD",
+  yearlyBilling: "每12个月 45 USD",
   monthlyBilling: "每月 9.99 USD",
   cta: "获取 Fine Art Pro",
   heroSub: "无限量、无版权限制，随时用于任何个人或商业项目。",
   yearlyBadge: "超值之选",
-  yearlySave: "省 20% — 立省两个月",
+  yearlySave: "省 62%",
   valueNote: "比一张图库照片还便宜，即可无限下载 40 万件作品的 4K 原图。",
   ctaNote: "随时取消 · 即时访问 · 安全支付",
   compareFreeTitle: "免费",
@@ -1088,7 +1088,7 @@ const zh: FineArtProCopy = {
     {
       question: "订阅会自动续费吗？",
       answer:
-        "会。月付 9.99 USD，年付方案每年 95.88 USD，直至您取消。可随时取消。",
+        "会。月付 9.99 USD，年付方案每年 45 USD，直至您取消。可随时取消。",
     },
     {
       question: "如何取消订阅？",
