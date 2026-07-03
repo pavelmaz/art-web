@@ -446,7 +446,7 @@ export default async function ArtworkDetailPage({ params }: ArtworkPageProps) {
         />
       ) : null}
       <div className="mx-auto max-w-7xl px-5">
-        <ArtworkJsonLd artwork={artwork} />
+        <ArtworkJsonLd artwork={artwork} inLanguage="en" />
         <BreadcrumbJsonLd artwork={artwork} />
 
         <div className="flex flex-col gap-8 lg:flex-row lg:items-start">

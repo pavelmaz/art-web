@@ -41,7 +41,7 @@ export function ArtworkJsonLd({ artwork, pageUrl, inLanguage }: ArtworkJsonLdPro
   const schema: Record<string, unknown> = {
     "@context": "https://schema.org",
     "@type": "VisualArtwork",
-    license: "https://creativecommons.org/publicdomain/zero/1.0/",
+    license: "https://creativecommons.org/publicdomain/mark/1.0/",
   };
   schema.copyrightNotice = "Public Domain";
 
@@ -72,15 +72,18 @@ export function ArtworkJsonLd({ artwork, pageUrl, inLanguage }: ArtworkJsonLdPro
     schema.artMedium = artMedium;
   }
   if (nonEmpty(image)) {
+    const imageName = nonEmpty(artist) ? `${title} by ${artist}` : title;
     schema.image = {
       "@type": "ImageObject",
       "url": image,
       "contentUrl": image,
-      "name": `${title} by ${artist}`,
-      "description": artwork.alt_text || `${title} by ${artist}`,
-      "license": "https://creativecommons.org/publicdomain/zero/1.0/",
+      ...(nonEmpty(imageName) ? { name: imageName } : {}),
+      ...(nonEmpty(artwork.alt_text) || nonEmpty(imageName)
+        ? { description: artwork.alt_text || imageName }
+        : {}),
+      "license": "https://creativecommons.org/publicdomain/mark/1.0/",
       "acquireLicensePage": detailUrl ?? `https://fineartfree.com/artworks/${artwork.slug}`,
-      "creditText": artist || "Unknown artist",
+      ...(nonEmpty(artist) ? { creditText: artist } : {}),
     };
   }
   if (nonEmpty(description)) {
@@ -102,7 +105,7 @@ export function ArtworkJsonLd({ artwork, pageUrl, inLanguage }: ArtworkJsonLdPro
   }
 
   if (nonEmpty(artwork.style_title)) {
-    schema.artworkSurface = artwork.style_title;
+    schema.keywords = artwork.style_title;
   }
 
   return (

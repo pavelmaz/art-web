@@ -474,7 +474,7 @@ export default async function ArtworkDetailPageIt({ params }: ArtworkPageProps) 
         />
       ) : null}
       <div className="mx-auto max-w-7xl px-5">
-        <ArtworkJsonLd artwork={artwork} pageUrl={`https://fineartfree.com${artworkDetailPath("it", artwork.slug)}`} inLanguage="it" />
+        <ArtworkJsonLd artwork={{ ...artwork, description: artwork.description_it || artwork.description }} pageUrl={`https://fineartfree.com${artworkDetailPath("it", artwork.slug)}`} inLanguage="it" />
         <BreadcrumbJsonLd artwork={artwork} category={category} />
 
         <div className="flex flex-col gap-8 lg:flex-row lg:items-start">

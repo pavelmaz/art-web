@@ -1,4 +1,4 @@
-import { buildArtworkLanguageAlternates } from "@/lib/locale-routes";
+import { absoluteArtworkUrl, buildArtworkLanguageAlternates } from "@/lib/locale-routes";
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import Link from "next/link";
@@ -425,7 +425,11 @@ export default async function ArtworkDetailPagePt({ params }: ArtworkPageProps) 
         />
       ) : null}
       <div className="mx-auto max-w-7xl px-5">
-        <ArtworkJsonLd artwork={artwork} />
+        <ArtworkJsonLd
+          artwork={{ ...artwork, description: artwork.description_pt || artwork.description }}
+          pageUrl={absoluteArtworkUrl("pt", artwork.slug)}
+          inLanguage="pt"
+        />
         <BreadcrumbJsonLd artwork={artwork} category={category} />
 
         <div className="flex flex-col gap-8 lg:flex-row lg:items-start">

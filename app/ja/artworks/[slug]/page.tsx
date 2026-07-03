@@ -1,4 +1,4 @@
-import { buildArtworkLanguageAlternates } from "@/lib/locale-routes";
+import { absoluteArtworkUrl, buildArtworkLanguageAlternates } from "@/lib/locale-routes";
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import Link from "next/link";
@@ -429,7 +429,11 @@ export default async function ArtworkDetailPageJa({ params }: ArtworkPageProps) 
         />
       ) : null}
       <div className="mx-auto max-w-7xl px-5">
-        <ArtworkJsonLd artwork={artwork} />
+        <ArtworkJsonLd
+          artwork={{ ...artwork, description: artwork.description_jp || artwork.description }}
+          pageUrl={absoluteArtworkUrl("ja", artwork.slug)}
+          inLanguage="ja"
+        />
         <BreadcrumbJsonLd artwork={artwork} category={category} />
 
         <div className="flex flex-col gap-8 lg:flex-row lg:items-start">
