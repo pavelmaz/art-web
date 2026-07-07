@@ -19,7 +19,7 @@ export function BrowseHubGrid({ items }: { items: BrowseHubItem[] }) {
 
         return (
           <Link key={`${item.href}::${item.name}`} href={item.href}>
-            <div className="group relative aspect-square cursor-pointer overflow-hidden rounded-xl">
+            <div className="group relative aspect-square cursor-pointer overflow-hidden">
               {imageUrl ? (
                 <Image
                   src={imageUrl}
@@ -36,9 +36,10 @@ export function BrowseHubGrid({ items }: { items: BrowseHubItem[] }) {
                 </div>
               )}
 
-              <div className="glass-primary pointer-events-none absolute inset-x-2 bottom-2 rounded-lg px-3 py-2">
+              <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_top,rgba(0,0,0,0.75)_0%,rgba(0,0,0,0.1)_60%)]" />
+              <div className="absolute bottom-0 left-0 p-3">
                 <p className="text-sm font-semibold text-white">{item.name}</p>
-                <p className="mt-0.5 text-xs text-white/75">
+                <p className="mt-0.5 text-xs text-white/70">
                   {item.count} {item.count === 1 ? "artwork" : "artworks"}
                 </p>
               </div>
