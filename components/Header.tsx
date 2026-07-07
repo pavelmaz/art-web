@@ -214,10 +214,10 @@ export default function Header({ browseGenres = [] }: HeaderProps) {
               <ChevronDown className="mt-px" />
             </button>
             <div className="absolute top-full left-0 hidden group-hover:block pt-2 z-50">
-              <div className="glass-surface rounded-lg p-6 w-80">
+              <div className="glass-menu rounded-lg p-6 w-80">
                 <div className="grid grid-cols-2 gap-x-8 gap-y-3">
                   {BROWSE_LINKS.map((link) => (
-                    <Link key={link.href} href={link.href} className="text-sm text-[#6b6b6b] hover:text-[#1a1a1a]">
+                    <Link key={link.href} href={link.href} className="text-sm text-[#1a1a1a] hover:text-[#4CAF50]">
                       {link.label}
                     </Link>
                   ))}
@@ -236,10 +236,10 @@ export default function Header({ browseGenres = [] }: HeaderProps) {
               <ChevronDown className="mt-px" />
             </button>
             <div className="absolute top-full left-0 hidden group-hover/explore:block pt-2 z-50">
-              <div className="glass-surface rounded-lg p-6 w-48">
+              <div className="glass-menu rounded-lg p-6 w-48">
                 <div className="flex flex-col gap-4">
                   {EXPLORE_LINKS.map((link) => (
-                    <Link key={link.href} href={link.href} className="text-sm text-[#6b6b6b] hover:text-[#1a1a1a]">
+                    <Link key={link.href} href={link.href} className="text-sm text-[#1a1a1a] hover:text-[#4CAF50]">
                       {link.label}
                     </Link>
                   ))}
@@ -314,7 +314,7 @@ export default function Header({ browseGenres = [] }: HeaderProps) {
               {browseOpen ? (
                 <div className="grid grid-cols-2 gap-x-6 gap-y-3 pb-4">
                   {BROWSE_LINKS.map((link) => (
-                    <Link key={link.href} href={link.href} className="text-sm text-[#6b6b6b] active:text-[#1a1a1a]">
+                    <Link key={link.href} href={link.href} className="text-sm text-[#3a3a3a] active:text-[#1a1a1a]">
                       {link.label}
                     </Link>
                   ))}
@@ -335,7 +335,7 @@ export default function Header({ browseGenres = [] }: HeaderProps) {
               {exploreOpen ? (
                 <div className="flex flex-col gap-3 pb-4">
                   {EXPLORE_LINKS.map((link) => (
-                    <Link key={link.href} href={link.href} className="text-sm text-[#6b6b6b] active:text-[#1a1a1a]">
+                    <Link key={link.href} href={link.href} className="text-sm text-[#3a3a3a] active:text-[#1a1a1a]">
                       {link.label}
                     </Link>
                   ))}

@@ -121,6 +121,17 @@ img {
   -webkit-backdrop-filter: blur(16px) saturate(140%);
 }
 
+/* Dropdown menu panels: nearly opaque so dark backdrops (e.g. the homepage hero)
+   can't bleed through and wash out the text — keeps dark menu text readable on
+   every page while retaining a hint of blur. */
+.glass-menu {
+  background: rgba(255, 255, 255, 0.96);
+  backdrop-filter: blur(20px) saturate(150%);
+  -webkit-backdrop-filter: blur(20px) saturate(150%);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.16);
+}
+
 /* ── Auto-scrolling review marquee (Fine Art Pro hero) ─────────────────
    The track renders the reviews twice; translating it -50% loops seamlessly.
    Each card carries its own right margin so the wrap-around gap is even.
