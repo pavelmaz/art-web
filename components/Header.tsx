@@ -12,6 +12,7 @@ import {
 } from "@/lib/browse-genres-helpers";
 import { fineArtProPath } from "@/lib/fineart-pro-path";
 import { detectLocaleFromPathname } from "@/lib/hreflang-paths";
+import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
 import { HREFLANG_LOCALES, LOCALE_ROUTE_CONFIG, getSegments, localePath } from "@/lib/locale-routes";
 import { getT, type Locale } from "@/lib/translations";
 
@@ -116,6 +117,28 @@ export default function Header({ browseGenres = [] }: HeaderProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [browseOpen, setBrowseOpen] = useState(false);
   const [exploreOpen, setExploreOpen] = useState(false);
+
+  // Session-aware login entry: label flips to "My account" once signed in. Pages
+  // are statically cached, so auth state can only be read client-side.
+  const [signedIn, setSignedIn] = useState(false);
+  useEffect(() => {
+    const supabase = createSupabaseBrowserClient();
+    let cancelled = false;
+    void supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!cancelled) setSignedIn(Boolean(session));
+    });
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSignedIn(Boolean(session));
+    });
+    return () => {
+      cancelled = true;
+      subscription.unsubscribe();
+    };
+  }, []);
+  const loginHref = locale === "en" ? "/login" : `/login?loc=${locale}`;
+  const loginLabel = signedIn ? t.navAccount : t.navLogin;
 
   useEffect(() => {
     setMobileOpen(false);
@@ -230,6 +253,10 @@ export default function Header({ browseGenres = [] }: HeaderProps) {
               {link.label}
             </Link>
           ))}
+
+          <Link href={loginHref} className={textColor}>
+            {loginLabel}
+          </Link>
         </nav>
 
         {/* Mobile hamburger — visible on mobile only */}
@@ -326,6 +353,13 @@ export default function Header({ browseGenres = [] }: HeaderProps) {
                 {link.label}
               </Link>
             ))}
+
+            <Link
+              href={loginHref}
+              className="block border-b border-[#e8e6e1] py-4 text-[15px] font-medium text-[#1a1a1a]"
+            >
+              {loginLabel}
+            </Link>
           </div>
         </div>
       ) : null}
