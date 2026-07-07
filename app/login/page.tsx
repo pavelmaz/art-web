@@ -67,7 +67,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
               <p className="text-sm text-[#6b6b6b]">{t.loginProInactive}</p>
               <Link
                 href={fineArtProPath(locale)}
-                className="inline-flex items-center justify-center rounded-lg bg-[#F5C278] px-4 py-2.5 text-sm font-bold text-[#1a1a1a] transition-colors hover:bg-[#e8b560]"
+                className="inline-flex items-center justify-center rounded-lg bg-gradient-to-br from-[#F5C278] to-[#E4A23C] px-4 py-2.5 text-sm font-bold text-[#1a1a1a] shadow-[0_6px_18px_rgba(228,162,60,0.45)] transition hover:brightness-95"
               >
                 {t.insightsLimitCta}
               </Link>

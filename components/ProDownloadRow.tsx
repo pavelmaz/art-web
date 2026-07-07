@@ -72,8 +72,8 @@ export function ProDownloadRow({ locale, isPro, downloadHref, glass = false }: P
       <span
         className={
           glass
-            ? "inline-flex shrink-0 items-center gap-1 rounded-md bg-[#4CAF50] px-4 py-2 text-sm font-medium text-white shadow-sm transition-colors hover:bg-[#43A047]"
-            : "inline-flex shrink-0 items-center gap-1 rounded-md bg-[#1a1a1a] px-4 py-2 text-sm font-medium text-white"
+            ? "inline-flex shrink-0 items-center gap-1 rounded-md bg-gradient-to-br from-[#4CAF50] to-[#1e9e57] px-4 py-2 text-sm font-medium text-white shadow-[0_6px_18px_rgba(76,175,80,0.4)] transition hover:brightness-110"
+            : "inline-flex shrink-0 items-center gap-1 rounded-md bg-gradient-to-br from-[#4CAF50] to-[#1e9e57] px-4 py-2 text-sm font-medium text-white shadow-[0_6px_18px_rgba(76,175,80,0.4)] transition hover:brightness-110"
         }
       >
         {t.insightsLimitCta}

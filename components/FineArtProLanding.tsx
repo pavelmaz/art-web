@@ -170,7 +170,7 @@ export function FineArtProLanding({ locale }: FineArtProLandingProps) {
                 <p className="mt-1 text-xs text-[#9a9a9a]">{c.yearlyBilling}</p>
                 <Link
                   href={fineArtProLandingJoinHref(locale, "yearly")}
-                  className="mt-6 inline-flex w-full items-center justify-center rounded-lg bg-[#F5C278] px-4 py-3 text-sm font-bold text-[#1a1a1a] transition-colors hover:bg-[#e8b560] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1a1a1a] focus-visible:ring-offset-2"
+                  className="mt-6 inline-flex w-full items-center justify-center rounded-lg bg-gradient-to-br from-[#F5C278] to-[#E4A23C] px-4 py-3 text-sm font-bold text-[#1a1a1a] shadow-[0_6px_18px_rgba(228,162,60,0.45)] transition hover:brightness-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1a1a1a] focus-visible:ring-offset-2"
                 >
                   {c.cta}
                 </Link>
