@@ -310,7 +310,7 @@ export function ArtworkInsightsProvider({
             <Link
               href={fineArtProPath(locale)}
               onClick={() => track("Artwork Insights Upsell Click", { locale })}
-              className="inline-flex w-full items-center justify-center rounded-md bg-[#1a1a1a] px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[#333]"
+              className="inline-flex w-full items-center justify-center rounded-md bg-gradient-to-br from-[#4CAF50] to-[#1e9e57] px-5 py-2.5 text-sm font-medium text-white shadow-[0_6px_18px_rgba(76,175,80,0.4)] transition hover:brightness-110"
             >
               {labels.insightsLimitCta}
             </Link>
