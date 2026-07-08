@@ -185,7 +185,7 @@ export default function Header({ browseGenres = [] }: HeaderProps) {
             <label htmlFor="header-search" className="sr-only">
               {t.searchPlaceholder}
             </label>
-            <div className="flex h-9 items-center gap-2 rounded-full glass-inset px-3 py-1 focus-within:ring-2 focus-within:ring-[#d1d5db] md:h-10 md:px-4">
+            <div className="flex h-9 items-center gap-2 rounded-full border border-[#e0ded7] bg-[#efeee9] transition-colors focus-within:border-[#c9c6bd] focus-within:bg-white px-3 py-1 focus-within:ring-2 focus-within:ring-[#d1d5db] md:h-10 md:px-4">
               <SearchIcon className="size-4 shrink-0 text-[#9ca3af]" />
               <input
                 id="header-search"
@@ -288,7 +288,7 @@ export default function Header({ browseGenres = [] }: HeaderProps) {
             {/* Mobile search */}
             {!isHome ? (
               <form action={searchPath} method="get" className="mb-6">
-                <div className="flex h-10 items-center gap-2 rounded-full glass-inset px-4 focus-within:ring-2 focus-within:ring-[#d1d5db]">
+                <div className="flex h-10 items-center gap-2 rounded-full border border-[#e0ded7] bg-[#efeee9] transition-colors focus-within:border-[#c9c6bd] focus-within:bg-white px-4 focus-within:ring-2 focus-within:ring-[#d1d5db]">
                   <SearchIcon className="size-4 shrink-0 text-[#9ca3af]" />
                   <input
                     type="search"
