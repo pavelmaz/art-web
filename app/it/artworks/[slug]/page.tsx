@@ -15,6 +15,7 @@ import {
   ArtworkInsightsProvider,
 } from "@/components/ArtworkInsights";
 import { SectionCtaLink } from "@/components/SectionCtaLink";
+import { ArtistChip } from "@/components/ArtistChip";
 import { ArtworkZoomImage } from "@/components/ArtworkZoomImage";
 import { supabase } from "@/lib/supabase";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
@@ -343,13 +344,21 @@ export default async function ArtworkDetailPageIt({ params }: ArtworkPageProps) 
   const artistDeathYear = parseArtworkDeathYear(artwork.death_year);
   const artistSlug = artwork.artist_display?.trim() ? slugify(artwork.artist_display) : null;
   let artistArtworkCount = 0;
+  let artistPortrait: string | null = null;
 
-  if (artwork.artist_display?.trim()) {
+  if (artwork.artist_display?.trim() && artistSlug) {
     const countQuery = await supabase
       .from("artworks")
       .select("id", { count: "exact", head: true })
       .eq("artist_display", artwork.artist_display);
     artistArtworkCount = countQuery.count ?? 0;
+
+    const { data: artistRow } = await supabase
+      .from("artists")
+      .select("image_url")
+      .eq("slug", artistSlug)
+      .maybeSingle();
+    artistPortrait = (artistRow as { image_url?: string | null } | null)?.image_url ?? null;
   }
 
   const category = await resolveCategoryBreadcrumbIt(artwork);
@@ -522,14 +531,12 @@ export default async function ArtworkDetailPageIt({ params }: ArtworkPageProps) 
           <aside className="w-full lg:w-80">
             <div className="glass-surface space-y-4 rounded-2xl p-5 lg:sticky lg:top-6">
               <div>
-                <h1 className="mb-1 text-lg font-semibold text-[#1a1a1a]">{artwork.title}</h1>
-                {artistSlug ? (
-                  <Link href={`/it/artists/${artistSlug}`} className="text-sm text-[#6b6b6b] hover:text-[#1a1a1a]">
-                    {artist}
-                  </Link>
-                ) : (
-                  <p className="text-sm text-[#6b6b6b]">{artist}</p>
-                )}
+                <h1 className="mb-2 text-lg font-semibold text-[#1a1a1a]">{artwork.title}</h1>
+                <ArtistChip
+                  name={artist}
+                  href={artistSlug ? `/it/artists/${artistSlug}` : null}
+                  portrait={artistPortrait}
+                />
               </div>
 
               <p className="text-sm text-[#6b6b6b]">{artistArtworkCount} {t.artworks}</p>
