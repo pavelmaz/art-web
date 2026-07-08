@@ -5,6 +5,11 @@ import { artworkImageUrl } from "@/lib/utils";
 type ArtistProfileHeaderProps = {
   name: string;
   imageUrl: string | null;
+  /**
+   * A representative artwork by this artist (their top-scored work), shown in the
+   * portrait circle when there's no real photo — only ~2% of artists have one.
+   */
+  fallbackArtwork?: { image_id: string | null; url: string | null } | null;
   nationality: string | null;
   birthYear: number | null;
   deathYear: number | null;
@@ -15,6 +20,7 @@ type ArtistProfileHeaderProps = {
 export function ArtistProfileHeader({
   name,
   imageUrl,
+  fallbackArtwork,
   nationality,
   birthYear,
   deathYear,
@@ -24,7 +30,9 @@ export function ArtistProfileHeader({
   const metaLine = formatArtistMetaLine(nationality, birthYear, deathYear);
   const portraitSrc = imageUrl?.trim()
     ? artworkImageUrl({ url: null, image_id: imageUrl.trim() }, { width: 400, quality: 85 })
-    : null;
+    : fallbackArtwork
+      ? artworkImageUrl(fallbackArtwork, { width: 400, quality: 85 })
+      : null;
 
   return (
     <header className="flex flex-col gap-8 sm:flex-row sm:items-start">

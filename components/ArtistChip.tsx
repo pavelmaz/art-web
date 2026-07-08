@@ -8,20 +8,28 @@ type ArtistChipProps = {
   /** Artist page href, or null when there's no resolvable artist (renders a non-link chip). */
   href: string | null;
   /**
-   * Raw `artists.image_url` value (a storage hash/URL). null → initials fallback.
-   * Artist portraits have no renditions, so this resolves to the original via artworkImageUrl.
+   * Raw `artists.image_url` value (a storage hash/URL). null → falls back to a
+   * representative artwork, then to initials. Artist portraits have no renditions,
+   * so this resolves to the original via artworkImageUrl.
    */
   portrait?: string | null;
+  /**
+   * A representative artwork by this artist (their top-scored work), used as the
+   * avatar when there's no portrait — only ~2% of artists have a real photo.
+   */
+  fallbackArtwork?: { image_id: string | null; url: string | null } | null;
 };
 
 /**
  * Small, understated pill showing a circular artist portrait + name, linking to the
  * artist page. Shown under the artwork title in place of the plain artist name.
  */
-export function ArtistChip({ name, href, portrait }: ArtistChipProps) {
+export function ArtistChip({ name, href, portrait, fallbackArtwork }: ArtistChipProps) {
   const src = portrait?.trim()
     ? artworkImageUrl({ url: null, image_id: portrait.trim() }, { width: 96, quality: 85 })
-    : "";
+    : fallbackArtwork
+      ? artworkImageUrl(fallbackArtwork, { width: 96, quality: 85 })
+      : "";
   const initial = name.trim().charAt(0).toUpperCase() || "?";
 
   const chipClass =

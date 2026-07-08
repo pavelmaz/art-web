@@ -139,6 +139,7 @@ export default async function ArtistPage({ params, searchParams }: ArtistPagePro
       <ArtistProfileHeader
         name={artistName}
         imageUrl={artist.image_url}
+        fallbackArtwork={{ image_id: rows[0].image_id, url: rows[0].url }}
         nationality={artist.nationality}
         birthYear={artist.birth_year}
         deathYear={artist.death_year}
