@@ -298,7 +298,6 @@ export default async function ArtworkDetailPageJa({ params }: ArtworkPageProps) 
   const artistSlug = artwork.artist_display?.trim() ? slugify(artwork.artist_display) : null;
   let artistArtworkCount = 0;
   let artistPortrait: string | null = null;
-  let artistFallbackArtwork: { image_id: string | null; url: string | null } | null = null;
 
   if (artwork.artist_display?.trim() && artistSlug) {
     const countQuery = await supabase
@@ -313,18 +312,6 @@ export default async function ArtworkDetailPageJa({ params }: ArtworkPageProps) 
       .eq("slug", artistSlug)
       .maybeSingle();
     artistPortrait = (artistRow as { image_url?: string | null } | null)?.image_url ?? null;
-
-    if (!artistPortrait) {
-      const { data: topArtwork } = await supabase
-        .from("artworks")
-        .select("image_id, url")
-        .eq("artist_display", artwork.artist_display)
-        .order("score", { ascending: false })
-        .limit(1)
-        .maybeSingle();
-      artistFallbackArtwork =
-        (topArtwork as { image_id: string | null; url: string | null } | null) ?? null;
-    }
   }
 
   const category = await resolveCategoryBreadcrumbJa(artwork);
@@ -508,7 +495,7 @@ export default async function ArtworkDetailPageJa({ params }: ArtworkPageProps) 
                   name={artist}
                   href={artistSlug ? `/ja/artists/${artistSlug}` : null}
                   portrait={artistPortrait}
-                  fallbackArtwork={artistFallbackArtwork}
+                  fallbackArtwork={{ image_id: artwork.image_id, url: artwork.url }}
                 />
               </div>
 

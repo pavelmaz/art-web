@@ -33,7 +33,7 @@ export function ArtistChip({ name, href, portrait, fallbackArtwork }: ArtistChip
   const initial = name.trim().charAt(0).toUpperCase() || "?";
 
   const chipClass =
-    "group inline-flex max-w-full items-center gap-2 rounded-full border border-[#e8e6e1] bg-[#faf9f7] py-1 pl-1 pr-3";
+    "group inline-flex max-w-full items-center gap-2 rounded-full glass-inset py-1 pl-1 pr-3";
 
   const inner = (
     <>
@@ -60,7 +60,7 @@ export function ArtistChip({ name, href, portrait, fallbackArtwork }: ArtistChip
 
   if (href) {
     return (
-      <Link href={href} className={`${chipClass} transition-colors hover:border-[#dcd9d1] hover:bg-white`}>
+      <Link href={href} className={`${chipClass} transition-colors`}>
         {inner}
       </Link>
     );
