@@ -184,7 +184,7 @@ const en: FineArtProCopy = {
     {
       question: "How do I cancel my subscription?",
       answer:
-        "Cancel from your profile page: open the Subscriptions tab and click Cancel. Your subscription stays active until the end of the period you paid for (monthly or yearly).",
+        "Log in and click Manage subscription to cancel. Your subscription stays active until the end of the period you paid for (monthly or yearly).",
     },
   ],
   joinMeta: {
@@ -292,7 +292,7 @@ const es: FineArtProCopy = {
     {
       question: "¿Cómo cancelo mi suscripción?",
       answer:
-        "Desde tu perfil: pestaña Suscripciones y Cancelar. La suscripción sigue activa hasta el final del periodo pagado (mensual o anual).",
+        "Inicia sesión y pulsa Gestionar suscripción para cancelar. La suscripción sigue activa hasta el final del periodo pagado (mensual o anual).",
     },
   ],
   joinMeta: {
@@ -396,7 +396,7 @@ const pt: FineArtProCopy = {
     {
       question: "Como cancelo minha assinatura?",
       answer:
-        "No seu perfil: aba Assinaturas e Cancelar. Permanece ativa até o fim do período pago (mensal ou anual).",
+        "Faça login e clique em Gerenciar assinatura para cancelar. Permanece ativa até o fim do período pago (mensal ou anual).",
     },
   ],
   joinMeta: {
@@ -490,7 +490,7 @@ const ja: FineArtProCopy = {
     {
       question: "サブスクリプションを解約するには？",
       answer:
-        "プロフィールの「サブスクリプション」タブから解約できます。解約後も、支払済みの期間（月額・年間）の終了までは有効です。",
+        "ログイン後、「サブスクリプション管理」をクリックすると解約できます。解約後も、支払済みの期間（月額・年間）の終了までは有効です。",
     },
   ],
   joinMeta: {
@@ -588,7 +588,7 @@ const fr: FineArtProCopy = {
     {
       question: "Comment annuler mon abonnement ?",
       answer:
-        "Depuis votre profil : onglet Abonnements, puis Annuler. L'abonnement reste actif jusqu'à la fin de la période payée.",
+        "Connectez-vous puis cliquez sur Gérer l'abonnement pour annuler. L'abonnement reste actif jusqu'à la fin de la période payée.",
     },
   ],
   joinMeta: {
@@ -690,7 +690,7 @@ const de: FineArtProCopy = {
     {
       question: "Wie kündige ich?",
       answer:
-        "Im Profil unter Abonnements auf Kündigen. Das Abo bleibt bis Periodenende aktiv.",
+        "Anmelden und auf Abo verwalten klicken. Das Abo bleibt bis Periodenende aktiv.",
     },
   ],
   joinMeta: {
@@ -792,7 +792,7 @@ const it: FineArtProCopy = {
     {
       question: "Come disdico l'abbonamento?",
       answer:
-        "Dal profilo: scheda Abbonamenti e Annulla. Resta attivo fino alla fine del periodo pagato.",
+        "Accedi e clicca su Gestisci abbonamento per disdire. Resta attivo fino alla fine del periodo pagato.",
     },
   ],
   joinMeta: {
@@ -894,7 +894,7 @@ const ko: FineArtProCopy = {
     {
       question: "구독을 해지하려면?",
       answer:
-        "프로필의 구독 탭에서 해지하세요. 해지 후에도 결제한 기간(월/연) 종료까지 유효합니다.",
+        "로그인 후 구독 관리를 클릭해 해지하세요. 해지 후에도 결제한 기간(월/연) 종료까지 유효합니다.",
     },
   ],
   joinMeta: {
@@ -991,7 +991,7 @@ const ru: FineArtProCopy = {
     {
       question: "Как отменить подписку?",
       answer:
-        "В профиле: вкладка «Подписки» → «Отменить». Подписка активна до конца оплаченного периода.",
+        "Войдите и нажмите «Управление подпиской», чтобы отменить. Подписка активна до конца оплаченного периода.",
     },
   ],
   joinMeta: {
@@ -1093,7 +1093,7 @@ const zh: FineArtProCopy = {
     {
       question: "如何取消订阅？",
       answer:
-        "在个人资料页的「订阅」标签中取消。取消后订阅在已付费周期结束前仍有效。",
+        "登录后点击「管理订阅」即可取消。取消后订阅在已付费周期结束前仍有效。",
     },
   ],
   joinMeta: {

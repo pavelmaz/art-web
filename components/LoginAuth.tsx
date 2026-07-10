@@ -111,6 +111,58 @@ export function LoginAuth({ nextPath, copy }: { nextPath: string; copy: LoginAut
   );
 }
 
+/** Sends the subscriber to Stripe's customer billing portal (cancel, change plan, update card). */
+export function ManageSubscriptionButton({
+  locale,
+  label,
+  errorLabel,
+}: {
+  locale: string;
+  label: string;
+  errorLabel: string;
+}) {
+  const [busy, setBusy] = useState(false);
+  const [notice, setNotice] = useState<string | null>(null);
+
+  const openPortal = async () => {
+    setNotice(null);
+    setBusy(true);
+    const res = await fetch("/api/stripe/create-portal-session", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ loc: locale }),
+    });
+    let data: { url?: string; error?: string } = {};
+    try {
+      data = (await res.json()) as { url?: string; error?: string };
+    } catch {
+      setNotice(errorLabel);
+      setBusy(false);
+      return;
+    }
+    if (res.ok && data.url) {
+      window.location.href = data.url;
+      return;
+    }
+    setBusy(false);
+    setNotice(data.error ?? errorLabel);
+  };
+
+  return (
+    <div className="space-y-2">
+      <button
+        type="button"
+        onClick={() => void openPortal()}
+        disabled={busy}
+        className="rounded-lg border border-[#dadada] bg-white px-4 py-2 text-sm font-medium text-[#1a1a1a] transition-colors hover:bg-[#fafafa] disabled:opacity-60"
+      >
+        {label}
+      </button>
+      {notice ? <p className="text-sm text-[#1a1a1a]">{notice}</p> : null}
+    </div>
+  );
+}
+
 /** Signs the user out client-side, then reloads so server components drop the session. */
 export function SignOutButton({ label }: { label: string }) {
   const [busy, setBusy] = useState(false);
