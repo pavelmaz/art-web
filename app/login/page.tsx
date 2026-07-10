@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 
-import { LoginAuth, SignOutButton } from "@/components/LoginAuth";
+import { LoginAuth, ManageSubscriptionButton, SignOutButton } from "@/components/LoginAuth";
 import { fineArtProPath } from "@/lib/fineart-pro-path";
 import { getFineArtProT } from "@/lib/fineart-pro-translations";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
@@ -58,10 +58,19 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
           </div>
 
           {isPro ? (
-            <p className="inline-flex items-center gap-2 rounded-full bg-[#e7f4e7] px-3 py-1.5 text-sm font-medium text-[#2c6e30]">
-              <span aria-hidden>✓</span>
-              {t.loginProActive}
-            </p>
+            <div className="space-y-3">
+              <p className="inline-flex items-center gap-2 rounded-full bg-[#e7f4e7] px-3 py-1.5 text-sm font-medium text-[#2c6e30]">
+                <span aria-hidden>✓</span>
+                {t.loginProActive}
+              </p>
+              <div>
+                <ManageSubscriptionButton
+                  locale={locale}
+                  label={t.loginManageSubscription}
+                  errorLabel={t.loginPortalError}
+                />
+              </div>
+            </div>
           ) : (
             <div className="space-y-3">
               <p className="text-sm text-[#6b6b6b]">{t.loginProInactive}</p>
