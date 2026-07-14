@@ -194,7 +194,7 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <div className="w-full overflow-x-auto scrollbar-hide bg-[#faf9f7] px-5 py-6">
+      <div className="w-full overflow-x-auto scrollbar-hide bg-[#f6f4ee] px-5 py-6">
         <div className="flex gap-3 min-w-max">
           {genreImages.map((genre) => (
             <Link
@@ -222,7 +222,7 @@ export default async function HomePage() {
         </div>
       </div>
 
-      <section className="w-full bg-[#faf9f7] py-8">
+      <section className="w-full bg-[#f6f4ee] py-8">
         <div className="px-5">
           <h2 className="mb-8 text-xl font-semibold text-[#1a1a1a]">Browse by Artist</h2>
           {safeFeaturedArtists.length ? (
@@ -266,7 +266,7 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <section className="w-full bg-[#faf9f7] py-12">
+      <section className="w-full bg-[#f6f4ee] py-12">
         <div className="px-5">
           <h2 className="mb-8 text-xl font-semibold text-[#1a1a1a]">Free Public Domain Artworks</h2>
           <ArtworkGrid artworks={artworks} />

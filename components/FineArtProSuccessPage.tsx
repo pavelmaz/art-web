@@ -17,7 +17,7 @@ export function FineArtProSuccessPage({ locale, purchase = null }: FineArtProSuc
   const artworksHref = localePath(locale, "artworks");
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-white px-5">
+    <div className="flex min-h-screen items-center justify-center bg-[#f6f4ee] px-5">
       {purchase ? <ProPurchaseTracking {...purchase} /> : null}
       <div className="max-w-lg space-y-4 text-center">
         <h1 className="text-3xl font-semibold text-[#1a1a1a]">{c.successH1}</h1>

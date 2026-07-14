@@ -62,7 +62,7 @@ export function ProDownloadRow({ locale, isPro, downloadHref, glass = false }: P
       className={
         glass
           ? "glass-inset flex items-center justify-between gap-3 rounded-lg p-3 transition-colors"
-          : "flex items-center justify-between gap-3 rounded-lg border-2 border-[#1a1a1a] bg-white p-3 transition-colors hover:bg-[#faf9f7] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1a1a1a] focus-visible:ring-offset-2"
+          : "flex items-center justify-between gap-3 rounded-lg border-2 border-[#1a1a1a] bg-white p-3 transition-colors hover:bg-[#f6f4ee] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1a1a1a] focus-visible:ring-offset-2"
       }
     >
       <div className="min-w-0">

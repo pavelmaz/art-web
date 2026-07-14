@@ -187,7 +187,7 @@ export default async function HomePageJa() {
         </div>
       </section>
 
-      <div className="w-full overflow-x-auto scrollbar-hide bg-[#faf9f7] px-5 py-6">
+      <div className="w-full overflow-x-auto scrollbar-hide bg-[#f6f4ee] px-5 py-6">
         <div className="flex gap-3 min-w-max">
           {genreImages.map((genre) => (
             <Link
@@ -215,7 +215,7 @@ export default async function HomePageJa() {
         </div>
       </div>
 
-      <section className="w-full bg-[#faf9f7] py-8">
+      <section className="w-full bg-[#f6f4ee] py-8">
         <div className="px-5">
           <h2 className="mb-8 text-xl font-semibold text-[#1a1a1a]">{t.browseByArtist}</h2>
           {safeFeaturedArtists.length ? (
@@ -259,7 +259,7 @@ export default async function HomePageJa() {
         </div>
       </section>
 
-      <section className="w-full bg-[#faf9f7] py-12">
+      <section className="w-full bg-[#f6f4ee] py-12">
         <div className="px-5">
           <h2 className="mb-8 text-xl font-semibold text-[#1a1a1a]">{t.freeArtworks}</h2>
           <ArtworkGrid artworks={artworks} basePath="/ja" />

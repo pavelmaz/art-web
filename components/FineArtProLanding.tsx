@@ -50,7 +50,7 @@ export function FineArtProLanding({ locale }: FineArtProLandingProps) {
   const c = getFineArtProT(locale);
 
   return (
-    <div className="bg-white">
+    <div className="bg-[#f6f4ee]">
       <section className="px-3 pb-10 pt-3 md:px-6 md:pb-14 md:pt-3 lg:pb-16">
         <div className="mr-auto flex max-w-7xl flex-col gap-10 lg:flex-row lg:items-start lg:gap-12 xl:gap-16">
           {/* Image — shown after the value/price on mobile, left on desktop */}
@@ -184,7 +184,7 @@ export function FineArtProLanding({ locale }: FineArtProLandingProps) {
                 <p className="mt-1 text-xs text-[#9a9a9a]">{c.monthlyBilling}</p>
                 <Link
                   href={fineArtProLandingJoinHref(locale, "monthly")}
-                  className="mt-6 inline-flex w-full items-center justify-center rounded-lg border border-[#d9d9d9] bg-white px-4 py-3 text-sm font-bold text-[#1a1a1a] transition-colors hover:bg-[#faf9f7] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1a1a1a] focus-visible:ring-offset-2"
+                  className="mt-6 inline-flex w-full items-center justify-center rounded-lg border border-[#d9d9d9] bg-white px-4 py-3 text-sm font-bold text-[#1a1a1a] transition-colors hover:bg-[#f6f4ee] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1a1a1a] focus-visible:ring-offset-2"
                 >
                   {c.cta}
                 </Link>

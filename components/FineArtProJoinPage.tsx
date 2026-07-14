@@ -61,7 +61,7 @@ export async function FineArtProJoinPage({ locale, searchParams }: FineArtProJoi
   };
 
   return (
-    <div className="min-h-[50vh] bg-white px-3 py-10 md:px-6 md:py-14">
+    <div className="min-h-[50vh] bg-[#f6f4ee] px-3 py-10 md:px-6 md:py-14">
       <div className="mx-auto max-w-md">
         <p className="text-xs font-medium uppercase tracking-wide text-[#6b6b6b]">
           {c.joinEyebrow}
