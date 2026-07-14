@@ -57,6 +57,10 @@ export default async function RootLayout({
 }>) {
   const pathname = (await headers()).get("x-pathname") ?? "";
   const htmlLang = htmlLangFromPathname(pathname);
+  const localeSeg = pathname.split("/")[1] ?? "";
+  const contactHref = ["es", "pt", "de", "fr", "it", "ja", "ko", "ru", "zh"].includes(localeSeg)
+    ? `/${localeSeg}/contact`
+    : "/contact";
 
   let browseGenres = [] as Awaited<ReturnType<typeof getCachedGenresForBrowse>>;
   try {
@@ -96,6 +100,12 @@ export default async function RootLayout({
               </span>
               <Link href="/terms" className="text-[#a3a3a3] transition-colors hover:text-white">
                 Terms
+              </Link>
+              <span className="mx-2 text-[#404040]" aria-hidden>
+                |
+              </span>
+              <Link href={contactHref} className="text-[#a3a3a3] transition-colors hover:text-white">
+                Contact
               </Link>
             </nav>
             <hr className="mt-6 border-0 border-t border-[#262626]" />
