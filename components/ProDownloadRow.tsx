@@ -11,6 +11,8 @@ type ProDownloadRowProps = {
   locale: Locale;
   isPro: boolean;
   downloadHref: string;
+  /** Nice download filename (e.g. the artwork slug). */
+  filename?: string;
   /** Render with the glass design system (used on the artwork page pilot). */
   glass?: boolean;
 };
@@ -20,8 +22,13 @@ type ProDownloadRowProps = {
  * upsell pitch for everyone else. Fires paywall analytics so conversion can be
  * measured (paywall_view on display, paywall_cta_click on click).
  */
-export function ProDownloadRow({ locale, isPro, downloadHref, glass = false }: ProDownloadRowProps) {
+export function ProDownloadRow({ locale, isPro, downloadHref, filename, glass = false }: ProDownloadRowProps) {
   const t = getT(locale);
+  // Route the real file through the same-origin /api/download proxy so it saves
+  // instead of opening (a cross-origin <a download> is ignored by browsers).
+  const proDownloadHref = downloadHref
+    ? `/api/download?src=${encodeURIComponent(downloadHref)}${filename ? `&name=${encodeURIComponent(filename)}` : ""}`
+    : "#";
 
   useEffect(() => {
     if (!isPro) {
@@ -41,8 +48,7 @@ export function ProDownloadRow({ locale, isPro, downloadHref, glass = false }: P
           <p className="text-xs text-[#999]">{t.downloadMaxFormat}</p>
         </div>
         <a
-          href={downloadHref}
-          download
+          href={proDownloadHref}
           className={
             glass
               ? "glass-primary inline-flex items-center justify-center rounded-md px-4 py-2 text-sm font-medium"

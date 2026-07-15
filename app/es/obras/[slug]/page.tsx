@@ -504,10 +504,10 @@ export default async function ArtworkDetailPageEs({ params }: ArtworkPageProps) 
                     <p className="text-sm font-medium text-[#1a1a1a]">Standard</p>
                     <p className="text-xs text-[#999]">JPG</p>
                   </div>
-                  <DownloadButton imageUrl={imageUrl} label={t.downloadStandard} variant="glass" />
+                  <DownloadButton imageUrl={imageUrl} filename={artwork.slug} label={t.downloadStandard} variant="glass" />
                 </div>
 
-                <ProDownloadRow locale="es" isPro={isPro} downloadHref={maxDownloadHref} glass />
+                <ProDownloadRow locale="es" isPro={isPro} downloadHref={maxDownloadHref} filename={artwork.slug} glass />
               </div>
 
               <div className="my-4 border-t border-[#e8e6e1]" />
