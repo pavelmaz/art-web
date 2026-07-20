@@ -49,6 +49,16 @@ export function ProPurchaseTracking({ value, currency, transactionId, plan }: Ve
       transaction_id: transactionId,
       plan: plan ?? "unknown",
     });
+
+    // Microsoft Ads (UET) conversion — the goal in the Ads UI matches event
+    // action "purchase" and reads revenue from revenue_value/currency.
+    window.uetq = window.uetq ?? [];
+    window.uetq.push("event", "purchase", {
+      event_category: "subscription",
+      event_label: plan ?? "unknown",
+      revenue_value: value,
+      currency,
+    });
   }, [value, currency, transactionId, plan]);
 
   return null;
