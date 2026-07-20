@@ -1,8 +1,12 @@
 import { createClient } from "@supabase/supabase-js";
 
 import { ARTIST_INDEX_LETTERS } from "@/lib/artist-index";
+import { CONTACT_PATHS } from "@/lib/contact-translations";
+import { fineArtProPath } from "@/lib/fineart-pro-path";
+import { HREFLANG_LOCALES, LOCALE_ROUTE_CONFIG } from "@/lib/locale-routes";
 import { escapeXml, getPublicSiteUrl } from "@/lib/sitemap-xml";
 import { supabase as blogSupabase } from "@/lib/supabase";
+import type { Locale } from "@/lib/translations";
 import { slugify } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
@@ -114,6 +118,23 @@ export async function GET() {
 
     const base = getPublicSiteUrl();
     const entries: SitemapEntry[] = [];
+
+    // Core static pages. These were never listed in any sitemap (only detail pages
+    // were) — Bing Webmaster flags "important pages missing in sitemaps" for them.
+    // Home + top-level hubs per locale, plus Fine Art Pro, Contact and Terms.
+    for (const locale of HREFLANG_LOCALES) {
+      const cfg = locale === "en" ? null : LOCALE_ROUTE_CONFIG[locale];
+      const prefix = cfg ? cfg.prefix : "";
+      entries.push({ loc: `${base}${prefix || "/"}`.replace(/([^:])\/$/, "$1"), changefreq: "daily", priority: 1 });
+      entries.push({ loc: `${base}${prefix}/${cfg ? cfg.segments.artworks : "artworks"}`, changefreq: "daily", priority: 0.9 });
+      entries.push({ loc: `${base}${prefix}/${cfg ? cfg.segments.artists : "artists"}`, changefreq: "weekly", priority: 0.9 });
+      entries.push({ loc: `${base}${prefix}/${cfg ? cfg.segments.museums : "museums"}`, changefreq: "weekly", priority: 0.8 });
+      entries.push({ loc: `${base}${prefix}/${cfg ? cfg.segments.genres : "genres"}`, changefreq: "weekly", priority: 0.8 });
+      entries.push({ loc: `${base}${prefix}/${cfg ? cfg.segments.styles : "styles"}`, changefreq: "weekly", priority: 0.8 });
+      entries.push({ loc: `${base}${fineArtProPath(locale as Locale)}`, changefreq: "monthly", priority: 0.8 });
+      entries.push({ loc: `${base}${CONTACT_PATHS[locale as Locale]}`, changefreq: "monthly", priority: 0.5 });
+    }
+    entries.push({ loc: `${base}/terms`, changefreq: "monthly", priority: 0.3 });
 
     for (const name of Array.from(artists).sort()) {
       const seg = slugify(name);
