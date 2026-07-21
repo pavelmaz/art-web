@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import sharp from "sharp";
 
 /**
  * Same-origin download proxy. A cross-origin `<a download>` (the image lives on
@@ -31,7 +32,25 @@ export async function GET(req: NextRequest) {
     return new NextResponse("Upstream error", { status: 502 });
   }
 
-  const contentType = upstream.headers.get("content-type") ?? "application/octet-stream";
+  let contentType = upstream.headers.get("content-type") ?? "application/octet-stream";
+  let body: BodyInit = upstream.body;
+
+  // Downloads should be universally openable: print shops, old design tools and
+  // marketplaces all speak JPG, while WebP (our display/rendition format) still
+  // trips some of them up. Convert WebP to JPG on the fly — display images keep
+  // serving WebP straight from the CDN; only the download click pays this cost.
+  if (contentType.includes("webp")) {
+    try {
+      const converted = await sharp(Buffer.from(await upstream.arrayBuffer()))
+        .jpeg({ quality: 90 })
+        .toBuffer();
+      body = new Uint8Array(converted);
+      contentType = "image/jpeg";
+    } catch {
+      // Conversion failed — serve the original WebP rather than no file.
+    }
+  }
+
   const ext = contentType.includes("webp")
     ? "webp"
     : contentType.includes("png")
@@ -48,7 +67,7 @@ export async function GET(req: NextRequest) {
       .slice(0, 80) || "artwork";
   const filename = `${base}.${ext}`;
 
-  return new NextResponse(upstream.body, {
+  return new NextResponse(body, {
     headers: {
       "Content-Type": contentType,
       "Content-Disposition": `attachment; filename="${filename}"`,
