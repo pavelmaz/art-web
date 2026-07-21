@@ -2,6 +2,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { Playfair_Display } from "next/font/google";
 
+import { RotatingProHero } from "@/components/RotatingProHero";
+
 import { FineArtProFaq } from "@/components/FineArtProFaq";
 import {
   fineArtProLandingJoinHref,
@@ -56,15 +58,7 @@ export function FineArtProLanding({ locale }: FineArtProLandingProps) {
           {/* Image — shown after the value/price on mobile, left on desktop */}
           <div className="order-2 -ml-1 w-full shrink-0 lg:order-1 lg:max-w-[42%]">
             <div className="overflow-hidden rounded-2xl border border-[#e8e6e1] bg-[#f5f5f5] shadow-sm">
-              <Image
-                src="/images/fine-art-pro-wanderer.jpg"
-                alt={c.heroImageAlt}
-                width={799}
-                height={1024}
-                className="h-auto w-full object-cover"
-                sizes="(max-width: 1024px) 100vw, 40vw"
-                priority
-              />
+              <RotatingProHero alt={c.heroImageAlt} />
             </div>
           </div>
 
