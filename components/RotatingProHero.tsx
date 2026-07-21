@@ -11,7 +11,7 @@ import { useEffect, useState } from "react";
  * the rest sit stacked underneath and lazy-load. Rotation is skipped for users
  * with prefers-reduced-motion.
  */
-const HOLD_MS = 6000;
+const HOLD_MS = 3000;
 
 const IMAGES = [
   "/images/fine-art-pro-wanderer.jpg",
@@ -45,7 +45,7 @@ export function RotatingProHero({ alt }: RotatingProHeroProps) {
           src={src}
           alt={i === active ? alt : ""}
           fill
-          className={`object-cover transition-opacity duration-[1200ms] ease-in-out ${
+          className={`object-cover transition-opacity duration-[900ms] ease-in-out ${
             i === active ? "opacity-100" : "opacity-0"
           }`}
           sizes="(max-width: 1024px) 100vw, 40vw"
