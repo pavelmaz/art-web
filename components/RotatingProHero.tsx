@@ -18,6 +18,7 @@ const IMAGES = [
   "/images/fine-art-pro-girl.jpg",
   "/images/fine-art-pro-monk.webp",
   "/images/fine-art-pro-pearl.webp",
+  "/images/fine-art-pro-rafael.jpg",
 ];
 
 type RotatingProHeroProps = {
