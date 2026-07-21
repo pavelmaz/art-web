@@ -131,6 +131,12 @@ function isLikelyImageUrl(value: string): boolean {
     const parsed = new URL(value);
     const pathname = parsed.pathname.toLowerCase();
 
+    // Wiki description PAGES (commons.wikimedia.org/wiki/File:X.jpg) are HTML,
+    // even though the path ends in an image extension.
+    if (pathname.startsWith("/wiki/")) {
+      return false;
+    }
+
     if (/\.(jpg|jpeg|png|webp|gif|avif|svg)$/.test(pathname)) {
       return true;
     }

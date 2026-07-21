@@ -10,7 +10,7 @@ import { NextRequest, NextResponse } from "next/server";
  *
  * Host-allowlisted so it can't be abused as an open proxy.
  */
-const ALLOWED_HOSTS = new Set(["cdn.fineartfree.com", "www.artic.edu"]);
+const ALLOWED_HOSTS = new Set(["cdn.fineartfree.com", "www.artic.edu", "upload.wikimedia.org"]);
 
 export async function GET(req: NextRequest) {
   const src = req.nextUrl.searchParams.get("src");
