@@ -25,16 +25,16 @@ declare global {
 }
 
 const BANNER_COPY: Record<string, { text: string; accept: string; decline: string }> = {
-  en: { text: "We use cookies to measure our advertising.", accept: "Accept", decline: "No thanks" },
-  es: { text: "Usamos cookies para medir nuestra publicidad.", accept: "Aceptar", decline: "No, gracias" },
-  pt: { text: "Usamos cookies para medir a nossa publicidade.", accept: "Aceitar", decline: "Não, obrigado" },
-  fr: { text: "Nous utilisons des cookies pour mesurer notre publicité.", accept: "Accepter", decline: "Non merci" },
-  de: { text: "Wir verwenden Cookies, um unsere Werbung zu messen.", accept: "Akzeptieren", decline: "Nein, danke" },
-  it: { text: "Usiamo i cookie per misurare la nostra pubblicità.", accept: "Accetta", decline: "No, grazie" },
-  ja: { text: "広告効果測定のためにCookieを使用します。", accept: "同意する", decline: "同意しない" },
-  ko: { text: "광고 성과 측정을 위해 쿠키를 사용합니다.", accept: "동의", decline: "거부" },
-  ru: { text: "Мы используем cookie для оценки нашей рекламы.", accept: "Принять", decline: "Нет, спасибо" },
-  zh: { text: "我们使用 Cookie 来衡量广告效果。", accept: "接受", decline: "拒绝" },
+  en: { text: "We use cookies to understand how visitors find us.", accept: "Accept", decline: "No thanks" },
+  es: { text: "Usamos cookies para saber cómo nos encuentran los visitantes.", accept: "Aceptar", decline: "No, gracias" },
+  pt: { text: "Usamos cookies para saber como os visitantes nos encontram.", accept: "Aceitar", decline: "Não, obrigado" },
+  fr: { text: "Nous utilisons des cookies pour savoir comment les visiteurs nous trouvent.", accept: "Accepter", decline: "Non merci" },
+  de: { text: "Wir verwenden Cookies, um zu verstehen, wie Besucher uns finden.", accept: "Akzeptieren", decline: "Nein, danke" },
+  it: { text: "Usiamo i cookie per capire come i visitatori ci trovano.", accept: "Accetta", decline: "No, grazie" },
+  ja: { text: "訪問者がどのように当サイトを見つけたかを知るためにCookieを使用します。", accept: "同意する", decline: "同意しない" },
+  ko: { text: "방문자가 저희를 어떻게 찾았는지 파악하기 위해 쿠키를 사용합니다.", accept: "동의", decline: "거부" },
+  ru: { text: "Мы используем cookie, чтобы понять, как посетители нас находят.", accept: "Принять", decline: "Нет, спасибо" },
+  zh: { text: "我们使用 Cookie 来了解访客如何找到我们。", accept: "接受", decline: "拒绝" },
 };
 
 export function MicrosoftUet() {
