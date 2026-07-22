@@ -116,7 +116,7 @@ export async function generateMetadata({ params, searchParams }: StylePageProps)
   const enSlug = style?.slug || slug;
 
   return {
-    title,
+    title: { absolute: title },
     description,
     alternates: paginatedAlternates(`/es/estilos/${esSlug}`, page, buildStyleLanguageAlternates(enSlug)),
     openGraph: { title, description },

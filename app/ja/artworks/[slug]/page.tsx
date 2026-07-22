@@ -21,7 +21,7 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { getT } from "@/lib/translations";
 import { resolveGenreHubLink, resolveStyleHubLink } from "@/lib/resolve-genre-style-links";
 import { parseArtworkDeathYear } from "@/lib/artwork-death-year";
-import { absoluteUrl, artworkDetailImageUrl, artworkGridImageUrl, artworkImageUrl, artworkOriginalUrl, generateAltText, slugify } from "@/lib/utils";
+import { absoluteUrl, artworkDetailImageUrl, artworkGridImageUrl, artworkImageUrl, artworkOriginalUrl, buildArtworkPinAttrs, generateAltText, slugify } from "@/lib/utils";
 import type { Artwork } from "@/types/artwork";
 
 export const revalidate = 86400;
@@ -243,7 +243,7 @@ export async function generateMetadata({ params }: ArtworkPageProps): Promise<Me
   const imageUrl = artworkImageUrl(artwork);
 
   return {
-    title,
+    title: { absolute: title },
     description,
     alternates: {
       canonical: absoluteUrl(`/ja/artworks/${slug}`),
@@ -457,6 +457,7 @@ export default async function ArtworkDetailPageJa({ params }: ArtworkPageProps) 
                           src={imageUrl}
                           fullSrc={artworkOriginalUrl(artwork) || imageUrl}
                           alt={imageAlt}
+                        pinAttrs={buildArtworkPinAttrs(artwork, "ja", absoluteUrl(`/ja/artworks/${slug}`))}
                         />
                         <ArtworkInsightsOverlay />
                       </div>

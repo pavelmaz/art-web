@@ -55,7 +55,7 @@ export async function generateMetadata({ params }: ArtistPageProps): Promise<Met
   const description = `${artist.name}의 작품 ${totalCount}점을 다운로드하세요. 고해상도 퍼블릭 도메인 회화, 개인·상업적 이용 무료.`;
 
   return {
-    title,
+    title: { absolute: title },
     description,
     alternates: {
       canonical: `https://fineartfree.com${localePath("ko", "artists")}/${slug}`,

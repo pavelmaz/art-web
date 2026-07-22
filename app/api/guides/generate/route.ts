@@ -1,4 +1,3 @@
-import { createClient } from "@supabase/supabase-js";
 import { NextRequest, NextResponse } from "next/server";
 
 import { selectArtworksForGuide } from "@/lib/guide-artwork-selection";
@@ -20,12 +19,6 @@ import { GUIDE_INTERESTS, TIME_HOURS_OPTIONS, VISIT_TYPES } from "@/lib/guide-ty
 import { supabase } from "@/lib/supabase";
 
 export const maxDuration = 60;
-
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!,
-  { auth: { persistSession: false } },
-);
 
 const ARTWORK_SELECT_COLUMNS =
   "id, title, artist_display, image_id, score, style_title";
@@ -289,7 +282,7 @@ export async function POST(req: NextRequest) {
       guideData = assembleGuide(parsed, selected, buildFallbackOverview(parsed, selected), insights);
     }
 
-    const { data: inserted, error: insertError } = await supabaseAdmin
+    const { data: inserted, error: insertError } = await supabase
       .from("guided_visits")
       .insert({
         museum_slug: parsed.museum_slug,

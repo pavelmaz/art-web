@@ -37,7 +37,7 @@ export async function generateMetadata({ params }: MuseumPageProps): Promise<Met
     `${museum.name}のコレクションから作品を${museum.artworkCount}点、高解像度で無料ダウンロード。パブリックドメイン作品です。`;
 
   return {
-    title,
+    title: { absolute: title },
     description,
     alternates: {
       canonical: absoluteUrl(`/ja/museums/${slug}`),

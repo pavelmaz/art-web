@@ -54,7 +54,7 @@ export async function generateMetadata({ params }: ArtistPageProps): Promise<Met
   const description = `${artist.name}の作品を${totalCount}点、高解像度で無料ダウンロード。パブリックドメインの美術作品です。`;
 
   return {
-    title,
+    title: { absolute: title },
     description,
     alternates: {
       canonical: absoluteUrl(`/ja/artists/${slug}`),

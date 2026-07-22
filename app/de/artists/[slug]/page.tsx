@@ -55,7 +55,7 @@ export async function generateMetadata({ params }: ArtistPageProps): Promise<Met
   const description = `Laden Sie ${totalCount} Werke von ${artist.name} herunter. Gemeinfreie Gemälde in hoher Auflösung, kostenlos für jede Nutzung.`;
 
   return {
-    title,
+    title: { absolute: title },
     description,
     alternates: {
       canonical: `https://fineartfree.com${localePath("de", "artists")}/${slug}`,

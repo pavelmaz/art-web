@@ -55,7 +55,7 @@ export async function generateMetadata({ params }: ArtistPageProps): Promise<Met
   const description = `Scarica ${totalCount} opere di ${artist.name}. Dipinti di pubblico dominio ad alta risoluzione, gratis per qualsiasi uso.`;
 
   return {
-    title,
+    title: { absolute: title },
     description,
     alternates: {
       canonical: `https://fineartfree.com${localePath("it", "artists")}/${slug}`,

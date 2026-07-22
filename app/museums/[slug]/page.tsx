@@ -37,7 +37,7 @@ export async function generateMetadata({ params }: MuseumPageProps): Promise<Met
     `Explore ${museum.artworkCount} artworks from ${museum.name} free to download. High-resolution public domain art for any purpose.`;
 
   return {
-    title,
+    title: { absolute: title },
     description,
     alternates: {
       canonical: absoluteUrl(`/museums/${slug}`),

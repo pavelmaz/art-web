@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 
-import { artworkGridImageUrl } from "@/lib/utils";
+import { artworkGridImageUrl, buildArtworkPinAttrs, absoluteUrl } from "@/lib/utils";
 import type { Artwork } from "@/types/artwork";
 
 type ArtworkCardProps = {
@@ -11,19 +11,32 @@ type ArtworkCardProps = {
   basePath?: string;
 };
 
+/** basePath (e.g. "/es", "/de", "" for EN) doubles as the locale code for pin copy. */
+function localeFromBasePath(basePath?: string): string {
+  const seg = (basePath ?? "").replace(/^\//, "");
+  return seg || "en";
+}
+
 export function ArtworkCard({ artwork, index, basePath }: ArtworkCardProps) {
   const artist = artwork.artistDisplay ?? artwork.artistName;
   const isFirst = index === 0;
 
   const artworksSegment = (basePath === '/es' || basePath === '/pt') ? 'obras' : 'artworks';
+  const href = `${basePath ?? ''}/${artworksSegment}/${artwork.slug}`;
 
-  const previewSrc = artworkGridImageUrl({
+  const imageSource = {
     url: artwork.sourceUrl ?? artwork.url ?? null,
     image_id: artwork.imageId ?? artwork.imageUrl ?? null,
-  });
+  };
+  const previewSrc = artworkGridImageUrl(imageSource);
+  const pinAttrs = buildArtworkPinAttrs(
+    { ...imageSource, title: artwork.title, artist_display: artist, description: artwork.description },
+    localeFromBasePath(basePath),
+    absoluteUrl(href)
+  );
 
   return (
-    <Link href={`${basePath ?? ''}/${artworksSegment}/${artwork.slug}`} className="group block">
+    <Link href={href} className="group block">
       <div className="overflow-hidden">
         {previewSrc ? (
           <img
@@ -37,6 +50,7 @@ export function ArtworkCard({ artwork, index, basePath }: ArtworkCardProps) {
               const target = e.target as HTMLImageElement;
               target.style.display = "none";
             }}
+            {...pinAttrs}
           />
         ) : (
           <div className="w-full h-40 flex items-center justify-center text-[#aaa] text-xs">

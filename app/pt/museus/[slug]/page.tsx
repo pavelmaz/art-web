@@ -37,7 +37,7 @@ export async function generateMetadata({ params }: MuseumPageProps): Promise<Met
     `Baixe ${museum.artworkCount} obras de arte de ${museum.name} grátis. Pinturas de domínio público em alta resolução para qualquer uso.`;
 
   return {
-    title,
+    title: { absolute: title },
     description,
     alternates: {
       canonical: absoluteUrl(`/pt/museus/${slug}`),

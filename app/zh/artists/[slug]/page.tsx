@@ -55,7 +55,7 @@ export async function generateMetadata({ params }: ArtistPageProps): Promise<Met
   const description = `免费下载 ${artist.name} 的 ${totalCount} 件作品。高分辨率公有领域绘画，可免费用于个人和商业用途。`;
 
   return {
-    title,
+    title: { absolute: title },
     description,
     alternates: {
       canonical: `https://fineartfree.com${localePath("zh", "artists")}/${slug}`,

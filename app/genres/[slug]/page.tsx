@@ -89,7 +89,7 @@ export async function generateMetadata({ params, searchParams }: GenrePageProps)
   const description = `Download ${totalCount} ${genreTitle} paintings in high resolution. Public domain art free for personal and commercial use.`;
 
   return {
-    title,
+    title: { absolute: title },
     description,
     alternates: paginatedAlternates(`/genres/${slug}`, page, buildGenreLanguageAlternates(slug)),
     openGraph: {

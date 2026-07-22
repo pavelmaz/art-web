@@ -94,7 +94,7 @@ export async function generateMetadata({ params, searchParams }: GenrePageProps)
   const ptSlug = genre.slug_pt?.trim() || genre.slug;
 
   return {
-    title,
+    title: { absolute: title },
     description,
     alternates: paginatedAlternates(`/es/generos/${esSlug}`, page, buildGenreLanguageAlternates(genre.slug)),
     openGraph: { title, description },

@@ -51,7 +51,7 @@ export async function generateMetadata({ params }: ArtistPageProps): Promise<Met
   const description = `Descarga ${totalCount} obras de ${artist.name}. Pinturas de dominio público en alta resolución, gratis para cualquier uso.`;
 
   return {
-    title,
+    title: { absolute: title },
     description,
     alternates: {
       canonical: absoluteUrl(`/es/artistas/${slug}`),

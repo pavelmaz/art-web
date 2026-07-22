@@ -177,6 +177,7 @@ export default function Header({ browseGenres = [] }: HeaderProps) {
             height={1024}
             priority
             className="h-12 w-auto max-h-12 max-w-[280px] object-contain object-left"
+            data-pin-nopin="true"
           />
         </Link>
 

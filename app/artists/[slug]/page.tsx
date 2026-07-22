@@ -51,7 +51,7 @@ export async function generateMetadata({ params }: ArtistPageProps): Promise<Met
   const description = `Browse ${totalCount} works by ${artist.name}. Download high-resolution public domain paintings free for any use.`;
 
   return {
-    title,
+    title: { absolute: title },
     description,
     alternates: {
       canonical: absoluteUrl(`/artists/${slug}`),

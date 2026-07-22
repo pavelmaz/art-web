@@ -126,7 +126,7 @@ export async function generateMetadata({ params, searchParams }: StylePageProps)
   const jaSlug = style?.slug || slug;
 
   return {
-    title,
+    title: { absolute: title },
     description,
     alternates: paginatedAlternates(`/ja/styles/${jaSlug}`, page, buildStyleLanguageAlternates(enSlug)),
     openGraph: { title, description },

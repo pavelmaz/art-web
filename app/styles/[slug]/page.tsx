@@ -104,7 +104,7 @@ export async function generateMetadata({ params, searchParams }: StylePageProps)
   const description = `Browse ${totalCount} ${styleName} artworks free to download in high resolution. Public domain paintings and prints free for personal and commercial use.`;
 
   return {
-    title,
+    title: { absolute: title },
     description,
     alternates: paginatedAlternates(`/styles/${slug}`, page, buildStyleLanguageAlternates(slug)),
     openGraph: {

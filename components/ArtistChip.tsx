@@ -45,6 +45,7 @@ export function ArtistChip({ name, href, portrait, fallbackArtwork }: ArtistChip
             loading="lazy"
             decoding="async"
             className="h-full w-full object-cover"
+            data-pin-nopin="true"
           />
         ) : (
           <span className="text-[11px] font-semibold text-[#b8b0a6]" aria-hidden>

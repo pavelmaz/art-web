@@ -111,7 +111,7 @@ export function topicsCountriesPageMetadata(input: {
   openGraph?: Metadata["openGraph"];
 }): Metadata {
   return {
-    title: input.title,
+    title: { absolute: input.title as string },
     description: input.description,
     alternates: paginatedAlternates(
       input.canonicalPath,

@@ -7,6 +7,12 @@ type ArtworkZoomImageProps = {
   src: string;
   fullSrc?: string;
   alt: string;
+  /** Pinterest save-button attributes (data-pin-url/media/description). Omit to leave unpinned. */
+  pinAttrs?: {
+    "data-pin-url": string;
+    "data-pin-media": string;
+    "data-pin-description": string;
+  };
 };
 
 const MIN_ZOOM = 1;
@@ -24,7 +30,7 @@ function distance(a: { x: number; y: number }, b: { x: number; y: number }): num
   return Math.hypot(a.x - b.x, a.y - b.y);
 }
 
-export function ArtworkZoomImage({ src, fullSrc, alt }: ArtworkZoomImageProps) {
+export function ArtworkZoomImage({ src, fullSrc, alt, pinAttrs }: ArtworkZoomImageProps) {
   const [open, setOpen] = useState(false);
   const [scale, setScale] = useState(1);
   const [tx, setTx] = useState(0);
@@ -225,6 +231,7 @@ export function ArtworkZoomImage({ src, fullSrc, alt }: ArtworkZoomImageProps) {
           src={src}
           alt={alt}
           className="artwork-img artwork-img--hero shadow-[0_4px_24px_rgba(0,0,0,0.10)] transition-opacity group-hover:opacity-95"
+          {...pinAttrs}
         />
       </button>
 

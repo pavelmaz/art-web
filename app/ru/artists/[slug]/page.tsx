@@ -55,7 +55,7 @@ export async function generateMetadata({ params }: ArtistPageProps): Promise<Met
   const description = `Скачайте ${totalCount} произведений ${artist.name}. Картины из общественного достояния в высоком разрешении, бесплатно для любого использования.`;
 
   return {
-    title,
+    title: { absolute: title },
     description,
     alternates: {
       canonical: `https://fineartfree.com${localePath("ru", "artists")}/${slug}`,
