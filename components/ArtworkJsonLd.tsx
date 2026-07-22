@@ -83,7 +83,10 @@ export function ArtworkJsonLd({ artwork, pageUrl, inLanguage }: ArtworkJsonLdPro
         : {}),
       "license": "https://creativecommons.org/publicdomain/mark/1.0/",
       "acquireLicensePage": detailUrl ?? `https://fineartfree.com/artworks/${artwork.slug}`,
-      ...(nonEmpty(artist) ? { creditText: artist } : {}),
+      // Google's licensable-images metadata reads these on the ImageObject itself
+      // (Search Console flags them as missing when only set on the VisualArtwork).
+      "copyrightNotice": "Public Domain",
+      ...(nonEmpty(artist) ? { creditText: artist, creator: { "@type": "Person", name: artist } } : {}),
     };
   }
   if (nonEmpty(description)) {
