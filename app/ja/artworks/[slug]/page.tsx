@@ -457,7 +457,7 @@ export default async function ArtworkDetailPageJa({ params }: ArtworkPageProps) 
                           src={imageUrl}
                           fullSrc={artworkOriginalUrl(artwork) || imageUrl}
                           alt={imageAlt}
-                        pinAttrs={buildArtworkPinAttrs(artwork, "ja", absoluteUrl(`/ja/artworks/${slug}`))}
+                        pinAttrs={buildArtworkPinAttrs({ ...artwork, description: artwork.description_jp || artwork.description }, "ja", absoluteUrl(`/ja/artworks/${slug}`))}
                         />
                         <ArtworkInsightsOverlay />
                       </div>

@@ -498,7 +498,7 @@ export default async function ArtworkDetailPageZh({ params }: ArtworkPageProps) 
                           src={imageUrl}
                           fullSrc={artworkOriginalUrl(artwork) || imageUrl}
                           alt={localeTranslation?.alt_text || generateAltText(artwork)}
-                        pinAttrs={buildArtworkPinAttrs(artwork, "zh", absoluteUrl(`/zh/artworks/${slug}`))}
+                        pinAttrs={buildArtworkPinAttrs({ ...artwork, description: artwork.description_ch || artwork.description }, "zh", absoluteUrl(`/zh/artworks/${slug}`))}
                         />
                         <ArtworkInsightsOverlay />
                       </div>
