@@ -85,8 +85,11 @@ export function ArtworkJsonLd({ artwork, pageUrl, inLanguage }: ArtworkJsonLdPro
       "acquireLicensePage": detailUrl ?? `https://fineartfree.com/artworks/${artwork.slug}`,
       // Google's licensable-images metadata reads these on the ImageObject itself
       // (Search Console flags them as missing when only set on the VisualArtwork).
+      // ~190 catalog works are anonymous — museums credit those "Unknown artist",
+      // which also satisfies the required creator field.
       "copyrightNotice": "Public Domain",
-      ...(nonEmpty(artist) ? { creditText: artist, creator: { "@type": "Person", name: artist } } : {}),
+      "creditText": nonEmpty(artist) ? artist : "Unknown artist",
+      "creator": { "@type": "Person", name: nonEmpty(artist) ? artist : "Unknown artist" },
     };
   }
   if (nonEmpty(description)) {
