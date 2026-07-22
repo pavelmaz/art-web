@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 
-import { artworkGridImageUrl, buildArtworkPinAttrs, absoluteUrl } from "@/lib/utils";
+import { artworkGridImageUrl } from "@/lib/utils";
 import type { Artwork } from "@/types/artwork";
 
 type ArtworkCardProps = {
@@ -10,12 +10,6 @@ type ArtworkCardProps = {
   index?: number;
   basePath?: string;
 };
-
-/** basePath (e.g. "/es", "/de", "" for EN) doubles as the locale code for pin copy. */
-function localeFromBasePath(basePath?: string): string {
-  const seg = (basePath ?? "").replace(/^\//, "");
-  return seg || "en";
-}
 
 export function ArtworkCard({ artwork, index, basePath }: ArtworkCardProps) {
   const artist = artwork.artistDisplay ?? artwork.artistName;
@@ -29,11 +23,6 @@ export function ArtworkCard({ artwork, index, basePath }: ArtworkCardProps) {
     image_id: artwork.imageId ?? artwork.imageUrl ?? null,
   };
   const previewSrc = artworkGridImageUrl(imageSource);
-  const pinAttrs = buildArtworkPinAttrs(
-    { ...imageSource, title: artwork.title, artist_display: artist, description: artwork.description },
-    localeFromBasePath(basePath),
-    absoluteUrl(href)
-  );
 
   return (
     <Link href={href} className="group block">
@@ -50,7 +39,6 @@ export function ArtworkCard({ artwork, index, basePath }: ArtworkCardProps) {
               const target = e.target as HTMLImageElement;
               target.style.display = "none";
             }}
-            {...pinAttrs}
           />
         ) : (
           <div className="w-full h-40 flex items-center justify-center text-[#aaa] text-xs">
