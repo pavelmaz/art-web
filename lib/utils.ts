@@ -186,6 +186,8 @@ export const ARTWORK_HERO_IMAGE_WIDTH = 1600;
 export const IMAGE_RENDITIONS = {
   grid: "w800",
   detail: "w1400",
+  /** JPEG (not WebP) — feeds og:image; WhatsApp's preview fetcher can't render WebP. */
+  og: "og1200",
 } as const;
 export type ImageRendition = keyof typeof IMAGE_RENDITIONS;
 
@@ -211,7 +213,8 @@ function supabaseRenditionUrl(url: string, rendition: ImageRendition): string | 
   if (!objectPath || !objectPath.startsWith("artworks/")) {
     return null;
   }
-  const webpPath = objectPath.replace(/\.[a-z0-9]+$/i, ".webp");
+  const ext = rendition === "og" ? ".jpg" : ".webp";
+  const webpPath = objectPath.replace(/\.[a-z0-9]+$/i, ext);
   return `${prefix}renditions/${IMAGE_RENDITIONS[rendition]}/${webpPath}`;
 }
 
@@ -290,6 +293,12 @@ export function artworkDetailImageUrl(artwork: ArtworkImageSource): string {
     width: ARTWORK_HERO_IMAGE_WIDTH,
     rendition: "detail",
   });
+}
+
+/** og:image URL — always JPEG. Supabase-hosted images use the og1200 JPEG
+ *  rendition; artic/wikimedia sources already serve JPEG and pass through. */
+export function artworkOgImageUrl(artwork: ArtworkImageSource): string {
+  return artworkImageUrl(artwork, { quality: 80, width: 1200, rendition: "og" });
 }
 
 export function artworkOriginalUrl(artwork: ArtworkImageSource): string {

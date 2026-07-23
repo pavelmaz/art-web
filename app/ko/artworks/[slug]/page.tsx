@@ -21,7 +21,7 @@ import { supabase } from "@/lib/supabase";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { getT } from "@/lib/translations";
 import { parseArtworkDeathYear } from "@/lib/artwork-death-year";
-import { artworkDetailImageUrl, artworkGridImageUrl, artworkImageUrl, artworkMediumKind, artworkOriginalUrl, generateAltText, slugify } from "@/lib/utils";
+import { artworkDetailImageUrl, artworkGridImageUrl, artworkImageUrl, artworkMediumKind, artworkOgImageUrl, artworkOriginalUrl, generateAltText, slugify } from "@/lib/utils";
 import type { Artwork } from "@/types/artwork";
 
 export const revalidate = 86400;
@@ -290,7 +290,7 @@ export async function generateMetadata({ params }: ArtworkPageProps): Promise<Me
     artwork.description_ko?.slice(0, 200) ||
     `${artwork.title} de ${artist}. 무료 퍼블릭 도메인 아트.`;
 
-  const imageUrl = artworkImageUrl(artwork);
+  const imageUrl = artworkOgImageUrl(artwork);
 
   return {
     title: { absolute: title },

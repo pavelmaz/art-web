@@ -39,10 +39,13 @@ const LIMIT = (() => {
   return Number.isFinite(n) && n > 0 ? n : null;
 })();
 
-/** Must match IMAGE_RENDITIONS in lib/utils.ts. */
+/** Must match IMAGE_RENDITIONS in lib/utils.ts.
+ *  og1200 is JPEG (not WebP): it feeds og:image tags, and WhatsApp's link-preview
+ *  fetcher only reliably renders JPEG/PNG. */
 const VARIANTS = [
-  { key: "w800", width: 800, quality: 75 },
-  { key: "w1400", width: 1400, quality: 80 },
+  { key: "w800", width: 800, quality: 75, format: "webp" },
+  { key: "w1400", width: 1400, quality: 80, format: "webp" },
+  { key: "og1200", width: 1200, quality: 80, format: "jpeg" },
 ];
 
 if (!SUPABASE_URL || !SERVICE_KEY) {
@@ -77,9 +80,10 @@ async function listAll(prefix) {
   return keys;
 }
 
-/** artworks/<hash>.jpg -> renditions/<variant>/artworks/<hash>.webp */
+/** artworks/<hash>.jpg -> renditions/<variant>/artworks/<hash>.<webp|jpg> */
 function renditionKey(variantKey, sourceKey) {
-  const webp = sourceKey.replace(/\.[a-z0-9]+$/i, ".webp");
+  const ext = VARIANTS.find((v) => v.key === variantKey)?.format === "jpeg" ? ".jpg" : ".webp";
+  const webp = sourceKey.replace(/\.[a-z0-9]+$/i, ext);
   return `${RENDITION_PREFIX}/${variantKey}/${webp}`;
 }
 
@@ -119,11 +123,13 @@ async function processOne(sourceKey, existing) {
     for (const v of missing) {
       let out;
       try {
-        out = await sharp(input, { limitInputPixels: false }) // trusted sources; a few museum scans exceed sharp's default cap
+        const pipeline = sharp(input, { limitInputPixels: false }) // trusted sources; a few museum scans exceed sharp's default cap
           .rotate() // honour EXIF orientation
-          .resize({ width: v.width, withoutEnlargement: true })
-          .webp({ quality: v.quality })
-          .toBuffer();
+          .resize({ width: v.width, withoutEnlargement: true });
+        out = await (v.format === "jpeg"
+          ? pipeline.jpeg({ quality: v.quality, mozjpeg: true })
+          : pipeline.webp({ quality: v.quality })
+        ).toBuffer();
       } catch (e) {
         return { status: "error", key: sourceKey, error: `sharp(${v.key}): ${e.message}` };
       }
@@ -131,7 +137,7 @@ async function processOne(sourceKey, existing) {
         const { error } = await supabase.storage
           .from(BUCKET)
           .upload(renditionKey(v.key, sourceKey), out, {
-            contentType: "image/webp",
+            contentType: v.format === "jpeg" ? "image/jpeg" : "image/webp",
             upsert: true,
           });
         if (error) throw new Error(`upload(${v.key}): ${error.message}`);

@@ -20,7 +20,7 @@ import { supabase } from "@/lib/supabase";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { getT } from "@/lib/translations";
 import { parseArtworkDeathYear } from "@/lib/artwork-death-year";
-import { absoluteUrl, artworkDetailImageUrl, artworkGridImageUrl, artworkImageUrl, artworkMediumKind, artworkOriginalUrl, generateAltText, slugify } from "@/lib/utils";
+import { absoluteUrl, artworkDetailImageUrl, artworkGridImageUrl, artworkImageUrl, artworkMediumKind, artworkOgImageUrl, artworkOriginalUrl, generateAltText, slugify } from "@/lib/utils";
 import type { Artwork } from "@/types/artwork";
 
 export const revalidate = 86400;
@@ -250,7 +250,7 @@ export async function generateMetadata({ params }: ArtworkPageProps): Promise<Me
     translation?.seo_description ||
     `${artwork.title} by ${artist}. Public domain artwork free to download.`;
 
-  const imageUrl = artworkImageUrl(artwork);
+  const imageUrl = artworkOgImageUrl(artwork);
 
   return {
     title: { absolute: title },
