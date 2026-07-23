@@ -305,6 +305,24 @@ export function artworkOriginalUrl(artwork: ArtworkImageSource): string {
   return `https://www.artic.edu/iiif/2/${id}/full/1200,/0/default.jpg`;
 }
 
+export type ArtworkMediumKind = "painting" | "print" | "drawing" | "watercolor";
+
+/** Coarse medium bucket for the SEO line under the artwork heading, so an
+ *  etching is never called a "painting". Defaults to painting (~90% of catalog). */
+export function artworkMediumKind(medium: string | null | undefined): ArtworkMediumKind {
+  const m = (medium ?? "").toLowerCase();
+  if (/etch|engrav|lithograph|woodcut|woodblock|screenprint|silkscreen|aquatint|mezzotint|\bprint\b/.test(m)) {
+    return "print";
+  }
+  if (/watercolor|watercolour|gouache/.test(m)) {
+    return "watercolor";
+  }
+  if (/drawing|chalk|charcoal|graphite|pencil|pastel|pen and|ink on paper/.test(m)) {
+    return "drawing";
+  }
+  return "painting";
+}
+
 export function generateAltText(artwork: {
   title: string | null;
   date_display: string | null;

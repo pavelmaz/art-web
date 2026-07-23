@@ -21,7 +21,7 @@ import { supabase } from "@/lib/supabase";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { getT } from "@/lib/translations";
 import { parseArtworkDeathYear } from "@/lib/artwork-death-year";
-import { artworkDetailImageUrl, artworkGridImageUrl, artworkImageUrl, artworkOriginalUrl, generateAltText, slugify } from "@/lib/utils";
+import { artworkDetailImageUrl, artworkGridImageUrl, artworkImageUrl, artworkMediumKind, artworkOriginalUrl, generateAltText, slugify } from "@/lib/utils";
 import type { Artwork } from "@/types/artwork";
 
 export const revalidate = 86400;
@@ -487,48 +487,7 @@ export default async function ArtworkDetailPageDe({ params }: ArtworkPageProps) 
         <BreadcrumbJsonLd artwork={artwork} category={category} />
 
         <div className="flex flex-col gap-8 lg:flex-row lg:items-start">
-          <ArtworkInsightsProvider artwork={artwork} locale="de" isPro={isPro}>
-            <div className="flex-1 space-y-4">
-              <div>
-                {imageUrl ? (
-                  <>
-                    <div className="flex justify-center">
-                      <div className="relative w-fit max-w-full">
-                        <ArtworkZoomImage
-                          src={imageUrl}
-                          fullSrc={artworkOriginalUrl(artwork) || imageUrl}
-                          alt={localeTranslation?.alt_text || generateAltText(artwork)}
-                        />
-                        <ArtworkInsightsOverlay />
-                      </div>
-                    </div>
-                    <ArtworkInsightsControls />
-                  </>
-                ) : (
-                  <div className="flex h-[420px] w-full items-center justify-center bg-neutral-200 text-neutral-600">
-                    No image available
-                  </div>
-                )}
-              </div>
-              <Breadcrumbs items={breadcrumbItems} currentPath={`/de/artworks/${artwork.slug}`} includeJsonLd={false} />
-
-              {descriptionText?.trim() ? (
-                <section className="max-w-2xl pt-4">
-                  <h2 className="mb-5 text-2xl font-semibold tracking-tight text-[#1a1a1a]">
-                    {artwork.title} — {t.historyAndFacts}
-                  </h2>
-                  <div>
-                    <ArtworkDescriptionFormatted description={descriptionText.trim()} />
-                  </div>
-                  {artistSlug && relatedArtworks.length === 0 ? (
-                    <SectionCtaLink href={`/de/artists/${artistSlug}`}>{t.browseAll}</SectionCtaLink>
-                  ) : null}
-                </section>
-              ) : null}
-            </div>
-          </ArtworkInsightsProvider>
-
-          <aside className="w-full lg:w-80">
+          <aside className="order-2 w-full lg:w-80">
             <div className="glass-surface space-y-4 rounded-2xl p-5 lg:sticky lg:top-6">
               <div>
                 <h1 className="mb-2 text-lg font-semibold text-[#1a1a1a]">{artwork.title}</h1>
@@ -634,6 +593,50 @@ export default async function ArtworkDetailPageDe({ params }: ArtworkPageProps) 
               </div>
             </div>
           </aside>
+
+          <ArtworkInsightsProvider artwork={artwork} locale="de" isPro={isPro}>
+            <div className="order-1 flex-1 space-y-4">
+              <div>
+                {imageUrl ? (
+                  <>
+                    <div className="flex justify-center">
+                      <div className="relative w-fit max-w-full">
+                        <ArtworkZoomImage
+                          src={imageUrl}
+                          fullSrc={artworkOriginalUrl(artwork) || imageUrl}
+                          alt={localeTranslation?.alt_text || generateAltText(artwork)}
+                        />
+                        <ArtworkInsightsOverlay />
+                      </div>
+                    </div>
+                    <ArtworkInsightsControls />
+                  </>
+                ) : (
+                  <div className="flex h-[420px] w-full items-center justify-center bg-neutral-200 text-neutral-600">
+                    No image available
+                  </div>
+                )}
+              </div>
+              <Breadcrumbs items={breadcrumbItems} currentPath={`/de/artworks/${artwork.slug}`} includeJsonLd={false} />
+
+              {descriptionText?.trim() ? (
+                <section className="max-w-2xl pt-4">
+                  <h2 className="mb-5 text-2xl font-semibold tracking-tight text-[#1a1a1a]">
+                    {artwork.title} — {t.historyAndFacts}
+                  </h2>
+                  <p className="-mt-2 mb-5 text-sm text-[#6b6b6b]">
+                    {t.artworkSeoLine(artworkMediumKind(artwork.medium_display), artist, artwork.date_display)}
+                  </p>
+                  <div>
+                    <ArtworkDescriptionFormatted description={descriptionText.trim()} />
+                  </div>
+                  {artistSlug && relatedArtworks.length === 0 ? (
+                    <SectionCtaLink href={`/de/artists/${artistSlug}`}>{t.browseAll}</SectionCtaLink>
+                  ) : null}
+                </section>
+              ) : null}
+            </div>
+          </ArtworkInsightsProvider>
         </div>
 
         {relatedArtworks.length > 0 && artistSlug ? (
