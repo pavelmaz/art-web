@@ -510,6 +510,18 @@ export default async function ArtworkDetailPage({ params }: ArtworkPageProps) {
               <div className="my-4 border-t border-[#e8e6e1]" />
 
               <div className="glass-inset space-y-3 rounded-lg p-3">
+                {artwork.style_title?.trim() ? (
+                  <div>
+                    <p className="text-xs text-[#999]">Style</p>
+                    <Link
+                      href={`/styles/${slugify(artwork.style_title)}`}
+                      className="text-sm text-[#1a1a1a] underline"
+                    >
+                      {artwork.style_title}
+                    </Link>
+                  </div>
+                ) : null}
+
                 {artwork.medium_display?.trim() ? (
                   <div>
                     <p className="text-xs text-[#999]">Medium</p>
