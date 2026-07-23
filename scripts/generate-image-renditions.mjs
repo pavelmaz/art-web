@@ -119,7 +119,7 @@ async function processOne(sourceKey, existing) {
     for (const v of missing) {
       let out;
       try {
-        out = await sharp(input)
+        out = await sharp(input, { limitInputPixels: false }) // trusted sources; a few museum scans exceed sharp's default cap
           .rotate() // honour EXIF orientation
           .resize({ width: v.width, withoutEnlargement: true })
           .webp({ quality: v.quality })
