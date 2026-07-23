@@ -570,9 +570,14 @@ export default async function ArtworkDetailPagePt({ params }: ArtworkPageProps) 
 
               <div className="border-t border-[#e8e6e1]" />
 
-              <span className="glass-chip inline-flex items-center gap-1 rounded-full px-2 py-1 text-xs">
-                {t.publicDomain}
-              </span>
+              <div className="flex flex-wrap gap-2">
+                <span className="glass-chip inline-flex items-center gap-1 rounded-full px-2 py-1 text-xs">
+                  {t.publicDomain}
+                </span>
+                <span className="glass-chip inline-flex items-center gap-1 rounded-full px-2 py-1 text-xs">
+                  {t.freeCommercialUse}
+                </span>
+              </div>
             </div>
           </aside>
         </div>

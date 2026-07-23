@@ -588,10 +588,16 @@ export default async function ArtworkDetailPage({ params }: ArtworkPageProps) {
 
               <div className="border-t border-[#e8e6e1]" />
 
-              <span className="glass-chip inline-flex items-center gap-1 rounded-full px-2 py-1 text-xs">
-                <span aria-hidden>✓</span>
-                Public Domain
-              </span>
+              <div className="flex flex-wrap gap-2">
+                <span className="glass-chip inline-flex items-center gap-1 rounded-full px-2 py-1 text-xs">
+                  <span aria-hidden>✓</span>
+                  Public Domain
+                </span>
+                <span className="glass-chip inline-flex items-center gap-1 rounded-full px-2 py-1 text-xs">
+                  <span aria-hidden>✓</span>
+                  Free for Commercial Use
+                </span>
+              </div>
             </div>
           </aside>
         </div>
