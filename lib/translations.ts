@@ -16,7 +16,7 @@ export const translations = {
     freeCommercialUse: '✓ Free for Commercial Use',
     artworkSeoLine: (kind: 'painting' | 'print' | 'drawing' | 'watercolor', artist: string, date?: string | null) => {
       const w = { painting: 'Painting', print: 'Print', drawing: 'Drawing', watercolor: 'Watercolor' }[kind];
-      return `${w} by ${artist}${date ? `, ${date}` : ''} — public domain, free high-resolution download.`;
+      return `License: ${w} by ${artist}${date ? `, ${date}` : ''} — public domain. Free high-resolution download for personal and commercial use.`;
     },
     licenseText: 'All public domain files can be freely used for personal and commercial projects.',
     whyPublicDomain: 'Why is this image in the public domain?',
@@ -83,7 +83,7 @@ export const translations = {
     freeCommercialUse: '✓ Uso Comercial Gratuito',
     artworkSeoLine: (kind: 'painting' | 'print' | 'drawing' | 'watercolor', artist: string, date?: string | null) => {
       const w = { painting: 'Pintura', print: 'Grabado', drawing: 'Dibujo', watercolor: 'Acuarela' }[kind];
-      return `${w} de ${artist}${date ? `, ${date}` : ''} — dominio público, descarga gratuita en alta resolución.`;
+      return `Licencia: ${w} de ${artist}${date ? `, ${date}` : ''} — dominio público. Descarga gratuita en alta resolución para uso personal y comercial.`;
     },
     licenseText: 'Todas las imágenes de dominio público pueden usarse libremente para proyectos personales y comerciales sin restricciones.',
     whyPublicDomain: '¿Por qué esta imagen es de dominio público?',
@@ -150,7 +150,7 @@ export const translations = {
     freeCommercialUse: '✓ Uso Comercial Gratuito',
     artworkSeoLine: (kind: 'painting' | 'print' | 'drawing' | 'watercolor', artist: string, date?: string | null) => {
       const w = { painting: 'Pintura', print: 'Gravura', drawing: 'Desenho', watercolor: 'Aquarela' }[kind];
-      return `${w} de ${artist}${date ? `, ${date}` : ''} — domínio público, download gratuito em alta resolução.`;
+      return `Licença: ${w} de ${artist}${date ? `, ${date}` : ''} — domínio público. Download gratuito em alta resolução para uso pessoal e comercial.`;
     },
     licenseText: 'Todas as imagens de domínio público podem ser usadas livremente para projetos pessoais e comerciais sem restrições.',
     whyPublicDomain: 'Por que esta imagem é de domínio público?',
@@ -217,7 +217,7 @@ export const translations = {
     freeCommercialUse: '✓ 商用利用無料',
     artworkSeoLine: (kind: 'painting' | 'print' | 'drawing' | 'watercolor', artist: string, date?: string | null) => {
       const w = { painting: '絵画', print: '版画', drawing: '素描', watercolor: '水彩画' }[kind];
-      return `${artist}による${w}${date ? `（${date}）` : ''} — パブリックドメイン、高解像度の無料ダウンロード。`;
+      return `ライセンス: ${artist}による${w}${date ? `（${date}）` : ''} — パブリックドメイン。個人・商用利用可の高解像度無料ダウンロード。`;
     },
     licenseText:
       'パブリックドメインのファイルは、個人・商用プロジェクトに自由にご利用いただけます。',
@@ -287,7 +287,7 @@ export const translations = {
     freeCommercialUse: '✓ Usage commercial gratuit',
     artworkSeoLine: (kind: 'painting' | 'print' | 'drawing' | 'watercolor', artist: string, date?: string | null) => {
       const w = { painting: 'Peinture', print: 'Estampe', drawing: 'Dessin', watercolor: 'Aquarelle' }[kind];
-      return `${w} de ${artist}${date ? `, ${date}` : ''} — domaine public, téléchargement gratuit en haute résolution.`;
+      return `Licence : ${w} de ${artist}${date ? `, ${date}` : ''} — domaine public. Téléchargement gratuit en haute résolution pour usage personnel et commercial.`;
     },
     licenseText:
       'Toutes les images du domaine public peuvent être utilisées librement pour des projets personnels et commerciaux.',
@@ -355,7 +355,7 @@ export const translations = {
     freeCommercialUse: '✓ Kostenlos für kommerzielle Nutzung',
     artworkSeoLine: (kind: 'painting' | 'print' | 'drawing' | 'watercolor', artist: string, date?: string | null) => {
       const w = { painting: 'Gemälde', print: 'Druckgrafik', drawing: 'Zeichnung', watercolor: 'Aquarell' }[kind];
-      return `${w} von ${artist}${date ? `, ${date}` : ''} — gemeinfrei, kostenloser Download in hoher Auflösung.`;
+      return `Lizenz: ${w} von ${artist}${date ? `, ${date}` : ''} — gemeinfrei. Kostenloser Download in hoher Auflösung für private und kommerzielle Nutzung.`;
     },
     licenseText:
       'Alle gemeinfreien Dateien können frei für private und kommerzielle Projekte genutzt werden.',
@@ -423,7 +423,7 @@ export const translations = {
     freeCommercialUse: '✓ Uso commerciale gratuito',
     artworkSeoLine: (kind: 'painting' | 'print' | 'drawing' | 'watercolor', artist: string, date?: string | null) => {
       const w = { painting: 'Dipinto', print: 'Stampa', drawing: 'Disegno', watercolor: 'Acquerello' }[kind];
-      return `${w} di ${artist}${date ? `, ${date}` : ''} — pubblico dominio, download gratuito in alta risoluzione.`;
+      return `Licenza: ${w} di ${artist}${date ? `, ${date}` : ''} — pubblico dominio. Download gratuito in alta risoluzione per uso personale e commerciale.`;
     },
     licenseText:
       'Tutte le immagini di pubblico dominio possono essere usate liberamente per progetti personali e commerciali.',
@@ -491,7 +491,7 @@ export const translations = {
     freeCommercialUse: '✓ 상업적 사용 무료',
     artworkSeoLine: (kind: 'painting' | 'print' | 'drawing' | 'watercolor', artist: string, date?: string | null) => {
       const w = { painting: '회화', print: '판화', drawing: '드로잉', watercolor: '수채화' }[kind];
-      return `${artist}의 ${w}${date ? ` (${date})` : ''} — 퍼블릭 도메인, 고해상도 무료 다운로드.`;
+      return `라이선스: ${artist}의 ${w}${date ? ` (${date})` : ''} — 퍼블릭 도메인. 개인 및 상업적 사용을 위한 고해상도 무료 다운로드.`;
     },
     licenseText: '퍼블릭 도메인 파일은 개인·상업 프로젝트에 자유롭게 사용할 수 있습니다.',
     whyPublicDomain: '이 이미지가 퍼블릭 도메인인 이유는?',
@@ -558,7 +558,7 @@ export const translations = {
     freeCommercialUse: '✓ Бесплатно для коммерческого использования',
     artworkSeoLine: (kind: 'painting' | 'print' | 'drawing' | 'watercolor', artist: string, date?: string | null) => {
       const w = { painting: 'Картина', print: 'Гравюра', drawing: 'Рисунок', watercolor: 'Акварель' }[kind];
-      return `${w} — ${artist}${date ? `, ${date}` : ''}. Общественное достояние, бесплатная загрузка в высоком разрешении.`;
+      return `Лицензия: ${w} — ${artist}${date ? `, ${date}` : ''}. Общественное достояние. Бесплатная загрузка в высоком разрешении для личного и коммерческого использования.`;
     },
     licenseText:
       'Все файлы в общественном достоянии можно свободно использовать в личных и коммерческих проектах.',
@@ -626,7 +626,7 @@ export const translations = {
     freeCommercialUse: '✓ 免费商用',
     artworkSeoLine: (kind: 'painting' | 'print' | 'drawing' | 'watercolor', artist: string, date?: string | null) => {
       const w = { painting: '绘画', print: '版画', drawing: '素描', watercolor: '水彩' }[kind];
-      return `${artist}的${w}作品${date ? `（${date}）` : ''} — 公有领域，免费高清下载。`;
+      return `许可：${artist}的${w}作品${date ? `（${date}）` : ''} — 公有领域。免费高清下载，可用于个人和商业用途。`;
     },
     licenseText: '所有公有领域文件均可自由用于个人与商业项目。',
     whyPublicDomain: '为什么这张图片属于公有领域？',

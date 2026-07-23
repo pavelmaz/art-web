@@ -491,8 +491,7 @@ export default async function ArtworkDetailPage({ params }: ArtworkPageProps) {
 
               <div className="glass-inset rounded-lg p-3">
                 <p className="text-xs leading-relaxed text-[#4a4a4a]">
-                  License: All public domain files can be freely used for personal and commercial
-                  projects.
+                  {t.artworkSeoLine(artworkMediumKind(artwork.medium_display), artist, artwork.date_display)}
                 </p>
                 <details className="mt-2 text-xs text-[#4a4a4a]">
                   <summary className="inline-flex cursor-pointer list-none select-none items-center gap-1 text-[#6b6b6b] marker:content-none">
@@ -590,9 +589,6 @@ export default async function ArtworkDetailPage({ params }: ArtworkPageProps) {
                   <h2 className="mb-5 text-2xl font-semibold tracking-tight text-[#1a1a1a]">
                     {artwork.title} — History &amp; Facts
                   </h2>
-                  <p className="-mt-2 mb-5 text-sm text-[#6b6b6b]">
-                    {t.artworkSeoLine(artworkMediumKind(artwork.medium_display), artist, artwork.date_display)}
-                  </p>
                   <div>
                     <ArtworkDescriptionFormatted description={artwork.description.trim()} />
                   </div>
