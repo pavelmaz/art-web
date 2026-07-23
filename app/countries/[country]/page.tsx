@@ -76,6 +76,14 @@ export async function generateMetadata({ params, searchParams }: CountryPageProp
   });
 }
 
+/** Countries whose "famous {adjective} paintings" query has real search volume;
+ *  maps the DB country name to the searched adjective (France → French). */
+const FAMOUS_SECTION_COUNTRIES: Record<string, string> = {
+  France: "French",
+  Spain: "Spanish",
+  Italy: "Italian",
+};
+
 export default async function CountryPage({ params, searchParams }: CountryPageProps) {
   const { country: slug } = await params;
   const countryName = unslugify(decodeURIComponent(slug));
@@ -144,6 +152,9 @@ export default async function CountryPage({ params, searchParams }: CountryPageP
       <p className="max-w-3xl text-neutral-700">
         Browse free public domain artworks from {countryName} — paintings, illustrations, and museum pieces.
       </p>
+      {page === 1 && FAMOUS_SECTION_COUNTRIES[countryName] ? (
+        <h2 className="text-base font-semibold">Famous {FAMOUS_SECTION_COUNTRIES[countryName]} Paintings</h2>
+      ) : null}
       <ArtworkGrid artworks={uniqueArtworks} />
       <Pagination
         currentPage={page}

@@ -99,6 +99,17 @@ export async function generateMetadata({ params, searchParams }: GenrePageProps)
   };
 }
 
+/** Genres whose "famous {genre} paintings" query has real search volume — the
+ *  grid is already score-sorted, so the heading labels what page 1 shows. */
+const FAMOUS_SECTION_GENRES = new Set([
+  "Landscape",
+  "Portrait",
+  "Still Life",
+  "Historical",
+  "Religious",
+  "Animal",
+]);
+
 export default async function GenrePage({ params, searchParams }: GenrePageProps) {
   const { slug } = await params;
   if (!Object.hasOwn(GENRE_MAP, slug)) {
@@ -181,6 +192,9 @@ export default async function GenrePage({ params, searchParams }: GenrePageProps
         <div className="max-w-3xl mb-8 text-sm leading-relaxed text-[#4a4a4a]">
           <p>{intro}</p>
         </div>
+      ) : null}
+      {page === 1 && FAMOUS_SECTION_GENRES.has(genreTitle) ? (
+        <h2 className="text-base font-semibold">Famous {genreTitle} Paintings</h2>
       ) : null}
       <ArtworkGrid artworks={uniqueArtworks} />
       <Pagination

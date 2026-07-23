@@ -77,6 +77,12 @@ export async function generateMetadata({ params, searchParams }: TopicPageProps)
   });
 }
 
+/** Topics whose "famous {topic} paintings" query has real search volume; maps
+ *  the tag to the searched singular form (flowers → Flower). */
+const FAMOUS_SECTION_TOPICS: Record<string, string> = {
+  flowers: "Flower",
+};
+
 export default async function TopicPage({ params, searchParams }: TopicPageProps) {
   const { tag: slug } = await params;
   const tag = decodeURIComponent(slug).replace(/-/g, " ");
@@ -146,6 +152,9 @@ export default async function TopicPage({ params, searchParams }: TopicPageProps
       <p className="max-w-3xl text-neutral-700">
         Browse free public domain {tag} artworks, paintings, illustrations, and museum pieces.
       </p>
+      {page === 1 && FAMOUS_SECTION_TOPICS[tag] ? (
+        <h2 className="text-base font-semibold">Famous {FAMOUS_SECTION_TOPICS[tag]} Paintings</h2>
+      ) : null}
       <ArtworkGrid artworks={uniqueArtworks} />
       <Pagination
         currentPage={page}

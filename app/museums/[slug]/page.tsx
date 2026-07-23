@@ -31,7 +31,7 @@ export async function generateMetadata({ params }: MuseumPageProps): Promise<Met
     notFound();
   }
 
-  const title = `${museum.name} Collection — Free Art Downloads | Fine Art Free`;
+  const title = `${museum.name} — Famous Paintings & Free Downloads | Fine Art Free`;
   const description =
     museum.seoDescription ??
     `Explore ${museum.artworkCount} artworks from ${museum.name} free to download. High-resolution public domain art for any purpose.`;
@@ -102,6 +102,9 @@ export default async function MuseumPage({ params, searchParams }: MuseumPagePro
       <p className="text-sm text-[#6b6b6b]">
         {museum.artworkCount} {museum.artworkCount === 1 ? "artwork" : "artworks"}
       </p>
+      {page === 1 ? (
+        <h2 className="text-base font-semibold">Famous Paintings in the {museum.name}</h2>
+      ) : null}
       <ArtworkGrid artworks={artworks} />
       <Pagination
         currentPage={page}

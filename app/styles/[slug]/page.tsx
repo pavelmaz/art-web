@@ -100,7 +100,7 @@ export async function generateMetadata({ params, searchParams }: StylePageProps)
     notFound();
   }
 
-  const title = `${styleName} Art — Free Public Domain Downloads | Fine Art Free`;
+  const title = `${styleName} Paintings & Art — Free Public Domain Downloads | Fine Art Free`;
   const description = `Browse ${totalCount} ${styleName} artworks free to download in high resolution. Public domain paintings and prints free for personal and commercial use.`;
 
   return {
@@ -113,6 +113,10 @@ export async function generateMetadata({ params, searchParams }: StylePageProps)
     },
   };
 }
+
+/** Styles whose "famous {style} paintings" query has real search volume — the
+ *  grid is already score-sorted, so the heading labels what page 1 shows. */
+const FAMOUS_SECTION_STYLES = new Set(["Renaissance", "Baroque", "Impressionism"]);
 
 export default async function StyleDetailPage({ params, searchParams }: StylePageProps) {
   const { slug } = await params;
@@ -186,11 +190,14 @@ export default async function StyleDetailPage({ params, searchParams }: StylePag
         items={[{ label: "Home", href: "/" }, { label: "Styles", href: "/styles" }, { label: styleName }]}
         currentPath={`/styles/${slug}`}
       />
-      <h1 className="text-3xl font-bold tracking-tight">{styleName} Art</h1>
+      <h1 className="text-3xl font-bold tracking-tight">{styleName} Paintings &amp; Art</h1>
       {descriptionText ? (
         <div className="max-w-3xl mb-8 text-sm leading-relaxed text-[#4a4a4a]">
           <p>{descriptionText}</p>
         </div>
+      ) : null}
+      {page === 1 && FAMOUS_SECTION_STYLES.has(styleName) ? (
+        <h2 className="text-base font-semibold">Famous {styleName} Paintings</h2>
       ) : null}
       <ArtworkGrid artworks={artworks} />
       <Pagination
