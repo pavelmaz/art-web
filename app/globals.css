@@ -108,11 +108,9 @@ img {
 }
 
 .glass-chip {
-  background: rgba(191, 143, 21, 0.18);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  border: 1px solid rgba(191, 143, 21, 0.45);
-  color: #7a5a12;
+  background: linear-gradient(to bottom right, #4caf50, #1e9e57);
+  color: #fff;
+  box-shadow: 0 6px 18px rgba(76, 175, 80, 0.4);
 }
 
 .glass-nav {
