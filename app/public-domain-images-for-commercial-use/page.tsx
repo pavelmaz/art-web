@@ -158,16 +158,19 @@ export default async function CommercialUsePage() {
           className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-b from-transparent to-[#f6f4ee]"
           aria-hidden
         />
-        <div className="relative z-10 mx-auto max-w-4xl px-5 text-center">
-          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-white">
+        <div className="relative z-10 mx-auto max-w-7xl px-5 text-left">
+          <p className="mb-5 text-[13px] uppercase tracking-[0.08em] text-[#CECBF6]">
+            Public domain · Commercial use
+          </p>
+          <h1 className="max-w-3xl text-4xl sm:text-5xl lg:text-6xl font-bold leading-[1.1] tracking-tight text-white">
             Public Domain Images for Commercial Use
           </h1>
-          <p className="mx-auto mt-4 max-w-2xl text-base sm:text-lg text-white">
+          <p className="mt-5 max-w-2xl text-base sm:text-lg leading-relaxed text-[#E4E1F5]">
             Browse 500,000+ public domain paintings, fine art images and vintage prints from the
             world&apos;s great museums — every file free to download in high resolution for personal
             and commercial use. No attribution, no license fees, no account.
           </p>
-          <div className="mt-6 flex flex-wrap items-center justify-center gap-2">
+          <div className="mt-6 flex flex-wrap items-center gap-2">
             {["Public Domain", "Commercial Use", "No Attribution", "High Resolution"].map((badge) => (
               <span
                 key={badge}
@@ -178,7 +181,7 @@ export default async function CommercialUsePage() {
               </span>
             ))}
           </div>
-          <form action="/search" method="get" className="mx-auto mt-8 max-w-xl">
+          <form action="/search" method="get" className="mt-8 max-w-xl">
             <div className="flex items-center rounded-full bg-white/95 px-5 py-3">
               <input
                 type="text"
@@ -207,7 +210,7 @@ export default async function CommercialUsePage() {
 
       <div className="mx-auto max-w-7xl px-5">
         <section className="py-10">
-          <h2 className="mb-5 text-xl font-semibold text-[#1a1a1a]">What you can make with them</h2>
+          <h2 className="mb-5 text-2xl sm:text-3xl font-semibold tracking-tight text-[#1a1a1a]">What you can make with them</h2>
           <div className="grid max-w-4xl grid-cols-1 gap-x-12 gap-y-5 sm:grid-cols-2">
             {USE_CASES.map((useCase) => (
               <div key={useCase.title}>
@@ -219,7 +222,7 @@ export default async function CommercialUsePage() {
         </section>
 
         <section className="py-6">
-          <h2 className="mb-3 text-xl font-semibold text-[#1a1a1a]">
+          <h2 className="mb-3 text-2xl sm:text-3xl font-semibold tracking-tight text-[#1a1a1a]">
             Download famous paintings in high resolution
           </h2>
           <p className="max-w-3xl text-sm leading-relaxed text-[#4a4a4a]">
@@ -243,7 +246,7 @@ export default async function CommercialUsePage() {
         </section>
 
         <section className="py-8">
-          <h2 className="mb-5 text-xl font-semibold text-[#1a1a1a]">
+          <h2 className="mb-5 text-2xl sm:text-3xl font-semibold tracking-tight text-[#1a1a1a]">
             Featured free commercial-use artworks
           </h2>
           <div className="pd-marquee -mx-5">
@@ -282,7 +285,7 @@ export default async function CommercialUsePage() {
         </section>
 
         <section className="py-6">
-          <h2 className="mb-3 text-xl font-semibold text-[#1a1a1a]">Print-ready quality</h2>
+          <h2 className="mb-3 text-2xl sm:text-3xl font-semibold tracking-tight text-[#1a1a1a]">Print-ready quality</h2>
           <p className="max-w-3xl text-sm leading-relaxed text-[#4a4a4a]">
             Files are large enough for real printing — canvas prints, framed wall art, posters and
             print-on-demand products. Free downloads cover most uses; Fine Art Pro unlocks
@@ -292,7 +295,7 @@ export default async function CommercialUsePage() {
 
         <section className="grid grid-cols-1 gap-10 py-10 md:grid-cols-2 md:items-start">
           <div>
-            <h2 className="mb-4 text-xl font-semibold text-[#1a1a1a]">
+            <h2 className="mb-4 text-2xl sm:text-3xl font-semibold tracking-tight text-[#1a1a1a]">
               Why these images are free
             </h2>
             <p className="text-sm leading-relaxed text-[#4a4a4a]">
@@ -316,7 +319,7 @@ export default async function CommercialUsePage() {
         </section>
 
         <section className="py-6">
-          <h2 className="mb-4 text-xl font-semibold text-[#1a1a1a]">Popular categories</h2>
+          <h2 className="mb-4 text-2xl sm:text-3xl font-semibold tracking-tight text-[#1a1a1a]">Popular categories</h2>
           <div className="flex flex-wrap gap-2">
             {CATEGORY_LINKS.map((cat) => (
               <Link
@@ -342,7 +345,7 @@ export default async function CommercialUsePage() {
         </section>
 
         <section className="max-w-3xl py-6">
-          <h2 className="mb-4 text-xl font-semibold text-[#1a1a1a]">Frequently asked questions</h2>
+          <h2 className="mb-4 text-2xl sm:text-3xl font-semibold tracking-tight text-[#1a1a1a]">Frequently asked questions</h2>
           <div className="space-y-3">
             {FAQ.map((item) => (
               <details key={item.q} className="rounded-lg border border-[#e8e6e1] bg-white shadow-[0_2px_8px_rgba(0,0,0,0.04)] p-4">
