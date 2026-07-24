@@ -361,13 +361,16 @@ export function artworkStandardSpecs(artwork: ArtworkSpecSource): string | null 
   const stdW = Math.min(1400, w);
   const stdH = Math.round((h * stdW) / w);
   const size = formatFileSize(artwork.std_bytes);
-  return `${stdW} × ${stdH}px · JPG${size ? ` · ${size}` : ""}`;
+  return `${stdW} × ${stdH}px${size ? ` · ${size}` : ""}`;
 }
 
-/** "6407 × 4789px · JPG · 19.4 MB" for the Pro/original download. */
+/** "6407 × 4789px · JPG · 19.4 MB" for the Pro/original download. Returns null
+ *  for small originals (< 1800px wide) — showing near-identical dimensions next
+ *  to "Unlock the 4K original" would undermine the pitch, so those keep the
+ *  generic label. */
 export function artworkMaxSpecs(artwork: ArtworkSpecSource): string | null {
   const { img_width: w, img_height: h } = artwork;
-  if (!w || !h) {
+  if (!w || !h || w < 1800) {
     return null;
   }
   const size = formatFileSize(artwork.orig_bytes);
