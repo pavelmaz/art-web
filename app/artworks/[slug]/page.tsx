@@ -563,10 +563,13 @@ export default async function ArtworkDetailPage({ params }: ArtworkPageProps) {
                   <span aria-hidden>✓</span>
                   Public Domain
                 </span>
-                <span className="glass-chip inline-flex items-center gap-1 whitespace-nowrap rounded-full px-1.5 py-1 text-[11px]">
+                <Link
+                  href="/public-domain-images-for-commercial-use"
+                  className="glass-chip inline-flex items-center gap-1 whitespace-nowrap rounded-full px-1.5 py-1 text-[11px] transition-colors hover:bg-white/60"
+                >
                   <span aria-hidden>✓</span>
                   Free for Commercial Use
-                </span>
+                </Link>
               </div>
             </div>
           </aside>
