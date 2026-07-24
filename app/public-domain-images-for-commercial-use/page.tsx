@@ -211,13 +211,29 @@ export default async function CommercialUsePage() {
       <div className="mx-auto max-w-7xl px-5">
         <section className="py-10">
           <h2 className="mb-5 text-2xl sm:text-3xl font-semibold tracking-tight text-[#1a1a1a]">What you can make with them</h2>
-          <div className="grid max-w-4xl grid-cols-1 gap-x-12 gap-y-5 sm:grid-cols-2">
-            {USE_CASES.map((useCase) => (
-              <div key={useCase.title}>
-                <p className="text-sm font-medium text-[#1a1a1a]">{useCase.title}</p>
-                <p className="mt-0.5 text-sm text-[#6b6b6b]">{useCase.text}</p>
-              </div>
-            ))}
+          <div className="grid max-w-5xl grid-cols-1 gap-x-12 gap-y-6 sm:grid-cols-2">
+            {USE_CASES.map((useCase, i) => {
+              const thumb = artworks[i % Math.max(artworks.length, 1)];
+              return (
+                <div key={useCase.title} className="flex items-start gap-4">
+                  {thumb ? (
+                    /* eslint-disable-next-line @next/next/no-img-element */
+                    <img
+                      src={thumb.imageUrl}
+                      alt=""
+                      aria-hidden
+                      className="h-14 w-14 shrink-0 rounded-lg object-cover"
+                      loading="lazy"
+                      decoding="async"
+                    />
+                  ) : null}
+                  <div>
+                    <p className="text-sm font-medium text-[#1a1a1a]">{useCase.title}</p>
+                    <p className="mt-0.5 text-sm text-[#6b6b6b]">{useCase.text}</p>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </section>
 
@@ -232,14 +248,33 @@ export default async function CommercialUsePage() {
             quality — free.
           </p>
           {featuredArtists.length ? (
-            <div className="mt-5 flex flex-wrap gap-2">
+            <div className="mt-8 flex flex-wrap gap-x-8 gap-y-6">
               {featuredArtists.map((artist) => (
-                <ArtistChip
+                <Link
                   key={artist.slug}
-                  name={artist.name}
                   href={`/artists/${artist.slug}`}
-                  portrait={artist.image_url}
-                />
+                  className="group flex w-24 flex-col items-center text-center"
+                >
+                  <span className="flex h-20 w-20 items-center justify-center overflow-hidden rounded-full bg-[#e8e4de] shadow-[0_2px_10px_rgba(0,0,0,0.08)] transition-transform duration-300 group-hover:scale-105">
+                    {artist.image_url?.trim() ? (
+                      /* eslint-disable-next-line @next/next/no-img-element */
+                      <img
+                        src={artworkImageUrl({ url: null, image_id: artist.image_url.trim() }, { width: 160, quality: 85 })}
+                        alt={artist.name}
+                        className="h-full w-full object-cover"
+                        loading="lazy"
+                        decoding="async"
+                      />
+                    ) : (
+                      <span className="text-lg font-semibold text-[#b8b0a6]" aria-hidden>
+                        {artist.name.charAt(0)}
+                      </span>
+                    )}
+                  </span>
+                  <span className="mt-2 text-[13px] leading-tight text-[#4a4a4a] transition-colors group-hover:text-[#1a1a1a]">
+                    {artist.name}
+                  </span>
+                </Link>
               ))}
             </div>
           ) : null}
