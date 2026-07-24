@@ -32,6 +32,9 @@ done
 echo "── 2/3 generate image renditions ──"
 npm run --silent images:renditions
 
+echo "── 2b: backfill pixel dimensions + file sizes for new artworks ──"
+node --env-file=.env.local scripts/backfill-image-dims.mjs || echo "⚠️ dims backfill failed (non-fatal)"
+
 echo "── 3/3 copy new files to Cloudflare R2 ──"
 # Renditions + artist portraits are content-addressed (named by sha256), so an
 # existing R2 key never needs re-checking or re-uploading. --ignore-existing makes
