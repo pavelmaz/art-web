@@ -19,12 +19,12 @@ const urbanist = Urbanist({
 
 export const metadata: Metadata = {
   title: {
-    default: 'Fine Art Free — Download 500,000+ Public Domain Artworks',
+    default: 'Fine Art Free — Download 500,000+ Public Domain Paintings & Art',
     template: '%s | Fine Art Free',
   },
   description: 'Browse and download 500,000+ classic paintings, prints and illustrations free. Public domain art from the world\'s top museums. Free for personal and commercial use.',
   openGraph: {
-    title: 'Fine Art Free — Download 500,000+ Public Domain Artworks',
+    title: 'Fine Art Free — Download 500,000+ Public Domain Paintings & Art',
     description: 'Browse and download 500,000+ classic paintings free. Public domain art from top museums. Free for any use.',
     url: 'https://fineartfree.com',
     siteName: 'Fine Art Free',

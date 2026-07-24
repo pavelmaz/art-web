@@ -10,14 +10,14 @@ import type { Artwork } from "@/types/artwork";
 export const revalidate = 86400;
 
 export const metadata: Metadata = {
-  title: "Fine Art Free — Download 500,000+ Public Domain Artworks",
+  title: "Fine Art Free — Download 500,000+ Public Domain Paintings & Art",
   description:
-    "Browse and download 500,000+ classic paintings, prints and illustrations free. Public domain art from the world's top museums. Free for personal and commercial use.",
+    "Download 500,000+ public domain paintings, classic artworks and fine art images free. High resolution, from the world's top museums. Free for commercial use.",
   alternates: {
     canonical: "https://fineartfree.com",
   },
   openGraph: {
-    title: "Fine Art Free — Download 500,000+ Public Domain Artworks",
+    title: "Fine Art Free — Download 500,000+ Public Domain Paintings & Art",
     description:
       "Browse and download 500,000+ classic paintings free. Public domain art from top museums. Free for any use.",
   },
