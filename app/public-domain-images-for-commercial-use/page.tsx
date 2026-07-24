@@ -198,7 +198,7 @@ export default async function CommercialUsePage() {
           <h2 className="mb-5 text-xl font-semibold text-[#1a1a1a]">What you can make with them</h2>
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {USE_CASES.map((useCase) => (
-              <div key={useCase.title} className="glass-inset rounded-lg p-4">
+              <div key={useCase.title} className="rounded-lg border border-[#e8e6e1] bg-white shadow-[0_2px_8px_rgba(0,0,0,0.04)] p-4">
                 <p className="text-sm font-semibold text-[#1a1a1a]">{useCase.title}</p>
                 <p className="mt-1 text-sm text-[#6b6b6b]">{useCase.text}</p>
               </div>
@@ -259,7 +259,7 @@ export default async function CommercialUsePage() {
               ["Museum", "grade scans"],
               ["JPG", "ready for POD"],
             ].map(([big, small]) => (
-              <div key={big} className="glass-inset rounded-lg p-4 text-center">
+              <div key={big} className="rounded-lg border border-[#e8e6e1] bg-white shadow-[0_2px_8px_rgba(0,0,0,0.04)] p-4 text-center">
                 <p className="text-lg font-semibold text-[#1a1a1a]">{big}</p>
                 <p className="text-xs text-[#6b6b6b]">{small}</p>
               </div>
@@ -270,21 +270,21 @@ export default async function CommercialUsePage() {
         <section className="py-6">
           <h2 className="mb-5 text-xl font-semibold text-[#1a1a1a]">Why these images are free</h2>
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-            <div className="glass-inset rounded-lg p-4">
+            <div className="rounded-lg border border-[#e8e6e1] bg-white shadow-[0_2px_8px_rgba(0,0,0,0.04)] p-4">
               <p className="text-sm font-semibold text-[#1a1a1a]">Copyright has expired</p>
               <p className="mt-1 text-sm text-[#6b6b6b]">
                 The artists died more than 70 years ago, placing their work in the public domain
                 worldwide.
               </p>
             </div>
-            <div className="glass-inset rounded-lg p-4">
+            <div className="rounded-lg border border-[#e8e6e1] bg-white shadow-[0_2px_8px_rgba(0,0,0,0.04)] p-4">
               <p className="text-sm font-semibold text-[#1a1a1a]">Museum open access</p>
               <p className="mt-1 text-sm text-[#6b6b6b]">
                 The Met, the Rijksmuseum and other museums release their high-resolution scans
                 under CC0.
               </p>
             </div>
-            <div className="glass-inset rounded-lg p-4">
+            <div className="rounded-lg border border-[#e8e6e1] bg-white shadow-[0_2px_8px_rgba(0,0,0,0.04)] p-4">
               <p className="text-sm font-semibold text-[#1a1a1a]">The one caveat</p>
               <p className="mt-1 text-sm text-[#6b6b6b]">
                 Trademarks or recognizable living persons within an image can carry separate
@@ -301,7 +301,7 @@ export default async function CommercialUsePage() {
               <Link
                 key={cat.href}
                 href={cat.href}
-                className="glass-inset rounded-full px-4 py-2 text-sm text-[#1a1a1a] transition-colors hover:bg-white/60"
+                className="rounded-full border border-[#e8e6e1] bg-white shadow-[0_2px_8px_rgba(0,0,0,0.04)] px-4 py-2 text-sm text-[#1a1a1a] transition-colors hover:bg-white/60"
               >
                 {cat.label}
               </Link>
@@ -324,7 +324,7 @@ export default async function CommercialUsePage() {
           <h2 className="mb-4 text-xl font-semibold text-[#1a1a1a]">Frequently asked questions</h2>
           <div className="space-y-3">
             {FAQ.map((item) => (
-              <details key={item.q} className="glass-inset rounded-lg p-4">
+              <details key={item.q} className="rounded-lg border border-[#e8e6e1] bg-white shadow-[0_2px_8px_rgba(0,0,0,0.04)] p-4">
                 <summary className="cursor-pointer list-none text-sm font-semibold text-[#1a1a1a] marker:content-none">
                   {item.q}
                 </summary>
