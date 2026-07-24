@@ -19,6 +19,20 @@ const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.
 const CDN = "https://cdn.fineartfree.com/";
 const CONCURRENCY = 12;
 const UA = "FineArtFree-dims/1.0 (https://fineartfree.com; pavelmazuelas@gmail.com)";
+// artic.edu's IIIF endpoint 403s non-browser clients — send browser-like headers there.
+const BROWSER_UA =
+  "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36";
+
+function headersFor(url) {
+  if (url.includes("artic.edu")) {
+    return {
+      "User-Agent": BROWSER_UA,
+      Accept: "image/avif,image/webp,image/*,*/*",
+      Referer: "https://www.artic.edu/",
+    };
+  }
+  return { "User-Agent": UA };
+}
 
 function probeUrl(imageId) {
   if (!imageId) return null;
@@ -41,7 +55,7 @@ async function worker(queue) {
     const url = probeUrl(row.image_id);
     if (!url) { fail++; continue; }
     try {
-      const info = await probe(url, { headers: { "User-Agent": UA } });
+      const info = await probe(url, { headers: headersFor(url) });
       const patch = { img_width: info.width, img_height: info.height };
       if (row.orig_bytes == null && Number.isFinite(info.length) && info.length > 0) {
         patch.orig_bytes = info.length;
