@@ -135,6 +135,11 @@ export async function GET() {
       entries.push({ loc: `${base}${CONTACT_PATHS[locale as Locale]}`, changefreq: "monthly", priority: 0.5 });
     }
     entries.push({ loc: `${base}/terms`, changefreq: "monthly", priority: 0.3 });
+    entries.push({
+      loc: `${base}/public-domain-images-for-commercial-use`,
+      changefreq: "weekly",
+      priority: 0.9,
+    });
 
     for (const name of Array.from(artists).sort()) {
       const seg = slugify(name);

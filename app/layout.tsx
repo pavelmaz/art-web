@@ -87,6 +87,15 @@ export default async function RootLayout({
               <span className="mx-2 text-[#404040]" aria-hidden>
                 |
               </span>
+              <Link
+                href="/public-domain-images-for-commercial-use"
+                className="text-[#a3a3a3] transition-colors hover:text-white"
+              >
+                Commercial Use
+              </Link>
+              <span className="mx-2 text-[#404040]" aria-hidden>
+                |
+              </span>
               <Link href="/fineart-pro" className="text-[#a3a3a3] transition-colors hover:text-white">
                 Fine Art Pro
               </Link>
