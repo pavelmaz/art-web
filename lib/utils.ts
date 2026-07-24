@@ -332,6 +332,48 @@ export function artworkMediumKind(medium: string | null | undefined): ArtworkMed
   return "painting";
 }
 
+/** "2.3 MB" / "640 KB" — null when bytes are unknown. */
+export function formatFileSize(bytes: number | null | undefined): string | null {
+  if (!bytes || bytes <= 0) {
+    return null;
+  }
+  const mb = bytes / 1048576;
+  if (mb < 0.1) {
+    return `${Math.max(1, Math.round(bytes / 1024))} KB`;
+  }
+  return `${mb.toFixed(1)} MB`;
+}
+
+type ArtworkSpecSource = {
+  img_width?: number | null;
+  img_height?: number | null;
+  orig_bytes?: number | null;
+  std_bytes?: number | null;
+};
+
+/** "1400 × 1047px · JPG · 0.4 MB" for the free/standard download (w1400 rendition,
+ *  never enlarged past the original). Null until the dims backfill covers the row. */
+export function artworkStandardSpecs(artwork: ArtworkSpecSource): string | null {
+  const { img_width: w, img_height: h } = artwork;
+  if (!w || !h) {
+    return null;
+  }
+  const stdW = Math.min(1400, w);
+  const stdH = Math.round((h * stdW) / w);
+  const size = formatFileSize(artwork.std_bytes);
+  return `${stdW} × ${stdH}px · JPG${size ? ` · ${size}` : ""}`;
+}
+
+/** "6407 × 4789px · JPG · 19.4 MB" for the Pro/original download. */
+export function artworkMaxSpecs(artwork: ArtworkSpecSource): string | null {
+  const { img_width: w, img_height: h } = artwork;
+  if (!w || !h) {
+    return null;
+  }
+  const size = formatFileSize(artwork.orig_bytes);
+  return `${w} × ${h}px · JPG${size ? ` · ${size}` : ""}`;
+}
+
 export function generateAltText(artwork: {
   title: string | null;
   date_display: string | null;

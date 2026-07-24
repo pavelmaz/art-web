@@ -21,7 +21,7 @@ import { supabase } from "@/lib/supabase";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { getT } from "@/lib/translations";
 import { parseArtworkDeathYear } from "@/lib/artwork-death-year";
-import { artworkDetailImageUrl, artworkGridImageUrl, artworkImageUrl, artworkMediumKind, artworkOgImageUrl, artworkOriginalUrl, generateAltText, slugify } from "@/lib/utils";
+import { artworkDetailImageUrl, artworkGridImageUrl, artworkImageUrl, artworkMaxSpecs, artworkMediumKind, artworkOgImageUrl, artworkOriginalUrl, artworkStandardSpecs, generateAltText, slugify } from "@/lib/utils";
 import type { Artwork } from "@/types/artwork";
 
 export const revalidate = 86400;
@@ -42,6 +42,10 @@ type ArtworkRow = {
   description: string | null;
   description_ko: string | null;
   death_year: number | null;
+  img_width: number | null;
+  img_height: number | null;
+  orig_bytes: number | null;
+  std_bytes: number | null;
 };
 
 
@@ -507,12 +511,12 @@ export default async function ArtworkDetailPageKo({ params }: ArtworkPageProps) 
                 <div className="flex items-center justify-between gap-4 rounded-lg glass-inset p-3">
                   <div>
                     <p className="text-sm font-medium text-[#1a1a1a]">Standard</p>
-                    <p className="text-xs text-[#999]">JPG</p>
+                    <p className="text-xs text-[#999]">{artworkStandardSpecs(artwork) ?? "JPG"}</p>
                   </div>
                   <DownloadButton imageUrl={imageUrl} filename={artwork.slug} label={t.downloadStandard} variant="glass" />
                 </div>
 
-                <ProDownloadRow locale="ko" isPro={isPro} downloadHref={maxDownloadHref} filename={artwork.slug} glass />
+                <ProDownloadRow locale="ko" isPro={isPro} downloadHref={maxDownloadHref} filename={artwork.slug} glass specs={artworkMaxSpecs(artwork)} />
               </div>
 
               <div className="my-4 border-t border-[#e8e6e1]" />

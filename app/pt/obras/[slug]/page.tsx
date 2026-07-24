@@ -21,7 +21,7 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { getT } from "@/lib/translations";
 import { resolveGenreHubLink, resolveStyleHubLink } from "@/lib/resolve-genre-style-links";
 import { parseArtworkDeathYear } from "@/lib/artwork-death-year";
-import { artworkDetailImageUrl, artworkGridImageUrl, artworkImageUrl, artworkMediumKind, artworkOgImageUrl, artworkOriginalUrl, generateAltText, slugify } from "@/lib/utils";
+import { artworkDetailImageUrl, artworkGridImageUrl, artworkImageUrl, artworkMaxSpecs, artworkMediumKind, artworkOgImageUrl, artworkOriginalUrl, artworkStandardSpecs, generateAltText, slugify } from "@/lib/utils";
 import type { Artwork } from "@/types/artwork";
 
 export const revalidate = 86400;
@@ -42,6 +42,10 @@ type ArtworkRow = {
   description: string | null;
   description_pt: string | null;
   death_year: number | null;
+  img_width: number | null;
+  img_height: number | null;
+  orig_bytes: number | null;
+  std_bytes: number | null;
 };
 
 
@@ -194,7 +198,7 @@ function ArtworkDescriptionFormatted({ description }: { description: string }) {
 
 async function getArtworkBySlug(slug: string): Promise<ArtworkRow | null> {
   const selectColumns =
-    "id, slug, title, artist_display, url, image_id, museum, style_title, genre_title, medium_display, date_display, dimensions, description, description_pt";
+    "id, slug, title, artist_display, url, image_id, museum, style_title, genre_title, medium_display, date_display, dimensions, description, description_pt, img_width, img_height, orig_bytes, std_bytes";
 
   const primary = await supabase
     .from("artworks")
@@ -462,12 +466,12 @@ export default async function ArtworkDetailPagePt({ params }: ArtworkPageProps) 
                 <div className="flex items-center justify-between gap-4 rounded-lg glass-inset p-3">
                   <div>
                     <p className="text-sm font-medium text-[#1a1a1a]">Standard</p>
-                    <p className="text-xs text-[#999]">JPG</p>
+                    <p className="text-xs text-[#999]">{artworkStandardSpecs(artwork) ?? "JPG"}</p>
                   </div>
                   <DownloadButton imageUrl={imageUrl} filename={artwork.slug} label={t.downloadStandard} variant="glass" />
                 </div>
 
-                <ProDownloadRow locale="pt" isPro={isPro} downloadHref={maxDownloadHref} filename={artwork.slug} glass />
+                <ProDownloadRow locale="pt" isPro={isPro} downloadHref={maxDownloadHref} filename={artwork.slug} glass specs={artworkMaxSpecs(artwork)} />
               </div>
 
               <div className="my-4 border-t border-[#e8e6e1]" />
