@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 import { ArtistChip } from "@/components/ArtistChip";
-import { ArtworkGrid } from "@/components/ArtworkGrid";
 import { supabase } from "@/lib/supabase";
 import { absoluteUrl, artworkImageUrl } from "@/lib/utils";
 import type { Artwork } from "@/types/artwork";
@@ -97,10 +96,18 @@ export default async function CommercialUsePage() {
   const [{ data: artworkRows }, { data: artistRows }] = await Promise.all([
     supabase
       .from("artworks")
-      .select("id, title, slug, artist_display, image_id, url, museum, style_title, genre_title, score, alt_text")
+      .select("id, title, slug, artist_display, image_id, url, museum, style_title, genre_title, score, alt_text, death_year")
       .not("image_id", "is", null)
+      // Commercial-safety filter: only artists dead 90+ years — the catalog holds a
+      // few 20th-century works (Dalí d.1989, Hopper d.1967) that must never appear
+      // on the page promising commercial use.
+      .not("death_year", "is", null)
+      .lt("death_year", 1932)
+      // Bartholdi's Statue of Liberty watercolors top the score table but make weak
+      // lead tiles for a paintings pitch.
+      .not("artist_display", "ilike", "%bartholdi%")
       .order("score", { ascending: false })
-      .limit(12),
+      .limit(16),
     supabase
       .from("artists")
       .select("name, slug, image_url, artwork_count")
@@ -135,17 +142,18 @@ export default async function CommercialUsePage() {
     <div>
       <FaqJsonLd />
 
-      <section className="relative w-full bg-[#1a1a1a] py-20">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src="/hero-bg-moonrise.svg"
-          alt=""
-          className="absolute inset-0 w-full h-full object-cover"
-          fetchPriority="high"
-          decoding="sync"
-          aria-hidden="true"
-        />
-        <div className="absolute inset-0 bg-black/45" />
+      <section className="relative w-full bg-[#26215C] py-20">
+        <div
+          className="absolute inset-0 grid grid-cols-6 opacity-20"
+          aria-hidden
+        >
+          <div className="bg-[#7F77DD]" />
+          <div className="bg-[#534AB7]" />
+          <div className="bg-[#3C3489]" />
+          <div className="bg-[#0F6E56]" />
+          <div className="bg-[#993C1D]" />
+          <div className="bg-[#854F0B]" />
+        </div>
         <div
           className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-b from-transparent to-[#f6f4ee]"
           aria-hidden
@@ -200,11 +208,11 @@ export default async function CommercialUsePage() {
       <div className="mx-auto max-w-7xl px-5">
         <section className="py-10">
           <h2 className="mb-5 text-xl font-semibold text-[#1a1a1a]">What you can make with them</h2>
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid max-w-4xl grid-cols-1 gap-x-12 gap-y-5 sm:grid-cols-2">
             {USE_CASES.map((useCase) => (
-              <div key={useCase.title} className="rounded-lg border border-[#e8e6e1] bg-white shadow-[0_2px_8px_rgba(0,0,0,0.04)] p-4">
-                <p className="text-sm font-semibold text-[#1a1a1a]">{useCase.title}</p>
-                <p className="mt-1 text-sm text-[#6b6b6b]">{useCase.text}</p>
+              <div key={useCase.title}>
+                <p className="text-sm font-medium text-[#1a1a1a]">{useCase.title}</p>
+                <p className="mt-0.5 text-sm text-[#6b6b6b]">{useCase.text}</p>
               </div>
             ))}
           </div>
@@ -238,11 +246,34 @@ export default async function CommercialUsePage() {
           <h2 className="mb-5 text-xl font-semibold text-[#1a1a1a]">
             Featured free commercial-use artworks
           </h2>
-          <ArtworkGrid artworks={artworks} />
+          <div className="pd-marquee -mx-5">
+            <div className="pd-marquee-track px-5">
+              {[...artworks, ...artworks].map((artwork, i) => (
+                <Link
+                  key={`${artwork.id}-${i}`}
+                  href={`/artworks/${artwork.slug}`}
+                  className="group block w-[200px] shrink-0"
+                >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={artwork.imageUrl}
+                    alt={artwork.altText || `${artwork.title} by ${artwork.artistDisplay}`}
+                    className="aspect-[4/5] w-full rounded-lg object-cover transition-transform duration-300 group-hover:scale-[1.03]"
+                    loading="lazy"
+                    decoding="async"
+                  />
+                  <p className="mt-2 truncate text-[13px] font-medium text-[#1a1a1a]">
+                    {artwork.title}
+                  </p>
+                  <p className="truncate text-[12px] text-[#6b6b6b]">{artwork.artistDisplay}</p>
+                </Link>
+              ))}
+            </div>
+          </div>
           <div className="mt-6">
             <Link
               href="/artworks"
-              className="inline-flex items-center gap-1 rounded-md bg-gradient-to-br from-[#4CAF50] to-[#1e9e57] px-5 py-2.5 text-sm font-medium text-white shadow-[0_6px_18px_rgba(76,175,80,0.4)] transition hover:brightness-110"
+              className="inline-flex items-center gap-1 rounded-lg bg-[#1a1a1a] px-5 py-2.5 text-sm font-medium text-white transition hover:bg-[#333]"
             >
               Browse all 500,000+ artworks
               <span aria-hidden>→</span>
@@ -257,44 +288,30 @@ export default async function CommercialUsePage() {
             print-on-demand products. Free downloads cover most uses; Fine Art Pro unlocks
             full-size 4K originals for large-format printing.
           </p>
-          <div className="mt-5 grid max-w-xl grid-cols-3 gap-3">
-            {[
-              ["4K", "original files"],
-              ["Museum", "grade scans"],
-              ["JPG", "ready for POD"],
-            ].map(([big, small]) => (
-              <div key={big} className="rounded-lg border border-[#e8e6e1] bg-white shadow-[0_2px_8px_rgba(0,0,0,0.04)] p-4 text-center">
-                <p className="text-lg font-semibold text-[#1a1a1a]">{big}</p>
-                <p className="text-xs text-[#6b6b6b]">{small}</p>
-              </div>
-            ))}
-          </div>
         </section>
 
-        <section className="py-6">
-          <h2 className="mb-5 text-xl font-semibold text-[#1a1a1a]">Why these images are free</h2>
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-            <div className="rounded-lg border border-[#e8e6e1] bg-white shadow-[0_2px_8px_rgba(0,0,0,0.04)] p-4">
-              <p className="text-sm font-semibold text-[#1a1a1a]">Copyright has expired</p>
-              <p className="mt-1 text-sm text-[#6b6b6b]">
-                The artists died more than 70 years ago, placing their work in the public domain
-                worldwide.
-              </p>
-            </div>
-            <div className="rounded-lg border border-[#e8e6e1] bg-white shadow-[0_2px_8px_rgba(0,0,0,0.04)] p-4">
-              <p className="text-sm font-semibold text-[#1a1a1a]">Museum open access</p>
-              <p className="mt-1 text-sm text-[#6b6b6b]">
-                The Met, the Rijksmuseum and other museums release their high-resolution scans
-                under CC0.
-              </p>
-            </div>
-            <div className="rounded-lg border border-[#e8e6e1] bg-white shadow-[0_2px_8px_rgba(0,0,0,0.04)] p-4">
-              <p className="text-sm font-semibold text-[#1a1a1a]">The one caveat</p>
-              <p className="mt-1 text-sm text-[#6b6b6b]">
-                Trademarks or recognizable living persons within an image can carry separate
-                rights — rare in classic art, but worth knowing.
-              </p>
-            </div>
+        <section className="grid grid-cols-1 gap-10 py-10 md:grid-cols-2 md:items-start">
+          <div>
+            <h2 className="mb-4 text-xl font-semibold text-[#1a1a1a]">
+              Why these images are free
+            </h2>
+            <p className="text-sm leading-relaxed text-[#4a4a4a]">
+              Copyright has expired: the artists died more than 70 years ago, placing their work
+              in the public domain worldwide. On top of that, the Met, the Rijksmuseum and other
+              museums release their high-resolution scans under CC0 open access.
+            </p>
+            <p className="mt-3 text-sm leading-relaxed text-[#4a4a4a]">
+              The one caveat worth knowing: trademarks or recognizable living persons within an
+              image can carry separate rights — rare in classic art, but worth knowing.
+            </p>
+          </div>
+          <div className="border-l-2 border-[#d8d5cd] pl-6">
+            <p className="text-3xl font-semibold tracking-tight text-[#1a1a1a]">4K</p>
+            <p className="mb-4 text-sm text-[#6b6b6b]">original files, museum-grade scans</p>
+            <p className="text-3xl font-semibold tracking-tight text-[#1a1a1a]">500,000+</p>
+            <p className="mb-4 text-sm text-[#6b6b6b]">artworks, five centuries of art</p>
+            <p className="text-3xl font-semibold tracking-tight text-[#1a1a1a]">$0</p>
+            <p className="text-sm text-[#6b6b6b]">no license fees, no attribution — JPG, ready for POD</p>
           </div>
         </section>
 
@@ -339,7 +356,7 @@ export default async function CommercialUsePage() {
         </section>
 
         <section className="py-10">
-          <div className="rounded-2xl bg-gradient-to-br from-[#4CAF50] to-[#1e9e57] px-6 py-10 text-center shadow-[0_6px_18px_rgba(76,175,80,0.4)]">
+          <div className="rounded-2xl bg-[#26215C] px-6 py-10 text-center">
             <p className="text-xl font-semibold text-white">Start downloading — free, forever</p>
             <p className="mt-2 text-sm text-white/90">
               No account needed · 4K originals and unlimited downloads with Fine Art Pro

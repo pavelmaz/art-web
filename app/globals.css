@@ -115,6 +115,35 @@ img {
   color: #1a1a1a;
 }
 
+/* Landing-page artwork marquee: continuous rightward drift, pausable on hover,
+   tiles stay clickable throughout. Track holds the tile list twice; shifting
+   from -50% to 0 loops seamlessly. */
+.pd-marquee {
+  overflow: hidden;
+}
+.pd-marquee-track {
+  display: flex;
+  gap: 16px;
+  width: max-content;
+  animation: pd-marquee-drift 60s linear infinite;
+}
+.pd-marquee:hover .pd-marquee-track {
+  animation-play-state: paused;
+}
+@keyframes pd-marquee-drift {
+  from {
+    transform: translateX(-50%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .pd-marquee-track {
+    animation: none;
+  }
+}
+
 .glass-nav {
   background: rgba(255, 255, 255, 0.72);
   backdrop-filter: blur(16px) saturate(140%);
