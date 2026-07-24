@@ -146,6 +146,10 @@ export default async function CommercialUsePage() {
           aria-hidden="true"
         />
         <div className="absolute inset-0 bg-black/45" />
+        <div
+          className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-b from-transparent to-[#f6f4ee]"
+          aria-hidden
+        />
         <div className="relative z-10 mx-auto max-w-4xl px-5 text-center">
           <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-white">
             Public Domain Images for Commercial Use
