@@ -35,6 +35,9 @@ export const metadata: Metadata = {
       'application/rss+xml': 'https://fineartfree.com/feed',
     },
   },
+  other: {
+    'p:domain_verify': '70b1748da69f5a53b4c7c07dc21b12ef',
+  },
 };
 
 function htmlLangFromPathname(pathname: string): string {
