@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 
-import { ArtistChip } from "@/components/ArtistChip";
 import { supabase } from "@/lib/supabase";
 import { absoluteUrl, artworkImageUrl } from "@/lib/utils";
 import type { Artwork } from "@/types/artwork";
