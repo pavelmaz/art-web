@@ -49,7 +49,7 @@ export function ProDownloadRow({ locale, isPro, downloadHref, filename, glass = 
       >
         <div>
           <p className="text-sm font-medium text-[#1a1a1a]">
-            {t.downloadMaxSize}{maxDims ? `, ${maxDims}` : ""}
+            4K Original{maxDims ? `, ${maxDims}` : ""}
           </p>
           <p className="text-xs text-[#999]">{maxSize ? `JPG, Size: ${maxSize}` : t.downloadMaxFormat}</p>
         </div>
@@ -79,7 +79,7 @@ export function ProDownloadRow({ locale, isPro, downloadHref, filename, glass = 
     >
       <div className="min-w-0">
         <p className="text-sm font-semibold text-[#1a1a1a]">{t.proDownloadTitle}</p>
-        {maxDims ? <p className="text-xs text-[#1a1a1a]">{maxDims}{maxSize ? ` · JPG, ${maxSize}` : ""}</p> : null}
+        {maxDims ? <p className="text-xs text-[#1a1a1a]">{maxDims}{maxSize ? ` · JPG, Size: ${maxSize}` : ""}</p> : null}
         <p className="text-xs text-[#6b6b6b]">{t.proDownloadPerks}</p>
       </div>
       <span
