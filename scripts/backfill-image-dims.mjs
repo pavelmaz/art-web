@@ -17,7 +17,7 @@ const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.
 });
 
 const CDN = "https://cdn.fineartfree.com/";
-const CONCURRENCY = 12;
+const CONCURRENCY = Number(process.env.DIMS_CONCURRENCY ?? 12);
 const UA = "FineArtFree-dims/1.0 (https://fineartfree.com; pavelmazuelas@gmail.com)";
 // artic.edu's IIIF endpoint 403s non-browser clients — send browser-like headers there.
 const BROWSER_UA =
