@@ -143,20 +143,16 @@ export default async function CommercialUsePage() {
     <div>
       <FaqJsonLd />
 
-      <section className="relative w-full bg-[#26215C] py-20">
-        <div
-          className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-b from-transparent to-[#f6f4ee]"
-          aria-hidden
-        />
+      <section className="relative w-full bg-[#1a1a1a] py-20">
         <div className="relative z-10 mx-auto flex max-w-7xl items-center gap-12 px-5">
           <div className="min-w-0 flex-1 text-left">
-          <p className="mb-5 text-[13px] uppercase tracking-[0.08em] text-[#CECBF6]">
+          <p className="mb-5 text-[13px] uppercase tracking-[0.08em] text-[#a3a3a3]">
             Public domain · Commercial use
           </p>
           <h1 className="max-w-3xl text-4xl sm:text-5xl lg:text-6xl font-bold leading-[1.1] tracking-tight text-white">
             Public Domain Images for Commercial Use
           </h1>
-          <p className="mt-5 max-w-2xl text-base sm:text-lg leading-relaxed text-[#E4E1F5]">
+          <p className="mt-5 max-w-2xl text-base sm:text-lg leading-relaxed text-white/85">
             Browse 500,000+ public domain paintings, fine art images and vintage prints from the
             world&apos;s great museums — every file free to download in high resolution for personal
             and commercial use. No attribution, no license fees, no account.
@@ -391,7 +387,7 @@ export default async function CommercialUsePage() {
         </section>
 
         <section className="py-10">
-          <div className="rounded-2xl bg-[#26215C] px-6 py-10 text-center">
+          <div className="rounded-2xl bg-[#1a1a1a] px-6 py-10 text-center">
             <p className="text-xl font-semibold text-white">Start downloading — free, forever</p>
             <p className="mt-2 text-sm text-white/90">
               No account needed · 4K originals and unlimited downloads with Fine Art Pro
