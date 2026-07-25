@@ -49,7 +49,7 @@ async function fetchArtworksByFilter(term: string) {
   return supabase
     .from("artworks")
     .select(ARTWORK_SELECT)
-    .or(`title.ilike.%${safe}%,artist_display.ilike.%${safe}%,tags.cs.{${safe}}`)
+    .or(`title.ilike.%${safe}%,artist_display.ilike.%${safe}%,museum.ilike.%${safe}%,genre_title.ilike.%${safe}%,style_title.ilike.%${safe}%,tags.cs.{${safe}}`)
     .order("score", { ascending: false })
     .limit(50);
 }
