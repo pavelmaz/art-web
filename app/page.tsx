@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 import { ArtworkGrid } from "@/components/ArtworkGrid";
+import { MuseumLogoStrip } from "@/components/MuseumLogoStrip";
+import { RotatingProHero } from "@/components/RotatingProHero";
 import { WebSiteJsonLd } from "@/components/JsonLd";
 import { supabase } from "@/lib/supabase";
 import { artworkImageUrl, slugify } from "@/lib/utils";
@@ -158,39 +160,40 @@ export default async function HomePage() {
   return (
     <div>
       <WebSiteJsonLd />
-      <section className="relative w-full bg-[#1a1a1a] py-24">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src="/hero-bg-moonrise.svg"
-          alt=""
-          className="absolute inset-0 w-full h-full object-cover"
-          fetchPriority="high"
-          decoding="sync"
-          aria-hidden="true"
-        />
-        <div className="absolute inset-0 bg-black/45" />
-        <div className="relative z-10 mx-auto max-w-7xl px-5 text-left">
-          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-white">
-            Classic Art, Free to Download
-          </h1>
-          <p className="mt-4 max-w-2xl text-base sm:text-lg text-white">
-            500,000+ public domain paintings, prints and illustrations from the world&apos;s
-            greatest museums — free for personal and commercial use.
-          </p>
-          <form action="/search" method="get" className="mt-14 max-w-3xl md:mt-16">
-            <div className="flex items-center border-b border-white">
-              <input
-                type="text"
-                name="q"
-                placeholder="Search by artwork title or artist"
-                className="w-full bg-transparent py-2 text-[15px] leading-normal text-white placeholder:text-white focus:outline-none"
-                aria-label="Search by artwork title or artist"
-              />
-              <button type="submit" className="px-2 text-3xl text-white hover:text-white" aria-label="Search">
-                ⌕
-              </button>
+      <section className="relative w-full bg-[#1a1a1a] py-20">
+        <div className="relative z-10 mx-auto flex max-w-7xl items-center gap-12 px-5">
+          <div className="min-w-0 flex-1 text-left">
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-white">
+              Classic Art, Free to Download
+            </h1>
+            <p className="mt-4 max-w-2xl text-base sm:text-lg text-white">
+              500,000+ public domain paintings, prints and illustrations from the world&apos;s
+              greatest museums — free for personal and commercial use.
+            </p>
+            <form action="/search" method="get" className="mt-14 max-w-3xl md:mt-16">
+              <div className="flex items-center border-b border-white">
+                <input
+                  type="text"
+                  name="q"
+                  placeholder="Search by artwork title or artist"
+                  className="w-full bg-transparent py-2 text-[15px] leading-normal text-white placeholder:text-white focus:outline-none"
+                  aria-label="Search by artwork title or artist"
+                />
+                <button type="submit" className="px-2 text-3xl text-white hover:text-white" aria-label="Search">
+                  ⌕
+                </button>
+              </div>
+            </form>
+          </div>
+          <div className="hidden w-[340px] shrink-0 lg:block xl:w-[380px]">
+            <div className="overflow-hidden rounded-2xl shadow-[0_20px_60px_rgba(0,0,0,0.45)]">
+              <RotatingProHero alt="Famous public domain paintings, free to download" />
             </div>
-          </form>
+          </div>
+        </div>
+
+        <div className="relative z-10 mx-auto mt-14 max-w-7xl px-5">
+          <MuseumLogoStrip />
         </div>
       </section>
 
