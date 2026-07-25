@@ -20,7 +20,7 @@ import { supabase } from "@/lib/supabase";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { getT } from "@/lib/translations";
 import { parseArtworkDeathYear } from "@/lib/artwork-death-year";
-import { absoluteUrl, artworkDetailImageUrl, artworkGridImageUrl, artworkImageUrl, artworkMaxSpecs, artworkMediumKind, artworkOgImageUrl, artworkOriginalUrl, artworkStandardSpecs, generateAltText, slugify } from "@/lib/utils";
+import { absoluteUrl, artworkDetailImageUrl, artworkGridImageUrl, artworkImageUrl, artworkMaxSize, artworkMaxSpecs, artworkMediumKind, artworkOgImageUrl, artworkOriginalUrl, artworkStandardSize, artworkStandardSpecs, generateAltText, slugify } from "@/lib/utils";
 import type { Artwork } from "@/types/artwork";
 
 export const revalidate = 86400;
@@ -482,13 +482,17 @@ export default async function ArtworkDetailPage({ params }: ArtworkPageProps) {
               <div className="space-y-3">
                 <div className="flex items-center justify-between gap-4 rounded-lg glass-inset p-3">
                   <div>
-                    <p className="text-sm font-medium text-[#1a1a1a]">Standard</p>
-                    <p className="text-xs text-[#999]">{artworkStandardSpecs(artwork) ?? "JPG"}</p>
+                    <p className="text-sm font-medium text-[#1a1a1a]">
+                      Standard{artworkStandardSpecs(artwork) ? `, ${artworkStandardSpecs(artwork)}` : ""}
+                    </p>
+                    <p className="text-xs text-[#999]">
+                      {artworkStandardSize(artwork) ? `JPG, Size: ${artworkStandardSize(artwork)}` : "JPG"}
+                    </p>
                   </div>
                   <DownloadButton imageUrl={imageUrl} filename={artwork.slug} variant="glass" />
                 </div>
 
-                <ProDownloadRow locale="en" isPro={isPro} downloadHref={maxDownloadHref} filename={artwork.slug} glass specs={artworkMaxSpecs(artwork)} />
+                <ProDownloadRow locale="en" isPro={isPro} downloadHref={maxDownloadHref} filename={artwork.slug} glass maxDims={artworkMaxSpecs(artwork)} maxSize={artworkMaxSize(artwork)} />
               </div>
 
               <div className="my-4 border-t border-[#e8e6e1]" />

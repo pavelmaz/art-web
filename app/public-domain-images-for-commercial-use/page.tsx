@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Cinzel } from "next/font/google";
+import { Cormorant_Garamond } from "next/font/google";
 
 import { RotatingProHero } from "@/components/RotatingProHero";
 
@@ -8,7 +8,7 @@ import { supabase } from "@/lib/supabase";
 import { absoluteUrl, artworkImageUrl } from "@/lib/utils";
 import type { Artwork } from "@/types/artwork";
 
-const cinzel = Cinzel({ subsets: ["latin"], weight: ["400", "500", "600"], display: "swap" });
+const serif = Cormorant_Garamond({ subsets: ["latin"], weight: ["500", "600"], display: "swap" });
 
 export const revalidate = 86400;
 
@@ -164,7 +164,7 @@ export default async function CommercialUsePage() {
           <p className="mb-5 text-[13px] uppercase tracking-[0.08em] text-[#a3a3a3]">
             Public domain · Commercial use
           </p>
-          <h1 className={`${cinzel.className} max-w-3xl text-4xl sm:text-5xl lg:text-6xl font-medium leading-[1.15] text-white`}>
+          <h1 className={`${serif.className} max-w-3xl text-5xl sm:text-6xl lg:text-7xl font-semibold leading-[1.05] text-white`}>
             Public Domain Images for Commercial Use
           </h1>
           <p className="mt-5 max-w-2xl text-base sm:text-lg leading-relaxed text-white/85">
@@ -245,7 +245,7 @@ export default async function CommercialUsePage() {
 
       <div className="mx-auto max-w-7xl px-5">
         <section className="py-10">
-          <h2 className={`${cinzel.className} mb-5 text-2xl sm:text-3xl font-medium text-[#1a1a1a]`}>What you can make with them</h2>
+          <h2 className={`${serif.className} mb-5 text-2xl sm:text-3xl font-medium text-[#1a1a1a]`}>What you can make with them</h2>
           <div className="grid max-w-5xl grid-cols-1 gap-x-12 gap-y-6 sm:grid-cols-2">
             {USE_CASES.map((useCase, i) => {
               const thumb = artworks[i % Math.max(artworks.length, 1)];
@@ -273,7 +273,7 @@ export default async function CommercialUsePage() {
         </section>
 
         <section className="py-6">
-          <h2 className={`${cinzel.className} mb-3 text-2xl sm:text-3xl font-medium text-[#1a1a1a]`}>
+          <h2 className={`${serif.className} mb-3 text-2xl sm:text-3xl font-medium text-[#1a1a1a]`}>
             Download famous paintings in high resolution
           </h2>
           <p className="max-w-3xl text-sm leading-relaxed text-[#4a4a4a]">
@@ -316,7 +316,7 @@ export default async function CommercialUsePage() {
         </section>
 
         <section className="py-8">
-          <h2 className={`${cinzel.className} mb-5 text-2xl sm:text-3xl font-medium text-[#1a1a1a]`}>
+          <h2 className={`${serif.className} mb-5 text-2xl sm:text-3xl font-medium text-[#1a1a1a]`}>
             Featured free commercial-use artworks
           </h2>
           <div className="pd-marquee -mx-5">
@@ -355,7 +355,7 @@ export default async function CommercialUsePage() {
         </section>
 
         <section className="py-6">
-          <h2 className={`${cinzel.className} mb-3 text-2xl sm:text-3xl font-medium text-[#1a1a1a]`}>Print-ready quality</h2>
+          <h2 className={`${serif.className} mb-3 text-2xl sm:text-3xl font-medium text-[#1a1a1a]`}>Print-ready quality</h2>
           <p className="max-w-3xl text-sm leading-relaxed text-[#4a4a4a]">
             Files are large enough for real printing — canvas prints, framed wall art, posters and
             print-on-demand products. Free downloads cover most uses; Fine Art Pro unlocks
@@ -365,7 +365,7 @@ export default async function CommercialUsePage() {
 
         <section className="grid grid-cols-1 gap-10 py-10 md:grid-cols-2 md:items-start">
           <div>
-            <h2 className={`${cinzel.className} mb-4 text-2xl sm:text-3xl font-medium text-[#1a1a1a]`}>
+            <h2 className={`${serif.className} mb-4 text-2xl sm:text-3xl font-medium text-[#1a1a1a]`}>
               Why these images are free
             </h2>
             <p className="text-sm leading-relaxed text-[#4a4a4a]">
@@ -389,7 +389,7 @@ export default async function CommercialUsePage() {
         </section>
 
         <section className="py-6">
-          <h2 className={`${cinzel.className} mb-4 text-2xl sm:text-3xl font-medium text-[#1a1a1a]`}>Popular categories</h2>
+          <h2 className={`${serif.className} mb-4 text-2xl sm:text-3xl font-medium text-[#1a1a1a]`}>Popular categories</h2>
           <div className="flex flex-wrap gap-2">
             {CATEGORY_LINKS.map((cat) => (
               <Link
@@ -415,7 +415,7 @@ export default async function CommercialUsePage() {
         </section>
 
         <section className="max-w-3xl py-6">
-          <h2 className={`${cinzel.className} mb-4 text-2xl sm:text-3xl font-medium text-[#1a1a1a]`}>Frequently asked questions</h2>
+          <h2 className={`${serif.className} mb-4 text-2xl sm:text-3xl font-medium text-[#1a1a1a]`}>Frequently asked questions</h2>
           <div className="space-y-3">
             {FAQ.map((item) => (
               <details key={item.q} className="rounded-lg border border-[#e8e6e1] bg-white shadow-[0_2px_8px_rgba(0,0,0,0.04)] p-4">

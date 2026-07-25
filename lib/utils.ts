@@ -351,7 +351,7 @@ type ArtworkSpecSource = {
   std_bytes?: number | null;
 };
 
-/** "1400 × 1047px · JPG · 0.4 MB" for the free/standard download (w1400 rendition,
+/** "1400 x 1047px" — dimensions of the free/standard download (w1400 rendition,
  *  never enlarged past the original). Null until the dims backfill covers the row. */
 export function artworkStandardSpecs(artwork: ArtworkSpecSource): string | null {
   const { img_width: w, img_height: h } = artwork;
@@ -360,21 +360,32 @@ export function artworkStandardSpecs(artwork: ArtworkSpecSource): string | null 
   }
   const stdW = Math.min(1400, w);
   const stdH = Math.round((h * stdW) / w);
-  const size = formatFileSize(artwork.std_bytes);
-  return `${stdW} × ${stdH}px${size ? ` · ${size}` : ""}`;
+  return `${stdW} x ${stdH}px`;
 }
 
-/** "6407 × 4789px · JPG · 19.4 MB" for the Pro/original download. Returns null
- *  for small originals (< 1800px wide) — showing near-identical dimensions next
- *  to "Unlock the 4K original" would undermine the pitch, so those keep the
- *  generic label. */
+/** File size for the standard download, e.g. "0.4 MB". */
+export function artworkStandardSize(artwork: ArtworkSpecSource): string | null {
+  return formatFileSize(artwork.std_bytes);
+}
+
+/** "6407 x 4789px" — dimensions of the Pro/original download. Null for small
+ *  originals (< 1800px wide): near-identical dimensions next to "Unlock the 4K
+ *  original" would undermine the pitch, so those keep the generic label. */
 export function artworkMaxSpecs(artwork: ArtworkSpecSource): string | null {
   const { img_width: w, img_height: h } = artwork;
   if (!w || !h || w < 1800) {
     return null;
   }
-  const size = formatFileSize(artwork.orig_bytes);
-  return `${w} × ${h}px · JPG${size ? ` · ${size}` : ""}`;
+  return `${w} x ${h}px`;
+}
+
+/** File size for the Pro/original download, e.g. "19.4 MB". Null for small originals. */
+export function artworkMaxSize(artwork: ArtworkSpecSource): string | null {
+  const { img_width: w } = artwork;
+  if (!w || w < 1800) {
+    return null;
+  }
+  return formatFileSize(artwork.orig_bytes);
 }
 
 export function generateAltText(artwork: {

@@ -15,8 +15,10 @@ type ProDownloadRowProps = {
   filename?: string;
   /** Render with the glass design system (used on the artwork page pilot). */
   glass?: boolean;
-  /** Per-artwork max-file specs line, e.g. "6407 × 4789px · JPG · 19.4 MB". */
-  specs?: string | null;
+  /** Per-artwork Pro-download dimensions, e.g. "6407 x 4789px". */
+  maxDims?: string | null;
+  /** Per-artwork Pro-download file size, e.g. "19.4 MB". */
+  maxSize?: string | null;
 };
 
 /**
@@ -24,7 +26,7 @@ type ProDownloadRowProps = {
  * upsell pitch for everyone else. Fires paywall analytics so conversion can be
  * measured (paywall_view on display, paywall_cta_click on click).
  */
-export function ProDownloadRow({ locale, isPro, downloadHref, filename, glass = false, specs }: ProDownloadRowProps) {
+export function ProDownloadRow({ locale, isPro, downloadHref, filename, glass = false, maxDims, maxSize }: ProDownloadRowProps) {
   const t = getT(locale);
   // Route the real file through the same-origin /api/download proxy so it saves
   // instead of opening (a cross-origin <a download> is ignored by browsers).
@@ -46,8 +48,10 @@ export function ProDownloadRow({ locale, isPro, downloadHref, filename, glass = 
         }`}
       >
         <div>
-          <p className="text-sm font-medium text-[#1a1a1a]">{t.downloadMaxSize}</p>
-          <p className="text-xs text-[#999]">{specs ?? t.downloadMaxFormat}</p>
+          <p className="text-sm font-medium text-[#1a1a1a]">
+            {t.downloadMaxSize}{maxDims ? `, ${maxDims}` : ""}
+          </p>
+          <p className="text-xs text-[#999]">{maxSize ? `JPG, Size: ${maxSize}` : t.downloadMaxFormat}</p>
         </div>
         <a
           href={proDownloadHref}
@@ -75,7 +79,7 @@ export function ProDownloadRow({ locale, isPro, downloadHref, filename, glass = 
     >
       <div className="min-w-0">
         <p className="text-sm font-semibold text-[#1a1a1a]">{t.proDownloadTitle}</p>
-        {specs ? <p className="text-xs text-[#1a1a1a]">{specs}</p> : null}
+        {maxDims ? <p className="text-xs text-[#1a1a1a]">{maxDims}{maxSize ? ` · JPG, ${maxSize}` : ""}</p> : null}
         <p className="text-xs text-[#6b6b6b]">{t.proDownloadPerks}</p>
       </div>
       <span
