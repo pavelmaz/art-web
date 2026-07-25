@@ -465,7 +465,7 @@ export default async function ArtworkDetailPagePt({ params }: ArtworkPageProps) 
               <div className="space-y-3">
                 <div className="flex items-center justify-between gap-4 rounded-lg glass-inset p-3">
                   <div>
-                    <p className="text-sm font-medium text-[#1a1a1a]">
+                    <p className="text-sm font-medium text-[#1a1a1a] whitespace-nowrap">
                       Standard{artworkStandardSpecs(artwork) ? `, ${artworkStandardSpecs(artwork)}` : ""}
                     </p>
                     <p className="text-xs text-[#999]">

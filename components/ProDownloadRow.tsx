@@ -48,8 +48,8 @@ export function ProDownloadRow({ locale, isPro, downloadHref, filename, glass = 
         }`}
       >
         <div>
-          <p className="text-sm font-medium text-[#1a1a1a]">
-            4K Original{maxDims ? `, ${maxDims}` : ""}
+          <p className="text-sm font-medium text-[#1a1a1a] whitespace-nowrap">
+            Max Size{maxDims ? `, ${maxDims}` : ""}
           </p>
           <p className="text-xs text-[#999]">{maxSize ? `JPG, Size: ${maxSize}` : t.downloadMaxFormat}</p>
         </div>
