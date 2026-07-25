@@ -170,15 +170,15 @@ export default async function CommercialUsePage() {
             ))}
           </div>
           <form action="/search" method="get" className="mt-8 max-w-xl">
-            <div className="flex items-center rounded-full bg-white/95 px-5 py-3">
+            <div className="flex items-center rounded-full border border-white/25 bg-white/10 px-5 py-3 backdrop-blur-md">
               <input
                 type="text"
                 name="q"
                 placeholder="Search 500,000+ artworks by artist or keyword"
-                className="w-full bg-transparent text-[15px] text-[#1a1a1a] placeholder:text-[#6b6b6b] focus:outline-none"
+                className="w-full bg-transparent text-[15px] text-white placeholder:text-white/55 focus:outline-none"
                 aria-label="Search artworks by artist or keyword"
               />
-              <button type="submit" className="pl-2 text-2xl text-[#1a1a1a]" aria-label="Search">
+              <button type="submit" className="pl-2 text-2xl text-white" aria-label="Search">
                 ⌕
               </button>
             </div>

@@ -170,16 +170,16 @@ export default async function HomePage() {
               500,000+ public domain paintings, prints and illustrations from the world&apos;s
               greatest museums — free for personal and commercial use.
             </p>
-            <form action="/search" method="get" className="mt-14 max-w-3xl md:mt-16">
-              <div className="flex items-center border-b border-white">
+            <form action="/search" method="get" className="mt-8 max-w-xl">
+              <div className="flex items-center rounded-full border border-white/25 bg-white/10 px-5 py-3 backdrop-blur-md">
                 <input
                   type="text"
                   name="q"
                   placeholder="Search by artwork title or artist"
-                  className="w-full bg-transparent py-2 text-[15px] leading-normal text-white placeholder:text-white focus:outline-none"
+                  className="w-full bg-transparent text-[15px] text-white placeholder:text-white/55 focus:outline-none"
                   aria-label="Search by artwork title or artist"
                 />
-                <button type="submit" className="px-2 text-3xl text-white hover:text-white" aria-label="Search">
+                <button type="submit" className="pl-2 text-2xl text-white" aria-label="Search">
                   ⌕
                 </button>
               </div>
