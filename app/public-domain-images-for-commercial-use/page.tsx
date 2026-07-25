@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 
+import { RotatingProHero } from "@/components/RotatingProHero";
+
 import { supabase } from "@/lib/supabase";
 import { absoluteUrl, artworkImageUrl } from "@/lib/utils";
 import type { Artwork } from "@/types/artwork";
@@ -143,21 +145,11 @@ export default async function CommercialUsePage() {
 
       <section className="relative w-full bg-[#26215C] py-20">
         <div
-          className="absolute inset-0 grid grid-cols-6 opacity-20"
-          aria-hidden
-        >
-          <div className="bg-[#7F77DD]" />
-          <div className="bg-[#534AB7]" />
-          <div className="bg-[#3C3489]" />
-          <div className="bg-[#0F6E56]" />
-          <div className="bg-[#993C1D]" />
-          <div className="bg-[#854F0B]" />
-        </div>
-        <div
           className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-b from-transparent to-[#f6f4ee]"
           aria-hidden
         />
-        <div className="relative z-10 mx-auto max-w-7xl px-5 text-left">
+        <div className="relative z-10 mx-auto flex max-w-7xl items-center gap-12 px-5">
+          <div className="min-w-0 flex-1 text-left">
           <p className="mb-5 text-[13px] uppercase tracking-[0.08em] text-[#CECBF6]">
             Public domain · Commercial use
           </p>
@@ -204,6 +196,12 @@ export default async function CommercialUsePage() {
             {" · "}
             <Link href="/styles/ukiyo-e" className="underline hover:text-white">japanese woodblock</Link>
           </p>
+          </div>
+          <div className="hidden w-[340px] shrink-0 lg:block xl:w-[380px]">
+            <div className="overflow-hidden rounded-2xl shadow-[0_20px_60px_rgba(0,0,0,0.45)]">
+              <RotatingProHero alt="Famous public domain paintings, free for commercial use" />
+            </div>
+          </div>
         </div>
       </section>
 
