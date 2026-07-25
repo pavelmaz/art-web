@@ -170,6 +170,17 @@ export default async function HomePage() {
               500,000+ public domain paintings, prints and illustrations from the world&apos;s
               greatest museums — free for personal and commercial use.
             </p>
+            <div className="mt-6 flex flex-wrap items-center gap-2">
+              {["Public Domain", "Commercial Use", "No Attribution", "High Resolution"].map((badge) => (
+                <span
+                  key={badge}
+                  className="inline-flex items-center gap-1 whitespace-nowrap rounded-full bg-white/15 px-3 py-1 text-xs text-white backdrop-blur"
+                >
+                  <span aria-hidden>✓</span>
+                  {badge}
+                </span>
+              ))}
+            </div>
             <form action="/search" method="get" className="mt-8 max-w-xl">
               <div className="flex items-center rounded-full border border-white/25 bg-white/10 px-5 py-3 backdrop-blur-md">
                 <input
@@ -184,6 +195,16 @@ export default async function HomePage() {
                 </button>
               </div>
             </form>
+            <p className="mt-4 text-sm text-white/80">
+              Popular:{" "}
+              <Link href="/artists/vincent-van-gogh" className="underline hover:text-white">van gogh</Link>
+              {" · "}
+              <Link href="/artworks/water-lilies-claude-monet" className="underline hover:text-white">monet water lilies</Link>
+              {" · "}
+              <Link href="/genres/botanical" className="underline hover:text-white">botanical prints</Link>
+              {" · "}
+              <Link href="/styles/ukiyo-e" className="underline hover:text-white">japanese woodblock</Link>
+            </p>
           </div>
           <div className="hidden w-[340px] shrink-0 lg:block xl:w-[380px]">
             <div className="overflow-hidden rounded-2xl shadow-[0_20px_60px_rgba(0,0,0,0.45)]">
