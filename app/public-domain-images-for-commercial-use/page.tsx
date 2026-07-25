@@ -46,6 +46,15 @@ const USE_CASES = [
   { title: "Web & app design", text: "Hero images, backgrounds and UI accents with timeless style." },
 ];
 
+/** Museum logos (white PNG, sourced from Wikimedia Commons) → their hub pages. */
+const MUSEUM_LOGOS = [
+  { file: "rijksmuseum.png", name: "Rijksmuseum", slug: "rijksmuseum" },
+  { file: "national-gallery.png", name: "The National Gallery", slug: "national-gallery-london" },
+  { file: "british-museum.png", name: "The British Museum", slug: "british-museum" },
+  { file: "uffizi.png", name: "Uffizi Gallery", slug: "uffizi-gallery" },
+  { file: "art-institute-chicago.png", name: "Art Institute of Chicago", slug: "art-institute-of-chicago" },
+];
+
 const CATEGORY_LINKS = [
   { label: "Botanical prints", href: "/genres/botanical" },
   { label: "Vintage posters", href: "/styles/art-nouveau" },
@@ -196,6 +205,33 @@ export default async function CommercialUsePage() {
           <div className="hidden w-[340px] shrink-0 lg:block xl:w-[380px]">
             <div className="overflow-hidden rounded-2xl shadow-[0_20px_60px_rgba(0,0,0,0.45)]">
               <RotatingProHero alt="Famous public domain paintings, free for commercial use" />
+            </div>
+          </div>
+        </div>
+
+        <div className="relative z-10 mx-auto mt-14 max-w-7xl px-5">
+          <p className="mb-4 text-[11px] uppercase tracking-[0.1em] text-white/40">
+            Sourced from the world&apos;s great museums
+          </p>
+          <div className="pd-marquee">
+            <div className="pd-marquee-track items-center">
+              {[...MUSEUM_LOGOS, ...MUSEUM_LOGOS].map((m, i) => (
+                <Link
+                  key={`${m.slug}-${i}`}
+                  href={`/museums/${m.slug}`}
+                  className="flex h-8 shrink-0 items-center opacity-55 transition-opacity hover:opacity-90"
+                  aria-label={m.name}
+                >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={`/images/museum-logos/${m.file}`}
+                    alt={m.name}
+                    className="h-7 w-auto"
+                    loading="lazy"
+                    decoding="async"
+                  />
+                </Link>
+              ))}
             </div>
           </div>
         </div>
