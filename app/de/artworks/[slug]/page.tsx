@@ -508,16 +508,16 @@ export default async function ArtworkDetailPageDe({ params }: ArtworkPageProps) 
               <div className="my-4 border-t border-[#e8e6e1]" />
 
               <div className="space-y-3">
-                <div className="rounded-lg glass-inset p-3">
-                  <p className="text-sm font-medium text-[#1a1a1a]">
-                    Standard{artworkStandardSpecs(artwork) ? `, ${artworkStandardSpecs(artwork)}` : ""}
-                  </p>
-                  <p className="text-xs text-[#999]">
-                    {artworkStandardSize(artwork) ? `JPG, Size: ${artworkStandardSize(artwork)}` : "JPG"}
-                  </p>
-                  <div className="mt-2.5">
-                    <DownloadButton imageUrl={imageUrl} filename={artwork.slug} label={t.downloadStandard} variant="glass" fullWidth />
+                <div className="flex items-center justify-between gap-2 rounded-lg glass-inset p-3">
+                  <div className="min-w-0">
+                    <p className="whitespace-nowrap text-xs font-medium text-[#1a1a1a]">
+                      Standard{artworkStandardSpecs(artwork) ? `, ${artworkStandardSpecs(artwork)}` : ""}
+                    </p>
+                    <p className="text-[11px] text-[#999]">
+                      {artworkStandardSize(artwork) ? `JPG, Size: ${artworkStandardSize(artwork)}` : "JPG"}
+                    </p>
                   </div>
+                  <DownloadButton imageUrl={imageUrl} filename={artwork.slug} label={t.downloadStandard} variant="glass" />
                 </div>
 
                 <ProDownloadRow locale="de" isPro={isPro} downloadHref={maxDownloadHref} filename={artwork.slug} glass maxDims={artworkMaxSpecs(artwork)} maxSize={artworkMaxSize(artwork)} />
