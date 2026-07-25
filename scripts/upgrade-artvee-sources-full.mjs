@@ -154,17 +154,25 @@ async function upgrade(row, info) {
 let scanned = 0, upgraded = 0, noMatch = 0, hashRej = 0, tooSmall = 0, errors = 0;
 const startedAt = Date.now();
 
-// Pull all remaining candidates (img_width<1800 drops already-upgraded rows), grouped by artist.
-const { data: rows, error } = await supabase
-  .from("artworks")
-  .select("id, slug, title, artist_display, image_id, img_width, img_height, score")
-  .like("url", "%artvee.com%")
-  .lt("img_width", 1800)
-  .not("img_width", "is", null)
-  .not("artist_display", "is", null)
-  .order("score", { ascending: false })
-  .limit(40000);
-if (error) throw error;
+// Pull all remaining candidates (img_width<1800 drops already-upgraded rows), grouped
+// by artist. PostgREST caps a single response at ~1000 rows, so page with .range().
+const rows = [];
+for (let from = 0; ; from += 1000) {
+  const { data, error } = await supabase
+    .from("artworks")
+    .select("id, slug, title, artist_display, image_id, img_width, img_height, score")
+    .like("url", "%artvee.com%")
+    .lt("img_width", 1800)
+    .not("img_width", "is", null)
+    .not("artist_display", "is", null)
+    .order("score", { ascending: false })
+    .order("id", { ascending: true })
+    .range(from, from + 999);
+  if (error) throw error;
+  if (!data?.length) break;
+  rows.push(...data);
+  if (data.length < 1000) break;
+}
 console.log(`${rows.length} candidate artworks to consider (highest score first)`);
 
 const byArtist = new Map();
