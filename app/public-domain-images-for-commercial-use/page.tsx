@@ -183,16 +183,23 @@ export default async function CommercialUsePage() {
               </button>
             </div>
           </form>
-          <p className="mt-4 text-sm text-white/80">
-            Popular:{" "}
-            <Link href="/artists/vincent-van-gogh" className="underline hover:text-white">van gogh</Link>
-            {" · "}
-            <Link href="/artworks/water-lilies-claude-monet" className="underline hover:text-white">monet water lilies</Link>
-            {" · "}
-            <Link href="/genres/botanical" className="underline hover:text-white">botanical prints</Link>
-            {" · "}
-            <Link href="/styles/ukiyo-e" className="underline hover:text-white">japanese woodblock</Link>
-          </p>
+          <div className="mt-4 flex flex-wrap items-center gap-2">
+            <span className="text-sm text-white/70">Popular:</span>
+            {[
+              { href: "/artists/vincent-van-gogh", label: "van gogh" },
+              { href: "/artworks/water-lilies-claude-monet", label: "monet water lilies" },
+              { href: "/genres/botanical", label: "botanical prints" },
+              { href: "/styles/ukiyo-e", label: "japanese woodblock" },
+            ].map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                className="inline-flex items-center rounded-full border border-white/25 bg-white/10 px-3 py-1 text-sm text-white/90 backdrop-blur-md transition hover:border-white/40 hover:bg-white/20 hover:text-white"
+              >
+                {item.label}
+              </Link>
+            ))}
+          </div>
           </div>
           <div className="hidden w-[340px] shrink-0 lg:block xl:w-[380px]">
             <div className="overflow-hidden rounded-2xl shadow-[0_20px_60px_rgba(0,0,0,0.45)]">
