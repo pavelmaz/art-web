@@ -4,6 +4,8 @@ type DownloadButtonProps = {
   filename?: string;
   label?: string;
   variant?: "solid" | "glass";
+  /** Render as a full-width block button (stacked below specs). */
+  fullWidth?: boolean;
 };
 
 /**
@@ -12,15 +14,16 @@ type DownloadButtonProps = {
  * to the device (desktop + mobile) instead of opening — a cross-origin `<a download>`
  * to the CDN is ignored by browsers.
  */
-export function DownloadButton({ imageUrl, filename, label = "Download", variant = "solid" }: DownloadButtonProps) {
+export function DownloadButton({ imageUrl, filename, label = "Download", variant = "solid", fullWidth = false }: DownloadButtonProps) {
   const params = new URLSearchParams({ src: imageUrl });
   if (filename?.trim()) params.set("name", filename.trim());
   const href = imageUrl ? `/api/download?${params.toString()}` : "#";
 
+  const display = fullWidth ? "flex w-full" : "inline-flex";
   const className =
     variant === "glass"
-      ? "glass-primary inline-flex items-center justify-center rounded-md px-4 py-2 text-sm font-medium"
-      : "inline-flex items-center justify-center rounded-md bg-[#4CAF50] px-4 py-2 text-sm font-medium text-white hover:bg-[#43A047]";
+      ? `glass-primary ${display} items-center justify-center rounded-md px-4 py-2 text-sm font-medium`
+      : `${display} items-center justify-center rounded-md bg-[#4CAF50] px-4 py-2 text-sm font-medium text-white hover:bg-[#43A047]`;
 
   return (
     <a href={href} className={className}>
