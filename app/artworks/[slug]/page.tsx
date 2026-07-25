@@ -463,7 +463,7 @@ export default async function ArtworkDetailPage({ params }: ArtworkPageProps) {
         <BreadcrumbJsonLd artwork={artwork} />
 
         <div className="flex flex-col gap-8 lg:flex-row lg:items-start">
-          <aside className="order-2 w-full lg:w-80">
+          <aside className="order-2 w-full lg:w-96">
             <div className="glass-surface space-y-4 rounded-2xl p-5 lg:sticky lg:top-6">
               <div>
                 <h1 className="mb-2 text-lg font-semibold text-[#1a1a1a]">{artwork.title}</h1>
@@ -482,10 +482,10 @@ export default async function ArtworkDetailPage({ params }: ArtworkPageProps) {
               <div className="space-y-3">
                 <div className="flex items-center justify-between gap-2 rounded-lg glass-inset p-3">
                   <div className="min-w-0">
-                    <p className="whitespace-nowrap text-xs font-medium text-[#1a1a1a]">
+                    <p className="truncate text-[13px] font-medium text-[#1a1a1a]">
                       Standard{artworkStandardSpecs(artwork) ? `, ${artworkStandardSpecs(artwork)}` : ""}
                     </p>
-                    <p className="text-[11px] text-[#999]">
+                    <p className="text-xs text-[#999]">
                       {artworkStandardSize(artwork) ? `JPG, Size: ${artworkStandardSize(artwork)}` : "JPG"}
                     </p>
                   </div>

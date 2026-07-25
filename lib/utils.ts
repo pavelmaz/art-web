@@ -368,21 +368,22 @@ export function artworkStandardSize(artwork: ArtworkSpecSource): string | null {
   return formatFileSize(artwork.std_bytes);
 }
 
-/** "6407 x 4789px" — dimensions of the Pro/original download. Null for small
- *  originals (< 1800px wide): near-identical dimensions next to "Unlock the 4K
- *  original" would undermine the pitch, so those keep the generic label. */
+/** "6407 x 4789px" — dimensions of the Pro/original download. Null only when the
+ *  original is no bigger than the 1400px Standard (w <= 1400), where "Max Size"
+ *  would just repeat the free download; otherwise always show the real numbers. */
 export function artworkMaxSpecs(artwork: ArtworkSpecSource): string | null {
   const { img_width: w, img_height: h } = artwork;
-  if (!w || !h || w < 1800) {
+  if (!w || !h || w <= 1400) {
     return null;
   }
   return `${w} x ${h}px`;
 }
 
-/** File size for the Pro/original download, e.g. "19.4 MB". Null for small originals. */
+/** File size for the Pro/original download, e.g. "19.4 MB". Null when the original
+ *  is no bigger than the Standard, or when the byte size is unknown. */
 export function artworkMaxSize(artwork: ArtworkSpecSource): string | null {
   const { img_width: w } = artwork;
-  if (!w || w < 1800) {
+  if (!w || w <= 1400) {
     return null;
   }
   return formatFileSize(artwork.orig_bytes);

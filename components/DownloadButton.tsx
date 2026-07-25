@@ -19,8 +19,8 @@ export function DownloadButton({ imageUrl, filename, label = "Download", variant
 
   const className =
     variant === "glass"
-      ? "glass-primary inline-flex shrink-0 items-center justify-center rounded-md px-3 py-2 text-xs font-medium"
-      : "inline-flex shrink-0 items-center justify-center rounded-md bg-[#4CAF50] px-3 py-2 text-xs font-medium text-white hover:bg-[#43A047]";
+      ? "glass-primary inline-flex shrink-0 items-center justify-center rounded-md px-3 py-2 text-[13px] font-medium"
+      : "inline-flex shrink-0 items-center justify-center rounded-md bg-[#4CAF50] px-3 py-2 text-[13px] font-medium text-white hover:bg-[#43A047]";
 
   return (
     <a href={href} className={className}>

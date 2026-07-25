@@ -44,15 +44,15 @@ export function ProDownloadRow({ locale, isPro, downloadHref, filename, glass = 
     return (
       <div className={`flex items-center justify-between gap-2 rounded-lg p-3 ${glass ? "glass-inset" : "bg-[#eceff3]"}`}>
         <div className="min-w-0">
-          <p className="whitespace-nowrap text-xs font-medium text-[#1a1a1a]">Max Size{maxDims ? `, ${maxDims}` : ""}</p>
-          <p className="text-[11px] text-[#999]">{maxSize ? `JPG, Size: ${maxSize}` : t.downloadMaxFormat}</p>
+          <p className="truncate text-[13px] font-medium text-[#1a1a1a]">Max Size{maxDims ? `, ${maxDims}` : ""}</p>
+          <p className="text-xs text-[#999]">{maxSize ? `JPG, Size: ${maxSize}` : t.downloadMaxFormat}</p>
         </div>
         <a
           href={proDownloadHref}
           className={
             glass
-              ? "glass-primary inline-flex shrink-0 items-center justify-center rounded-md px-3 py-2 text-xs font-medium"
-              : "inline-flex shrink-0 items-center justify-center rounded-md bg-[#9e9e9e] px-3 py-2 text-xs font-medium text-white transition-colors hover:bg-[#8a8a8a]"
+              ? "glass-primary inline-flex shrink-0 items-center justify-center rounded-md px-3 py-2 text-[13px] font-medium"
+              : "inline-flex shrink-0 items-center justify-center rounded-md bg-[#9e9e9e] px-3 py-2 text-[13px] font-medium text-white transition-colors hover:bg-[#8a8a8a]"
           }
         >
           {t.downloadStandard}
@@ -64,13 +64,13 @@ export function ProDownloadRow({ locale, isPro, downloadHref, filename, glass = 
   return (
     <div className={`flex items-center justify-between gap-2 rounded-lg p-3 ${glass ? "glass-inset" : "border-2 border-[#1a1a1a] bg-white"}`}>
       <div className="min-w-0">
-        <p className="whitespace-nowrap text-xs font-medium text-[#1a1a1a]">Max Size{maxDims ? `, ${maxDims}` : ""}</p>
-        <p className="text-[11px] text-[#999]">{maxSize ? `JPG, Size: ${maxSize}` : t.downloadMaxFormat}</p>
+        <p className="truncate text-[13px] font-medium text-[#1a1a1a]">Max Size{maxDims ? `, ${maxDims}` : ""}</p>
+        <p className="text-xs text-[#999]">{maxSize ? `JPG, Size: ${maxSize}` : t.downloadMaxFormat}</p>
       </div>
       <Link
         href={fineArtProPath(locale)}
         onClick={() => track("paywall_cta_click", { source: "download_4k", locale })}
-        className="inline-flex shrink-0 items-center gap-1 rounded-md bg-gradient-to-br from-[#4CAF50] to-[#1e9e57] px-3 py-2 text-xs font-medium text-white shadow-[0_6px_18px_rgba(76,175,80,0.4)] transition hover:brightness-110"
+        className="inline-flex shrink-0 items-center gap-1 rounded-md bg-gradient-to-br from-[#4CAF50] to-[#1e9e57] px-3 py-2 text-[13px] font-medium text-white shadow-[0_6px_18px_rgba(76,175,80,0.4)] transition hover:brightness-110"
       >
         {t.insightsLimitCta}
         <span aria-hidden="true">→</span>
