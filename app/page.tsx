@@ -181,17 +181,6 @@ export default async function HomePage() {
               500,000+ public domain paintings, prints and illustrations from the world&apos;s
               greatest museums — free for personal and commercial use.
             </p>
-            <div className="mt-6 flex flex-wrap items-center gap-2">
-              {["Public Domain", "Commercial Use", "No Attribution", "High Resolution"].map((badge) => (
-                <span
-                  key={badge}
-                  className="inline-flex items-center gap-1 whitespace-nowrap rounded-full bg-white/15 px-3 py-1 text-xs text-white backdrop-blur"
-                >
-                  <span aria-hidden>✓</span>
-                  {badge}
-                </span>
-              ))}
-            </div>
             <form action="/search" method="get" className="mt-8 max-w-xl">
               <div className="flex items-center rounded-full border border-white/25 bg-white/10 px-5 py-3 backdrop-blur-md">
                 <input
