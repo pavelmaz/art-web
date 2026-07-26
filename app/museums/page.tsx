@@ -46,6 +46,7 @@ export default async function MuseumsPage({ searchParams }: MuseumsPageProps) {
       imageId: row.image_id,
       url: row.url,
       logoSrc: museumLogoSrc(slug),
+      dark: true,
     };
   });
 
