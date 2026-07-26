@@ -144,7 +144,18 @@ export default async function CommercialUsePage() {
     <div>
       <FaqJsonLd />
 
-      <section className="relative w-full bg-[#1a1a1a] py-20">
+      <section className="relative w-full overflow-hidden bg-[#080b16] py-20">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src="/images/hero-caspar.jpg"
+          alt=""
+          aria-hidden
+          className="pointer-events-none absolute inset-0 h-full w-full object-cover"
+        />
+        <div
+          className="pointer-events-none absolute inset-0 bg-gradient-to-r from-[#080b16]/90 via-[#080b16]/65 to-[#080b16]/40"
+          aria-hidden
+        />
         <div className="relative z-10 mx-auto flex max-w-7xl items-center gap-12 px-5">
           <div className="min-w-0 flex-1 text-left">
           <p className="mb-5 text-[13px] uppercase tracking-[0.08em] text-[#a3a3a3]">
