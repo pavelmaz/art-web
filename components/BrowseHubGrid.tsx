@@ -56,7 +56,7 @@ export function BrowseHubGrid({ items }: { items: BrowseHubItem[] }) {
                         loading="lazy"
                       />
                     ) : (
-                      <span className="text-[15px] font-semibold leading-snug tracking-wide text-white/95">
+                      <span className="text-[12px] font-medium uppercase leading-relaxed tracking-[0.14em] text-white/90">
                         {item.name}
                       </span>
                     )}
