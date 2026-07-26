@@ -9,6 +9,9 @@ export type BrowseHubItem = {
   count: number;
   imageId: string | null;
   url: string | null;
+  /** White logo path (e.g. museums) — when set, the card shows the logo over a
+   *  darkened version of the artwork instead of the plain name label. */
+  logoSrc?: string | null;
 };
 
 export function BrowseHubGrid({ items }: { items: BrowseHubItem[] }) {
@@ -36,13 +39,36 @@ export function BrowseHubGrid({ items }: { items: BrowseHubItem[] }) {
                 </div>
               )}
 
-              <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_top,rgba(0,0,0,0.75)_0%,rgba(0,0,0,0.1)_60%)]" />
-              <div className="absolute bottom-0 left-0 p-3">
-                <p className="text-sm font-semibold text-white">{item.name}</p>
-                <p className="mt-0.5 text-xs text-white/70">
-                  {item.count} {item.count === 1 ? "artwork" : "artworks"}
-                </p>
-              </div>
+              {item.logoSrc ? (
+                <>
+                  {/* darker layer so the white logo reads over any artwork */}
+                  <div className="pointer-events-none absolute inset-0 bg-[#0f1420]/72 transition-colors duration-300 group-hover:bg-[#0f1420]/60" />
+                  <div className="pointer-events-none absolute inset-0 flex items-center justify-center p-6">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={item.logoSrc}
+                      alt={item.name}
+                      className="max-h-12 w-auto max-w-[80%] object-contain opacity-95"
+                      loading="lazy"
+                    />
+                  </div>
+                  <div className="pointer-events-none absolute bottom-0 left-0 p-3">
+                    <p className="text-xs text-white/70">
+                      {item.count} {item.count === 1 ? "artwork" : "artworks"}
+                    </p>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_top,rgba(0,0,0,0.75)_0%,rgba(0,0,0,0.1)_60%)]" />
+                  <div className="absolute bottom-0 left-0 p-3">
+                    <p className="text-sm font-semibold text-white">{item.name}</p>
+                    <p className="mt-0.5 text-xs text-white/70">
+                      {item.count} {item.count === 1 ? "artwork" : "artworks"}
+                    </p>
+                  </div>
+                </>
+              )}
             </div>
           </Link>
         );

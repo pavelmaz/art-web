@@ -5,6 +5,7 @@ import { Pagination } from "@/components/Pagination";
 import { getCachedMuseumHub } from "@/lib/cached-hub-data";
 import { getPaginationParams, getTotalPages } from "@/lib/pagination";
 import { hubListPageMetadata } from "@/lib/list-page-metadata";
+import { museumLogoSrc } from "@/lib/museum-logos";
 import { slugify } from "@/lib/utils";
 
 export const revalidate = 86400;
@@ -36,13 +37,17 @@ export default async function MuseumsPage({ searchParams }: MuseumsPageProps) {
 
   const aggregated = await getCachedMuseumHub();
 
-  const items = aggregated.map((row) => ({
-    name: row.display,
-    href: `/museums/${slugify(row.display)}`,
-    count: row.count,
-    imageId: row.image_id,
-    url: row.url,
-  }));
+  const items = aggregated.map((row) => {
+    const slug = slugify(row.display);
+    return {
+      name: row.display,
+      href: `/museums/${slug}`,
+      count: row.count,
+      imageId: row.image_id,
+      url: row.url,
+      logoSrc: museumLogoSrc(slug),
+    };
+  });
 
   const totalPages = Math.max(1, getTotalPages(items.length));
   const paginated = items.slice(from, to + 1);

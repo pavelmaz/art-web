@@ -1,16 +1,6 @@
 import Link from "next/link";
 
-/** Museum logos (white PNG, sourced from Wikimedia Commons) → their hub pages. */
-const MUSEUM_LOGOS = [
-  { file: "rijksmuseum.png", name: "Rijksmuseum", slug: "rijksmuseum" },
-  { file: "prado.png", name: "Museo del Prado", slug: "museo-del-prado" },
-  { file: "national-gallery.png", name: "The National Gallery", slug: "national-gallery-london" },
-  { file: "british-museum.png", name: "The British Museum", slug: "british-museum" },
-  { file: "mauritshuis.png", name: "Mauritshuis", slug: "mauritshuis" },
-  { file: "uffizi.png", name: "Uffizi Gallery", slug: "uffizi-gallery" },
-  { file: "the-met.png", name: "The Metropolitan Museum of Art", slug: "metropolitan-museum-of-art" },
-  { file: "art-institute-chicago.png", name: "Art Institute of Chicago", slug: "art-institute-of-chicago" },
-];
+import { MUSEUM_LOGOS } from "@/lib/museum-logos";
 
 /** Continuously scrolling row of museum wordmarks, each linking to its hub.
  *  Starts mid-strip so all logos are visible on load; pauses on hover. */
