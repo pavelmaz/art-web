@@ -67,8 +67,11 @@ export default function Header({ browseGenres = [] }: HeaderProps) {
   const prefix = locale === "en" ? "" : `/${locale}`;
   const searchPath = localePath(locale, "search");
   const segments = getSegments(locale);
+  // Home pages AND the commercial landing use the transparent header that sits
+  // over their dark hero (white text/logo, no header search — the hero has one).
   const isHome =
     pathname === "/" ||
+    pathname === "/public-domain-images-for-commercial-use" ||
     HREFLANG_LOCALES.some((loc) => {
       if (loc === "en") return false;
       const p = LOCALE_ROUTE_CONFIG[loc].prefix;
