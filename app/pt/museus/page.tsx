@@ -6,6 +6,7 @@ import { getCachedMuseumHub } from "@/lib/cached-hub-data";
 import { getPaginationParams, getTotalPages } from "@/lib/pagination";
 import { hubListPageMetadata } from "@/lib/list-page-metadata";
 import { absoluteUrl, slugify } from "@/lib/utils";
+import { museumLogoSrc } from "@/lib/museum-logos";
 
 export const revalidate = 86400;
 
@@ -36,13 +37,18 @@ export default async function MuseumsPage({ searchParams }: MuseumsPageProps) {
 
   const aggregated = await getCachedMuseumHub();
 
-  const items = aggregated.map((row) => ({
-    name: row.display,
-    href: `/pt/museus/${slugify(row.display)}`,
-    count: row.count,
-    imageId: row.image_id,
-    url: row.url,
-  }));
+  const items = aggregated.map((row) => {
+    const slug = slugify(row.display);
+    return {
+      name: row.display,
+      href: `/pt/museus/${slug}`,
+      count: row.count,
+      imageId: row.image_id,
+      url: row.url,
+      logoSrc: museumLogoSrc(slug),
+      dark: true,
+    };
+  });
 
   const totalPages = Math.max(1, getTotalPages(items.length));
   const paginated = items.slice(from, to + 1);
