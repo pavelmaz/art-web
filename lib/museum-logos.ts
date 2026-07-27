@@ -10,6 +10,14 @@ export const MUSEUM_LOGOS: MuseumLogo[] = [
   { file: "uffizi.png", name: "Uffizi Gallery", slug: "uffizi-gallery" },
   { file: "the-met.png", name: "The Metropolitan Museum of Art", slug: "metropolitan-museum-of-art" },
   { file: "art-institute-chicago.png", name: "Art Institute of Chicago", slug: "art-institute-of-chicago" },
+  { file: "musee-dorsay.png", name: "Musée d'Orsay", slug: "musee-dorsay" },
+  { file: "museum-of-fine-arts-boston.png", name: "Museum of Fine Arts Boston", slug: "museum-of-fine-arts-boston" },
+  { file: "national-gallery-of-art-washington.png", name: "National Gallery of Art", slug: "national-gallery-of-art-washington" },
+  { file: "louvre-museum.png", name: "Louvre", slug: "louvre-museum" },
+  { file: "guggenheim-museum.png", name: "Guggenheim Museum", slug: "guggenheim-museum" },
+  { file: "kunsthistorisches-museum.png", name: "Kunsthistorisches Museum", slug: "kunsthistorisches-museum" },
+  { file: "albertina-museum.png", name: "Albertina", slug: "albertina-museum" },
+  { file: "belvedere-museum.png", name: "Belvedere", slug: "belvedere-museum" },
 ];
 
 const BY_SLUG = new Map(MUSEUM_LOGOS.map((m) => [m.slug, m.file]));

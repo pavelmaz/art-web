@@ -2,6 +2,10 @@ import Link from "next/link";
 
 import { MUSEUM_LOGOS } from "@/lib/museum-logos";
 
+// The homepage strip stays curated to the original 8 clean single-line wordmarks;
+// the museums grid uses the full MUSEUM_LOGOS list.
+const STRIP_LOGOS = MUSEUM_LOGOS.slice(0, 8);
+
 /** Continuously scrolling row of museum wordmarks, each linking to its hub.
  *  Starts mid-strip so all logos are visible on load; pauses on hover. */
 export function MuseumLogoStrip({ label = "Sourced from the world's great museums" }: { label?: string }) {
@@ -10,7 +14,7 @@ export function MuseumLogoStrip({ label = "Sourced from the world's great museum
       <p className="mb-4 text-[11px] uppercase tracking-[0.1em] text-white/40">{label}</p>
       <div className="pd-marquee">
         <div className="pd-marquee-track items-center" style={{ animationDelay: "-30s" }}>
-          {[...MUSEUM_LOGOS, ...MUSEUM_LOGOS].map((m, i) => (
+          {[...STRIP_LOGOS, ...STRIP_LOGOS].map((m, i) => (
             <Link
               key={`${m.slug}-${i}`}
               href={`/museums/${m.slug}`}
