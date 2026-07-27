@@ -135,18 +135,6 @@ Return ONLY valid JSON:
 
 const FREE_INSIGHT_STORAGE_KEY = "faf-insights-free-used";
 
-/** Free (non-Pro) visitors get one Discover per browser; tracked client-side in localStorage. */
-function hasUsedFreeInsight(): boolean {
-  if (typeof window === "undefined") {
-    return false;
-  }
-  try {
-    return window.localStorage.getItem(FREE_INSIGHT_STORAGE_KEY) === "1";
-  } catch {
-    return false;
-  }
-}
-
 function markFreeInsightUsed(): void {
   if (typeof window === "undefined") {
     return;
@@ -193,12 +181,8 @@ export function ArtworkInsightsProvider({
   }, [hasInsights, insights.length, visibleCount]);
 
   const handleDiscover = useCallback(async () => {
-    if (!isPro && hasUsedFreeInsight()) {
-      setShowProModal(true);
-      track("Artwork Insights Locked", { locale });
-      return;
-    }
-
+    // Insights are temporarily free for everyone — the Pro gate below is disabled.
+    // To re-enable: restore the `hasUsedFreeInsight()` check that showed the modal.
     const apiKey = process.env.NEXT_PUBLIC_OPENAI_API_KEY;
     if (!apiKey) {
       setError(labels.insightsApiKeyMissing);
