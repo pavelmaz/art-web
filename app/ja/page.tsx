@@ -3,6 +3,7 @@ import Link from "next/link";
 
 import { ArtworkGrid } from "@/components/ArtworkGrid";
 import { WebSiteJsonLd } from "@/components/JsonLd";
+import { HomeHero } from "@/components/HomeHero";
 import { supabase } from "@/lib/supabase";
 import { getT } from "@/lib/translations";
 import { getCachedGenresForHomeStrip } from "@/lib/browse-genres";
@@ -152,40 +153,7 @@ export default async function HomePageJa() {
   return (
     <div>
       <WebSiteJsonLd />
-      <section className="relative w-full overflow-hidden bg-[#080b16] py-24">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src="/images/hero-caspar.jpg"
-          alt=""
-          className="absolute inset-0 w-full h-full object-cover"
-          fetchPriority="high"
-          decoding="sync"
-          aria-hidden="true"
-        />
-        <div className="absolute inset-0 bg-gradient-to-r from-[#080b16]/90 via-[#080b16]/65 to-[#080b16]/40" />
-        <div className="relative z-10 mx-auto max-w-7xl px-5 text-left">
-          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-white">
-            {t.heroH1}
-          </h1>
-          <p className="mt-4 max-w-2xl text-base sm:text-lg text-white">
-            {t.heroSubtitle}
-          </p>
-          <form action="/ja/search" method="get" className="mt-14 max-w-3xl md:mt-16">
-            <div className="flex items-center border-b border-white">
-              <input
-                type="text"
-                name="q"
-                placeholder={t.searchPlaceholder}
-                className="w-full bg-transparent py-2 text-[15px] leading-normal text-white placeholder:text-white focus:outline-none"
-                aria-label={t.searchPlaceholder}
-              />
-              <button type="submit" className="px-2 text-3xl text-white hover:text-white" aria-label={t.search}>
-                ⌕
-              </button>
-            </div>
-          </form>
-        </div>
-      </section>
+      <HomeHero locale="ja" />
 
       <div className="w-full overflow-x-auto scrollbar-hide bg-[#f6f4ee] px-5 py-6">
         <div className="flex gap-3 min-w-max">

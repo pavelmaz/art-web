@@ -2,9 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 import { ArtworkGrid } from "@/components/ArtworkGrid";
-import { MuseumLogoStrip } from "@/components/MuseumLogoStrip";
-import { RotatingProHero } from "@/components/RotatingProHero";
 import { WebSiteJsonLd } from "@/components/JsonLd";
+import { HomeHero } from "@/components/HomeHero";
 import { supabase } from "@/lib/supabase";
 import { artworkImageUrl, slugify } from "@/lib/utils";
 import type { Artwork } from "@/types/artwork";
@@ -160,70 +159,7 @@ export default async function HomePage() {
   return (
     <div>
       <WebSiteJsonLd />
-      <section className="relative w-full overflow-hidden bg-[#080b16] py-20">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src="/images/hero-caspar.jpg"
-          alt=""
-          aria-hidden
-          className="pointer-events-none absolute inset-0 h-full w-full object-cover"
-        />
-        <div
-          className="pointer-events-none absolute inset-0 bg-gradient-to-r from-[#080b16]/90 via-[#080b16]/65 to-[#080b16]/40"
-          aria-hidden
-        />
-        <div className="relative z-10 mx-auto flex max-w-7xl items-center gap-12 px-5">
-          <div className="min-w-0 flex-1 text-left">
-            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-white">
-              Classic Art, Free to Download
-            </h1>
-            <p className="mt-4 max-w-2xl text-base sm:text-lg text-white">
-              500,000+ public domain paintings, prints and illustrations from the world&apos;s
-              greatest museums — free for personal and commercial use.
-            </p>
-            <form action="/search" method="get" className="mt-8 max-w-xl">
-              <div className="flex items-center rounded-full border border-white/25 bg-white/10 px-5 py-3 backdrop-blur-md">
-                <input
-                  type="text"
-                  name="q"
-                  placeholder="Search by artwork title or artist"
-                  className="w-full bg-transparent text-[15px] text-white placeholder:text-white/55 focus:outline-none"
-                  aria-label="Search by artwork title or artist"
-                />
-                <button type="submit" className="pl-2 text-2xl text-white" aria-label="Search">
-                  ⌕
-                </button>
-              </div>
-            </form>
-            <div className="mt-4 flex flex-wrap items-center gap-2">
-              <span className="text-sm text-white/70">Popular:</span>
-              {[
-                { href: "/artists/vincent-van-gogh", label: "van gogh" },
-                { href: "/artworks/water-lilies-claude-monet", label: "monet water lilies" },
-                { href: "/genres/botanical", label: "botanical prints" },
-                { href: "/styles/ukiyo-e", label: "japanese woodblock" },
-              ].map((item) => (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className="inline-flex items-center rounded-full border border-white/25 bg-white/10 px-3 py-1 text-sm text-white/90 backdrop-blur-md transition hover:border-white/40 hover:bg-white/20 hover:text-white"
-                >
-                  {item.label}
-                </Link>
-              ))}
-            </div>
-          </div>
-          <div className="hidden w-[340px] shrink-0 lg:block xl:w-[380px]">
-            <div className="overflow-hidden rounded-2xl shadow-[0_20px_60px_rgba(0,0,0,0.45)]">
-              <RotatingProHero alt="Famous public domain paintings, free to download" />
-            </div>
-          </div>
-        </div>
-
-        <div className="relative z-10 mx-auto mt-14 max-w-7xl px-5">
-          <MuseumLogoStrip />
-        </div>
-      </section>
+      <HomeHero locale="en" />
 
       <div className="w-full overflow-x-auto scrollbar-hide bg-[#f6f4ee] px-5 py-6">
         <div className="flex gap-3 min-w-max">
