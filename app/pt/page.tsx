@@ -151,17 +151,17 @@ export default async function HomePagePt() {
   return (
     <div>
       <WebSiteJsonLd />
-      <section className="relative w-full bg-[#1a1a1a] py-24">
+      <section className="relative w-full overflow-hidden bg-[#080b16] py-24">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
-          src="/hero-bg-moonrise.svg"
+          src="/images/hero-caspar.jpg"
           alt=""
           className="absolute inset-0 w-full h-full object-cover"
           fetchPriority="high"
           decoding="sync"
           aria-hidden="true"
         />
-        <div className="absolute inset-0 bg-black/45" />
+        <div className="absolute inset-0 bg-gradient-to-r from-[#080b16]/90 via-[#080b16]/65 to-[#080b16]/40" />
         <div className="relative z-10 mx-auto max-w-7xl px-5 text-left">
           <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-white">
             {t.heroH1}
