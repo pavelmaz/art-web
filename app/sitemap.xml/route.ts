@@ -8,8 +8,12 @@ import { supabase } from "@/lib/supabase";
 
 export const dynamic = "force-dynamic";
 
-/** Used only if the live count can't be read; keeps the index covering all artworks. */
-const FALLBACK_SITEMAP_COUNT = 180;
+/** Used only if the live count can't be read. Deliberately an OVER-estimate of the
+ *  real page count (~218 at ~109k artworks) with headroom for growth: pages past the
+ *  real end return empty-but-valid sitemaps, so over-listing is harmless — whereas
+ *  under-listing (the old 180) silently dropped pages 180-217 across every locale
+ *  (~209k URLs). Raise further as the catalog approaches ~200k artworks. */
+const FALLBACK_SITEMAP_COUNT = 400;
 
 /** One honest site-wide date stamped on every child <sitemap>: the newest import
  *  wave, never older than the last content refresh. A constant (not a live query)
