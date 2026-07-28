@@ -41,6 +41,17 @@ type ArtworkUrlEntry = { loc: string; lastmod?: string };
  */
 export const CONTENT_REFRESH_LASTMOD = Date.parse("2026-06-28T00:00:00.000Z");
 
+/**
+ * Newest-content date for the sitemap INDEX `<lastmod>` — distinct from
+ * CONTENT_REFRESH_LASTMOD (which is the last time EVERY page's text changed). This
+ * is the date of the most recent artwork import wave (max(created_at) in the table),
+ * used to tell crawlers the catalog gained fresh content worth re-crawling. It's a
+ * constant, not a live query, because `created_at` is unindexed (a `created_at desc`
+ * scan is ~6s cold and would risk the sitemap index timing out). Bump it when the
+ * next import wave lands. Latest wave: 2026-07-23.
+ */
+export const CATALOG_INDEX_LASTMOD = Date.parse("2026-07-23T00:00:00.000Z");
+
 /** Convert a Postgres timestamp string to a W3C/ISO-8601 <lastmod> value, floored
  *  at the last site-wide content refresh (newer rows keep their created_at). */
 export function toLastmod(value: string | null | undefined): string | undefined {
