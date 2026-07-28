@@ -1,4 +1,8 @@
-import { ARTWORK_SITEMAP_PAGE_SIZE } from "@/lib/artwork-sitemap-response";
+import {
+  ARTWORK_SITEMAP_PAGE_SIZE,
+  CONTENT_REFRESH_LASTMOD,
+  toLastmod,
+} from "@/lib/artwork-sitemap-response";
 import { getPublicSiteUrl, escapeXml } from "@/lib/sitemap-xml";
 import { supabase } from "@/lib/supabase";
 
@@ -6,6 +10,26 @@ export const dynamic = "force-dynamic";
 
 /** Used only if the live count can't be read; keeps the index covering all artworks. */
 const FALLBACK_SITEMAP_COUNT = 180;
+
+/** Newest artwork's created_at — read via id-desc (index-only, ~instant) so we can
+ *  stamp the index children with a real "catalog last updated" <lastmod>. Returns
+ *  null on any error so the caller floors at the content-refresh date; never adds a
+ *  slow per-child aggregation that could hit the statement timeout. */
+async function newestArtworkCreatedAt(): Promise<string | null> {
+  try {
+    const { data, error } = await supabase
+      .from("artworks")
+      .select("created_at")
+      .order("id", { ascending: false })
+      .limit(1);
+    if (error) {
+      return null;
+    }
+    return (data as { created_at: string | null }[] | null)?.[0]?.created_at ?? null;
+  } catch {
+    return null;
+  }
+}
 
 /** Number of artwork sitemap pages = ceil(total artworks / page size), read live so
  *  the index never drops newly added artworks. */
@@ -33,7 +57,14 @@ function emptySitemapIndex(): string {
 export async function GET() {
   try {
     const base = getPublicSiteUrl();
-    const pageCount = await artworkSitemapPageCount();
+    const [pageCount, newestCreated] = await Promise.all([
+      artworkSitemapPageCount(),
+      newestArtworkCreatedAt(),
+    ]);
+    // One honest, site-wide date for every child: the catalog's last real change
+    // (newest artwork), floored at the content-refresh date. Advances only when
+    // content actually changes — never faked to "now" per request.
+    const lastmod = toLastmod(newestCreated) ?? new Date(CONTENT_REFRESH_LASTMOD).toISOString();
     const locs: string[] = [`${base}/sitemap/static`];
     for (let i = 0; i < pageCount; i++) {
       locs.push(`${base}/sitemap/artworks/${i}`);
@@ -66,7 +97,7 @@ export async function GET() {
       locs
         .map(
           (loc) =>
-            `  <sitemap>\n    <loc>${escapeXml(loc)}</loc>\n  </sitemap>`
+            `  <sitemap>\n    <loc>${escapeXml(loc)}</loc>\n    <lastmod>${lastmod}</lastmod>\n  </sitemap>`
         )
         .join("\n") +
       "\n</sitemapindex>\n";

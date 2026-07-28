@@ -39,11 +39,11 @@ type ArtworkUrlEntry = { loc: string; lastmod?: string };
  * and suppress re-crawling of the now-enriched pages. Bump this when the next
  * site-wide content refresh lands.
  */
-const CONTENT_REFRESH_LASTMOD = Date.parse("2026-06-28T00:00:00.000Z");
+export const CONTENT_REFRESH_LASTMOD = Date.parse("2026-06-28T00:00:00.000Z");
 
 /** Convert a Postgres timestamp string to a W3C/ISO-8601 <lastmod> value, floored
  *  at the last site-wide content refresh (newer rows keep their created_at). */
-function toLastmod(value: string | null | undefined): string | undefined {
+export function toLastmod(value: string | null | undefined): string | undefined {
   const created = typeof value === "string" && value.trim() ? Date.parse(value) : NaN;
   const lastmod = Number.isNaN(created) ? CONTENT_REFRESH_LASTMOD : Math.max(created, CONTENT_REFRESH_LASTMOD);
   return new Date(lastmod).toISOString();
