@@ -49,6 +49,21 @@ export default function AboutPage() {
           <a href={"https://guides.library.ualberta.ca/c.php?g=332470&p=5354482"} target="_blank" rel="noopener noreferrer" className="underline hover:text-[#1a1a1a]">University of Alberta</a> (Canada).
         </p>
 
+        <div className="not-prose flex flex-wrap items-center gap-x-8 gap-y-5 py-1">
+          <a href={"https://guiasbus.us.es/bellasartes/sitiosweb"} target="_blank" rel="noopener noreferrer" aria-label="University of Seville">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/images/university-logos/seville.png" alt="University of Seville" className="h-10 w-auto opacity-70 transition hover:opacity-100" />
+          </a>
+          <a href={"https://libguides.skidmore.edu/art/images"} target="_blank" rel="noopener noreferrer" aria-label="Skidmore College">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/images/university-logos/skidmore.png" alt="Skidmore College" className="h-8 w-auto opacity-70 transition hover:opacity-100" />
+          </a>
+          <a href={"https://guides.library.ualberta.ca/c.php?g=332470&p=5354482"} target="_blank" rel="noopener noreferrer" aria-label="University of Alberta">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/images/university-logos/alberta.png" alt="University of Alberta" className="h-9 w-auto opacity-70 transition hover:opacity-100" />
+          </a>
+        </div>
+
         <h2 className="text-lg font-semibold text-[#1a1a1a]">Are these images really free to use?</h2>
         <p>
           Yes. In recent years, major museums and libraries around the world — including the Rijksmuseum, the
