@@ -25,7 +25,7 @@ const VARIANTS = [
 const since = new Date(Date.now() - 48 * 3600 * 1000).toISOString();
 const res = await fetch(
   // PostgREST `like` uses * as the wildcard
-  `${URL}/rest/v1/artworks?select=id,slug,image_id,img_width&created_at=gt.${encodeURIComponent(since)}&image_id=like.${encodeURIComponent("*/art-images/artworks/*")}`,
+  `${URL}/rest/v1/artworks?select=id,slug,image_id,img_width,orig_bytes,std_bytes&created_at=gt.${encodeURIComponent(since)}&image_id=like.${encodeURIComponent("*/art-images/artworks/*")}`,
   { headers: auth }
 );
 const rows = await res.json();
@@ -48,7 +48,7 @@ for (const row of rows) {
       const res = await fetch(`${CDN}/storage/v1/object/public/${BUCKET}/renditions/${v.key}/artworks/${base}.${v.ext}`, { method: "HEAD" });
       if (!res.ok) missing.push(v);
     }
-    if (!missing.length && row.img_width) { ok++; continue; }
+    if (!missing.length && row.img_width && row.orig_bytes && row.std_bytes) { ok++; continue; }
 
     const orig = await fetch(`${URL}/storage/v1/object/${BUCKET}/${key}`, { headers: auth });
     if (!orig.ok) throw new Error(`original ${orig.status}`);
@@ -63,10 +63,22 @@ for (const row of rows) {
       });
       if (!up.ok) throw new Error(`upload ${v.key} ${up.status}`);
     }
-    if (!row.img_width && meta.width) {
+
+    // Byte sizes for the download rows ("JPG, Size: X MB"): orig_bytes = the
+    // stored original; std_bytes = the Standard download as actually delivered
+    // (w1400 re-encoded to JPEG q90 by the /api/download proxy).
+    const patch = {};
+    if (!row.img_width && meta.width) { patch.img_width = meta.width; patch.img_height = meta.height; }
+    if (!row.orig_bytes) patch.orig_bytes = buf.length;
+    if (!row.std_bytes) {
+      const stdJpeg = await sharp(buf, { limitInputPixels: false })
+        .rotate().resize({ width: 1400, withoutEnlargement: true }).jpeg({ quality: 90 }).toBuffer();
+      patch.std_bytes = stdJpeg.length;
+    }
+    if (Object.keys(patch).length) {
       await fetch(`${URL}/rest/v1/artworks?id=eq.${encodeURIComponent(row.id)}`, {
         method: "PATCH", headers: { ...auth, "Content-Type": "application/json" },
-        body: JSON.stringify({ img_width: meta.width, img_height: meta.height }),
+        body: JSON.stringify(patch),
       });
     }
     made++;

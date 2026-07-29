@@ -62,6 +62,37 @@ if (inputs.length === 0 && !DRIP) {
 
 // ---------- small helpers ----------
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+/** Full-original rule: when Commons only serves a TIFF (browsers can't show it),
+ *  don't settle for the 1920px JPEG preview — download the full TIFF, convert to
+ *  JPEG (≤6000px, q92) and store it directly. Returns null on any failure so the
+ *  caller falls back to the preview. */
+async function storeTiffOriginal(origUrl) {
+  try {
+    const [{ default: sharp }, { createHash }] = await Promise.all([import("sharp"), import("node:crypto")]);
+    const res = await fetch(origUrl, { headers: { "User-Agent": UA }, signal: AbortSignal.timeout(300000) });
+    if (!res.ok) throw new Error(`tiff fetch ${res.status}`);
+    const src = Buffer.from(await res.arrayBuffer());
+    const jpeg = await sharp(src, { limitInputPixels: false })
+      .rotate().resize({ width: 6000, withoutEnlargement: true }).jpeg({ quality: 92, mozjpeg: true }).toBuffer();
+    const meta = await sharp(jpeg).metadata();
+    const sha = createHash("sha256").update(jpeg).digest("hex");
+    const key = `artworks/${sha}.jpg`;
+    const up = await fetch(`${SUPABASE_URL}/storage/v1/object/art-images/${key}`, {
+      method: "POST",
+      headers: { apikey: SERVICE_KEY, Authorization: `Bearer ${SERVICE_KEY}`, "Content-Type": "image/jpeg", "x-upsert": "true" },
+      body: jpeg,
+    });
+    if (!up.ok) throw new Error(`upload ${up.status}`);
+    return {
+      publicUrl: `${SUPABASE_URL}/storage/v1/object/public/art-images/${key}`,
+      width: meta.width, height: meta.height, bytes: jpeg.length,
+    };
+  } catch (e) {
+    console.error(`  tiff-full failed (${e.message}) — falling back to preview`);
+    return null;
+  }
+}
 const stripHtml = (s) => (s || "").replace(/<[^>]*>/g, "").replace(/\s+/g, " ").trim();
 
 // Ports of makeSlug/normalizeTitle from app/api/import-artworks/route.ts
@@ -270,6 +301,11 @@ async function fileInfo(fileTitle) {
     width: usedThumb ? ii.thumbwidth : ii.width,
     height: usedThumb ? ii.thumbheight : ii.height,
     license,
+    // For the full-original TIFF path + orig_bytes at insert:
+    origUrl: ii.url,
+    origWidth: ii.width,
+    origBytes: usedThumb ? null : (ii.size ?? null),
+    usedThumb,
   };
 }
 
@@ -373,6 +409,13 @@ async function processItem(item) {
       slug = `${slugBase}-${counter++}`;
     }
 
+    // TIFF originals bigger than the 1920 preview: store the true full original
+    // (converted to JPEG ≤6000px) instead of the capped preview.
+    let stored = null;
+    if (info.usedThumb && (info.origWidth ?? 0) > 1920) {
+      stored = await storeTiffOriginal(info.origUrl);
+    }
+
     await pgrest("artworks", {
       method: "POST",
       body: JSON.stringify({
@@ -380,14 +423,19 @@ async function processItem(item) {
         slug,
         title: info.title,
         artist_display: canonical,
-        image_id: info.imageUrl,
+        image_id: stored ? stored.publicUrl : info.imageUrl,
         url: info.pageUrl,
         score: 50,
         ...(item.year ? { date_display: String(item.year) } : {}),
         // Commons reports the original's dimensions — write them at insert time so
         // the download rows can show real specs (they were NULL until the nightly
         // renditions job backfilled them).
-        ...(info.width ? { img_width: info.width, img_height: info.height } : {}),
+        ...(stored
+          ? { img_width: stored.width, img_height: stored.height, orig_bytes: stored.bytes }
+          : {
+              ...(info.width ? { img_width: info.width, img_height: info.height } : {}),
+              ...(info.origBytes ? { orig_bytes: info.origBytes } : {}),
+            }),
       }),
     });
     summary.imported++;
