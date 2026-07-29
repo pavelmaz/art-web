@@ -45,9 +45,18 @@ const args = process.argv.slice(2);
 const DRY = args.includes("--dry");
 const limitArg = args.find((a) => a.startsWith("--limit="));
 const CATEGORY_CAP = limitArg ? parseInt(limitArg.split("=")[1], 10) : 200;
+// --drip[=N]: walk existing artists A→Z and import up to N new works (default 25),
+// resuming from a saved cursor (_import_drip_state). --after=Name overrides the
+// start; --max-artists=M caps how many artists one run will scan (safety).
+const dripArg = args.find((a) => a.startsWith("--drip"));
+const DRIP = dripArg ? (parseInt(dripArg.split("=")[1] ?? "", 10) || 25) : 0;
+const afterArg = args.find((a) => a.startsWith("--after="));
+const DRIP_CURSOR = afterArg ? afterArg.split("=").slice(1).join("=") : "";
+const maxArtistsArg = args.find((a) => a.startsWith("--max-artists="));
+const MAX_ARTISTS = maxArtistsArg ? parseInt(maxArtistsArg.split("=")[1], 10) : 150;
 const inputs = args.filter((a) => !a.startsWith("--"));
-if (inputs.length === 0) {
-  console.error("No inputs. Pass Wikipedia media URLs, File:… titles, or Category:… names.");
+if (inputs.length === 0 && !DRIP) {
+  console.error("No inputs. Pass Wikipedia media URLs, File:… titles, Category:… names, or use --drip[=N].");
   process.exit(1);
 }
 
@@ -298,54 +307,30 @@ async function resolveArtist(artistRaw) {
   return { canonical: aliased, isNew: true };
 }
 
-// ---------- main ----------
-/** Work items: { file, titleOverride?, year?, artistHint? } */
-const fileTitles = [];
-for (const input of inputs) {
-  // "wd:Artist Name" → every painting by that artist on Wikidata (canonical image each)
-  if (/^wd:/i.test(input)) {
-    const artistName = input.slice(3).trim();
-    try {
-      const paintings = await wikidataPaintings(artistName);
-      fileTitles.push(...paintings.map((p) => ({ ...p, artistHint: artistName })));
-    } catch (e) {
-      // One artist's lookup failing must not kill the whole batch.
-      console.error(`✗ SKIPPING ARTIST ${artistName}: ${e.message}`);
-    }
-    continue;
-  }
-  const parsed = toFileTitles(input);
-  if (parsed.error) { console.error(`✗ ${parsed.error}`); continue; }
-  if (parsed.category) {
-    const files = await expandCategory(parsed.category);
-    console.log(`Category ${parsed.category}: ${files.length} files`);
-    fileTitles.push(...files.map((f) => ({ file: f })));
-  } else {
-    fileTitles.push({ file: parsed.file });
-  }
-}
-console.log(`\n${DRY ? "DRY RUN — " : ""}processing ${fileTitles.length} file(s)…\n`);
-
+// ---------- per-item processing ----------
 const summary = { imported: 0, skipped: 0, newArtists: new Set(), touchedArtists: new Set() };
 const newSlugs = [];
 
-for (const item of fileTitles) {
+/** Process one work item {file, titleOverride?, year?, altTitles?, artistHint?}.
+ *  Returns "import" if it imported it (or WOULD, in --dry), else "skip".
+ *  Mutates summary/newSlugs as a side effect. */
+async function processItem(item) {
   const fileTitle = item.file;
   await sleep(150);
   try {
     const info = await fileInfo(fileTitle);
-    if (info.skip) { console.log(`— SKIP  ${info.skip}`); summary.skipped++; continue; }
+    if (info.skip) { console.log(`— SKIP  ${info.skip}`); summary.skipped++; return "skip"; }
     if (item.titleOverride) info.title = normalizeTitle(item.titleOverride);
     if (item.artistHint) info.artistRaw = item.artistHint;
     if (!info.title || !info.artistRaw) {
       console.log(`— SKIP  missing title/artist (${fileTitle})`);
-      summary.skipped++; continue;
+      summary.skipped++; return "skip";
     }
     // Items with no English title leak raw multilingual QS markup ("title QS:P1476,nl:…")
     // through Commons ObjectName — garbage titles/slugs, not worth importing.
     if (/QS:/i.test(info.title)) {
       console.log(`— SKIP  no clean English title (${fileTitle})`);
-      summary.skipped++; continue;
+      summary.skipped++; return "skip";
     }
 
     const { canonical, isNew } = await resolveArtist(info.artistRaw);
@@ -361,13 +346,13 @@ for (const item of fileTitles) {
     const hit = allKeys.find((k) => seenKeys.has(k));
     if (hit) {
       console.log(`— SKIP  already in catalog${hit !== key ? " (matched alt-language title)" : ""}: "${info.title}" — ${canonical}`);
-      summary.skipped++; continue;
+      summary.skipped++; return "skip";
     }
 
     console.log(
       `${DRY ? "→ WOULD IMPORT" : "+ IMPORT"}  "${info.title}" — ${canonical}${isNew ? " (NEW ARTIST)" : ""}  [${info.width}×${info.height}, ${info.license}]`
     );
-    if (DRY) continue;
+    if (DRY) return "import"; // count would-imports toward the drip cap
 
     if (isNew) {
       await pgrest("artists", {
@@ -402,10 +387,97 @@ for (const item of fileTitles) {
     summary.touchedArtists.add(canonical);
     seenKeys.add(key);
     newSlugs.push(slug);
+    return "import";
   } catch (err) {
     console.error(`✗ ERROR ${fileTitle}: ${err.message}`);
-    summary.skipped++;
+    summary.skipped++; return "skip";
   }
+}
+
+// ---------- main ----------
+if (DRIP) {
+  // Drip mode: walk existing artists alphabetically from the saved cursor,
+  // import each one's new Wikidata paintings, and STOP once DRIP works are
+  // imported (or MAX_ARTISTS scanned). Drains a prolific artist across days:
+  // the cursor only advances past an artist once ALL their works are checked.
+  let cursor = DRIP_CURSOR;
+  if (!cursor && !DRY) {
+    const st = await pgrest(`_import_drip_state?select=cursor&id=eq.1&limit=1`).catch(() => null);
+    if (st && st[0]?.cursor) cursor = st[0].cursor;
+  }
+  console.log(`\n${DRY ? "DRY RUN — " : ""}DRIP: up to ${DRIP} new works, starting after artist "${cursor}"\n`);
+
+  let imported = 0, scanned = 0, lastCompleted = cursor, pageCursor = cursor;
+  outer:
+  while (imported < DRIP && scanned < MAX_ARTISTS) {
+    const filter = pageCursor ? `&name=gt.${encodeURIComponent(pageCursor)}` : "";
+    const batch = await pgrest(`artists?select=name&order=name.asc${filter}&limit=25`);
+    if (!batch || !batch.length) { console.log("Reached the end of the artist list."); break; }
+    for (const { name } of batch) {
+      if (imported >= DRIP || scanned >= MAX_ARTISTS) break outer;
+      scanned++;
+      pageCursor = name;
+      let paintings = [];
+      try { paintings = await wikidataPaintings(name); }
+      catch (e) { console.error(`✗ ${name}: ${e.message}`); lastCompleted = name; continue; }
+      let capMidArtist = false;
+      for (const p of paintings) {
+        if (imported >= DRIP) { capMidArtist = true; break; }
+        if ((await processItem({ ...p, artistHint: name })) === "import") imported++;
+      }
+      if (capMidArtist) break outer; // leave cursor at the last FULLY-drained artist
+      lastCompleted = name;
+    }
+  }
+  console.log(`\n${DRY ? "DRY " : ""}DRIP result: ${imported} ${DRY ? "would import" : "imported"} · scanned ${scanned} artist(s) · next run resumes after "${lastCompleted}"`);
+  if (!DRY) {
+    await pgrest(`_import_drip_state?on_conflict=id`, {
+      method: "POST",
+      headers: { Prefer: "resolution=merge-duplicates" },
+      body: JSON.stringify({ id: 1, cursor: lastCompleted }),
+    }).catch((e) => console.error("cursor save failed:", e.message));
+  }
+
+  // Automation step: ensure every artist we touched has a portrait; find one via
+  // Wikidata (P18) if it's missing. backfill-artist-portraits only ever touches
+  // artists whose image_url is null, so artists that already have one are skipped.
+  const toPortrait = [...new Set([...summary.touchedArtists, ...summary.newArtists])];
+  if (!DRY && toPortrait.length) {
+    console.log(`\nArtist portraits: checking ${toPortrait.length} artist(s) for a missing image…`);
+    try {
+      const { execFileSync } = await import("node:child_process");
+      execFileSync(process.execPath, ["backfill-artist-portraits.mjs"], {
+        stdio: "inherit",
+        env: { ...process.env, NAMES: toPortrait.join("|") },
+      });
+    } catch (e) { console.error("portrait step failed:", e.message); }
+  }
+} else {
+  // Input mode: Wikipedia media URLs / File:… / Category:… / wd:Artist Name
+  const fileTitles = [];
+  for (const input of inputs) {
+    if (/^wd:/i.test(input)) {
+      const artistName = input.slice(3).trim();
+      try {
+        const paintings = await wikidataPaintings(artistName);
+        fileTitles.push(...paintings.map((p) => ({ ...p, artistHint: artistName })));
+      } catch (e) {
+        console.error(`✗ SKIPPING ARTIST ${artistName}: ${e.message}`);
+      }
+      continue;
+    }
+    const parsed = toFileTitles(input);
+    if (parsed.error) { console.error(`✗ ${parsed.error}`); continue; }
+    if (parsed.category) {
+      const files = await expandCategory(parsed.category);
+      console.log(`Category ${parsed.category}: ${files.length} files`);
+      fileTitles.push(...files.map((f) => ({ file: f })));
+    } else {
+      fileTitles.push({ file: parsed.file });
+    }
+  }
+  console.log(`\n${DRY ? "DRY RUN — " : ""}processing ${fileTitles.length} file(s)…\n`);
+  for (const item of fileTitles) await processItem(item);
 }
 
 // artwork_count refresh for touched artists

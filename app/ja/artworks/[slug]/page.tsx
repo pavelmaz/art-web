@@ -164,7 +164,7 @@ function groupEveryThreeSentences(sentences: string[]): string[] {
 }
 
 function parseBoldAsterisk(text: string): ReactNode {
-  const segments = text.split(/(\*[^*]+\*)/g);
+  const segments = text.split(/(\*[^*\n]{1,60}\*)/g);
   const nodes: ReactNode[] = [];
   let key = 0;
   for (const seg of segments) {
@@ -174,7 +174,7 @@ function parseBoldAsterisk(text: string): ReactNode {
     if (seg.startsWith("*") && seg.endsWith("*") && seg.length > 2) {
       nodes.push(<strong key={key++}>{seg.slice(1, -1)}</strong>);
     } else {
-      nodes.push(seg);
+      nodes.push(seg.replace(/\*/g, ""));
     }
   }
   return nodes.length === 1 ? nodes[0] : <>{nodes}</>;
