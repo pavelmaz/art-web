@@ -1,0 +1,69 @@
+name: Daily artwork drip import
+
+# Adds ~25 missing artworks per day for artists already in the catalog, walking
+# the artist list A→Z (cursor in _import_drip_state). Full chain per run:
+#   1. import  — import-wikipedia.mjs --drip=25 (dedupe, dims, IndexNow,
+#                artist-portrait backfill for touched artists)
+#   2. migrate — copy the new external images into storage/R2
+#   3. renditions — WebP/JPEG renditions for just the new images
+#   4. enrich  — grounded Prado-style descriptions + 10-locale translations
+# Runs at 02:00 UTC, before the 03:00 image-renditions sweep (safety net).
+
+on:
+  schedule:
+    - cron: "0 2 * * *"
+  workflow_dispatch: {}
+
+concurrency:
+  group: daily-import
+  cancel-in-progress: false
+
+jobs:
+  drip:
+    runs-on: ubuntu-latest
+    timeout-minutes: 110
+    env:
+      NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+      SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+
+      - run: npm ci
+
+      - name: Import up to 25 missing artworks (A→Z drip)
+        run: node import-wikipedia.mjs --drip=25 --max-artists=150
+
+      - name: Migrate new external images to storage
+        run: |
+          BASE="${NEXT_PUBLIC_SUPABASE_URL%/}/functions/v1"
+          for i in $(seq 1 15); do
+            resp=$(curl -s -m 240 -X POST "$BASE/migrate-external-images" \
+              -H "Authorization: Bearer $SUPABASE_SERVICE_KEY" -H "apikey: $SUPABASE_SERVICE_KEY" \
+              -H "Content-Type: application/json" -d '{}')
+            echo "migrate #$i: $(echo "$resp" | head -c 200)"
+            remaining=$(echo "$resp" | grep -oE '"artworks_remaining":[0-9]+' | grep -oE '[0-9]+' || echo "")
+            [ "$remaining" = "0" ] && break
+            sleep 2
+          done
+
+      - name: Renditions for the new images
+        run: node scripts/renditions-recent.mjs
+
+      - name: Enrich (Prado-style descriptions, 10 locales)
+        run: |
+          BASE="${NEXT_PUBLIC_SUPABASE_URL%/}/functions/v1"
+          for i in $(seq 1 20); do
+            resp=$(curl -s -m 280 -X POST "$BASE/enrich-artworks" \
+              -H "Authorization: Bearer $SUPABASE_SERVICE_KEY" -H "apikey: $SUPABASE_SERVICE_KEY" \
+              -H "Content-Type: application/json" -d '{}')
+            echo "enrich #$i: $(echo "$resp" | head -c 200)"
+            echo "$resp" | grep -q 'need enrichment' && break
+            remaining=$(echo "$resp" | grep -oE '"remaining":[0-9]+' | grep -oE '[0-9]+' || echo "")
+            [ "$remaining" = "0" ] && break
+            sleep 2
+          done
