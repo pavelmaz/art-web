@@ -373,17 +373,19 @@ export function artworkStandardSize(artwork: ArtworkSpecSource): string | null {
  *  would just repeat the free download; otherwise always show the real numbers. */
 export function artworkMaxSpecs(artwork: ArtworkSpecSource): string | null {
   const { img_width: w, img_height: h } = artwork;
-  if (!w || !h || w <= 1400) {
+  if (!w || !h) {
     return null;
   }
+  // Always show the original's real dimensions when known — even when it's no
+  // bigger than the 1400 Standard (the Pro pitch there is the untouched original
+  // JPG, and a "4K quality" claim on a small work would be false).
   return `${w} x ${h}px`;
 }
 
-/** File size for the Pro/original download, e.g. "19.4 MB". Null when the original
- *  is no bigger than the Standard, or when the byte size is unknown. */
+/** File size for the Pro/original download, e.g. "19.4 MB". Null only when the
+ *  byte size is unknown. */
 export function artworkMaxSize(artwork: ArtworkSpecSource): string | null {
-  const { img_width: w } = artwork;
-  if (!w || w <= 1400) {
+  if (!artwork.img_width) {
     return null;
   }
   return formatFileSize(artwork.orig_bytes);

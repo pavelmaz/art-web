@@ -259,13 +259,16 @@ async function fileInfo(fileTitle) {
     return { skip: `tiff with no jpeg thumb (${fileTitle})` };
   }
 
+  // Dims of the file we actually store: the original's — unless we fell back to
+  // the JPEG thumb (TIFF case), then the thumb's.
+  const usedThumb = imageUrl !== ii.url;
   return {
     title: normalizeTitle(title),
     artistRaw,
     imageUrl,
     pageUrl: ii.descriptionurl || `https://commons.wikimedia.org/wiki/${encodeURIComponent(fileTitle)}`,
-    width: ii.width,
-    height: ii.height,
+    width: usedThumb ? ii.thumbwidth : ii.width,
+    height: usedThumb ? ii.thumbheight : ii.height,
     license,
   };
 }
@@ -381,6 +384,10 @@ async function processItem(item) {
         url: info.pageUrl,
         score: 50,
         ...(item.year ? { date_display: String(item.year) } : {}),
+        // Commons reports the original's dimensions — write them at insert time so
+        // the download rows can show real specs (they were NULL until the nightly
+        // renditions job backfilled them).
+        ...(info.width ? { img_width: info.width, img_height: info.height } : {}),
       }),
     });
     summary.imported++;
