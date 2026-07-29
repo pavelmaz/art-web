@@ -40,6 +40,15 @@ export default function AboutPage() {
           message.
         </p>
 
+        <h2 className="text-lg font-semibold text-[#1a1a1a]">Recommended by university libraries</h2>
+        <p>
+          Fine Art Free is included as a recommended resource in the art and image research guides of universities and
+          colleges around the world, including the{" "}
+          <a href={"https://guiasbus.us.es/bellasartes/sitiosweb"} target="_blank" rel="noopener noreferrer" className="underline hover:text-[#1a1a1a]">University of Seville</a> (Spain),{" "}
+          <a href={"https://libguides.skidmore.edu/art/images"} target="_blank" rel="noopener noreferrer" className="underline hover:text-[#1a1a1a]">Skidmore College</a> (USA), and the{" "}
+          <a href={"https://guides.library.ualberta.ca/c.php?g=332470&p=5354482"} target="_blank" rel="noopener noreferrer" className="underline hover:text-[#1a1a1a]">University of Alberta</a> (Canada).
+        </p>
+
         <h2 className="text-lg font-semibold text-[#1a1a1a]">Are these images really free to use?</h2>
         <p>
           Yes. In recent years, major museums and libraries around the world — including the Rijksmuseum, the
