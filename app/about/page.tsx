@@ -20,9 +20,24 @@ export default function AboutPage() {
 
       <section className="prose prose-sm text-[#4a4a4a] space-y-6">
         <p>
-          Fine Art Free is a curated collection of over 72,000 public domain artworks sourced from the world&apos;s
+          Fine Art Free is a curated collection of over 500,000 public domain artworks sourced from the world&apos;s
           leading museums and cultural institutions. Our mission is to make classic art freely accessible to everyone
-          — designers, educators, artists, and anyone who loves great paintings.
+          — designers, educators, artists, students, and anyone who loves great paintings.
+        </p>
+
+        <h2 className="text-lg font-semibold text-[#1a1a1a]">Who runs Fine Art Free</h2>
+        <p>
+          Fine Art Free is an independent project founded and maintained by Pavel Mazuelas, a professor in the
+          Master&apos;s in Digital Marketing at the Universidad Complutense de Madrid. It grew from a simple
+          observation: the world&apos;s great museums have released hundreds of thousands of artworks into the public
+          domain, but they sit scattered across dozens of separate databases. Fine Art Free brings them together in one
+          place, in high resolution and free to download — with no account and no paywall.
+        </p>
+        <p>
+          The project is independent and not affiliated with any museum or institution. If you have a question, a
+          correction, or a suggestion, you can reach us any time through our{" "}
+          <a href="/contact" className="underline hover:text-[#1a1a1a]">contact page</a> — we read and reply to every
+          message.
         </p>
 
         <h2 className="text-lg font-semibold text-[#1a1a1a]">Are these images really free to use?</h2>
