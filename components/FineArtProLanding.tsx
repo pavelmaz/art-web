@@ -9,7 +9,9 @@ import {
   fineArtProLandingJoinHref,
   getFineArtProT,
 } from "@/lib/fineart-pro-translations";
+import { supabase } from "@/lib/supabase";
 import type { Locale } from "@/lib/translations";
+import { artworkDetailImageUrl } from "@/lib/utils";
 
 const playfair = Playfair_Display({
   subsets: ["latin"],
@@ -21,7 +23,28 @@ const AVATAR_COLORS = ["#4285F4", "#DB4437", "#0F9D58", "#F4B400", "#7E57C2", "#
 
 type FineArtProLandingProps = {
   locale: Locale;
+  /** Slug of the artwork the visitor came from ("Become Pro" on an artwork page)
+   *  — shown as the hero's first slide so the pitch opens with THEIR painting. */
+  leadArtSlug?: string | null;
 };
+
+/** Resolve the referring artwork's display image; null on any miss so the hero
+ *  just runs its normal rotation. */
+async function leadImageForSlug(slug: string | null | undefined): Promise<string | null> {
+  if (!slug || !/^[a-z0-9-]{1,100}$/.test(slug)) return null;
+  try {
+    const { data } = await supabase
+      .from("artworks")
+      .select("image_id, url")
+      .eq("slug", slug)
+      .limit(1);
+    const row = data?.[0];
+    if (!row?.image_id) return null;
+    return artworkDetailImageUrl({ url: row.url ?? null, image_id: row.image_id });
+  } catch {
+    return null;
+  }
+}
 
 /** Render a Free/Pro comparison cell: true → check, false → dash, string → the value. */
 function comparisonCell(value: string | boolean) {
@@ -48,8 +71,9 @@ function comparisonCell(value: string | boolean) {
   return value;
 }
 
-export function FineArtProLanding({ locale }: FineArtProLandingProps) {
+export async function FineArtProLanding({ locale, leadArtSlug }: FineArtProLandingProps) {
   const c = getFineArtProT(locale);
+  const leadImage = await leadImageForSlug(leadArtSlug);
 
   return (
     <div className="bg-[#f6f4ee]">
@@ -58,7 +82,7 @@ export function FineArtProLanding({ locale }: FineArtProLandingProps) {
           {/* Image — shown after the value/price on mobile, left on desktop */}
           <div className="order-2 -ml-1 w-full shrink-0 lg:order-1 lg:max-w-[42%]">
             <div className="overflow-hidden rounded-2xl border border-[#e8e6e1] bg-[#f5f5f5] shadow-sm">
-              <RotatingProHero alt={c.heroImageAlt} />
+              <RotatingProHero alt={c.heroImageAlt} leadImage={leadImage} />
             </div>
           </div>
 

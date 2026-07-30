@@ -23,36 +23,53 @@ const IMAGES = [
 
 type RotatingProHeroProps = {
   alt: string;
+  /** Optional first slide — e.g. the artwork the visitor was just looking at
+   *  when they hit "Become Pro" (external CDN URL, rendered via plain <img>). */
+  leadImage?: string | null;
 };
 
-export function RotatingProHero({ alt }: RotatingProHeroProps) {
+export function RotatingProHero({ alt, leadImage }: RotatingProHeroProps) {
+  const images = leadImage ? [leadImage, ...IMAGES] : IMAGES;
   const [active, setActive] = useState(0);
 
   useEffect(() => {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
       return;
     }
-    const id = setInterval(() => setActive((a) => (a + 1) % IMAGES.length), HOLD_MS);
+    const id = setInterval(() => setActive((a) => (a + 1) % images.length), HOLD_MS);
     return () => clearInterval(id);
-  }, []);
+  }, [images.length]);
 
   return (
     // Fixed portrait box (the original wanderer.jpg ratio) so differently
     // proportioned paintings crossfade without any layout shift.
     <div className="relative aspect-[799/1024] w-full">
-      {IMAGES.map((src, i) => (
-        <Image
-          key={src}
-          src={src}
-          alt={i === active ? alt : ""}
-          fill
-          className={`object-cover transition-opacity duration-[900ms] ease-in-out ${
-            i === active ? "opacity-100" : "opacity-0"
-          }`}
-          sizes="(max-width: 1024px) 100vw, 40vw"
-          priority={i === 0}
-        />
-      ))}
+      {images.map((src, i) =>
+        /^https?:\/\//.test(src) ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            key={src}
+            src={src}
+            alt={i === active ? alt : ""}
+            className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-[900ms] ease-in-out ${
+              i === active ? "opacity-100" : "opacity-0"
+            }`}
+            fetchPriority={i === 0 ? "high" : undefined}
+          />
+        ) : (
+          <Image
+            key={src}
+            src={src}
+            alt={i === active ? alt : ""}
+            fill
+            className={`object-cover transition-opacity duration-[900ms] ease-in-out ${
+              i === active ? "opacity-100" : "opacity-0"
+            }`}
+            sizes="(max-width: 1024px) 100vw, 40vw"
+            priority={i === 0}
+          />
+        )
+      )}
     </div>
   );
 }

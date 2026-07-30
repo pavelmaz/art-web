@@ -3,6 +3,11 @@ import { fineArtProMetadata } from "@/lib/fineart-pro-translations";
 
 export const metadata = fineArtProMetadata("de");
 
-export default function Page() {
-  return <FineArtProLanding locale="de" />;
+export default async function Page({
+  searchParams,
+}: {
+  searchParams: Promise<{ art?: string }>;
+}) {
+  const { art } = await searchParams;
+  return <FineArtProLanding locale="de" leadArtSlug={art ?? null} />;
 }

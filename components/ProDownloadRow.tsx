@@ -68,7 +68,9 @@ export function ProDownloadRow({ locale, isPro, downloadHref, filename, glass = 
         <p className="text-xs text-[#999]">{maxSize ? `JPG, Size: ${maxSize}` : t.downloadMaxFormat}</p>
       </div>
       <Link
-        href={fineArtProPath(locale)}
+        // Carry the artwork over so the Pro page's hero opens with the painting
+        // the visitor was just looking at (filename = the artwork slug).
+        href={filename ? `${fineArtProPath(locale)}?art=${encodeURIComponent(filename)}` : fineArtProPath(locale)}
         onClick={() => track("paywall_cta_click", { source: "download_4k", locale })}
         className="inline-flex shrink-0 items-center gap-1 rounded-md bg-gradient-to-br from-[#4CAF50] to-[#1e9e57] px-3 py-2 text-[13px] font-medium text-white shadow-[0_6px_18px_rgba(76,175,80,0.4)] transition hover:brightness-110"
       >
