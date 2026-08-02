@@ -137,43 +137,10 @@ export async function FineArtProLanding({ locale, leadArtSlug }: FineArtProLandi
               </div>
             </div>
 
-            {/* Free vs Pro — single source of truth for features (modern comparison table). */}
-            <div className="mt-7 overflow-hidden rounded-2xl border border-[#e3e0d9] bg-white">
-              <table className="w-full table-fixed border-collapse">
-                <thead>
-                  <tr>
-                    <th className="w-[46%] px-4 py-3.5 text-left text-xs font-medium text-[#9a9a9a]">
-                      {c.comparisonHeader}
-                    </th>
-                    <th className="w-[27%] px-2 py-3.5 text-center text-[13px] font-medium text-[#8a8a8a]">
-                      {c.compareFreeTitle}
-                    </th>
-                    <th className="w-[27%] bg-[#f4faf4] px-2 py-3.5 text-center">
-                      <span className="inline-block rounded-full bg-[#e7f4e7] px-2.5 py-1 text-xs font-semibold text-[#2c6e30]">
-                        {c.compareProTitle}
-                      </span>
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {c.comparison.map((row) => (
-                    <tr key={row.feature}>
-                      <td className="border-t border-[#ece9e3] px-4 py-3 text-sm text-[#4a4a4a]">
-                        {row.feature}
-                      </td>
-                      <td className="border-t border-[#ece9e3] px-2 py-3 text-center text-sm text-[#9a9a9a]">
-                        {comparisonCell(row.free)}
-                      </td>
-                      <td className="border-t border-[#ece9e3] bg-[#f4faf4] px-2 py-3 text-center text-sm font-medium text-[#1a1a1a]">
-                        {comparisonCell(row.pro)}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-
-            <p className="mt-8 text-sm font-medium text-[#1a1a1a]">{c.valueNote}</p>
+            {/* Pricing FIRST — visitors arrive with intent; the $/mo is the
+                strongest hook, so it must land in the first scroll. The Free/Pro
+                comparison follows as supporting proof. */}
+            <p className="mt-7 text-sm font-medium text-[#1a1a1a]">{c.valueNote}</p>
 
             <div className="mt-5 grid gap-4 sm:grid-cols-2 sm:gap-5">
               <div className="relative flex flex-col rounded-2xl border-2 border-[#1a1a1a] bg-white p-6 shadow-sm">
@@ -210,6 +177,42 @@ export async function FineArtProLanding({ locale, leadArtSlug }: FineArtProLandi
             </div>
 
             <p className="mt-4 text-center text-xs text-[#6b6b6b]">{c.ctaNote}</p>
+
+            {/* Free vs Pro — single source of truth for features (modern comparison table). */}
+            <div className="mt-8 overflow-hidden rounded-2xl border border-[#e3e0d9] bg-white">
+              <table className="w-full table-fixed border-collapse">
+                <thead>
+                  <tr>
+                    <th className="w-[46%] px-4 py-3.5 text-left text-xs font-medium text-[#9a9a9a]">
+                      {c.comparisonHeader}
+                    </th>
+                    <th className="w-[27%] px-2 py-3.5 text-center text-[13px] font-medium text-[#8a8a8a]">
+                      {c.compareFreeTitle}
+                    </th>
+                    <th className="w-[27%] bg-[#f4faf4] px-2 py-3.5 text-center">
+                      <span className="inline-block rounded-full bg-[#e7f4e7] px-2.5 py-1 text-xs font-semibold text-[#2c6e30]">
+                        {c.compareProTitle}
+                      </span>
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {c.comparison.map((row) => (
+                    <tr key={row.feature}>
+                      <td className="border-t border-[#ece9e3] px-4 py-3 text-sm text-[#4a4a4a]">
+                        {row.feature}
+                      </td>
+                      <td className="border-t border-[#ece9e3] px-2 py-3 text-center text-sm text-[#9a9a9a]">
+                        {comparisonCell(row.free)}
+                      </td>
+                      <td className="border-t border-[#ece9e3] bg-[#f4faf4] px-2 py-3 text-center text-sm font-medium text-[#1a1a1a]">
+                        {comparisonCell(row.pro)}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       </section>
