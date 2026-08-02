@@ -56,20 +56,43 @@ async function wd(params) {
   return res.json();
 }
 
+/** Guard against same-ish-name mismatches (e.g. "A. Stein" resolving to Théophile
+ *  STEINLEN): every substantial token of OUR artist name must appear as an exact
+ *  token of the candidate's label or aliases. Initials ("A.") are ignored; a
+ *  partial/substring hit (stein ⊄ steinlen) does NOT count. False rejects just
+ *  mean no portrait — the safe direction. */
+function nameMatchesLabel(name, labels) {
+  const tokens = (s) => (s || "")
+    .toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "")
+    .split(/[^a-z0-9]+/).filter(Boolean);
+  const need = tokens(name).filter((t) => t.length > 2);
+  if (!need.length) return false;
+  const have = new Set(labels.flatMap(tokens));
+  return need.every((t) => have.has(t));
+}
+
 async function resolvePortrait(name) {
   const search = await wd({
     action: "wbsearchentities", search: name, language: "en", type: "item", limit: "6",
   });
-  const ids = (search.search ?? []).map((s) => s.id);
+  const hits = search.search ?? [];
+  const ids = hits.map((s) => s.id);
   if (!ids.length) return null;
 
   const ent = await wd({
-    action: "wbgetentities", ids: ids.join("|"), props: "claims", languages: "en",
+    action: "wbgetentities", ids: ids.join("|"), props: "claims|labels|aliases", languages: "en",
   });
 
   for (const id of ids) {
     const claims = ent.entities?.[id]?.claims;
     if (!claims) continue;
+    const hit = hits.find((h) => h.id === id);
+    const labels = [
+      hit?.label, hit?.match?.text,
+      ent.entities?.[id]?.labels?.en?.value,
+      ...((ent.entities?.[id]?.aliases?.en ?? []).map((a) => a.value)),
+    ].filter(Boolean);
+    if (!nameMatchesLabel(name, labels)) continue;
     const isHuman = (claims.P31 ?? []).some((c) => c.mainsnak?.datavalue?.value?.id === "Q5");
     const isArtist = (claims.P106 ?? []).some((c) =>
       ART_OCCUPATIONS.has(c.mainsnak?.datavalue?.value?.id),
