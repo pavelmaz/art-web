@@ -77,21 +77,24 @@ export async function FineArtProLanding({ locale, leadArtSlug }: FineArtProLandi
 
   return (
     <div className="bg-[#f6f4ee]">
-      <section className="px-3 pb-10 pt-3 md:px-6 md:pb-14 md:pt-3 lg:pb-16">
+      {/* Dark hero: the detail crops read far better on a near-black ground, and
+          the glass panels (same treatment as the homepage search bar) need
+          something behind them to refract. The header sits transparently over it. */}
+      <section className="relative bg-[#0f1115] px-3 pb-12 pt-24 text-white md:px-6 md:pb-16 md:pt-28 lg:pb-20">
         <div className="mr-auto flex max-w-7xl flex-col gap-10 lg:flex-row lg:items-start lg:gap-12 xl:gap-16">
           {/* Image — shown after the value/price on mobile, left on desktop */}
           <div className="order-2 -ml-1 w-full shrink-0 lg:order-1 lg:max-w-[42%]">
-            <div className="overflow-hidden rounded-2xl border border-[#e8e6e1] bg-[#f5f5f5] shadow-sm">
+            <div className="glass-surface overflow-hidden rounded-2xl">
               <RotatingProHero alt={c.heroImageAlt} leadImage={leadImage} />
             </div>
           </div>
 
           <div className="order-1 min-w-0 flex-1 lg:order-2">
-            <h1 className="font-serif text-3xl font-bold leading-tight tracking-tight text-[#1a1a1a] sm:text-4xl lg:text-[2.75rem] lg:leading-[1.12]">
+            <h1 className="font-serif text-3xl font-bold leading-tight tracking-tight text-white sm:text-4xl lg:text-[2.75rem] lg:leading-[1.12]">
               {c.heroH1}
             </h1>
 
-            <p className="mt-4 text-base leading-relaxed text-[#4a4a4a] sm:text-lg">{c.heroSub}</p>
+            <p className="mt-4 text-base leading-relaxed text-white/75 sm:text-lg">{c.heroSub}</p>
 
             {/* Social proof — a rating line plus an auto-scrolling review strip, so
                 visitors see real reviews exist immediately, without scrolling down. */}
@@ -100,8 +103,8 @@ export async function FineArtProLanding({ locale, leadArtSlug }: FineArtProLandi
                 <span className="text-[15px] tracking-tight text-[#E0A93C]" aria-hidden>
                   ★★★★★
                 </span>
-                <span className="text-[13px] text-[#4a4a4a]">
-                  <span className="font-semibold text-[#1a1a1a]">{c.trustRating}</span> · {c.trustCount}
+                <span className="text-[13px] text-white/75">
+                  <span className="font-semibold text-white">{c.trustRating}</span> · {c.trustCount}
                 </span>
               </div>
 
@@ -110,7 +113,7 @@ export async function FineArtProLanding({ locale, leadArtSlug }: FineArtProLandi
                   {[...c.testimonials, ...c.testimonials].map((t, i) => (
                     <li
                       key={`${t.name}-${i}`}
-                      className="mr-3.5 flex w-[260px] shrink-0 flex-col rounded-xl border border-[#ece9e3] bg-white px-4 py-3"
+                      className="glass-chip mr-3.5 flex w-[260px] shrink-0 flex-col rounded-xl px-4 py-3"
                       aria-hidden={i >= c.testimonials.length}
                     >
                       <div className="flex items-center gap-2.5">
@@ -121,14 +124,14 @@ export async function FineArtProLanding({ locale, leadArtSlug }: FineArtProLandi
                         >
                           {t.name.charAt(0)}
                         </span>
-                        <span className="truncate text-[13px] font-semibold text-[#1a1a1a]">
+                        <span className="truncate text-[13px] font-semibold text-white">
                           {t.name}
                         </span>
                         <span className="ml-auto text-[11px] tracking-tight text-[#E0A93C]" aria-hidden>
                           ★★★★★
                         </span>
                       </div>
-                      <p className="mt-2 line-clamp-2 text-[12px] leading-snug text-[#5a5a5a]">
+                      <p className="mt-2 line-clamp-2 text-[12px] leading-snug text-white/70">
                         {t.quote}
                       </p>
                     </li>
@@ -140,19 +143,19 @@ export async function FineArtProLanding({ locale, leadArtSlug }: FineArtProLandi
             {/* Pricing FIRST — visitors arrive with intent; the $/mo is the
                 strongest hook, so it must land in the first scroll. The Free/Pro
                 comparison follows as supporting proof. */}
-            <p className="mt-7 text-sm font-medium text-[#1a1a1a]">{c.valueNote}</p>
+            <p className="mt-7 text-sm font-medium text-white/90">{c.valueNote}</p>
 
             <div className="mt-5 grid gap-4 sm:grid-cols-2 sm:gap-5">
-              <div className="relative flex flex-col rounded-2xl border-2 border-[#1a1a1a] bg-white p-6 shadow-sm">
-                <span className="absolute -top-3 left-6 rounded-full bg-[#1a1a1a] px-3 py-1 text-xs font-semibold text-white">
+              <div className="glass-surface relative flex flex-col rounded-2xl p-6 ring-1 ring-white/40">
+                <span className="absolute -top-3 left-6 rounded-full bg-white px-3 py-1 text-xs font-semibold text-[#12100E]">
                   {c.yearlyBadge}
                 </span>
-                <p className="text-sm text-[#6b6b6b]">{c.yearlyPlan}</p>
-                <p className="mt-3 text-2xl font-bold tracking-tight text-[#1a1a1a] sm:text-[1.65rem]">
+                <p className="text-sm text-white/70">{c.yearlyPlan}</p>
+                <p className="mt-3 text-2xl font-bold tracking-tight text-white sm:text-[1.65rem]">
                   {c.yearlyPrice}
                 </p>
-                <p className="mt-1 text-xs font-semibold text-[#3b8e3f]">{c.yearlySave}</p>
-                <p className="mt-1 text-xs text-[#9a9a9a]">{c.yearlyBilling}</p>
+                <p className="mt-1 text-xs font-semibold text-[#8FBF9B]">{c.yearlySave}</p>
+                <p className="mt-1 text-xs text-white/55">{c.yearlyBilling}</p>
                 <Link
                   href={fineArtProLandingJoinHref(locale, "yearly", leadArtSlug)}
                   className="mt-6 inline-flex w-full items-center justify-center rounded-lg bg-gradient-to-br from-[#F5C278] to-[#E4A23C] px-4 py-3 text-sm font-bold text-[#1a1a1a] shadow-[0_6px_18px_rgba(228,162,60,0.45)] transition hover:brightness-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1a1a1a] focus-visible:ring-offset-2"
@@ -161,22 +164,22 @@ export async function FineArtProLanding({ locale, leadArtSlug }: FineArtProLandi
                 </Link>
               </div>
 
-              <div className="flex flex-col rounded-2xl border border-[#d9d9d9] bg-white p-6 shadow-sm">
-                <p className="text-sm text-[#6b6b6b]">{c.monthlyPlan}</p>
-                <p className="mt-3 text-2xl font-bold tracking-tight text-[#1a1a1a] sm:text-[1.65rem]">
+              <div className="glass-inset flex flex-col rounded-2xl p-6">
+                <p className="text-sm text-white/70">{c.monthlyPlan}</p>
+                <p className="mt-3 text-2xl font-bold tracking-tight text-white sm:text-[1.65rem]">
                   {c.monthlyPrice}
                 </p>
-                <p className="mt-1 text-xs text-[#9a9a9a]">{c.monthlyBilling}</p>
+                <p className="mt-1 text-xs text-white/55">{c.monthlyBilling}</p>
                 <Link
                   href={fineArtProLandingJoinHref(locale, "monthly", leadArtSlug)}
-                  className="mt-6 inline-flex w-full items-center justify-center rounded-lg border border-[#d9d9d9] bg-white px-4 py-3 text-sm font-bold text-[#1a1a1a] transition-colors hover:bg-[#f6f4ee] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1a1a1a] focus-visible:ring-offset-2"
+                  className="glass-secondary mt-6 inline-flex w-full items-center justify-center rounded-lg px-4 py-3 text-sm font-bold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50"
                 >
                   {c.cta}
                 </Link>
               </div>
             </div>
 
-            <p className="mt-4 text-center text-xs text-[#6b6b6b]">{c.ctaNote}</p>
+            <p className="mt-4 text-center text-xs text-white/60">{c.ctaNote}</p>
 
             {/* Free vs Pro — single source of truth for features (modern comparison table). */}
             <div className="mt-8 overflow-hidden rounded-2xl border border-[#e3e0d9] bg-white">

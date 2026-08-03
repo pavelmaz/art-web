@@ -72,6 +72,9 @@ export default function Header({ browseGenres = [] }: HeaderProps) {
   const isHome =
     pathname === "/" ||
     pathname === "/public-domain-images-for-commercial-use" ||
+    // Fine Art Pro landing: same dark hero treatment, so the menu sits over it
+    // transparently instead of on a separate white bar.
+    /^(\/[a-z]{2})?\/fineart-pro\/?$/.test(pathname) ||
     HREFLANG_LOCALES.some((loc) => {
       if (loc === "en") return false;
       const p = LOCALE_ROUTE_CONFIG[loc].prefix;
