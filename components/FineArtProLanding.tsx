@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Playfair_Display } from "next/font/google";
 
+import { PlanCtaLink } from "@/components/PlanCtaLink";
 import { RotatingProHero } from "@/components/RotatingProHero";
 
 import { FineArtProFaq } from "@/components/FineArtProFaq";
@@ -169,12 +170,14 @@ export async function FineArtProLanding({ locale, leadArtSlug }: FineArtProLandi
                 </p>
                 <p className="mt-1 text-xs font-semibold text-[#8FBF9B]">{c.yearlySave}</p>
                 <p className="mt-1 text-xs text-white/55">{c.yearlyBilling}</p>
-                <Link
+                <PlanCtaLink
                   href={fineArtProLandingJoinHref(locale, "yearly", leadArtSlug)}
+                  plan="yearly"
+                  locale={locale}
                   className="mt-6 inline-flex w-full items-center justify-center rounded-lg bg-gradient-to-br from-[#F5C278] to-[#E4A23C] px-4 py-3 text-sm font-bold text-[#1a1a1a] shadow-[0_6px_18px_rgba(228,162,60,0.45)] transition hover:brightness-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1a1a1a] focus-visible:ring-offset-2"
                 >
                   {c.cta}
-                </Link>
+                </PlanCtaLink>
               </div>
 
               <div className="glass-dark flex flex-col rounded-2xl p-6">
@@ -183,12 +186,14 @@ export async function FineArtProLanding({ locale, leadArtSlug }: FineArtProLandi
                   {c.monthlyPrice}
                 </p>
                 <p className="mt-1 text-xs text-white/55">{c.monthlyBilling}</p>
-                <Link
+                <PlanCtaLink
                   href={fineArtProLandingJoinHref(locale, "monthly", leadArtSlug)}
+                  plan="monthly"
+                  locale={locale}
                   className="glass-dark-btn mt-6 inline-flex w-full items-center justify-center rounded-lg px-4 py-3 text-sm font-bold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50"
                 >
                   {c.cta}
-                </Link>
+                </PlanCtaLink>
               </div>
             </div>
 
