@@ -55,14 +55,6 @@ export type FineArtProCopy = {
   joinHeadline: string;
   joinArtNote: string;
   joinTrustedBy: string;
-  cmpEyebrow: string;
-  cmpH1: string;
-  cmpSub: string;
-  cmpFreeLabel: string;
-  cmpProLabel: string;
-  cmpAnchor: string;
-  cmpPerWork: string;
-  cmpCta: string;
   joinAuth: {
     choosePlanFirst: string;
     selectedPlan: (plan: "yearly" | "monthly") => string;
@@ -227,14 +219,6 @@ const en: FineArtProCopy = {
   joinHeadline: "One step from 500,000 masterpieces",
   joinArtNote: "This one is yours in full resolution.",
   joinTrustedBy: "Recommended by university libraries",
-  cmpEyebrow: "The same painting, twice",
-  cmpH1: "You’re downloading 3% of this artwork.",
-  cmpSub: "Free gives you 1,400 pixels of a painting that holds 8,889. Below is the same eye from each file — nothing retouched.",
-  cmpFreeLabel: "Free · 1,400 px",
-  cmpProLabel: "Pro · original 8,889 px",
-  cmpAnchor: "One stock photo costs $12–15. A year of Fine Art Pro costs $45 — for 500,000 artworks.",
-  cmpPerWork: "$0.00009 per artwork",
-  cmpCta: "Unlock full resolution",
   joinAuth: {
     choosePlanFirst: "Choose Monthly or Yearly on the Fine Art Pro page first.",
     selectedPlan: (plan) => `Selected plan: ${plan === "yearly" ? "Yearly" : "Monthly"}`,
@@ -352,14 +336,6 @@ const es: FineArtProCopy = {
   joinHeadline: "A un paso de 500.000 obras maestras",
   joinArtNote: "Esta será tuya en máxima resolución.",
   joinTrustedBy: "Recomendado por bibliotecas universitarias",
-  cmpEyebrow: "La misma pintura, dos veces",
-  cmpH1: "Estás descargando el 3 % de esta obra.",
-  cmpSub: "Gratis te da 1.400 píxeles de una pintura que tiene 8.889. Abajo, el mismo ojo desde cada archivo — sin retoques.",
-  cmpFreeLabel: "Gratis · 1.400 px",
-  cmpProLabel: "Pro · original de 8.889 px",
-  cmpAnchor: "Una sola foto de stock cuesta 12–15 $. Un año de Fine Art Pro cuesta 45 $ — por 500.000 obras.",
-  cmpPerWork: "0,00009 $ por obra",
-  cmpCta: "Desbloquear resolución completa",
   joinAuth: {
     ...en.joinAuth,
     choosePlanFirst: "Elige plan Mensual o Anual en la página de Fine Art Pro primero.",
@@ -474,14 +450,6 @@ const pt: FineArtProCopy = {
   joinHeadline: "A um passo de 500.000 obras-primas",
   joinArtNote: "Esta será sua em resolução máxima.",
   joinTrustedBy: "Recomendado por bibliotecas universitárias",
-  cmpEyebrow: "A mesma pintura, duas vezes",
-  cmpH1: "Você está baixando 3% desta obra.",
-  cmpSub: "O gratuito lhe dá 1.400 pixels de uma pintura que tem 8.889. Abaixo, o mesmo olho a partir de cada arquivo — sem retoques.",
-  cmpFreeLabel: "Grátis · 1.400 px",
-  cmpProLabel: "Pro · original de 8.889 px",
-  cmpAnchor: "Uma única foto de banco de imagens custa US$ 12–15. Um ano de Fine Art Pro custa US$ 45 — por 500.000 obras.",
-  cmpPerWork: "US$ 0,00009 por obra",
-  cmpCta: "Desbloquear resolução máxima",
   joinAuth: {
     ...es.joinAuth,
     choosePlanFirst: "Escolha Mensal ou Anual na página Fine Art Pro primeiro.",
@@ -584,14 +552,6 @@ const ja: FineArtProCopy = {
   joinHeadline: "50万点の名画まであと1ステップ",
   joinArtNote: "この作品を最高解像度で。",
   joinTrustedBy: "大学図書館に推薦されています",
-  cmpEyebrow: "同じ絵画を、2つの解像度で",
-  cmpH1: "あなたがダウンロードしているのは、この作品の3%です。",
-  cmpSub: "無料版は8,889ピクセルの絵画のうち1,400ピクセル。下は同じ目を各ファイルから切り出したものです（加工なし）。",
-  cmpFreeLabel: "無料 · 1,400 px",
-  cmpProLabel: "Pro · オリジナル 8,889 px",
-  cmpAnchor: "ストック写真1枚で12〜15ドル。Fine Art Proは年間45ドルで50万点。",
-  cmpPerWork: "1作品あたり0.00009ドル",
-  cmpCta: "フル解像度を解放する",
   joinAuth: {
     ...en.joinAuth,
     choosePlanFirst: "先にFine Art Proページで月額または年間プランを選んでください。",
@@ -702,14 +662,6 @@ const fr: FineArtProCopy = {
   joinHeadline: "À un pas de 500 000 chefs-d'œuvre",
   joinArtNote: "Celle-ci sera à vous en pleine résolution.",
   joinTrustedBy: "Recommandé par des bibliothèques universitaires",
-  cmpEyebrow: "Le même tableau, deux fois",
-  cmpH1: "Vous téléchargez 3 % de cette œuvre.",
-  cmpSub: "Le gratuit vous donne 1 400 pixels d’un tableau qui en compte 8 889. Ci-dessous, le même œil depuis chaque fichier — sans retouche.",
-  cmpFreeLabel: "Gratuit · 1 400 px",
-  cmpProLabel: "Pro · original de 8 889 px",
-  cmpAnchor: "Une seule photo de banque d'images coûte 12–15 $. Un an de Fine Art Pro coûte 45 $ — pour 500 000 œuvres.",
-  cmpPerWork: "0,00009 $ par œuvre",
-  cmpCta: "Débloquer la pleine résolution",
   joinAuth: {
     ...en.joinAuth,
     choosePlanFirst: "Choisissez Mensuel ou Annuel sur la page Fine Art Pro d'abord.",
@@ -822,14 +774,6 @@ const de: FineArtProCopy = {
   joinHeadline: "Nur ein Schritt bis zu 500.000 Meisterwerken",
   joinArtNote: "Dieses gehört Ihnen in voller Auflösung.",
   joinTrustedBy: "Empfohlen von Universitätsbibliotheken",
-  cmpEyebrow: "Dasselbe Gemälde, zweimal",
-  cmpH1: "Sie laden 3 % dieses Kunstwerks herunter.",
-  cmpSub: "Kostenlos erhalten Sie 1.400 Pixel eines Gemäldes mit 8.889. Unten dasselbe Auge aus beiden Dateien — unbearbeitet.",
-  cmpFreeLabel: "Kostenlos · 1.400 px",
-  cmpProLabel: "Pro · Original mit 8.889 px",
-  cmpAnchor: "Ein einziges Stockfoto kostet 12–15 $. Ein Jahr Fine Art Pro kostet 45 $ — für 500.000 Werke.",
-  cmpPerWork: "0,00009 $ pro Werk",
-  cmpCta: "Volle Auflösung freischalten",
   joinAuth: {
     ...en.joinAuth,
     choosePlanFirst: "Wählen Sie zuerst Monats- oder Jahresabo auf der Fine Art Pro-Seite.",
@@ -942,14 +886,6 @@ const it: FineArtProCopy = {
   joinHeadline: "A un passo da 500.000 capolavori",
   joinArtNote: "Questo sarà tuo alla massima risoluzione.",
   joinTrustedBy: "Consigliato dalle biblioteche universitarie",
-  cmpEyebrow: "Lo stesso dipinto, due volte",
-  cmpH1: "Stai scaricando il 3% di quest’opera.",
-  cmpSub: "Il gratuito ti dà 1.400 pixel di un dipinto che ne ha 8.889. Sotto, lo stesso occhio da ciascun file — senza ritocchi.",
-  cmpFreeLabel: "Gratis · 1.400 px",
-  cmpProLabel: "Pro · originale da 8.889 px",
-  cmpAnchor: "Una singola foto stock costa 12–15 $. Un anno di Fine Art Pro costa 45 $ — per 500.000 opere.",
-  cmpPerWork: "0,00009 $ per opera",
-  cmpCta: "Sblocca la risoluzione massima",
   joinAuth: {
     ...en.joinAuth,
     choosePlanFirst: "Scegli prima Mensile o Annuale sulla pagina Fine Art Pro.",
@@ -1060,14 +996,6 @@ const ko: FineArtProCopy = {
   joinHeadline: "50만 점의 명작까지 한 단계",
   joinArtNote: "이 작품을 최고 해상도로.",
   joinTrustedBy: "대학 도서관이 추천합니다",
-  cmpEyebrow: "같은 그림, 두 가지 해상도",
-  cmpH1: "당신이 내려받는 것은 이 작품의 3%입니다.",
-  cmpSub: "무료는 8,889픽셀 그림 중 1,400픽셀만 제공합니다. 아래는 각 파일에서 잘라낸 같은 눈입니다 — 보정 없음.",
-  cmpFreeLabel: "무료 · 1,400 px",
-  cmpProLabel: "Pro · 원본 8,889 px",
-  cmpAnchor: "스톡 사진 한 장이 12~15달러. Fine Art Pro는 연 45달러로 50만 점.",
-  cmpPerWork: "작품당 0.00009달러",
-  cmpCta: "전체 해상도 잠금 해제",
   joinAuth: {
     ...en.joinAuth,
     choosePlanFirst: "먼저 Fine Art Pro 페이지에서 월간 또는 연간 플랜을 선택하세요.",
@@ -1177,14 +1105,6 @@ const ru: FineArtProCopy = {
   joinHeadline: "Один шаг до 500 000 шедевров",
   joinArtNote: "Эта работа — ваша в полном разрешении.",
   joinTrustedBy: "Рекомендовано университетскими библиотеками",
-  cmpEyebrow: "Одна картина, два разрешения",
-  cmpH1: "Вы скачиваете 3 % этой картины.",
-  cmpSub: "Бесплатно — 1 400 пикселей из 8 889. Ниже один и тот же глаз из каждого файла, без обработки.",
-  cmpFreeLabel: "Бесплатно · 1 400 px",
-  cmpProLabel: "Pro · оригинал 8 889 px",
-  cmpAnchor: "Одна стоковая фотография стоит 12–15 $. Год Fine Art Pro — 45 $ за 500 000 работ.",
-  cmpPerWork: "0,00009 $ за работу",
-  cmpCta: "Открыть полное разрешение",
   joinAuth: {
     ...en.joinAuth,
     choosePlanFirst: "Сначала выберите месячный или годовой план на странице Fine Art Pro.",
@@ -1295,14 +1215,6 @@ const zh: FineArtProCopy = {
   joinHeadline: "距离 50 万件名作仅一步之遥",
   joinArtNote: "这幅作品将以最高分辨率归您所有。",
   joinTrustedBy: "大学图书馆推荐",
-  cmpEyebrow: "同一幅画，两种分辨率",
-  cmpH1: "你下载到的，只是这幅画的 3%。",
-  cmpSub: "免费版提供 1,400 像素，而原画有 8,889 像素。下方是从两个文件中截取的同一只眼睛——未经修饰。",
-  cmpFreeLabel: "免费 · 1,400 px",
-  cmpProLabel: "Pro · 原图 8,889 px",
-  cmpAnchor: "一张图库照片售价 12–15 美元。Fine Art Pro 一年 45 美元，可用 50 万件作品。",
-  cmpPerWork: "每件作品 0.00009 美元",
-  cmpCta: "解锁完整分辨率",
   joinAuth: {
     ...en.joinAuth,
     choosePlanFirst: "请先在 Fine Art Pro 页面选择月付或年付方案。",
