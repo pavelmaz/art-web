@@ -206,7 +206,7 @@ export const translations = {
       `${name} — Obras Completas Grátis para Baixar | Fine Art Free`,
   },
   ja: {
-    heroH1: '400,000点以上の無料パブリックドメインアート',
+    heroH1: '500,000点以上の無料パブリックドメインアート',
     heroSubtitle: '無料でダウンロード、個人・商用利用可能',
     searchPlaceholder: 'アーティストまたはキーワードで検索',
     browseByArtist: '芸術家から探す',

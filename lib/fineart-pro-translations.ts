@@ -80,7 +80,7 @@ const en: FineArtProCopy = {
   meta: {
     title: "Fine Art Pro",
     description:
-      "Get full access to hi-res images. Access over 400,000 paintings, drawings, posters and illustrations at the highest resolution available.",
+      "Get full access to hi-res images. Access over 500,000 paintings, drawings, posters and illustrations at the highest resolution available.",
     ogTitle: "Fine Art Pro — Hi-res public domain art",
     ogDescription:
       "Download images at the highest resolution available. Free from copyright restrictions and ready for your projects.",
@@ -89,9 +89,9 @@ const en: FineArtProCopy = {
     "Wanderer above the Sea of Fog by Caspar David Friedrich, circa 1818",
   moonriseImageAlt:
     "Oil painting Moonrise over the Sea by Caspar David Friedrich, showing three figures on rocks by the shore watching sailing ships at twilight",
-  heroH1: "Download 400,000+ masterpieces in stunning 4K",
+  heroH1: "Download 500,000+ masterpieces in stunning 4K",
   heroBullets: [
-    "Access over 400,000 paintings, drawings, posters and illustrations",
+    "Access over 500,000 paintings, drawings, posters and illustrations",
     "Download images at the highest resolution available",
     "Free from copyright restrictions and ready to be used in your projects.",
     "Unlimited AI insights on every artwork",
@@ -107,7 +107,7 @@ const en: FineArtProCopy = {
   heroSub: "Unlimited, copyright-free, and ready for any project — personal or commercial.",
   yearlyBadge: "Best value",
   yearlySave: "Save 62%",
-  valueNote: "Less than the price of a single stock photo — for unlimited 4K downloads of 400,000+ artworks.",
+  valueNote: "Less than the price of a single stock photo — for unlimited 4K downloads of 500,000+ artworks.",
   ctaNote: "Cancel anytime · Instant access · Secure checkout",
   compareFreeTitle: "Free",
   compareProTitle: "Pro",
@@ -243,7 +243,7 @@ const es: FineArtProCopy = {
   meta: {
     title: "Fine Art Pro",
     description:
-      "Acceso completo a imágenes en alta resolución. Más de 400.000 pinturas, dibujos, pósters e ilustraciones en la máxima resolución disponible.",
+      "Acceso completo a imágenes en alta resolución. Más de 500.000 pinturas, dibujos, pósters e ilustraciones en la máxima resolución disponible.",
     ogTitle: "Fine Art Pro — Arte de dominio público en alta resolución",
     ogDescription:
       "Descarga imágenes en la máxima resolución. Sin restricciones de copyright y listas para tus proyectos.",
@@ -251,9 +251,9 @@ const es: FineArtProCopy = {
   heroImageAlt: "El caminante sobre el mar de nubes, Caspar David Friedrich, ca. 1818",
   moonriseImageAlt:
     "Óleo Salida de la luna en el mar de Caspar David Friedrich, con tres figuras en la orilla observando barcos al crepúsculo",
-  heroH1: "Descarga más de 400.000 obras maestras en 4K",
+  heroH1: "Descarga más de 500.000 obras maestras en 4K",
   heroBullets: [
-    "Más de 400.000 pinturas, dibujos, pósters e ilustraciones",
+    "Más de 500.000 pinturas, dibujos, pósters e ilustraciones",
     "Descarga en la máxima resolución disponible",
     "Sin restricciones de copyright; listas para tus proyectos.",
     "Información con IA ilimitada en cada obra",
@@ -269,7 +269,7 @@ const es: FineArtProCopy = {
   heroSub: "Ilimitadas, libres de derechos y listas para cualquier proyecto, personal o comercial.",
   yearlyBadge: "Mejor valor",
   yearlySave: "Ahorra 62%",
-  valueNote: "Menos que el precio de una sola foto de stock — por descargas 4K ilimitadas de más de 400.000 obras.",
+  valueNote: "Menos que el precio de una sola foto de stock — por descargas 4K ilimitadas de más de 500.000 obras.",
   ctaNote: "Cancela cuando quieras · Acceso inmediato · Pago seguro",
   compareFreeTitle: "Gratis",
   compareProTitle: "Pro",
@@ -359,14 +359,14 @@ const pt: FineArtProCopy = {
   meta: {
     title: "Fine Art Pro",
     description:
-      "Acesso total a imagens em alta resolução. Mais de 400.000 pinturas, desenhos, pôsteres e ilustrações na resolução máxima disponível.",
+      "Acesso total a imagens em alta resolução. Mais de 500.000 pinturas, desenhos, pôsteres e ilustrações na resolução máxima disponível.",
     ogTitle: "Fine Art Pro — Arte de domínio público em alta resolução",
     ogDescription:
       "Baixe imagens na resolução máxima. Sem restrições de copyright e prontas para seus projetos.",
   },
-  heroH1: "Baixe mais de 400.000 obras-primas em 4K",
+  heroH1: "Baixe mais de 500.000 obras-primas em 4K",
   heroBullets: [
-    "Mais de 400.000 pinturas, desenhos, pôsteres e ilustrações",
+    "Mais de 500.000 pinturas, desenhos, pôsteres e ilustrações",
     "Download na resolução máxima disponível",
     "Sem restrições de copyright; prontas para seus projetos.",
     "Insights com IA ilimitados em cada obra",
@@ -380,7 +380,7 @@ const pt: FineArtProCopy = {
   heroSub: "Ilimitadas, livres de direitos e prontas para qualquer projeto, pessoal ou comercial.",
   yearlyBadge: "Melhor valor",
   yearlySave: "Economize 62%",
-  valueNote: "Menos que o preço de uma única foto de banco de imagens — por downloads 4K ilimitados de mais de 400.000 obras.",
+  valueNote: "Menos que o preço de uma única foto de banco de imagens — por downloads 4K ilimitados de mais de 500.000 obras.",
   ctaNote: "Cancele quando quiser · Acesso imediato · Pagamento seguro",
   compareFreeTitle: "Grátis",
   compareProTitle: "Pro",
@@ -461,14 +461,14 @@ const ja: FineArtProCopy = {
   meta: {
     title: "Fine Art Pro",
     description:
-      "高解像度画像へのフルアクセス。40万点以上の絵画・素描・ポスター・イラストを最高解像度で利用できます。",
+      "高解像度画像へのフルアクセス。50万点以上の絵画・素描・ポスター・イラストを最高解像度で利用できます。",
     ogTitle: "Fine Art Pro — 高解像度パブリックドメインアート",
     ogDescription:
       "最高解像度でダウンロード。著作権の制限なく、プロジェクトですぐに使えます。",
   },
-  heroH1: "40万点以上の名画を4Kでダウンロード",
+  heroH1: "50万点以上の名画を4Kでダウンロード",
   heroBullets: [
-    "40万点以上の絵画・素描・ポスター・イラスト",
+    "50万点以上の絵画・素描・ポスター・イラスト",
     "利用可能な最高解像度でダウンロード",
     "著作権の制限なく、プロジェクトにすぐ使えます。",
     "すべての作品でAIインサイトを無制限に",
@@ -482,7 +482,7 @@ const ja: FineArtProCopy = {
   heroSub: "無制限・著作権フリー。個人でも商用でも、あらゆるプロジェクトにすぐ使えます。",
   yearlyBadge: "おすすめ",
   yearlySave: "62%お得",
-  valueNote: "ストック写真1枚より安く、40万点以上の作品を4Kで無制限ダウンロード。",
+  valueNote: "ストック写真1枚より安く、50万点以上の作品を4Kで無制限ダウンロード。",
   ctaNote: "いつでも解約可能 · 即時アクセス · 安全な決済",
   compareFreeTitle: "無料",
   compareProTitle: "Pro",
@@ -565,14 +565,14 @@ const fr: FineArtProCopy = {
   meta: {
     title: "Fine Art Pro",
     description:
-      "Accès complet aux images haute résolution. Plus de 400 000 peintures, dessins, affiches et illustrations en résolution maximale.",
+      "Accès complet aux images haute résolution. Plus de 500 000 peintures, dessins, affiches et illustrations en résolution maximale.",
     ogTitle: "Fine Art Pro — Art du domaine public en haute résolution",
     ogDescription:
       "Téléchargez en résolution maximale. Sans restriction de droits d'auteur, prêt pour vos projets.",
   },
-  heroH1: "Téléchargez plus de 400 000 chefs-d'œuvre en 4K",
+  heroH1: "Téléchargez plus de 500 000 chefs-d'œuvre en 4K",
   heroBullets: [
-    "Plus de 400 000 peintures, dessins, affiches et illustrations",
+    "Plus de 500 000 peintures, dessins, affiches et illustrations",
     "Téléchargement en résolution maximale disponible",
     "Sans restriction de droits d'auteur, prêtes pour vos projets.",
     "Informations IA illimitées sur chaque œuvre",
@@ -586,7 +586,7 @@ const fr: FineArtProCopy = {
   heroSub: "Illimités, libres de droits et prêts pour tous vos projets, personnels ou commerciaux.",
   yearlyBadge: "Meilleure offre",
   yearlySave: "Économisez 62%",
-  valueNote: "Moins cher qu'une seule photo de banque d'images — pour des téléchargements 4K illimités de plus de 400 000 œuvres.",
+  valueNote: "Moins cher qu'une seule photo de banque d'images — pour des téléchargements 4K illimités de plus de 500 000 œuvres.",
   ctaNote: "Annulable à tout moment · Accès immédiat · Paiement sécurisé",
   compareFreeTitle: "Gratuit",
   compareProTitle: "Pro",
@@ -675,14 +675,14 @@ const de: FineArtProCopy = {
   meta: {
     title: "Fine Art Pro",
     description:
-      "Voller Zugang zu hochauflösenden Bildern. Über 400.000 Gemälde, Zeichnungen, Poster und Illustrationen in höchster verfügbarer Auflösung.",
+      "Voller Zugang zu hochauflösenden Bildern. Über 500.000 Gemälde, Zeichnungen, Poster und Illustrationen in höchster verfügbarer Auflösung.",
     ogTitle: "Fine Art Pro — Gemeinfreie Kunst in hoher Auflösung",
     ogDescription:
       "Downloads in höchster Auflösung. Ohne Urheberrechtsbeschränkungen, bereit für Ihre Projekte.",
   },
-  heroH1: "Über 400.000 Meisterwerke in 4K herunterladen",
+  heroH1: "Über 500.000 Meisterwerke in 4K herunterladen",
   heroBullets: [
-    "Über 400.000 Gemälde, Zeichnungen, Poster und Illustrationen",
+    "Über 500.000 Gemälde, Zeichnungen, Poster und Illustrationen",
     "Download in höchster verfügbarer Auflösung",
     "Gemeinfrei und sofort in Ihren Projekten nutzbar.",
     "Unbegrenzte KI-Einblicke zu jedem Kunstwerk",
@@ -696,7 +696,7 @@ const de: FineArtProCopy = {
   heroSub: "Unbegrenzt, lizenzfrei und bereit für jedes Projekt – privat oder kommerziell.",
   yearlyBadge: "Bestes Angebot",
   yearlySave: "62% sparen",
-  valueNote: "Günstiger als ein einzelnes Stockfoto – für unbegrenzte 4K-Downloads von über 400.000 Werken.",
+  valueNote: "Günstiger als ein einzelnes Stockfoto – für unbegrenzte 4K-Downloads von über 500.000 Werken.",
   ctaNote: "Jederzeit kündbar · Sofortiger Zugang · Sichere Zahlung",
   compareFreeTitle: "Kostenlos",
   compareProTitle: "Pro",
@@ -784,14 +784,14 @@ const it: FineArtProCopy = {
   meta: {
     title: "Fine Art Pro",
     description:
-      "Accesso completo a immagini ad alta risoluzione. Oltre 400.000 dipinti, disegni, poster e illustrazioni alla massima risoluzione disponibile.",
+      "Accesso completo a immagini ad alta risoluzione. Oltre 500.000 dipinti, disegni, poster e illustrazioni alla massima risoluzione disponibile.",
     ogTitle: "Fine Art Pro — Arte di pubblico dominio in alta risoluzione",
     ogDescription:
       "Scarica alla massima risoluzione. Senza vincoli di copyright, pronte per i tuoi progetti.",
   },
-  heroH1: "Scarica oltre 400.000 capolavori in 4K",
+  heroH1: "Scarica oltre 500.000 capolavori in 4K",
   heroBullets: [
-    "Oltre 400.000 dipinti, disegni, poster e illustrazioni",
+    "Oltre 500.000 dipinti, disegni, poster e illustrazioni",
     "Download alla massima risoluzione disponibile",
     "Di pubblico dominio, pronte per i tuoi progetti.",
     "Approfondimenti IA illimitati su ogni opera",
@@ -805,7 +805,7 @@ const it: FineArtProCopy = {
   heroSub: "Illimitati, liberi da copyright e pronti per ogni progetto, personale o commerciale.",
   yearlyBadge: "Miglior offerta",
   yearlySave: "Risparmia il 62%",
-  valueNote: "Meno del prezzo di una sola foto stock — per download 4K illimitati di oltre 400.000 opere.",
+  valueNote: "Meno del prezzo di una sola foto stock — per download 4K illimitati di oltre 500.000 opere.",
   ctaNote: "Disdici quando vuoi · Accesso immediato · Pagamento sicuro",
   compareFreeTitle: "Gratis",
   compareProTitle: "Pro",
@@ -893,14 +893,14 @@ const ko: FineArtProCopy = {
   meta: {
     title: "Fine Art Pro",
     description:
-      "고해상도 이미지 전체 이용. 40만 점 이상의 회화·소묘·포스터·일러스트를 최고 해상도로 이용하세요.",
+      "고해상도 이미지 전체 이용. 50만 점 이상의 회화·소묘·포스터·일러스트를 최고 해상도로 이용하세요.",
     ogTitle: "Fine Art Pro — 고해상도 퍼블릭 도메인 아트",
     ogDescription:
       "최고 해상도로 다운로드. 저작권 제한 없이 프로젝트에 바로 사용할 수 있습니다.",
   },
-  heroH1: "40만 점 이상의 명작을 4K로 다운로드",
+  heroH1: "50만 점 이상의 명작을 4K로 다운로드",
   heroBullets: [
-    "40만 점 이상의 회화·소묘·포스터·일러스트",
+    "50만 점 이상의 회화·소묘·포스터·일러스트",
     "이용 가능한 최고 해상도로 다운로드",
     "저작권 제한 없이 프로젝트에 바로 사용.",
     "모든 작품에 대한 무제한 AI 인사이트",
@@ -914,7 +914,7 @@ const ko: FineArtProCopy = {
   heroSub: "무제한, 저작권 무료 — 개인이든 상업이든 모든 프로젝트에 바로 사용하세요.",
   yearlyBadge: "최고 가성비",
   yearlySave: "62% 할인",
-  valueNote: "스톡 사진 한 장보다 저렴하게, 40만 점 이상의 작품을 4K로 무제한 다운로드.",
+  valueNote: "스톡 사진 한 장보다 저렴하게, 50만 점 이상의 작품을 4K로 무제한 다운로드.",
   ctaNote: "언제든 해지 가능 · 즉시 이용 · 안전한 결제",
   compareFreeTitle: "무료",
   compareProTitle: "Pro",
@@ -997,14 +997,14 @@ const ru: FineArtProCopy = {
   meta: {
     title: "Fine Art Pro",
     description:
-      "Полный доступ к изображениям в высоком разрешении. Более 400 000 картин, рисунков, плакатов и иллюстраций в максимальном качестве.",
+      "Полный доступ к изображениям в высоком разрешении. Более 500 000 картин, рисунков, плакатов и иллюстраций в максимальном качестве.",
     ogTitle: "Fine Art Pro — Искусство общественного достояния в высоком разрешении",
     ogDescription:
       "Скачивайте в максимальном разрешении. Без ограничений авторского права, готово для ваших проектов.",
   },
-  heroH1: "Скачивайте более 400 000 шедевров в 4K",
+  heroH1: "Скачивайте более 500 000 шедевров в 4K",
   heroBullets: [
-    "Более 400 000 картин, рисунков, плакатов и иллюстраций",
+    "Более 500 000 картин, рисунков, плакатов и иллюстраций",
     "Скачивание в максимально доступном разрешении",
     "Общественное достояние — свободно для ваших проектов.",
     "Безлимитные AI-инсайты к каждой работе",
@@ -1018,7 +1018,7 @@ const ru: FineArtProCopy = {
   heroSub: "Безлимитно, без авторских ограничений и готово для любого проекта — личного или коммерческого.",
   yearlyBadge: "Выгоднее всего",
   yearlySave: "Экономия 62%",
-  valueNote: "Дешевле одной стоковой фотографии — за безлимитные 4K-загрузки более 400 000 работ.",
+  valueNote: "Дешевле одной стоковой фотографии — за безлимитные 4K-загрузки более 500 000 работ.",
   ctaNote: "Отмена в любой момент · Мгновенный доступ · Безопасная оплата",
   compareFreeTitle: "Бесплатно",
   compareProTitle: "Pro",
@@ -1106,14 +1106,14 @@ const zh: FineArtProCopy = {
   meta: {
     title: "Fine Art Pro",
     description:
-      "完整访问高分辨率图像。40万+绘画、素描、海报与插图，以最高可用分辨率提供。",
+      "完整访问高分辨率图像。50万+绘画、素描、海报与插图，以最高可用分辨率提供。",
     ogTitle: "Fine Art Pro — 高分辨率公有领域艺术",
     ogDescription:
       "以最高分辨率下载。无版权限制，可直接用于您的项目。",
   },
   heroH1: "下载超过 40 万件 4K 高清名作",
   heroBullets: [
-    "40万+绘画、素描、海报与插图",
+    "50万+绘画、素描、海报与插图",
     "以最高可用分辨率下载",
     "公有领域，可直接用于您的项目。",
     "每件作品的无限 AI 解读",
