@@ -1,7 +1,6 @@
 import Link from "next/link";
 
 import { MuseumLogoStrip } from "@/components/MuseumLogoStrip";
-import { RotatingProHero } from "@/components/RotatingProHero";
 import { getT, type Locale } from "@/lib/translations";
 
 const POPULAR_LABEL: Record<Locale, string> = {
@@ -48,8 +47,8 @@ export function HomeHero({ locale }: { locale: Locale }) {
         className="pointer-events-none absolute inset-0 bg-gradient-to-r from-[#080b16]/90 via-[#080b16]/65 to-[#080b16]/40"
         aria-hidden
       />
-      <div className="relative z-10 mx-auto flex max-w-7xl items-center gap-12 px-5">
-        <div className="min-w-0 flex-1 text-left">
+      <div className="relative z-10 mx-auto max-w-7xl px-5">
+        <div className="min-w-0 text-left">
           <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-white">{t.heroH1}</h1>
           <p className="mt-4 max-w-2xl text-base sm:text-lg text-white">{t.heroSubtitle}</p>
           <form action={`${prefix}/search`} method="get" className="mt-8 max-w-xl">
@@ -77,11 +76,6 @@ export function HomeHero({ locale }: { locale: Locale }) {
                 {item.label}
               </Link>
             ))}
-          </div>
-        </div>
-        <div className="hidden w-[340px] shrink-0 lg:block xl:w-[380px]">
-          <div className="overflow-hidden rounded-2xl shadow-[0_20px_60px_rgba(0,0,0,0.45)]">
-            <RotatingProHero alt={t.heroH1} />
           </div>
         </div>
       </div>
