@@ -99,7 +99,9 @@ export async function FineArtProLanding({ locale, leadArtSlug }: FineArtProLandi
             <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-[#B08D4F]">
               {c.cmpEyebrow}
             </p>
-            <h2 className="mt-3 font-serif text-3xl font-normal leading-[1.15] sm:text-[2.4rem]">
+            {/* Same treatment as the homepage hero H1: body face (Urbanist), bold,
+                tight tracking — so the two entry points read as one brand. */}
+            <h2 className="mt-3 text-3xl font-bold tracking-tight sm:text-4xl lg:text-5xl">
               {c.cmpH1}
             </h2>
             <p className="mt-4 text-[15px] leading-relaxed text-[#A9A396]">{c.cmpSub}</p>
