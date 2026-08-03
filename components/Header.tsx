@@ -78,6 +78,12 @@ export default function Header({ browseGenres = [] }: HeaderProps) {
       return pathname === p;
     });
 
+  // Fine Art Pro funnel (landing + join): a checkout-style header with the logo
+  // only. Every nav link here is an exit from the one action the page exists for,
+  // so search / Browse / Explore / Log in are all dropped. The logo stays as a
+  // trust anchor and still links home.
+  const isProFunnel = /^(\/[a-z]{2})?\/fineart-pro(\/join)?\/?$/.test(pathname);
+
   const genresSegment = segments.genres;
   const stylesSegment = segments.styles;
   const artistsSegment = segments.artists;
@@ -159,6 +165,29 @@ export default function Header({ browseGenres = [] }: HeaderProps) {
   }, [mobileOpen]);
 
   const textColor = isHome ? "text-white/85 hover:text-white" : "text-[#1a1a1a] hover:text-black";
+
+  if (isProFunnel) {
+    return (
+      <header className="border-b border-[#e8e6e1] bg-[#f6f4ee]">
+        <div className="flex w-full items-center justify-center px-3 py-3 md:px-6">
+          <Link
+            href={prefix || "/"}
+            className="inline-flex shrink-0 items-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1a1a1a]/30"
+          >
+            <Image
+              src="/FineArt logo-dark.svg"
+              alt="Fine Art"
+              width={1024}
+              height={1024}
+              priority
+              className="h-10 w-auto max-h-10 max-w-[220px] object-contain"
+              data-pin-nopin="true"
+            />
+          </Link>
+        </div>
+      </header>
+    );
+  }
 
   return (
     <header
