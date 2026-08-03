@@ -78,11 +78,11 @@ export default function Header({ browseGenres = [] }: HeaderProps) {
       return pathname === p;
     });
 
-  // Fine Art Pro funnel (landing + join): a checkout-style header with the logo
-  // only. Every nav link here is an exit from the one action the page exists for,
-  // so search / Browse / Explore / Log in are all dropped. The logo stays as a
-  // trust anchor and still links home.
-  const isProFunnel = /^(\/[a-z]{2})?\/fineart-pro(\/join)?\/?$/.test(pathname);
+  // Fine Art Pro landing page: a checkout-style header with the logo only. Every
+  // nav link there is an exit from the one action the page exists for, so search /
+  // Browse / Explore / Log in are dropped; the logo stays as a trust anchor and
+  // still links home. The join page keeps the full navigation.
+  const isProFunnel = /^(\/[a-z]{2})?\/fineart-pro\/?$/.test(pathname);
 
   const genresSegment = segments.genres;
   const stylesSegment = segments.styles;
