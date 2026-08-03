@@ -8,7 +8,7 @@ import { getFineArtProT } from "@/lib/fineart-pro-translations";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import type { Locale } from "@/lib/translations";
 
-type SearchParams = Promise<{ plan?: string; error?: string; art?: string }>;
+type SearchParams = Promise<{ plan?: string; error?: string }>;
 
 /** Universities whose libraries list Fine Art Free — real, verifiable social proof
  *  (unlike the placeholder testimonials, which must not be used on a paid page). */
@@ -32,7 +32,6 @@ export async function FineArtProJoinPage({
   const sp = await searchParams;
   const plan = sp.plan === "yearly" || sp.plan === "monthly" ? sp.plan : null;
   const authError = sp.error;
-  const artSlug = sp.art ?? null;
   const c = getFineArtProT(locale);
 
   const supabase = await createSupabaseServerClient();
@@ -66,7 +65,7 @@ export async function FineArtProJoinPage({
     }
   }
 
-  const nextPath = fineArtProJoinPath(locale, plan, artSlug);
+  const nextPath = fineArtProJoinPath(locale, plan);
 
   // Resolve the locale's interpolating copy server-side: functions can't be passed
   // to a Client Component, so the client receives plain strings instead.

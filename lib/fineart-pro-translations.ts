@@ -1277,10 +1277,9 @@ export function fineArtProJoinMetadata(locale: Locale): Metadata {
 
 export function fineArtProLandingJoinHref(
   locale: Locale,
-  plan: "yearly" | "monthly",
-  art?: string | null
+  plan: "yearly" | "monthly"
 ): string {
-  return fineArtProJoinPath(locale, plan, art);
+  return fineArtProJoinPath(locale, plan);
 }
 
 export function fineArtProLandingHref(locale: Locale): string {

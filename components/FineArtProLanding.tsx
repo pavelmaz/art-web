@@ -171,7 +171,7 @@ export async function FineArtProLanding({ locale, leadArtSlug }: FineArtProLandi
                 <p className="mt-1 text-xs font-semibold text-[#8FBF9B]">{c.yearlySave}</p>
                 <p className="mt-1 text-xs text-white/55">{c.yearlyBilling}</p>
                 <PlanCtaLink
-                  href={fineArtProLandingJoinHref(locale, "yearly", leadArtSlug)}
+                  href={fineArtProLandingJoinHref(locale, "yearly")}
                   plan="yearly"
                   locale={locale}
                   className="mt-6 inline-flex w-full items-center justify-center rounded-lg bg-gradient-to-br from-[#F5C278] to-[#E4A23C] px-4 py-3 text-sm font-bold text-[#1a1a1a] shadow-[0_6px_18px_rgba(228,162,60,0.45)] transition hover:brightness-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1a1a1a] focus-visible:ring-offset-2"
@@ -187,7 +187,7 @@ export async function FineArtProLanding({ locale, leadArtSlug }: FineArtProLandi
                 </p>
                 <p className="mt-1 text-xs text-white/55">{c.monthlyBilling}</p>
                 <PlanCtaLink
-                  href={fineArtProLandingJoinHref(locale, "monthly", leadArtSlug)}
+                  href={fineArtProLandingJoinHref(locale, "monthly")}
                   plan="monthly"
                   locale={locale}
                   className="glass-dark-btn mt-6 inline-flex w-full items-center justify-center rounded-lg px-4 py-3 text-sm font-bold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50"
