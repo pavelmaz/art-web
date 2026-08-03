@@ -13,12 +13,19 @@ import { useEffect, useState } from "react";
  */
 const HOLD_MS = 3000;
 
+/**
+ * Detail crops, not whole paintings: a full painting shrunk into this box looks
+ * the same at any resolution, so it proves nothing. These are cropped from the
+ * originals at native resolution (3.7–5.7 real pixels per displayed pixel), which
+ * is why the craquelure, canvas weave and loaded brushstrokes survive — that is
+ * the thing Pro actually sells.
+ */
 const IMAGES = [
-  "/images/fine-art-pro-wanderer.jpg",
-  "/images/fine-art-pro-girl.jpg",
-  "/images/fine-art-pro-monk.webp",
-  "/images/fine-art-pro-pearl.webp",
-  "/images/fine-art-pro-rafael.jpg",
+  "/images/pro-detail/eyck-eye.jpg",       // van Eyck, 8,889px — craquelure
+  "/images/pro-detail/rembrandt-face.jpg", // Rembrandt, 12,243px — impasto
+  "/images/pro-detail/raphael-face.jpg",   // Raphael, 15,566px — canvas weave
+  "/images/pro-detail/vangogh-rey.jpg",    // Van Gogh, 8,279px — brush ridges
+  "/images/pro-detail/vangogh-vine.jpg",   // Van Gogh, 11,406px — thick paint
 ];
 
 type RotatingProHeroProps = {
