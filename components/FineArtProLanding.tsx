@@ -80,11 +80,24 @@ export async function FineArtProLanding({ locale, leadArtSlug }: FineArtProLandi
       {/* Dark hero: the detail crops read far better on a near-black ground, and
           the glass panels (same treatment as the homepage search bar) need
           something behind them to refract. The header sits transparently over it. */}
-      <section className="relative bg-[#0f1115] px-3 pb-12 pt-24 text-white md:px-6 md:pb-16 md:pt-28 lg:pb-20">
+      <section className="relative overflow-hidden bg-[#0f1115] px-3 pb-12 pt-24 text-white md:px-6 md:pb-16 md:pt-28 lg:pb-20">
+        {/* Glass refracts what is behind it — over a flat colour it just reads as
+            grey. These two layers give it texture and colour: a heavily blurred
+            crop of the Van Gogh, plus warm/cool blooms. */}
+        <div aria-hidden className="pointer-events-none absolute inset-0">
+          <div
+            className="absolute inset-0 scale-125 bg-cover bg-center opacity-[0.28] blur-[64px]"
+            style={{ backgroundImage: "url(/images/pro-detail/vangogh-vine.jpg)" }}
+          />
+          <div className="absolute -left-24 top-10 size-[520px] rounded-full bg-[#E4A23C]/20 blur-[130px]" />
+          <div className="absolute -right-24 bottom-0 size-[560px] rounded-full bg-[#3B6EA5]/25 blur-[140px]" />
+          <div className="absolute inset-0 bg-gradient-to-b from-[#0f1115]/70 via-[#0f1115]/55 to-[#0f1115]/85" />
+        </div>
+        <div className="relative">
         <div className="mr-auto flex max-w-7xl flex-col gap-10 lg:flex-row lg:items-start lg:gap-12 xl:gap-16">
           {/* Image — shown after the value/price on mobile, left on desktop */}
           <div className="order-2 -ml-1 w-full shrink-0 lg:order-1 lg:max-w-[42%]">
-            <div className="glass-surface overflow-hidden rounded-2xl">
+            <div className="glass-dark overflow-hidden rounded-2xl">
               <RotatingProHero alt={c.heroImageAlt} leadImage={leadImage} />
             </div>
           </div>
@@ -113,7 +126,7 @@ export async function FineArtProLanding({ locale, leadArtSlug }: FineArtProLandi
                   {[...c.testimonials, ...c.testimonials].map((t, i) => (
                     <li
                       key={`${t.name}-${i}`}
-                      className="glass-chip mr-3.5 flex w-[260px] shrink-0 flex-col rounded-xl px-4 py-3"
+                      className="glass-dark-chip mr-3.5 flex w-[260px] shrink-0 flex-col rounded-xl px-4 py-3"
                       aria-hidden={i >= c.testimonials.length}
                     >
                       <div className="flex items-center gap-2.5">
@@ -146,7 +159,7 @@ export async function FineArtProLanding({ locale, leadArtSlug }: FineArtProLandi
             <p className="mt-7 text-sm font-medium text-white/90">{c.valueNote}</p>
 
             <div className="mt-5 grid gap-4 sm:grid-cols-2 sm:gap-5">
-              <div className="glass-surface relative flex flex-col rounded-2xl p-6 ring-1 ring-white/40">
+              <div className="glass-dark-strong relative flex flex-col rounded-2xl p-6">
                 <span className="absolute -top-3 left-6 rounded-full bg-white px-3 py-1 text-xs font-semibold text-[#12100E]">
                   {c.yearlyBadge}
                 </span>
@@ -164,7 +177,7 @@ export async function FineArtProLanding({ locale, leadArtSlug }: FineArtProLandi
                 </Link>
               </div>
 
-              <div className="glass-inset flex flex-col rounded-2xl p-6">
+              <div className="glass-dark flex flex-col rounded-2xl p-6">
                 <p className="text-sm text-white/70">{c.monthlyPlan}</p>
                 <p className="mt-3 text-2xl font-bold tracking-tight text-white sm:text-[1.65rem]">
                   {c.monthlyPrice}
@@ -172,7 +185,7 @@ export async function FineArtProLanding({ locale, leadArtSlug }: FineArtProLandi
                 <p className="mt-1 text-xs text-white/55">{c.monthlyBilling}</p>
                 <Link
                   href={fineArtProLandingJoinHref(locale, "monthly", leadArtSlug)}
-                  className="glass-secondary mt-6 inline-flex w-full items-center justify-center rounded-lg px-4 py-3 text-sm font-bold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50"
+                  className="glass-dark-btn mt-6 inline-flex w-full items-center justify-center rounded-lg px-4 py-3 text-sm font-bold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50"
                 >
                   {c.cta}
                 </Link>
@@ -217,6 +230,7 @@ export async function FineArtProLanding({ locale, leadArtSlug }: FineArtProLandi
               </table>
             </div>
           </div>
+        </div>
         </div>
       </section>
 
