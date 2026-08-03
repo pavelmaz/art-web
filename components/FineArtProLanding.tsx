@@ -51,7 +51,7 @@ function comparisonCell(value: string | boolean) {
   if (value === true) {
     return (
       <>
-        <span className="text-[#3b8e3f]" aria-hidden>
+        <span className="text-[#8FBF9B]" aria-hidden>
           ✓
         </span>
         <span className="sr-only">Included</span>
@@ -61,7 +61,7 @@ function comparisonCell(value: string | boolean) {
   if (value === false) {
     return (
       <>
-        <span className="text-[#c4c4c4]" aria-hidden>
+        <span className="text-white/25" aria-hidden>
           –
         </span>
         <span className="sr-only">Not included</span>
@@ -195,18 +195,18 @@ export async function FineArtProLanding({ locale, leadArtSlug }: FineArtProLandi
             <p className="mt-4 text-center text-xs text-white/60">{c.ctaNote}</p>
 
             {/* Free vs Pro — single source of truth for features (modern comparison table). */}
-            <div className="mt-8 overflow-hidden rounded-2xl border border-[#e3e0d9] bg-white">
+            <div className="glass-dark mt-8 overflow-hidden rounded-2xl">
               <table className="w-full table-fixed border-collapse">
                 <thead>
                   <tr>
-                    <th className="w-[46%] px-4 py-3.5 text-left text-xs font-medium text-[#9a9a9a]">
+                    <th className="w-[46%] px-4 py-3.5 text-left text-xs font-medium text-white/45">
                       {c.comparisonHeader}
                     </th>
-                    <th className="w-[27%] px-2 py-3.5 text-center text-[13px] font-medium text-[#8a8a8a]">
+                    <th className="w-[27%] px-2 py-3.5 text-center text-[13px] font-medium text-white/50">
                       {c.compareFreeTitle}
                     </th>
-                    <th className="w-[27%] bg-[#f4faf4] px-2 py-3.5 text-center">
-                      <span className="inline-block rounded-full bg-[#e7f4e7] px-2.5 py-1 text-xs font-semibold text-[#2c6e30]">
+                    <th className="w-[27%] bg-white/[0.07] px-2 py-3.5 text-center">
+                      <span className="inline-block rounded-full bg-[#E4A23C]/20 px-2.5 py-1 text-xs font-semibold text-[#F5C278]">
                         {c.compareProTitle}
                       </span>
                     </th>
@@ -215,13 +215,13 @@ export async function FineArtProLanding({ locale, leadArtSlug }: FineArtProLandi
                 <tbody>
                   {c.comparison.map((row) => (
                     <tr key={row.feature}>
-                      <td className="border-t border-[#ece9e3] px-4 py-3 text-sm text-[#4a4a4a]">
+                      <td className="border-t border-white/10 px-4 py-3 text-sm text-white/75">
                         {row.feature}
                       </td>
-                      <td className="border-t border-[#ece9e3] px-2 py-3 text-center text-sm text-[#9a9a9a]">
+                      <td className="border-t border-white/10 px-2 py-3 text-center text-sm text-white/40">
                         {comparisonCell(row.free)}
                       </td>
-                      <td className="border-t border-[#ece9e3] bg-[#f4faf4] px-2 py-3 text-center text-sm font-medium text-[#1a1a1a]">
+                      <td className="border-t border-white/10 bg-white/[0.07] px-2 py-3 text-center text-sm font-medium text-white">
                         {comparisonCell(row.pro)}
                       </td>
                     </tr>
