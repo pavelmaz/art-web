@@ -133,7 +133,7 @@ export function FineArtProJoinAuth({ nextPath, plan, isLoggedIn, copy }: FineArt
             type="button"
             onClick={() => void signInWithGoogle()}
             disabled={busy}
-            className="flex w-full items-center justify-center gap-3 rounded-lg bg-[#1a1a1a] px-4 py-3 text-sm font-medium text-white shadow-sm transition-colors hover:bg-black disabled:opacity-60"
+            className="flex w-full items-center justify-center gap-3 rounded-lg bg-gradient-to-br from-[#F5C278] to-[#E4A23C] px-4 py-3.5 text-[15px] font-bold text-[#1a1a1a] shadow-[0_6px_18px_rgba(228,162,60,0.45)] transition hover:brightness-95 disabled:opacity-60"
           >
             <span className="flex size-5 items-center justify-center rounded-full bg-white">
               <svg width="14" height="14" viewBox="0 0 18 18" aria-hidden="true">

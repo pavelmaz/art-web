@@ -52,6 +52,9 @@ export type FineArtProCopy = {
   joinIncluded: string;
   joinNoCharge: string;
   joinContinueEmail: string;
+  joinHeadline: string;
+  joinArtNote: string;
+  joinTrustedBy: string;
   joinAuth: {
     choosePlanFirst: string;
     selectedPlan: (plan: "yearly" | "monthly") => string;
@@ -213,6 +216,9 @@ const en: FineArtProCopy = {
   joinIncluded: "Included with Pro",
   joinNoCharge: "You haven't been charged.",
   joinContinueEmail: "or continue with email",
+  joinHeadline: "One step from 500,000 masterpieces",
+  joinArtNote: "This one is yours in full resolution.",
+  joinTrustedBy: "Recommended by university libraries",
   joinAuth: {
     choosePlanFirst: "Choose Monthly or Yearly on the Fine Art Pro page first.",
     selectedPlan: (plan) => `Selected plan: ${plan === "yearly" ? "Yearly" : "Monthly"}`,
@@ -327,6 +333,9 @@ const es: FineArtProCopy = {
   joinIncluded: "Incluido con Pro",
   joinNoCharge: "No se te ha cobrado nada.",
   joinContinueEmail: "o continuar con email",
+  joinHeadline: "A un paso de 500.000 obras maestras",
+  joinArtNote: "Esta será tuya en máxima resolución.",
+  joinTrustedBy: "Recomendado por bibliotecas universitarias",
   joinAuth: {
     ...en.joinAuth,
     choosePlanFirst: "Elige plan Mensual o Anual en la página de Fine Art Pro primero.",
@@ -438,6 +447,9 @@ const pt: FineArtProCopy = {
   joinIncluded: "Incluído no Pro",
   joinNoCharge: "Você não foi cobrado.",
   joinContinueEmail: "ou continuar com e-mail",
+  joinHeadline: "A um passo de 500.000 obras-primas",
+  joinArtNote: "Esta será sua em resolução máxima.",
+  joinTrustedBy: "Recomendado por bibliotecas universitárias",
   joinAuth: {
     ...es.joinAuth,
     choosePlanFirst: "Escolha Mensal ou Anual na página Fine Art Pro primeiro.",
@@ -537,6 +549,9 @@ const ja: FineArtProCopy = {
   joinIncluded: "Proに含まれるもの",
   joinNoCharge: "請求は発生していません。",
   joinContinueEmail: "またはメールで続ける",
+  joinHeadline: "50万点の名画まであと1ステップ",
+  joinArtNote: "この作品を最高解像度で。",
+  joinTrustedBy: "大学図書館に推薦されています",
   joinAuth: {
     ...en.joinAuth,
     choosePlanFirst: "先にFine Art Proページで月額または年間プランを選んでください。",
@@ -644,6 +659,9 @@ const fr: FineArtProCopy = {
   joinIncluded: "Inclus avec Pro",
   joinNoCharge: "Vous n'avez pas été débité.",
   joinContinueEmail: "ou continuer avec un e-mail",
+  joinHeadline: "À un pas de 500 000 chefs-d'œuvre",
+  joinArtNote: "Celle-ci sera à vous en pleine résolution.",
+  joinTrustedBy: "Recommandé par des bibliothèques universitaires",
   joinAuth: {
     ...en.joinAuth,
     choosePlanFirst: "Choisissez Mensuel ou Annuel sur la page Fine Art Pro d'abord.",
@@ -753,6 +771,9 @@ const de: FineArtProCopy = {
   joinIncluded: "In Pro enthalten",
   joinNoCharge: "Es wurde nichts abgebucht.",
   joinContinueEmail: "oder mit E-Mail fortfahren",
+  joinHeadline: "Nur ein Schritt bis zu 500.000 Meisterwerken",
+  joinArtNote: "Dieses gehört Ihnen in voller Auflösung.",
+  joinTrustedBy: "Empfohlen von Universitätsbibliotheken",
   joinAuth: {
     ...en.joinAuth,
     choosePlanFirst: "Wählen Sie zuerst Monats- oder Jahresabo auf der Fine Art Pro-Seite.",
@@ -862,6 +883,9 @@ const it: FineArtProCopy = {
   joinIncluded: "Incluso con Pro",
   joinNoCharge: "Non ti è stato addebitato nulla.",
   joinContinueEmail: "o continua con l'email",
+  joinHeadline: "A un passo da 500.000 capolavori",
+  joinArtNote: "Questo sarà tuo alla massima risoluzione.",
+  joinTrustedBy: "Consigliato dalle biblioteche universitarie",
   joinAuth: {
     ...en.joinAuth,
     choosePlanFirst: "Scegli prima Mensile o Annuale sulla pagina Fine Art Pro.",
@@ -969,6 +993,9 @@ const ko: FineArtProCopy = {
   joinIncluded: "Pro 포함 사항",
   joinNoCharge: "결제되지 않았습니다.",
   joinContinueEmail: "또는 이메일로 계속하기",
+  joinHeadline: "50만 점의 명작까지 한 단계",
+  joinArtNote: "이 작품을 최고 해상도로.",
+  joinTrustedBy: "대학 도서관이 추천합니다",
   joinAuth: {
     ...en.joinAuth,
     choosePlanFirst: "먼저 Fine Art Pro 페이지에서 월간 또는 연간 플랜을 선택하세요.",
@@ -1075,6 +1102,9 @@ const ru: FineArtProCopy = {
   joinIncluded: "Входит в Pro",
   joinNoCharge: "Списание не производилось.",
   joinContinueEmail: "или продолжить по эл. почте",
+  joinHeadline: "Один шаг до 500 000 шедевров",
+  joinArtNote: "Эта работа — ваша в полном разрешении.",
+  joinTrustedBy: "Рекомендовано университетскими библиотеками",
   joinAuth: {
     ...en.joinAuth,
     choosePlanFirst: "Сначала выберите месячный или годовой план на странице Fine Art Pro.",
@@ -1182,6 +1212,9 @@ const zh: FineArtProCopy = {
   joinIncluded: "Pro 包含内容",
   joinNoCharge: "尚未向您收费。",
   joinContinueEmail: "或使用邮箱继续",
+  joinHeadline: "距离 50 万件名作仅一步之遥",
+  joinArtNote: "这幅作品将以最高分辨率归您所有。",
+  joinTrustedBy: "大学图书馆推荐",
   joinAuth: {
     ...en.joinAuth,
     choosePlanFirst: "请先在 Fine Art Pro 页面选择月付或年付方案。",
@@ -1242,8 +1275,12 @@ export function fineArtProJoinMetadata(locale: Locale): Metadata {
   };
 }
 
-export function fineArtProLandingJoinHref(locale: Locale, plan: "yearly" | "monthly"): string {
-  return fineArtProJoinPath(locale, plan);
+export function fineArtProLandingJoinHref(
+  locale: Locale,
+  plan: "yearly" | "monthly",
+  art?: string | null
+): string {
+  return fineArtProJoinPath(locale, plan, art);
 }
 
 export function fineArtProLandingHref(locale: Locale): string {

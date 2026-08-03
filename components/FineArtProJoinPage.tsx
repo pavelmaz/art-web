@@ -3,12 +3,42 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 
 import { FineArtProJoinAuth } from "@/components/FineArtProJoinAuth";
+import { RotatingProHero } from "@/components/RotatingProHero";
 import { fineArtProJoinPath, fineArtProPath } from "@/lib/fineart-pro-path";
 import { getFineArtProT } from "@/lib/fineart-pro-translations";
+import { supabase } from "@/lib/supabase";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import type { Locale } from "@/lib/translations";
+import { artworkDetailImageUrl } from "@/lib/utils";
 
-type SearchParams = Promise<{ plan?: string; error?: string }>;
+type SearchParams = Promise<{ plan?: string; error?: string; art?: string }>;
+
+/** Universities whose libraries list Fine Art Free — real, verifiable social proof
+ *  (unlike the placeholder testimonials, which must not be used on a paid page). */
+const UNIVERSITY_LOGOS = [
+  { file: "york.png", name: "University of York" },
+  { file: "waterloo.png", name: "University of Waterloo" },
+  { file: "alberta.png", name: "University of Alberta" },
+  { file: "skidmore.png", name: "Skidmore College" },
+  { file: "seville.png", name: "University of Seville" },
+] as const;
+
+/** Display image for the artwork the visitor came from; null on any miss. */
+async function leadImageForSlug(slug: string | null | undefined): Promise<string | null> {
+  if (!slug || !/^[a-z0-9-]{1,100}$/.test(slug)) return null;
+  try {
+    const { data } = await supabase
+      .from("artworks")
+      .select("image_id, url")
+      .eq("slug", slug)
+      .limit(1);
+    const row = data?.[0];
+    if (!row?.image_id) return null;
+    return artworkDetailImageUrl({ url: row.url ?? null, image_id: row.image_id });
+  } catch {
+    return null;
+  }
+}
 
 type FineArtProJoinPageProps = {
   locale: Locale;
@@ -19,7 +49,9 @@ export async function FineArtProJoinPage({ locale, searchParams }: FineArtProJoi
   const sp = await searchParams;
   const plan = sp.plan === "yearly" || sp.plan === "monthly" ? sp.plan : null;
   const authError = sp.error;
+  const artSlug = sp.art ?? null;
   const c = getFineArtProT(locale);
+  const leadImage = await leadImageForSlug(artSlug);
 
   const supabase = await createSupabaseServerClient();
   const {
@@ -49,7 +81,7 @@ export async function FineArtProJoinPage({ locale, searchParams }: FineArtProJoi
     }
   }
 
-  const nextPath = fineArtProJoinPath(locale, plan);
+  const nextPath = fineArtProJoinPath(locale, plan, artSlug);
 
   // Resolve the locale's interpolating copy server-side: functions can't be passed
   // to a Client Component, so the client receives plain strings instead.
@@ -73,15 +105,51 @@ export async function FineArtProJoinPage({ locale, searchParams }: FineArtProJoi
 
   return (
     <div className="min-h-[50vh] bg-[#f6f4ee] px-3 py-10 md:px-6 md:py-14">
-      <div className="mx-auto max-w-md">
-        <p className="text-xs font-medium uppercase tracking-wide text-[#6b6b6b]">
-          {c.joinEyebrow}
-        </p>
-        <h1 className="mt-2 text-2xl font-semibold tracking-tight text-[#1a1a1a]">{c.joinH1}</h1>
+      {/* Two columns on desktop: the art carries the emotion (this is an art site —
+          the checkout page must show art), the right column carries the action. */}
+      <div className="mx-auto grid max-w-5xl gap-8 lg:grid-cols-[minmax(0,1fr)_400px] lg:items-start lg:gap-14">
+        {/* Left: the artwork they came for (or a rotating masterpiece). */}
+        <div className="order-2 lg:order-1 lg:sticky lg:top-8">
+          <div className="overflow-hidden rounded-2xl border border-[#e8e6e1] bg-white shadow-[0_12px_40px_rgba(0,0,0,0.10)]">
+            <RotatingProHero alt={c.heroImageAlt} leadImage={leadImage} />
+          </div>
+          {leadImage ? (
+            <p className="mt-3 text-center text-sm text-[#6b6b6b]">{c.joinArtNote}</p>
+          ) : null}
+
+          {/* Real social proof: university libraries that list Fine Art Free. */}
+          <div className="mt-8">
+            <p className="text-center text-[11px] font-medium uppercase tracking-[0.14em] text-[#9a9a9a]">
+              {c.joinTrustedBy}
+            </p>
+            <div className="mt-4 flex flex-wrap items-center justify-center gap-x-7 gap-y-4">
+              {UNIVERSITY_LOGOS.map((u) => (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  key={u.file}
+                  src={`/images/university-logos/${u.file}`}
+                  alt={u.name}
+                  className="h-7 w-auto opacity-45 mix-blend-multiply transition hover:opacity-70"
+                  loading="lazy"
+                />
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Right: the action column. */}
+        <div className="order-1 lg:order-2">
+          <p className="text-xs font-medium uppercase tracking-wide text-[#6b6b6b]">
+            {c.joinEyebrow}
+          </p>
+          <h1 className="mt-2 text-[1.75rem] font-bold leading-tight tracking-tight text-[#1a1a1a] sm:text-[2rem]">
+            {c.joinHeadline}
+          </h1>
+          <p className="mt-1.5 text-sm text-[#6b6b6b]">{c.joinH1}</p>
 
         {/* Step indicator — a visible "2 steps, you're on the first" beats an
             unexplained sign-in wall. */}
-        <div className="mt-4 flex items-center gap-2 text-xs">
+        <div className="mt-5 flex items-center gap-2 text-xs">
           <span className="inline-flex items-center gap-1.5 rounded-full bg-[#1a1a1a] px-2.5 py-1 font-medium text-white">
             <span className="grid size-4 place-items-center rounded-full bg-white/25 text-[10px]">1</span>
             {c.joinStepAccount}
@@ -155,14 +223,15 @@ export async function FineArtProJoinPage({ locale, searchParams }: FineArtProJoi
           </ul>
         </div>
 
-        <p className="mt-8 text-center text-sm text-[#6b6b6b]">
-          <Link
-            href={fineArtProPath(locale)}
-            className="text-[#1a1a1a] underline underline-offset-2 hover:no-underline"
-          >
-            {c.joinBack}
-          </Link>
-        </p>
+          <p className="mt-8 text-center text-sm text-[#6b6b6b]">
+            <Link
+              href={fineArtProPath(locale)}
+              className="text-[#1a1a1a] underline underline-offset-2 hover:no-underline"
+            >
+              {c.joinBack}
+            </Link>
+          </p>
+        </div>
       </div>
     </div>
   );
