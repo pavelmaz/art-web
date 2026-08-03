@@ -61,6 +61,8 @@ export type FineArtProCopy = {
   cmpFreeLabel: string;
   cmpProLabel: string;
   cmpAnchor: string;
+  cmpPerWork: string;
+  cmpCta: string;
   joinAuth: {
     choosePlanFirst: string;
     selectedPlan: (plan: "yearly" | "monthly") => string;
@@ -231,6 +233,8 @@ const en: FineArtProCopy = {
   cmpFreeLabel: "Free · 1,400 px",
   cmpProLabel: "Pro · original 8,889 px",
   cmpAnchor: "One stock photo costs $12–15. A year of Fine Art Pro costs $45 — for 500,000 artworks.",
+  cmpPerWork: "$0.00009 per artwork",
+  cmpCta: "Unlock full resolution",
   joinAuth: {
     choosePlanFirst: "Choose Monthly or Yearly on the Fine Art Pro page first.",
     selectedPlan: (plan) => `Selected plan: ${plan === "yearly" ? "Yearly" : "Monthly"}`,
@@ -354,6 +358,8 @@ const es: FineArtProCopy = {
   cmpFreeLabel: "Gratis · 1.400 px",
   cmpProLabel: "Pro · original de 8.889 px",
   cmpAnchor: "Una sola foto de stock cuesta 12–15 $. Un año de Fine Art Pro cuesta 45 $ — por 500.000 obras.",
+  cmpPerWork: "0,00009 $ por obra",
+  cmpCta: "Desbloquear resolución completa",
   joinAuth: {
     ...en.joinAuth,
     choosePlanFirst: "Elige plan Mensual o Anual en la página de Fine Art Pro primero.",
@@ -474,6 +480,8 @@ const pt: FineArtProCopy = {
   cmpFreeLabel: "Grátis · 1.400 px",
   cmpProLabel: "Pro · original de 8.889 px",
   cmpAnchor: "Uma única foto de banco de imagens custa US$ 12–15. Um ano de Fine Art Pro custa US$ 45 — por 500.000 obras.",
+  cmpPerWork: "US$ 0,00009 por obra",
+  cmpCta: "Desbloquear resolução máxima",
   joinAuth: {
     ...es.joinAuth,
     choosePlanFirst: "Escolha Mensal ou Anual na página Fine Art Pro primeiro.",
@@ -582,6 +590,8 @@ const ja: FineArtProCopy = {
   cmpFreeLabel: "無料 · 1,400 px",
   cmpProLabel: "Pro · オリジナル 8,889 px",
   cmpAnchor: "ストック写真1枚で12〜15ドル。Fine Art Proは年間45ドルで50万点。",
+  cmpPerWork: "1作品あたり0.00009ドル",
+  cmpCta: "フル解像度を解放する",
   joinAuth: {
     ...en.joinAuth,
     choosePlanFirst: "先にFine Art Proページで月額または年間プランを選んでください。",
@@ -698,6 +708,8 @@ const fr: FineArtProCopy = {
   cmpFreeLabel: "Gratuit · 1 400 px",
   cmpProLabel: "Pro · original de 8 889 px",
   cmpAnchor: "Une seule photo de banque d'images coûte 12–15 $. Un an de Fine Art Pro coûte 45 $ — pour 500 000 œuvres.",
+  cmpPerWork: "0,00009 $ par œuvre",
+  cmpCta: "Débloquer la pleine résolution",
   joinAuth: {
     ...en.joinAuth,
     choosePlanFirst: "Choisissez Mensuel ou Annuel sur la page Fine Art Pro d'abord.",
@@ -816,6 +828,8 @@ const de: FineArtProCopy = {
   cmpFreeLabel: "Kostenlos · 1.400 px",
   cmpProLabel: "Pro · Original mit 8.889 px",
   cmpAnchor: "Ein einziges Stockfoto kostet 12–15 $. Ein Jahr Fine Art Pro kostet 45 $ — für 500.000 Werke.",
+  cmpPerWork: "0,00009 $ pro Werk",
+  cmpCta: "Volle Auflösung freischalten",
   joinAuth: {
     ...en.joinAuth,
     choosePlanFirst: "Wählen Sie zuerst Monats- oder Jahresabo auf der Fine Art Pro-Seite.",
@@ -934,6 +948,8 @@ const it: FineArtProCopy = {
   cmpFreeLabel: "Gratis · 1.400 px",
   cmpProLabel: "Pro · originale da 8.889 px",
   cmpAnchor: "Una singola foto stock costa 12–15 $. Un anno di Fine Art Pro costa 45 $ — per 500.000 opere.",
+  cmpPerWork: "0,00009 $ per opera",
+  cmpCta: "Sblocca la risoluzione massima",
   joinAuth: {
     ...en.joinAuth,
     choosePlanFirst: "Scegli prima Mensile o Annuale sulla pagina Fine Art Pro.",
@@ -1050,6 +1066,8 @@ const ko: FineArtProCopy = {
   cmpFreeLabel: "무료 · 1,400 px",
   cmpProLabel: "Pro · 원본 8,889 px",
   cmpAnchor: "스톡 사진 한 장이 12~15달러. Fine Art Pro는 연 45달러로 50만 점.",
+  cmpPerWork: "작품당 0.00009달러",
+  cmpCta: "전체 해상도 잠금 해제",
   joinAuth: {
     ...en.joinAuth,
     choosePlanFirst: "먼저 Fine Art Pro 페이지에서 월간 또는 연간 플랜을 선택하세요.",
@@ -1165,6 +1183,8 @@ const ru: FineArtProCopy = {
   cmpFreeLabel: "Бесплатно · 1 400 px",
   cmpProLabel: "Pro · оригинал 8 889 px",
   cmpAnchor: "Одна стоковая фотография стоит 12–15 $. Год Fine Art Pro — 45 $ за 500 000 работ.",
+  cmpPerWork: "0,00009 $ за работу",
+  cmpCta: "Открыть полное разрешение",
   joinAuth: {
     ...en.joinAuth,
     choosePlanFirst: "Сначала выберите месячный или годовой план на странице Fine Art Pro.",
@@ -1281,6 +1301,8 @@ const zh: FineArtProCopy = {
   cmpFreeLabel: "免费 · 1,400 px",
   cmpProLabel: "Pro · 原图 8,889 px",
   cmpAnchor: "一张图库照片售价 12–15 美元。Fine Art Pro 一年 45 美元，可用 50 万件作品。",
+  cmpPerWork: "每件作品 0.00009 美元",
+  cmpCta: "解锁完整分辨率",
   joinAuth: {
     ...en.joinAuth,
     choosePlanFirst: "请先在 Fine Art Pro 页面选择月付或年付方案。",

@@ -138,10 +138,45 @@ export async function FineArtProLanding({ locale, leadArtSlug }: FineArtProLandi
             </figure>
           </div>
 
-          {/* Anchor: judge the price against what one stock photo costs, not zero. */}
-          <p className="mx-auto mt-9 max-w-[52ch] text-center text-[15px] leading-relaxed text-[#BDB7A8]">
-            {c.cmpAnchor}
-          </p>
+          {/* Anchor beside the ask: the price is judged against what one stock
+              photo costs, not against zero, and the decision is made right here. */}
+          <div className="mx-auto mt-10 grid max-w-3xl items-center gap-8 md:grid-cols-2">
+            <div>
+              <p className="text-[15px] leading-relaxed text-[#BDB7A8]">{c.cmpAnchor}</p>
+              <p className="mt-3 font-mono text-[11px] text-[#7E7A6E]">{c.cmpPerWork}</p>
+            </div>
+
+            <div className="rounded-xl border border-[#34302A] bg-[#1C1A16] p-5">
+              <div className="flex items-baseline justify-between">
+                <span className="text-[13px] text-[#9C978A]">{c.yearlyPlan}</span>
+                <span className="rounded-full bg-[#26361F] px-2 py-0.5 text-[10.5px] font-bold text-[#8FBF9B]">
+                  {c.yearlySave}
+                </span>
+              </div>
+              <p className="mt-1.5 text-[1.75rem] font-extrabold tracking-tight text-[#F0EDE4]">
+                {c.yearlyPrice}
+              </p>
+              <p className="mt-0.5 text-xs text-[#7E7A6E]">{c.yearlyBilling}</p>
+              <Link
+                href={fineArtProLandingJoinHref(locale, "yearly", leadArtSlug)}
+                className="mt-4 inline-flex w-full items-center justify-center rounded-lg bg-gradient-to-br from-[#F5C278] to-[#E4A23C] px-4 py-3 text-sm font-bold text-[#12100E] shadow-[0_6px_18px_rgba(228,162,60,0.4)] transition hover:brightness-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E4A23C] focus-visible:ring-offset-2 focus-visible:ring-offset-[#12100E]"
+              >
+                {c.cmpCta}
+              </Link>
+              <div className="mt-3 flex items-center justify-between border-t border-[#2A2722] pt-3 text-xs text-[#9C978A]">
+                <Link
+                  href={fineArtProLandingJoinHref(locale, "monthly", leadArtSlug)}
+                  className="underline underline-offset-2 hover:text-[#F0EDE4]"
+                >
+                  {c.monthlyPlan}
+                </Link>
+                <span>
+                  <b className="text-[#F0EDE4]">{c.monthlyPrice}</b>
+                </span>
+              </div>
+              <p className="mt-3 text-center text-[11px] text-[#7E7A6E]">{c.ctaNote}</p>
+            </div>
+          </div>
 
           {/* The credential no competitor can buy. */}
           <div className="mt-10 border-t border-[#262320] pt-8">
@@ -164,106 +199,21 @@ export async function FineArtProLanding({ locale, leadArtSlug }: FineArtProLandi
         </div>
       </section>
 
-      <section className="px-3 pb-10 pt-10 md:px-6 md:pb-14 md:pt-12 lg:pb-16">
-        <div className="mr-auto flex max-w-7xl flex-col gap-10 lg:flex-row lg:items-start lg:gap-12 xl:gap-16">
-          {/* Image — shown after the value/price on mobile, left on desktop */}
-          <div className="order-2 -ml-1 w-full shrink-0 lg:order-1 lg:max-w-[42%]">
+      {/* What Pro adds, next to the artwork the visitor came from. The pitch and
+          the price already happened above — this section only substantiates it. */}
+      <section className="px-3 pb-12 pt-12 md:px-6 md:pb-16 md:pt-14">
+        <div className="mx-auto flex max-w-5xl flex-col gap-10 lg:flex-row lg:items-start lg:gap-14">
+          <div className="w-full shrink-0 lg:max-w-[38%]">
             <div className="overflow-hidden rounded-2xl border border-[#e8e6e1] bg-[#f5f5f5] shadow-sm">
               <RotatingProHero alt={c.heroImageAlt} leadImage={leadImage} />
             </div>
           </div>
 
-          <div className="order-1 min-w-0 flex-1 lg:order-2">
-            <h1 className="font-serif text-3xl font-bold leading-tight tracking-tight text-[#1a1a1a] sm:text-4xl lg:text-[2.75rem] lg:leading-[1.12]">
+          <div className="min-w-0 flex-1">
+            <h2 className="font-serif text-2xl font-normal leading-tight tracking-tight text-[#1a1a1a] sm:text-[1.9rem]">
               {c.heroH1}
-            </h1>
-
-            <p className="mt-4 text-base leading-relaxed text-[#4a4a4a] sm:text-lg">{c.heroSub}</p>
-
-            {/* Social proof — a rating line plus an auto-scrolling review strip, so
-                visitors see real reviews exist immediately, without scrolling down. */}
-            <div className="mt-5">
-              <div className="flex items-center gap-2">
-                <span className="text-[15px] tracking-tight text-[#E0A93C]" aria-hidden>
-                  ★★★★★
-                </span>
-                <span className="text-[13px] text-[#4a4a4a]">
-                  <span className="font-semibold text-[#1a1a1a]">{c.trustRating}</span> · {c.trustCount}
-                </span>
-              </div>
-
-              <div className="fap-marquee-mask mt-3">
-                <ul className="fap-marquee-track">
-                  {[...c.testimonials, ...c.testimonials].map((t, i) => (
-                    <li
-                      key={`${t.name}-${i}`}
-                      className="mr-3.5 flex w-[260px] shrink-0 flex-col rounded-xl border border-[#ece9e3] bg-white px-4 py-3"
-                      aria-hidden={i >= c.testimonials.length}
-                    >
-                      <div className="flex items-center gap-2.5">
-                        <span
-                          className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-semibold text-white"
-                          style={{ backgroundColor: AVATAR_COLORS[i % AVATAR_COLORS.length] }}
-                          aria-hidden
-                        >
-                          {t.name.charAt(0)}
-                        </span>
-                        <span className="truncate text-[13px] font-semibold text-[#1a1a1a]">
-                          {t.name}
-                        </span>
-                        <span className="ml-auto text-[11px] tracking-tight text-[#E0A93C]" aria-hidden>
-                          ★★★★★
-                        </span>
-                      </div>
-                      <p className="mt-2 line-clamp-2 text-[12px] leading-snug text-[#5a5a5a]">
-                        {t.quote}
-                      </p>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </div>
-
-            {/* Pricing FIRST — visitors arrive with intent; the $/mo is the
-                strongest hook, so it must land in the first scroll. The Free/Pro
-                comparison follows as supporting proof. */}
-            <p className="mt-7 text-sm font-medium text-[#1a1a1a]">{c.valueNote}</p>
-
-            <div className="mt-5 grid gap-4 sm:grid-cols-2 sm:gap-5">
-              <div className="relative flex flex-col rounded-2xl border-2 border-[#1a1a1a] bg-white p-6 shadow-sm">
-                <span className="absolute -top-3 left-6 rounded-full bg-[#1a1a1a] px-3 py-1 text-xs font-semibold text-white">
-                  {c.yearlyBadge}
-                </span>
-                <p className="text-sm text-[#6b6b6b]">{c.yearlyPlan}</p>
-                <p className="mt-3 text-2xl font-bold tracking-tight text-[#1a1a1a] sm:text-[1.65rem]">
-                  {c.yearlyPrice}
-                </p>
-                <p className="mt-1 text-xs font-semibold text-[#3b8e3f]">{c.yearlySave}</p>
-                <p className="mt-1 text-xs text-[#9a9a9a]">{c.yearlyBilling}</p>
-                <Link
-                  href={fineArtProLandingJoinHref(locale, "yearly", leadArtSlug)}
-                  className="mt-6 inline-flex w-full items-center justify-center rounded-lg bg-gradient-to-br from-[#F5C278] to-[#E4A23C] px-4 py-3 text-sm font-bold text-[#1a1a1a] shadow-[0_6px_18px_rgba(228,162,60,0.45)] transition hover:brightness-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1a1a1a] focus-visible:ring-offset-2"
-                >
-                  {c.cta}
-                </Link>
-              </div>
-
-              <div className="flex flex-col rounded-2xl border border-[#d9d9d9] bg-white p-6 shadow-sm">
-                <p className="text-sm text-[#6b6b6b]">{c.monthlyPlan}</p>
-                <p className="mt-3 text-2xl font-bold tracking-tight text-[#1a1a1a] sm:text-[1.65rem]">
-                  {c.monthlyPrice}
-                </p>
-                <p className="mt-1 text-xs text-[#9a9a9a]">{c.monthlyBilling}</p>
-                <Link
-                  href={fineArtProLandingJoinHref(locale, "monthly", leadArtSlug)}
-                  className="mt-6 inline-flex w-full items-center justify-center rounded-lg border border-[#d9d9d9] bg-white px-4 py-3 text-sm font-bold text-[#1a1a1a] transition-colors hover:bg-[#f6f4ee] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1a1a1a] focus-visible:ring-offset-2"
-                >
-                  {c.cta}
-                </Link>
-              </div>
-            </div>
-
-            <p className="mt-4 text-center text-xs text-[#6b6b6b]">{c.ctaNote}</p>
+            </h2>
+            <p className="mt-3 text-[15px] leading-relaxed text-[#4a4a4a]">{c.heroSub}</p>
 
             {/* Free vs Pro — single source of truth for features (modern comparison table). */}
             <div className="mt-8 overflow-hidden rounded-2xl border border-[#e3e0d9] bg-white">
