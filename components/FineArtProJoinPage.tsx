@@ -3,7 +3,6 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 
 import { FineArtProJoinAuth } from "@/components/FineArtProJoinAuth";
-import { ProArtStrip } from "@/components/ProArtStrip";
 import { fineArtProJoinPath, fineArtProPath } from "@/lib/fineart-pro-path";
 import { getFineArtProT } from "@/lib/fineart-pro-translations";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
@@ -101,10 +100,6 @@ export async function FineArtProJoinPage({
 
   return (
     <div className="min-h-[50vh] bg-[#f6f4ee]">
-      {/* Moving strip of masterpieces: makes the checkout look like an art site
-          without adding anything to read or decide. */}
-      <ProArtStrip leadSlug={artSlug} />
-
       <div className="px-3 py-10 md:px-6 md:py-12">
         {/* ONE centred column — every element points at the single action. */}
         <div className="mx-auto max-w-md">
@@ -116,23 +111,28 @@ export async function FineArtProJoinPage({
           </h1>
           <p className="mt-1.5 text-sm text-[#6b6b6b]">{c.joinH1}</p>
 
-          {/* Step indicator — a visible "2 steps, you're on the first" beats an
-            unexplained sign-in wall. */}
-          <div className="mt-5 flex items-center gap-2 text-xs">
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-[#1a1a1a] px-2.5 py-1 font-medium text-white">
-              <span className="grid size-4 place-items-center rounded-full bg-white/25 text-[10px]">
+          {/* Progress tracker: numbered nodes joined by a rail, current step in
+              gold (the Pro accent) and clearly labelled, so the sign-in reads as
+              step one of a short flow rather than an unexplained wall. */}
+          <ol className="mt-6 flex items-start" aria-label={`${c.joinStepAccount} → ${c.joinStepPayment}`}>
+            <li className="flex flex-1 flex-col items-center" aria-current="step">
+              <span className="grid size-9 place-items-center rounded-full bg-gradient-to-br from-[#F5C278] to-[#E4A23C] text-sm font-bold text-[#1a1a1a] shadow-[0_4px_12px_rgba(228,162,60,0.45)]">
                 1
               </span>
-              {c.joinStepAccount}
-            </span>
-            <span className="h-px w-4 bg-[#d8d5cd]" aria-hidden />
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-[#d8d5cd] px-2.5 py-1 text-[#6b6b6b]">
-              <span className="grid size-4 place-items-center rounded-full bg-[#e8e6e1] text-[10px]">
+              <span className="mt-2 text-center text-xs font-semibold text-[#1a1a1a]">
+                {c.joinStepAccount}
+              </span>
+            </li>
+            <li aria-hidden className="mt-[18px] h-0.5 w-16 shrink-0 rounded-full bg-[#e0ddd5] sm:w-20" />
+            <li className="flex flex-1 flex-col items-center">
+              <span className="grid size-9 place-items-center rounded-full border-2 border-[#e0ddd5] bg-white text-sm font-semibold text-[#b6b2a8]">
                 2
               </span>
-              {c.joinStepPayment}
-            </span>
-          </div>
+              <span className="mt-2 text-center text-xs font-medium text-[#9a9a9a]">
+                {c.joinStepPayment}
+              </span>
+            </li>
+          </ol>
 
           {/* Order summary for the plan they picked. */}
           {planCopy ? (

@@ -191,17 +191,3 @@ img {
     animation: none;
   }
 }
-
-/* Artwork strip on the Pro join page: same seamless-loop technique, slower and
-   without the hover pause (it's ambience behind a checkout, not something to
-   interact with). */
-.fap-artstrip-track {
-  display: flex;
-  width: max-content;
-  animation: fap-marquee 70s linear infinite;
-}
-@media (prefers-reduced-motion: reduce) {
-  .fap-artstrip-track {
-    animation: none;
-  }
-}
