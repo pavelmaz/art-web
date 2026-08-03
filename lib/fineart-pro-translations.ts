@@ -44,6 +44,14 @@ export type FineArtProCopy = {
   joinIntro: string;
   joinAuthError: string;
   joinBack: string;
+  /** Checkout-page reassurance (added to reduce drop-off at the auth step). */
+  joinStepAccount: string;
+  joinStepPayment: string;
+  joinYourPlan: string;
+  joinWhyAccount: string;
+  joinIncluded: string;
+  joinNoCharge: string;
+  joinContinueEmail: string;
   joinAuth: {
     choosePlanFirst: string;
     selectedPlan: (plan: "yearly" | "monthly") => string;
@@ -198,6 +206,13 @@ const en: FineArtProCopy = {
     "Use Google or your email. After you sign in, you can continue to secure Stripe checkout for your plan.",
   joinAuthError: "Something went wrong signing you in. Please try again.",
   joinBack: "Back to Fine Art Pro",
+  joinStepAccount: "Account",
+  joinStepPayment: "Payment",
+  joinYourPlan: "Your plan",
+  joinWhyAccount: "Your account is how you access your downloads — it takes one click.",
+  joinIncluded: "Included with Pro",
+  joinNoCharge: "You haven't been charged.",
+  joinContinueEmail: "or continue with email",
   joinAuth: {
     choosePlanFirst: "Choose Monthly or Yearly on the Fine Art Pro page first.",
     selectedPlan: (plan) => `Selected plan: ${plan === "yearly" ? "Yearly" : "Monthly"}`,
@@ -305,6 +320,13 @@ const es: FineArtProCopy = {
     "Usa Google o tu correo. Tras iniciar sesión, continúa al pago seguro con Stripe para tu plan.",
   joinAuthError: "Hubo un error al iniciar sesión. Inténtalo de nuevo.",
   joinBack: "Volver a Fine Art Pro",
+  joinStepAccount: "Cuenta",
+  joinStepPayment: "Pago",
+  joinYourPlan: "Tu plan",
+  joinWhyAccount: "Tu cuenta es como accedes a tus descargas — solo un clic.",
+  joinIncluded: "Incluido con Pro",
+  joinNoCharge: "No se te ha cobrado nada.",
+  joinContinueEmail: "o continuar con email",
   joinAuth: {
     ...en.joinAuth,
     choosePlanFirst: "Elige plan Mensual o Anual en la página de Fine Art Pro primero.",
@@ -409,6 +431,13 @@ const pt: FineArtProCopy = {
     "Use Google ou e-mail. Após entrar, continue ao checkout seguro no Stripe.",
   joinAuthError: "Erro ao entrar. Tente novamente.",
   joinBack: "Voltar ao Fine Art Pro",
+  joinStepAccount: "Conta",
+  joinStepPayment: "Pagamento",
+  joinYourPlan: "Seu plano",
+  joinWhyAccount: "Sua conta é como você acessa seus downloads — leva um clique.",
+  joinIncluded: "Incluído no Pro",
+  joinNoCharge: "Você não foi cobrado.",
+  joinContinueEmail: "ou continuar com e-mail",
   joinAuth: {
     ...es.joinAuth,
     choosePlanFirst: "Escolha Mensal ou Anual na página Fine Art Pro primeiro.",
@@ -501,6 +530,13 @@ const ja: FineArtProCopy = {
   joinIntro: "Googleまたはメールでログイン後、Stripeの安全な決済に進めます。",
   joinAuthError: "ログインに失敗しました。もう一度お試しください。",
   joinBack: "Fine Art Proに戻る",
+  joinStepAccount: "アカウント",
+  joinStepPayment: "お支払い",
+  joinYourPlan: "選択中のプラン",
+  joinWhyAccount: "アカウントはダウンロードにアクセスするためのものです（ワンクリック）。",
+  joinIncluded: "Proに含まれるもの",
+  joinNoCharge: "請求は発生していません。",
+  joinContinueEmail: "またはメールで続ける",
   joinAuth: {
     ...en.joinAuth,
     choosePlanFirst: "先にFine Art Proページで月額または年間プランを選んでください。",
@@ -601,6 +637,13 @@ const fr: FineArtProCopy = {
     "Google ou e-mail. Après connexion, poursuivez vers le paiement sécurisé Stripe.",
   joinAuthError: "Échec de la connexion. Veuillez réessayer.",
   joinBack: "Retour à Fine Art Pro",
+  joinStepAccount: "Compte",
+  joinStepPayment: "Paiement",
+  joinYourPlan: "Votre formule",
+  joinWhyAccount: "Votre compte vous donne accès à vos téléchargements — un seul clic.",
+  joinIncluded: "Inclus avec Pro",
+  joinNoCharge: "Vous n'avez pas été débité.",
+  joinContinueEmail: "ou continuer avec un e-mail",
   joinAuth: {
     ...en.joinAuth,
     choosePlanFirst: "Choisissez Mensuel ou Annuel sur la page Fine Art Pro d'abord.",
@@ -703,6 +746,13 @@ const de: FineArtProCopy = {
     "Mit Google oder E-Mail. Nach der Anmeldung geht es zum sicheren Stripe-Checkout.",
   joinAuthError: "Anmeldung fehlgeschlagen. Bitte erneut versuchen.",
   joinBack: "Zurück zu Fine Art Pro",
+  joinStepAccount: "Konto",
+  joinStepPayment: "Zahlung",
+  joinYourPlan: "Ihr Tarif",
+  joinWhyAccount: "Über Ihr Konto greifen Sie auf Ihre Downloads zu — nur ein Klick.",
+  joinIncluded: "In Pro enthalten",
+  joinNoCharge: "Es wurde nichts abgebucht.",
+  joinContinueEmail: "oder mit E-Mail fortfahren",
   joinAuth: {
     ...en.joinAuth,
     choosePlanFirst: "Wählen Sie zuerst Monats- oder Jahresabo auf der Fine Art Pro-Seite.",
@@ -805,6 +855,13 @@ const it: FineArtProCopy = {
     "Google o e-mail. Dopo l'accesso, continua al checkout sicuro Stripe.",
   joinAuthError: "Accesso non riuscito. Riprova.",
   joinBack: "Torna a Fine Art Pro",
+  joinStepAccount: "Account",
+  joinStepPayment: "Pagamento",
+  joinYourPlan: "Il tuo piano",
+  joinWhyAccount: "Il tuo account ti dà accesso ai download — basta un clic.",
+  joinIncluded: "Incluso con Pro",
+  joinNoCharge: "Non ti è stato addebitato nulla.",
+  joinContinueEmail: "o continua con l'email",
   joinAuth: {
     ...en.joinAuth,
     choosePlanFirst: "Scegli prima Mensile o Annuale sulla pagina Fine Art Pro.",
@@ -905,6 +962,13 @@ const ko: FineArtProCopy = {
   joinIntro: "Google 또는 이메일로 로그인한 뒤 Stripe 안전 결제로 진행합니다.",
   joinAuthError: "로그인에 실패했습니다. 다시 시도해 주세요.",
   joinBack: "Fine Art Pro로 돌아가기",
+  joinStepAccount: "계정",
+  joinStepPayment: "결제",
+  joinYourPlan: "선택한 플랜",
+  joinWhyAccount: "계정은 다운로드에 접근하는 방법입니다 — 클릭 한 번이면 됩니다.",
+  joinIncluded: "Pro 포함 사항",
+  joinNoCharge: "결제되지 않았습니다.",
+  joinContinueEmail: "또는 이메일로 계속하기",
   joinAuth: {
     ...en.joinAuth,
     choosePlanFirst: "먼저 Fine Art Pro 페이지에서 월간 또는 연간 플랜을 선택하세요.",
@@ -1004,6 +1068,13 @@ const ru: FineArtProCopy = {
     "Google или e-mail. После входа — безопасная оплата через Stripe.",
   joinAuthError: "Не удалось войти. Попробуйте снова.",
   joinBack: "Назад к Fine Art Pro",
+  joinStepAccount: "Аккаунт",
+  joinStepPayment: "Оплата",
+  joinYourPlan: "Ваш план",
+  joinWhyAccount: "Аккаунт нужен для доступа к загрузкам — это один клик.",
+  joinIncluded: "Входит в Pro",
+  joinNoCharge: "Списание не производилось.",
+  joinContinueEmail: "или продолжить по эл. почте",
   joinAuth: {
     ...en.joinAuth,
     choosePlanFirst: "Сначала выберите месячный или годовой план на странице Fine Art Pro.",
@@ -1104,6 +1175,13 @@ const zh: FineArtProCopy = {
   joinIntro: "使用 Google 或电子邮件登录后，进入 Stripe 安全结账。",
   joinAuthError: "登录失败，请重试。",
   joinBack: "返回 Fine Art Pro",
+  joinStepAccount: "账户",
+  joinStepPayment: "支付",
+  joinYourPlan: "您的方案",
+  joinWhyAccount: "账户是您访问下载内容的方式——只需一次点击。",
+  joinIncluded: "Pro 包含内容",
+  joinNoCharge: "尚未向您收费。",
+  joinContinueEmail: "或使用邮箱继续",
   joinAuth: {
     ...en.joinAuth,
     choosePlanFirst: "请先在 Fine Art Pro 页面选择月付或年付方案。",

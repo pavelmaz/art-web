@@ -13,6 +13,7 @@ import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
 type JoinAuthCopy = Omit<FineArtProCopy["joinAuth"], "selectedPlan" | "signedInAs"> & {
   selectedPlanLabel: string;
   signedInAsLabel: string;
+  continueEmailLabel: string;
 };
 
 type FineArtProJoinAuthProps = {
@@ -25,6 +26,7 @@ type FineArtProJoinAuthProps = {
 export function FineArtProJoinAuth({ nextPath, plan, isLoggedIn, copy }: FineArtProJoinAuthProps) {
   const [otpEmail, setOtpEmail] = useState("");
   const [busy, setBusy] = useState(false);
+  const [showEmail, setShowEmail] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
 
   const startCheckout = async () => {
@@ -103,14 +105,10 @@ export function FineArtProJoinAuth({ nextPath, plan, isLoggedIn, copy }: FineArt
   };
 
   return (
-    <div className="mt-8 space-y-6">
-      {plan ? (
-        <p className="text-sm text-[#4a4a4a]">
-          <span className="font-semibold text-[#1a1a1a]">{copy.selectedPlanLabel}</span>
-        </p>
-      ) : (
-        <p className="text-sm text-[#6b6b6b]">{copy.pickPlanHint}</p>
-      )}
+    <div className="mt-6 space-y-4">
+      {/* The chosen plan + price is now shown in the order-summary card above, so
+          only the "no plan picked yet" hint is still needed here. */}
+      {plan ? null : <p className="text-sm text-[#6b6b6b]">{copy.pickPlanHint}</p>}
 
       {isLoggedIn ? (
         <div className="space-y-4 rounded-lg border border-[#e8e6e1] bg-[#f5f5f5] px-4 py-3 text-sm text-[#1a1a1a]">
@@ -148,13 +146,21 @@ export function FineArtProJoinAuth({ nextPath, plan, isLoggedIn, copy }: FineArt
             {copy.continueGoogle}
           </button>
 
-          <div className="relative py-2 text-center text-xs text-[#6b6b6b]">
-            <span className="relative z-10 bg-white px-2">{copy.or}</span>
-            <span className="absolute inset-x-0 top-1/2 z-0 h-px bg-[#e8e6e1]" aria-hidden />
-          </div>
+          {/* Magic link is collapsed behind a text link: it works, but it sends the
+              user to their inbox mid-checkout, so it must never look like an equal
+              option to one-tap Google. */}
+          {!showEmail ? (
+            <button
+              type="button"
+              onClick={() => setShowEmail(true)}
+              className="mx-auto block text-xs text-[#6b6b6b] underline underline-offset-2 hover:text-[#1a1a1a]"
+            >
+              {copy.continueEmailLabel}
+            </button>
+          ) : null}
 
           {/* Secondary path: magic link (requires leaving for the inbox mid-flow). */}
-          <form onSubmit={sendMagicLink} className="space-y-3">
+          <form onSubmit={sendMagicLink} className={showEmail ? "space-y-3" : "hidden"}>
             <label htmlFor="join-email" className="sr-only">
               Email
             </label>
