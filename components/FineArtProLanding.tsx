@@ -21,6 +21,16 @@ const playfair = Playfair_Display({
 /** Google-review-style avatar background colors, assigned per testimonial by index. */
 const AVATAR_COLORS = ["#4285F4", "#DB4437", "#0F9D58", "#F4B400", "#7E57C2", "#00897B"];
 
+/** University libraries that list Fine Art Free — verifiable social proof, shown
+ *  white-on-dark via `invert` (the source files are dark-on-transparent). */
+const PRO_UNIVERSITY_LOGOS = [
+  { file: "york.png", name: "University of York" },
+  { file: "waterloo.png", name: "University of Waterloo" },
+  { file: "alberta.png", name: "University of Alberta" },
+  { file: "skidmore.png", name: "Skidmore College" },
+  { file: "seville.png", name: "University of Seville" },
+] as const;
+
 type FineArtProLandingProps = {
   locale: Locale;
   /** Slug of the artwork the visitor came from ("Become Pro" on an artwork page)
@@ -77,7 +87,84 @@ export async function FineArtProLanding({ locale, leadArtSlug }: FineArtProLandi
 
   return (
     <div className="bg-[#f6f4ee]">
-      <section className="px-3 pb-10 pt-3 md:px-6 md:pb-14 md:pt-3 lg:pb-16">
+      {/* ── Resolution demonstration ──────────────────────────────────────────
+          The objection isn't "is the art good" — it's "what does 4K actually buy
+          me". So show it: the SAME eye of the same Van Eyck, cropped from the
+          1,400px file the free tier serves and from the 8,889px original. Nothing
+          is blurred or retouched; the softness on the left is what that resolution
+          genuinely looks like at this zoom. */}
+      <section className="bg-[#12100E] px-3 py-12 text-[#F0EDE4] md:px-6 md:py-16">
+        <div className="mx-auto max-w-5xl">
+          <div className="mx-auto max-w-[58ch] text-center">
+            <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-[#B08D4F]">
+              {c.cmpEyebrow}
+            </p>
+            <h2 className="mt-3 font-serif text-3xl font-normal leading-[1.15] sm:text-[2.4rem]">
+              {c.cmpH1}
+            </h2>
+            <p className="mt-4 text-[15px] leading-relaxed text-[#A9A396]">{c.cmpSub}</p>
+          </div>
+
+          <div className="mx-auto mt-9 grid max-w-3xl grid-cols-2 gap-3 sm:gap-4">
+            <figure className="m-0">
+              <div className="overflow-hidden rounded-lg bg-[#1C1A16]">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src="/images/pro-detail/free.jpg"
+                  alt={c.cmpFreeLabel}
+                  width={1000}
+                  height={1161}
+                  className="block h-auto w-full opacity-90"
+                />
+              </div>
+              <figcaption className="mt-2.5 text-center text-[12.5px] text-[#8E887B]">
+                {c.cmpFreeLabel}
+              </figcaption>
+            </figure>
+            <figure className="m-0">
+              <div className="overflow-hidden rounded-lg ring-1 ring-[#B08D4F]">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src="/images/pro-detail/pro.jpg"
+                  alt={c.cmpProLabel}
+                  width={1000}
+                  height={1161}
+                  className="block h-auto w-full"
+                />
+              </div>
+              <figcaption className="mt-2.5 text-center text-[12.5px] font-semibold text-[#E4D9BE]">
+                {c.cmpProLabel}
+              </figcaption>
+            </figure>
+          </div>
+
+          {/* Anchor: judge the price against what one stock photo costs, not zero. */}
+          <p className="mx-auto mt-9 max-w-[52ch] text-center text-[15px] leading-relaxed text-[#BDB7A8]">
+            {c.cmpAnchor}
+          </p>
+
+          {/* The credential no competitor can buy. */}
+          <div className="mt-10 border-t border-[#262320] pt-8">
+            <p className="text-center font-mono text-[10.5px] uppercase tracking-[0.18em] text-[#7E7A6E]">
+              {c.joinTrustedBy}
+            </p>
+            <div className="mt-4 flex flex-wrap items-center justify-center gap-x-8 gap-y-4">
+              {PRO_UNIVERSITY_LOGOS.map((u) => (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  key={u.file}
+                  src={`/images/university-logos/${u.file}`}
+                  alt={u.name}
+                  className="h-6 w-auto opacity-40 invert"
+                  loading="lazy"
+                />
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="px-3 pb-10 pt-10 md:px-6 md:pb-14 md:pt-12 lg:pb-16">
         <div className="mr-auto flex max-w-7xl flex-col gap-10 lg:flex-row lg:items-start lg:gap-12 xl:gap-16">
           {/* Image — shown after the value/price on mobile, left on desktop */}
           <div className="order-2 -ml-1 w-full shrink-0 lg:order-1 lg:max-w-[42%]">
