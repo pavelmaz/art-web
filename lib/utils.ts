@@ -83,12 +83,34 @@ export function slugify(value: string): string {
     .map((c) => accentMap[c] || c)
     .join("");
 
+  // Must match the slug the importer wrote to the database, or every link the
+  // site builds from an artist name 404s. Two rules the old version got wrong:
+  //
+  //  1. Decompose first, then drop the combining marks — that covers every
+  //     accented letter (ń ś ż ą ē ŏ …) instead of only the ~60 in accentMap.
+  //     Letters that do NOT decompose (ł, đ, ø, ß, æ, þ) are mapped explicitly.
+  //     Previously they were simply deleted: "Pełczyński" → "peczyski".
+  //  2. Turn any run of non-alphanumerics into a SINGLE HYPHEN rather than
+  //     deleting it, so "A.C. Wyatt" → "a-c-wyatt" and "O'kelly" → "o-kelly".
   return str
     .toLowerCase()
-    .trim()
-    .replace(/[^a-z0-9\s-]/g, "")
-    .replace(/\s+/g, "-")
-    .replace(/-+/g, "-");
+    .normalize("NFD")
+    .replace(/[̀-ͯ]/g, "")
+    .replace(/æ/g, "ae")
+    .replace(/œ/g, "oe")
+    .replace(/ø/g, "o")
+    .replace(/ß/g, "ss")
+    .replace(/đ/g, "d")
+    .replace(/ð/g, "d")
+    .replace(/ł/g, "l")
+    .replace(/þ/g, "th")
+    .replace(/ı/g, "i")
+    .replace(/ħ/g, "h")
+    .replace(/ŧ/g, "t")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 100)
+    .replace(/-+$/, "");
 }
 
 /** Compare URL segments to `styles.slug` when DB uses underscores and routes use hyphens (e.g. art-deco vs art_deco). */

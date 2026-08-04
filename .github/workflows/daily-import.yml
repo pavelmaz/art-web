@@ -67,3 +67,11 @@ jobs:
             [ "$remaining" = "0" ] && break
             sleep 2
           done
+
+      # Safety net: an image that finished migrating after the first renditions
+      # pass would otherwise ship with no renditions and render as a broken image
+      # until the nightly sweep. Re-running is cheap — it HEAD-checks and skips
+      # everything already done.
+      - name: Renditions (second pass, catches late migrations)
+        if: always()
+        run: node scripts/renditions-recent.mjs
