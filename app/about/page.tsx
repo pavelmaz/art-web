@@ -13,6 +13,21 @@ export const metadata: Metadata = {
   },
 };
 
+/**
+ * University libraries that list Fine Art Free in their art/image research guides.
+ * Every entry is verified live and dofollow before being added here — this is the
+ * page's strongest trust signal, so it must never contain an unverified claim.
+ * Adding a new win is one line plus a logo in /images/university-logos.
+ */
+const LISTED_BY = [
+  { name: "Durham University", country: "UK", file: "durham.png", href: "https://libguides.durham.ac.uk/visualarts/databases" },
+  { name: "the University of York", country: "UK", file: "york.png", href: "https://subjectguides.york.ac.uk/historyofart/images" },
+  { name: "the University of Waterloo", country: "Canada", file: "waterloo.png", href: "https://subjectguides.uwaterloo.ca/az/fine-art-free" },
+  { name: "the University of Alberta", country: "Canada", file: "alberta.png", href: "https://guides.library.ualberta.ca/c.php?g=332470&p=5354482" },
+  { name: "Skidmore College", country: "USA", file: "skidmore.png", href: "https://libguides.skidmore.edu/art/images" },
+  { name: "the University of Seville", country: "Spain", file: "seville.png", href: "https://guiasbus.us.es/bellasartes/sitiosweb" },
+] as const;
+
 export default function AboutPage() {
   return (
     <main className="max-w-3xl mx-auto px-4 py-12">
@@ -42,26 +57,37 @@ export default function AboutPage() {
 
         <h2 className="text-lg font-semibold text-[#1a1a1a]">Recommended by university libraries</h2>
         <p>
-          Fine Art Free is included as a recommended resource in the art and image research guides of universities and
-          colleges around the world, including the{" "}
-          <a href={"https://guiasbus.us.es/bellasartes/sitiosweb"} target="_blank" rel="noopener noreferrer" className="underline hover:text-[#1a1a1a]">University of Seville</a> (Spain),{" "}
-          <a href={"https://libguides.skidmore.edu/art/images"} target="_blank" rel="noopener noreferrer" className="underline hover:text-[#1a1a1a]">Skidmore College</a> (USA), and the{" "}
-          <a href={"https://guides.library.ualberta.ca/c.php?g=332470&p=5354482"} target="_blank" rel="noopener noreferrer" className="underline hover:text-[#1a1a1a]">University of Alberta</a> (Canada).
+          Fine Art Free is included as a recommended resource in the art and image research guides of
+          universities and colleges around the world — among them{" "}
+          {LISTED_BY.map((u, i) => (
+            <span key={u.file}>
+              {i > 0 ? (i === LISTED_BY.length - 1 ? " and " : ", ") : ""}
+              <a
+                href={u.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline hover:text-[#1a1a1a]"
+              >
+                {u.name}
+              </a>{" "}
+              ({u.country})
+            </span>
+          ))}
+          .
         </p>
 
         <div className="not-prose flex flex-wrap items-center gap-x-8 gap-y-5 py-1">
-          <a href={"https://guiasbus.us.es/bellasartes/sitiosweb"} target="_blank" rel="noopener noreferrer" aria-label="University of Seville">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/images/university-logos/seville.png" alt="University of Seville" className="h-10 w-auto opacity-70 transition hover:opacity-100" />
-          </a>
-          <a href={"https://libguides.skidmore.edu/art/images"} target="_blank" rel="noopener noreferrer" aria-label="Skidmore College">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/images/university-logos/skidmore.png" alt="Skidmore College" className="h-8 w-auto opacity-70 transition hover:opacity-100" />
-          </a>
-          <a href={"https://guides.library.ualberta.ca/c.php?g=332470&p=5354482"} target="_blank" rel="noopener noreferrer" aria-label="University of Alberta">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/images/university-logos/alberta.png" alt="University of Alberta" className="h-9 w-auto opacity-70 transition hover:opacity-100" />
-          </a>
+          {LISTED_BY.map((u) => (
+            <a key={u.file} href={u.href} target="_blank" rel="noopener noreferrer" aria-label={u.name}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={`/images/university-logos/${u.file}`}
+                alt={u.name}
+                className="h-9 w-auto opacity-70 transition hover:opacity-100"
+                loading="lazy"
+              />
+            </a>
+          ))}
         </div>
 
         <h2 className="text-lg font-semibold text-[#1a1a1a]">Are these images really free to use?</h2>
