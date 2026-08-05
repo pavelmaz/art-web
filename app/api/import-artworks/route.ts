@@ -205,15 +205,10 @@ export async function POST(req: NextRequest) {
     }
   }
 
-  // Ping Google and Bing to notify about new content
-  try {
-    await Promise.all([
-      fetch('https://www.google.com/ping?sitemap=https://fineartfree.com/sitemap.xml'),
-      fetch('https://www.bing.com/ping?sitemap=https://fineartfree.com/sitemap.xml'),
-    ])
-  } catch (e) {
-    // Non-critical, ignore errors
-  }
+  // Sitemap ping removed: both endpoints are retired and were answering 404
+  // (Google, 2023) and 410 Gone (Bing, 2024) on every single import. Search
+  // engines now discover sitemap changes by crawling robots.txt. Nothing is
+  // lost by dropping them — they had not worked for a long time.
 
   // Submit new URLs to IndexNow for fast indexing
   try {
