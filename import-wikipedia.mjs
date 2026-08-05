@@ -548,8 +548,14 @@ for (const name of summary.touchedArtists) {
   });
 }
 
-// IndexNow for the new pages (all 10 locales)
-if (newSlugs.length) {
+// IndexNow for the new pages (all 10 locales).
+//
+// OFF BY DEFAULT since 5 Aug 2026 while the effect of submitting ~250 URLs/day
+// is being tested. Set INDEXNOW_ENABLED=1 to switch it back on — no code change
+// and no deploy needed. Note IndexNow feeds Bing/Yandex/Seznam/Naver, not Google.
+const INDEXNOW_ENABLED = process.env.INDEXNOW_ENABLED === "1";
+
+if (INDEXNOW_ENABLED && newSlugs.length) {
   const LOCALES = [
     { p: "", seg: "artworks" }, { p: "/es", seg: "obras" }, { p: "/pt", seg: "obras" },
     ...["de", "fr", "it", "ja", "ko", "ru", "zh"].map((l) => ({ p: `/${l}`, seg: "artworks" })),
@@ -568,6 +574,8 @@ if (newSlugs.length) {
     }),
   }).catch(() => {});
   console.log(`\nIndexNow: submitted ${urls.length} URLs for ${newSlugs.length} new artwork(s).`);
+} else if (newSlugs.length) {
+  console.log(`\nIndexNow: DISABLED — ${newSlugs.length} new artwork(s) not submitted (set INDEXNOW_ENABLED=1 to re-enable).`);
 }
 
 console.log(`\nDone. Imported: ${summary.imported}, skipped: ${summary.skipped}.`);

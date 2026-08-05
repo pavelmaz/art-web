@@ -210,15 +210,19 @@ export async function POST(req: NextRequest) {
   // engines now discover sitemap changes by crawling robots.txt. Nothing is
   // lost by dropping them — they had not worked for a long time.
 
-  // Submit new URLs to IndexNow for fast indexing
+  // Submit new URLs to IndexNow for fast indexing.
+  //
+  // OFF BY DEFAULT since 5 Aug 2026 while the effect of the daily submissions is
+  // being tested. Set INDEXNOW_ENABLED=1 to switch back on — no code change.
   try {
+    const indexNowEnabled = process.env.INDEXNOW_ENABLED === '1'
     const newUrls = insertedSlugs.flatMap((slug: string) => [
       `https://fineartfree.com/artworks/${slug}`,
       `https://fineartfree.com/es/obras/${slug}`,
       `https://fineartfree.com/pt/obras/${slug}`,
     ])
 
-    if (newUrls.length > 0) {
+    if (indexNowEnabled && newUrls.length > 0) {
       await fetch('https://api.indexnow.org/indexnow', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

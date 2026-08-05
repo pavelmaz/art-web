@@ -93,6 +93,18 @@ export async function POST(req: NextRequest) {
   }
 
   // Submit to IndexNow in batches of 10,000 (the API's per-request cap).
+  //
+  // OFF BY DEFAULT since 5 Aug 2026 while the effect of IndexNow submissions is
+  // being tested. This route can fire ~1M URLs, so it stays gated too — set
+  // INDEXNOW_ENABLED=1 to re-enable.
+  if (process.env.INDEXNOW_ENABLED !== '1') {
+    return NextResponse.json({
+      disabled: true,
+      message: 'IndexNow is disabled (set INDEXNOW_ENABLED=1 to re-enable). No URLs submitted.',
+      wouldHaveSubmitted: allUrls.length,
+    })
+  }
+
   const BATCH = 10000
   let submitted = 0
   let failed = 0
