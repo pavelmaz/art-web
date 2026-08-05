@@ -115,6 +115,21 @@ img {
   color: #1a1a1a;
 }
 
+/* The "on" state of a toggle (favourited / collected). Same glass build as
+   .glass-secondary, tinted with the Pro gold so the active state still reads
+   as a pane of glass rather than reverting to a flat filled button. */
+.glass-accent {
+  background: rgba(228, 162, 60, 0.2);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(228, 162, 60, 0.5);
+  color: #1a1a1a;
+  transition: background-color 0.15s ease;
+}
+.glass-accent:hover {
+  background: rgba(228, 162, 60, 0.28);
+}
+
 /* ── Glass on DARK grounds ─────────────────────────────────────────────
    The light variants above use ~45% white, which over a near-black section
    reads as flat pale grey. On dark you need the opposite: a very low white

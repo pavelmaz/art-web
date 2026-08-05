@@ -127,10 +127,8 @@ export function ArtworkActions({
           onClick={() => void toggleFavourite()}
           aria-pressed={isFav}
           aria-label={userId || !ready ? undefined : t.signInToSave}
-          className={`flex items-center justify-center gap-2 rounded-lg border px-3 py-2.5 text-[13px] font-medium transition ${
-            isFav
-              ? "border-[#e4a23c] bg-[#fdf6ea] text-[#1a1a1a]"
-              : "border-[#e8e6e1] bg-white/70 text-[#4a4a4a] hover:bg-white"
+          className={`flex items-center justify-center gap-2 rounded-md px-3 py-2.5 text-[13px] font-medium ${
+            isFav ? "glass-accent" : "glass-secondary"
           }`}
         >
           <HeartIcon filled={isFav} />
@@ -140,10 +138,8 @@ export function ArtworkActions({
         <button
           type="button"
           onClick={openCollect}
-          className={`flex items-center justify-center gap-2 rounded-lg border px-3 py-2.5 text-[13px] font-medium transition ${
-            inCollection
-              ? "border-[#e4a23c] bg-[#fdf6ea] text-[#1a1a1a]"
-              : "border-[#e8e6e1] bg-white/70 text-[#4a4a4a] hover:bg-white"
+          className={`flex items-center justify-center gap-2 rounded-md px-3 py-2.5 text-[13px] font-medium ${
+            inCollection ? "glass-accent" : "glass-secondary"
           }`}
         >
           <PlusIcon />
