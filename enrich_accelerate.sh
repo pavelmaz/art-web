@@ -37,8 +37,11 @@ run_loop () {
     if [ -z "${remaining:-}" ]; then
       fails=$((fails + 1))
       echo "[$label] ⚠️  bad response (#$fails): $(printf '%s' "$resp" | head -c 200)"
-      if [ "$fails" -ge 5 ]; then echo "[$label] ❌ too many errors, stopping."; break; fi
-      sleep 5; continue
+      # The edge function occasionally returns an empty body under OpenAI latency /
+      # timeouts. Those come in streaks, so ride them out (30 in a row before giving
+      # up) with a longer backoff instead of killing a multi-hour run over a blip.
+      if [ "$fails" -ge 30 ]; then echo "[$label] ❌ too many errors, stopping."; break; fi
+      sleep 20; continue
     fi
 
     fails=0
