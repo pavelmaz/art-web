@@ -26,7 +26,10 @@ function safeNextPath(next: string | null): string {
 async function stampSignupSource(userId: string) {
   try {
     const base = process.env.NEXT_PUBLIC_SUPABASE_URL?.replace(/\/$/, "");
-    const serviceKey = process.env.SUPABASE_SERVICE_KEY;
+    // SUPABASE_SERVICE_ROLE_KEY is the hosting env's name (and what the rest of
+    // the app reads); SUPABASE_SERVICE_KEY is the local scripts' alias.
+    const serviceKey =
+      process.env.SUPABASE_SERVICE_ROLE_KEY ?? process.env.SUPABASE_SERVICE_KEY;
     if (!base || !serviceKey) return;
 
     await fetch(`${base}/rest/v1/profiles?id=eq.${userId}&signup_source=is.null`, {

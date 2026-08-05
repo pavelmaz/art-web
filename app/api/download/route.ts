@@ -20,7 +20,12 @@ async function logDownload(req: NextRequest, slug: string | null) {
     } = await supabase.auth.getUser();
     if (!user) return;
 
-    const serviceKey = process.env.SUPABASE_SERVICE_KEY;
+    // SUPABASE_SERVICE_ROLE_KEY is the name configured in the hosting env and
+    // used by the rest of the app; SUPABASE_SERVICE_KEY is the alias the local
+    // node scripts use. Read both — reading only the latter meant this silently
+    // did nothing in production.
+    const serviceKey =
+      process.env.SUPABASE_SERVICE_ROLE_KEY ?? process.env.SUPABASE_SERVICE_KEY;
     const base = process.env.NEXT_PUBLIC_SUPABASE_URL?.replace(/\/$/, "");
     if (!serviceKey || !base) return;
 
@@ -123,7 +128,11 @@ export async function GET(req: NextRequest) {
     headers: {
       "Content-Type": contentType,
       "Content-Disposition": `attachment; filename="${filename}"`,
-      "Cache-Control": "public, max-age=86400",
+      // `private`, not `public`: this response now has a per-user side effect
+      // (the download log). A shared CDN copy would serve later visitors without
+      // ever invoking the handler, so their downloads would never be recorded.
+      // The user's own browser still caches, which is all a re-download needs.
+      "Cache-Control": "private, max-age=86400",
     },
   });
 }

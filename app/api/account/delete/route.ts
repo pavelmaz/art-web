@@ -24,7 +24,10 @@ export async function POST() {
     return NextResponse.json({ error: "Not signed in" }, { status: 401 });
   }
 
-  const serviceKey = process.env.SUPABASE_SERVICE_KEY;
+  // SUPABASE_SERVICE_ROLE_KEY is the hosting env's name (and what the rest of
+  // the app reads); SUPABASE_SERVICE_KEY is the local scripts' alias.
+  const serviceKey =
+    process.env.SUPABASE_SERVICE_ROLE_KEY ?? process.env.SUPABASE_SERVICE_KEY;
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   if (!serviceKey || !url) {
     return NextResponse.json({ error: "Server not configured" }, { status: 500 });
