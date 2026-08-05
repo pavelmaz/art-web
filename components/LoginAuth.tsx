@@ -82,7 +82,13 @@ export function LoginAuth({
     const emailRedirectTo = `${window.location.origin}/auth/callback?next=${encodeURIComponent(nextPath)}`;
     const { error } = await supabase.auth.signInWithOtp({
       email: otpEmail.trim(),
-      options: { emailRedirectTo },
+      options: {
+        emailRedirectTo,
+        // Read by handle_new_user() so the account is attributed at creation.
+        // auth/callback also stamps it — this database is shared with the
+        // LearnArt iOS app and the two audiences must stay separable.
+        data: { signup_source: "fineartfree" },
+      },
     });
     setBusy(false);
     if (error) {
