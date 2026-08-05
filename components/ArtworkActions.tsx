@@ -3,6 +3,7 @@
 import { track } from "@vercel/analytics";
 import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 
 import { getLibraryT } from "@/lib/library-translations";
 import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
@@ -182,6 +183,25 @@ function CollectModal({
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Scroll lock is its own effect with no deps: if it re-ran on every change it
+  // would capture "hidden" as the value to restore and leave the page locked.
+  useEffect(() => {
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, []);
+
+  // Escape closes with the same result as the Done button.
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose(memberOf.size > 0);
+    };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [onClose, memberOf]);
+
   useEffect(() => {
     void (async () => {
       const supabase = createSupabaseBrowserClient();
@@ -262,7 +282,14 @@ function CollectModal({
     setBusy(false);
   };
 
-  return (
+  // Portalled to <body>. The artwork sidebar is a .glass-surface card, and
+  // backdrop-filter creates a containing block for position:fixed descendants —
+  // so rendering in place traps the overlay inside that card (it appeared
+  // tucked behind the artwork) no matter how high the z-index goes.
+  //
+  // No mounted guard needed: this component is only rendered once modalOpen is
+  // true, which can only happen from a click, so it never runs during SSR.
+  return createPortal(
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
       role="dialog"
@@ -332,7 +359,8 @@ function CollectModal({
           {t.done}
         </button>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
 
