@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
+import type { Session } from "@supabase/supabase-js";
 
 import {
   getGenreLabelForLocale,
@@ -131,25 +132,41 @@ export default function Header({ browseGenres = [] }: HeaderProps) {
   const [browseOpen, setBrowseOpen] = useState(false);
   const [exploreOpen, setExploreOpen] = useState(false);
 
-  // Session-aware login entry: label flips to "My account" once signed in. Pages
-  // are statically cached, so auth state can only be read client-side.
-  const [signedIn, setSignedIn] = useState(false);
+  // Session-aware login entry: the "Log in" link becomes the user's avatar once
+  // signed in. Pages are statically cached, so auth state can only be read
+  // client-side. Apple sign-in returns no picture, and magic-link users have no
+  // profile at all, so `initial` is always kept as the fallback.
+  const [account, setAccount] = useState<{ avatar: string | null; name: string } | null>(null);
   useEffect(() => {
     const supabase = createSupabaseBrowserClient();
     let cancelled = false;
+    const read = (session: Session | null) => {
+      if (!session?.user) {
+        setAccount(null);
+        return;
+      }
+      const meta = session.user.user_metadata ?? {};
+      setAccount({
+        avatar: (meta.avatar_url as string) || (meta.picture as string) || null,
+        name:
+          (meta.full_name as string) ||
+          (meta.name as string) ||
+          session.user.email?.split("@")[0] ||
+          "",
+      });
+    };
     void supabase.auth.getSession().then(({ data: { session } }) => {
-      if (!cancelled) setSignedIn(Boolean(session));
+      if (!cancelled) read(session);
     });
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSignedIn(Boolean(session));
-    });
+    } = supabase.auth.onAuthStateChange((_event, session) => read(session));
     return () => {
       cancelled = true;
       subscription.unsubscribe();
     };
   }, []);
+  const signedIn = account !== null;
   // Signed-in visitors go straight to their library; everyone else to sign-in.
   const accountBase = signedIn ? "/account" : "/login";
   const loginHref = locale === "en" ? accountBase : `${accountBase}?loc=${locale}`;
@@ -293,9 +310,15 @@ export default function Header({ browseGenres = [] }: HeaderProps) {
             </Link>
           ))}
 
-          <Link href={loginHref} className={textColor}>
-            {loginLabel}
-          </Link>
+          {account ? (
+            <Link href={loginHref} aria-label={loginLabel} title={account.name}>
+              <AccountAvatar account={account} onDark={isHome} />
+            </Link>
+          ) : (
+            <Link href={loginHref} className={textColor}>
+              {loginLabel}
+            </Link>
+          )}
         </nav>
 
         {/* Mobile hamburger — visible on mobile only */}
@@ -395,13 +418,58 @@ export default function Header({ browseGenres = [] }: HeaderProps) {
 
             <Link
               href={loginHref}
-              className="block border-b border-[#e8e6e1] py-4 text-[15px] font-medium text-[#1a1a1a]"
+              className="flex items-center gap-3 border-b border-[#e8e6e1] py-4 text-[15px] font-medium text-[#1a1a1a]"
             >
-              {loginLabel}
+              {account ? (
+                <>
+                  <AccountAvatar account={account} />
+                  <span className="truncate">{account.name}</span>
+                </>
+              ) : (
+                loginLabel
+              )}
             </Link>
           </div>
         </div>
       ) : null}
     </header>
+  );
+}
+
+/**
+ * The signed-in nav entry. Google returns a picture, Apple never does and
+ * magic-link users have no profile at all, so the lettered fallback is not an
+ * edge case — it is what most signed-in users will actually see.
+ */
+function AccountAvatar({
+  account,
+  onDark = false,
+}: {
+  account: { avatar: string | null; name: string };
+  onDark?: boolean;
+}) {
+  const ring = onDark ? "ring-white/45" : "ring-[#e8e6e1]";
+
+  if (account.avatar) {
+    return (
+      // eslint-disable-next-line @next/next/no-img-element
+      <img
+        src={account.avatar}
+        alt=""
+        width={30}
+        height={30}
+        referrerPolicy="no-referrer"
+        className={`size-[30px] rounded-full object-cover ring-1 ${ring}`}
+      />
+    );
+  }
+
+  return (
+    <span
+      aria-hidden
+      className={`flex size-[30px] items-center justify-center rounded-full bg-[#e8e6e1] text-[13px] font-semibold uppercase text-[#4a4a4a] ring-1 ${ring}`}
+    >
+      {account.name.slice(0, 1)}
+    </span>
   );
 }
