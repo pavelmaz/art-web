@@ -150,7 +150,9 @@ export default function Header({ browseGenres = [] }: HeaderProps) {
       subscription.unsubscribe();
     };
   }, []);
-  const loginHref = locale === "en" ? "/login" : `/login?loc=${locale}`;
+  // Signed-in visitors go straight to their library; everyone else to sign-in.
+  const accountBase = signedIn ? "/account" : "/login";
+  const loginHref = locale === "en" ? accountBase : `${accountBase}?loc=${locale}`;
   const loginLabel = signedIn ? t.navAccount : t.navLogin;
 
   useEffect(() => {

@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 
-import { LoginAuth, ManageSubscriptionButton, SignOutButton } from "@/components/LoginAuth";
-import { fineArtProPath } from "@/lib/fineart-pro-path";
+import { LoginAuth } from "@/components/LoginAuth";
 import { getFineArtProT } from "@/lib/fineart-pro-translations";
+import { getLibraryT } from "@/lib/library-translations";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { getT, translations, type Locale } from "@/lib/translations";
 
@@ -18,90 +19,63 @@ function resolveLocale(raw: string | undefined): Locale {
   return raw && raw in translations ? (raw as Locale) : "en";
 }
 
+/** Only same-origin relative paths may be used as a post-login destination. */
+function safeNext(next: string | undefined): string | null {
+  if (!next || !next.startsWith("/") || next.startsWith("//")) return null;
+  return next;
+}
+
 type LoginPageProps = {
-  searchParams: Promise<{ loc?: string }>;
+  searchParams: Promise<{ loc?: string; next?: string }>;
 };
 
 export default async function LoginPage({ searchParams }: LoginPageProps) {
-  const { loc } = await searchParams;
+  const { loc, next } = await searchParams;
   const locale = resolveLocale(loc);
   const t = getT(locale);
+  const lib = getLibraryT(locale);
   const joinAuth = getFineArtProT(locale).joinAuth;
-  const nextPath = locale === "en" ? "/login" : `/login?loc=${locale}`;
+
+  const dest = safeNext(next);
+  const accountPath = locale === "en" ? "/account" : `/account?loc=${locale}`;
+  // After auth, land back where they were (a saved artwork) or in the panel.
+  const nextPath = dest ?? accountPath;
 
   const supabase = await createSupabaseServerClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
-  let isPro = false;
-  if (user) {
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("subscription_status")
-      .eq("id", user.id)
-      .maybeSingle();
-    isPro = profile?.subscription_status === "active";
-  }
+  // Already signed in — the account panel is the destination now, not this page.
+  if (user) redirect(nextPath);
 
   return (
-    <main className="mx-auto w-full max-w-md px-5 py-16">
-      <h1 className="text-2xl font-bold tracking-tight text-[#1a1a1a]">
-        {user ? t.navAccount : t.navLogin}
+    <main className="mx-auto flex w-full max-w-[26rem] flex-col px-5 py-16 sm:py-24">
+      <h1 className="text-center text-[1.75rem] font-semibold leading-tight tracking-tight text-[#1a1a1a] sm:text-[2rem]">
+        {t.navLogin}
       </h1>
+      <p className="mt-3 text-center text-sm leading-relaxed text-[#6b6b6b]">
+        {dest ? lib.signInToSave : t.loginIntro}
+      </p>
 
-      {user ? (
-        <div className="mt-8 space-y-5 rounded-2xl border border-[#e8e6e1] bg-white p-6">
-          <div>
-            <p className="text-xs uppercase tracking-wide text-[#9a9a9a]">{t.loginSignedInAs}</p>
-            <p className="mt-1 break-all text-sm font-medium text-[#1a1a1a]">{user.email}</p>
-          </div>
+      <LoginAuth
+        nextPath={nextPath}
+        copy={{
+          continueGoogle: joinAuth.continueGoogle,
+          or: joinAuth.or,
+          emailPlaceholder: joinAuth.emailPlaceholder,
+          emailLink: joinAuth.emailLink,
+          checkEmail: joinAuth.checkEmail,
+        }}
+        consentLabel={lib.marketingConsent}
+        consentHint={lib.marketingConsentHint}
+      />
 
-          {isPro ? (
-            <div className="space-y-3">
-              <p className="inline-flex items-center gap-2 rounded-full bg-[#e7f4e7] px-3 py-1.5 text-sm font-medium text-[#2c6e30]">
-                <span aria-hidden>✓</span>
-                {t.loginProActive}
-              </p>
-              <div>
-                <ManageSubscriptionButton
-                  locale={locale}
-                  label={t.loginManageSubscription}
-                  errorLabel={t.loginPortalError}
-                />
-              </div>
-            </div>
-          ) : (
-            <div className="space-y-3">
-              <p className="text-sm text-[#6b6b6b]">{t.loginProInactive}</p>
-              <Link
-                href={fineArtProPath(locale)}
-                className="inline-flex items-center justify-center rounded-lg bg-gradient-to-br from-[#F5C278] to-[#E4A23C] px-4 py-2.5 text-sm font-bold text-[#1a1a1a] shadow-[0_6px_18px_rgba(228,162,60,0.45)] transition hover:brightness-95"
-              >
-                {t.insightsLimitCta}
-              </Link>
-            </div>
-          )}
-
-          <div className="border-t border-[#e8e6e1] pt-4">
-            <SignOutButton label={t.signOut} />
-          </div>
-        </div>
-      ) : (
-        <>
-          <p className="mt-3 text-sm leading-relaxed text-[#6b6b6b]">{t.loginIntro}</p>
-          <LoginAuth
-            nextPath={nextPath}
-            copy={{
-              continueGoogle: joinAuth.continueGoogle,
-              or: joinAuth.or,
-              emailPlaceholder: joinAuth.emailPlaceholder,
-              emailLink: joinAuth.emailLink,
-              checkEmail: joinAuth.checkEmail,
-            }}
-          />
-        </>
-      )}
+      <p className="mt-10 text-center text-xs text-[#9a9a9a]">
+        <Link href="/terms" className="underline underline-offset-2 hover:text-[#6b6b6b]">
+          Terms of Use
+        </Link>
+      </p>
     </main>
   );
 }

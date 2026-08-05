@@ -31,7 +31,7 @@ export function ProDownloadRow({ locale, isPro, downloadHref, filename, glass = 
   // Route the real file through the same-origin /api/download proxy so it saves
   // instead of opening (a cross-origin <a download> is ignored by browsers).
   const proDownloadHref = downloadHref
-    ? `/api/download?src=${encodeURIComponent(downloadHref)}${filename ? `&name=${encodeURIComponent(filename)}` : ""}`
+    ? `/api/download?src=${encodeURIComponent(downloadHref)}&size=max${filename ? `&name=${encodeURIComponent(filename)}` : ""}`
     : "#";
 
   useEffect(() => {

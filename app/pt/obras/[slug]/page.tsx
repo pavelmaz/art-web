@@ -6,6 +6,7 @@ import { notFound } from "next/navigation";
 
 import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { DownloadButton } from "@/components/DownloadButton";
+import { ArtworkActions } from "@/components/ArtworkActions";
 import { ProDownloadRow } from "@/components/ProDownloadRow";
 import { ArtworkJsonLd } from "@/components/ArtworkJsonLd";
 import {
@@ -459,6 +460,10 @@ export default async function ArtworkDetailPagePt({ params }: ArtworkPageProps) 
               </div>
 
               <p className="text-sm text-[#6b6b6b]">{artistArtworkCount} {t.artworks}</p>
+
+              <div className="mt-4">
+                <ArtworkActions artworkId={artwork.id} locale="pt" />
+              </div>
 
               <div className="my-4 border-t border-[#e8e6e1]" />
 

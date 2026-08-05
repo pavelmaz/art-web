@@ -1,6 +1,56 @@
 import { NextRequest, NextResponse } from "next/server";
 import sharp from "sharp";
 
+import { createSupabaseServerClient } from "@/lib/supabase/server";
+
+/**
+ * Record the download against the signed-in user so it can be listed in
+ * /account/downloads. Anonymous downloads are not logged — there is nobody to
+ * show them to. Never throws: a logging failure must not cost the user a file.
+ *
+ * `downloads` is read-only under RLS (the owner may SELECT, nobody may INSERT),
+ * so the write goes through the service key.
+ */
+async function logDownload(req: NextRequest, slug: string | null) {
+  try {
+    if (!slug) return;
+    const supabase = await createSupabaseServerClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) return;
+
+    const serviceKey = process.env.SUPABASE_SERVICE_KEY;
+    const base = process.env.NEXT_PUBLIC_SUPABASE_URL?.replace(/\/$/, "");
+    if (!serviceKey || !base) return;
+
+    // The caller states which tier it is (the Standard and Max hrefs can point
+    // at the same object, so the URL alone cannot tell them apart).
+    const size = req.nextUrl.searchParams.get("size") === "max" ? "max" : "standard";
+
+    const headers = {
+      apikey: serviceKey,
+      Authorization: `Bearer ${serviceKey}`,
+      "Content-Type": "application/json",
+    };
+    const lookup = await fetch(
+      `${base}/rest/v1/artworks?select=id&slug=eq.${encodeURIComponent(slug)}&limit=1`,
+      { headers }
+    );
+    const rows = (await lookup.json()) as { id?: string }[];
+    const artworkId = Array.isArray(rows) ? rows[0]?.id : undefined;
+    if (!artworkId) return;
+
+    await fetch(`${base}/rest/v1/downloads`, {
+      method: "POST",
+      headers: { ...headers, Prefer: "return=minimal" },
+      body: JSON.stringify({ user_id: user.id, artwork_id: artworkId, size }),
+    });
+  } catch {
+    // Logging is best-effort; the download always wins.
+  }
+}
+
 /**
  * Same-origin download proxy. A cross-origin `<a download>` (the image lives on
  * cdn.fineartfree.com) is ignored by browsers, so the file just opens instead of
@@ -31,6 +81,8 @@ export async function GET(req: NextRequest) {
   if (!upstream.ok || !upstream.body) {
     return new NextResponse("Upstream error", { status: 502 });
   }
+
+  await logDownload(req, req.nextUrl.searchParams.get("name")?.trim() || null);
 
   let contentType = upstream.headers.get("content-type") ?? "application/octet-stream";
   let body: BodyInit = upstream.body;

@@ -25,7 +25,7 @@ type DownloadButtonProps = {
  */
 export function DownloadButton({ imageUrl, filename, label = "Download", variant = "solid" }: DownloadButtonProps) {
   const pathname = usePathname();
-  const params = new URLSearchParams({ src: imageUrl });
+  const params = new URLSearchParams({ src: imageUrl, size: "standard" });
   if (filename?.trim()) params.set("name", filename.trim());
   const href = imageUrl ? `/api/download?${params.toString()}` : "#";
 
