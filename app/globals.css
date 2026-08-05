@@ -24,6 +24,17 @@ img {
   display: block;
 }
 
+/* Tailwind v4's preflight dropped the v3 default of `cursor: pointer` on
+   buttons, so every <button> on the site showed an arrow while <a> links (the
+   Download button) showed a hand — the same control reading as clickable in one
+   place and not the other. Restore it, but leave disabled buttons alone so they
+   still signal that they can't be pressed. */
+button:not(:disabled),
+[role="button"]:not(:disabled),
+summary {
+  cursor: pointer;
+}
+
 /* Natural aspect ratio: scale down to fit container, never stretch or crop */
 .artwork-img {
   display: block;
