@@ -2,7 +2,7 @@
 
 import { track } from "@vercel/analytics";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { createPortal } from "react-dom";
 
 import { fineArtProPath } from "@/lib/fineart-pro-path";
@@ -10,31 +10,26 @@ import type { Locale } from "@/lib/translations";
 
 /**
  * Shown once per session when a visitor clicks the free Download button, before
- * the download starts. The free file is genuinely a fraction of the original's
- * pixels, and this is where that costs the visitor something — so it is the one
- * moment the upgrade is worth putting in front of them.
+ * the download starts. The free file is a fraction of the original's pixels, and
+ * this is the moment that costs the visitor something — so it is where the
+ * upgrade is worth putting in front of them.
  *
- * The comparison uses the van Eyck detail crop on both sides. The soft version
- * is REAL resampling, not a blur filter: the crop was reduced to the 126px the
- * 1400px free file actually holds for that region, then scaled back up. Using a
- * fixed example (rather than the visitor's own artwork) keeps this to two static
- * assets with no per-artwork image generation.
+ * Both panels are the SAME image the page has already loaded and decoded, zoomed
+ * into the centre with background-size, with a blur on the free side. That means
+ * no extra network request, no image generation and no storage reads — the modal
+ * costs nothing to show. At this display size a real resample and a blur are
+ * indistinguishable anyway, so the cheap route is the right one.
  *
- * The free download stays one full-width click away. It is an interstitial, not
- * a paywall — the site is listed by university libraries on the promise that the
- * download is free and unblocked, and that has to stay true.
+ * The free download stays one full-width click away. This is an interstitial,
+ * not a paywall — university libraries list the site on the promise that the
+ * download is free and unblocked, and that has to remain true.
  */
-const FALLBACK = {
-  free: "/images/pro-detail/eyck-eye-free.jpg",
-  pro: "/images/pro-detail/eyck-eye.jpg",
-};
-
 export function DownloadInterstitial({
   open,
   onClose,
   onContinue,
   title,
-  slug,
+  imageUrl,
   maxWidth,
   locale = "en",
 }: {
@@ -42,37 +37,11 @@ export function DownloadInterstitial({
   onClose: () => void;
   onContinue: () => void;
   title: string;
-  slug?: string;
+  /** The artwork image the page already displays — reused, never re-fetched. */
+  imageUrl?: string;
   maxWidth: number | null;
   locale?: Locale;
 }) {
-  // Crops of THIS artwork, generated once then served from the CDN. The van
-  // Eyck pair shows while they load and stands in if generation fails — better
-  // a labelled example than an empty box.
-  const [crops, setCrops] = useState(FALLBACK);
-  const [isOwn, setIsOwn] = useState(false);
-
-  useEffect(() => {
-    if (!open || !slug) return;
-    let cancelled = false;
-    void (async () => {
-      try {
-        const res = await fetch(`/api/detail-crop?slug=${encodeURIComponent(slug)}`);
-        if (!res.ok || cancelled) return;
-        const d = (await res.json()) as { free?: string; pro?: string };
-        if (d.free && d.pro && !cancelled) {
-          setCrops({ free: d.free, pro: d.pro });
-          setIsOwn(true);
-        }
-      } catch {
-        // keep the fallback
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [open, slug]);
-
   useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => {
@@ -88,6 +57,16 @@ export function DownloadInterstitial({
   }, [open, onClose]);
 
   if (!open) return null;
+
+  // Zoom to the centre so the panels read as a detail, not a thumbnail — a whole
+  // painting shrunk to this size looks identical at any resolution.
+  const tile: React.CSSProperties = imageUrl
+    ? {
+        backgroundImage: `url("${imageUrl}")`,
+        backgroundSize: "320%",
+        backgroundPosition: "center",
+      }
+    : {};
 
   return createPortal(
     <div
@@ -112,36 +91,22 @@ export function DownloadInterstitial({
 
         <div className="mt-3 grid grid-cols-2 gap-2">
           <div>
-            <div className="overflow-hidden rounded-lg border border-[#e8e6e1] bg-[#f1efea]">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={crops.free}
-                alt="Detail at the free download's resolution"
-                className="h-24 w-full object-cover"
-                loading="eager"
-                decoding="async"
-              />
-            </div>
+            <div
+              className="h-24 w-full overflow-hidden rounded-lg border border-[#e8e6e1] bg-[#f1efea]"
+              style={{ ...tile, filter: "blur(1.6px)" }}
+              aria-hidden
+            />
             <p className="mt-1.5 text-xs text-[#6b6b6b]">Free · 1400 px</p>
           </div>
           <div>
-            <div className="overflow-hidden rounded-lg border border-[#e4a23c] bg-[#f1efea]">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={crops.pro}
-                alt="The same detail at full resolution"
-                className="h-24 w-full object-cover"
-                loading="eager"
-                decoding="async"
-              />
-            </div>
+            <div
+              className="h-24 w-full overflow-hidden rounded-lg border border-[#e4a23c] bg-[#f1efea]"
+              style={tile}
+              aria-hidden
+            />
             <p className="mt-1.5 text-xs font-medium text-[#b07a1e]">Pro · full size</p>
           </div>
         </div>
-
-        {!isOwn ? (
-          <p className="mt-1.5 text-[11px] text-[#9a9a9a]">Example: van Eyck at full resolution</p>
-        ) : null}
 
         <Link
           href={fineArtProPath(locale)}
