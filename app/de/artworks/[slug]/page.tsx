@@ -522,7 +522,7 @@ export default async function ArtworkDetailPageDe({ params }: ArtworkPageProps) 
                       {artworkStandardSize(artwork) ? `JPG, Size: ${artworkStandardSize(artwork)}` : "JPG"}
                     </p>
                   </div>
-                  <DownloadButton imageUrl={imageUrl} filename={artwork.slug} label={t.downloadStandard} variant="glass" />
+                  <DownloadButton imageUrl={imageUrl} filename={artwork.slug} title={artwork.title} maxWidth={artwork.img_width ?? null} label={t.downloadStandard} variant="glass" />
                 </div>
 
                 <ProDownloadRow locale="de" isPro={isPro} downloadHref={maxDownloadHref} filename={artwork.slug} glass maxDims={artworkMaxSpecs(artwork)} maxSize={artworkMaxSize(artwork)} />

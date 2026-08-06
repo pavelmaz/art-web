@@ -2,7 +2,9 @@
 
 import { track } from "@vercel/analytics";
 import { usePathname } from "next/navigation";
+import { useCallback, useRef, useState, type MouseEvent } from "react";
 
+import { DownloadInterstitial } from "@/components/DownloadInterstitial";
 import { detectLocaleFromPathname } from "@/lib/hreflang-paths";
 
 type DownloadButtonProps = {
@@ -11,7 +13,14 @@ type DownloadButtonProps = {
   filename?: string;
   label?: string;
   variant?: "solid" | "glass";
+  /** Artwork title, shown in the interstitial. */
+  title?: string;
+  /** Original width in px. The interstitial is skipped when there is nothing bigger to sell. */
+  maxWidth?: number | null;
 };
+
+/** Shown at most once per browsing session, so someone collecting ten works isn't nagged ten times. */
+const SEEN_KEY = "faf_dl_interstitial_seen";
 
 /**
  * Standard-download button. Points at the same-origin /api/download proxy, which
@@ -23,29 +32,81 @@ type DownloadButtonProps = {
  * counterpart to `paywall_view` / `paywall_cta_click`, giving the ratio of visitors
  * who take the free file versus those who click through to Pro.
  */
-export function DownloadButton({ imageUrl, filename, label = "Download", variant = "solid" }: DownloadButtonProps) {
+export function DownloadButton({
+  imageUrl,
+  filename,
+  label = "Download",
+  variant = "solid",
+  title,
+  maxWidth = null,
+}: DownloadButtonProps) {
   const pathname = usePathname();
   const params = new URLSearchParams({ src: imageUrl, size: "standard" });
   if (filename?.trim()) params.set("name", filename.trim());
   const href = imageUrl ? `/api/download?${params.toString()}` : "#";
+
+  const [showInterstitial, setShowInterstitial] = useState(false);
+  const anchorRef = useRef<HTMLAnchorElement>(null);
 
   const className =
     variant === "glass"
       ? "glass-primary inline-flex shrink-0 items-center justify-center rounded-md px-3 py-2 text-[13px] font-medium"
       : "inline-flex shrink-0 items-center justify-center rounded-md bg-[#4CAF50] px-3 py-2 text-[13px] font-medium text-white hover:bg-[#43A047]";
 
+  const locale = detectLocaleFromPathname(pathname);
+
+  const alreadySeen = () => {
+    try {
+      return window.sessionStorage.getItem(SEEN_KEY) === "1";
+    } catch {
+      return true; // storage blocked — never interrupt
+    }
+  };
+
+  const markSeen = () => {
+    try {
+      window.sessionStorage.setItem(SEEN_KEY, "1");
+    } catch {
+      // nothing to record
+    }
+  };
+
+  const handleClick = useCallback(
+    (e: MouseEvent<HTMLAnchorElement>) => {
+      track("download_free", { artwork: filename ?? "unknown", locale });
+
+      // Skip when there is no larger file to sell: on those works the download
+      // panel behind the modal shows Max Size at the same 1400px, so an upgrade
+      // offer would contradict what is on screen.
+      const hasUpgrade = typeof maxWidth === "number" && maxWidth > 1400;
+      if (!hasUpgrade || alreadySeen()) return; // let the download proceed
+
+      e.preventDefault();
+      markSeen();
+      track("interstitial_view", { artwork: filename ?? "unknown", locale });
+      setShowInterstitial(true);
+    },
+    [filename, locale, maxWidth]
+  );
+
   return (
-    <a
-      href={href}
-      className={className}
-      onClick={() =>
-        track("download_free", {
-          artwork: filename ?? "unknown",
-          locale: detectLocaleFromPathname(pathname),
-        })
-      }
-    >
-      {label}
-    </a>
+    <>
+      <a ref={anchorRef} href={href} className={className} onClick={handleClick}>
+        {label}
+      </a>
+
+      <DownloadInterstitial
+        open={showInterstitial}
+        title={title ?? filename ?? ""}
+        maxWidth={maxWidth}
+        locale={locale}
+        onClose={() => setShowInterstitial(false)}
+        onContinue={() => {
+          setShowInterstitial(false);
+          track("interstitial_continue_free", { artwork: filename ?? "unknown", locale });
+          anchorRef.current?.click(); // handleClick no-ops now that the session is marked
+        }}
+      />
+    </>
   );
 }
