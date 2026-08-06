@@ -91,19 +91,23 @@ export function DownloadInterstitial({
 
         <div className="mt-3 grid grid-cols-2 gap-2">
           <div>
-            <div
-              className="h-24 w-full overflow-hidden rounded-lg border border-[#e8e6e1] bg-[#f1efea]"
-              style={{ ...tile, filter: "blur(1.6px)" }}
-              aria-hidden
-            />
+            {/* The blur lives on an inner layer scaled past the frame, and the
+                frame clips it. Blurring the bordered element itself softens its
+                own edges against transparency, which reads as an applied effect
+                rather than a low-resolution file. */}
+            <div className="h-24 w-full overflow-hidden rounded-lg border border-[#e8e6e1] bg-[#f1efea]">
+              <div
+                className="h-full w-full"
+                style={{ ...tile, filter: "blur(1px)", transform: "scale(1.12)" }}
+                aria-hidden
+              />
+            </div>
             <p className="mt-1.5 text-xs text-[#6b6b6b]">Free · 1400 px</p>
           </div>
           <div>
-            <div
-              className="h-24 w-full overflow-hidden rounded-lg border border-[#e4a23c] bg-[#f1efea]"
-              style={tile}
-              aria-hidden
-            />
+            <div className="h-24 w-full overflow-hidden rounded-lg border border-[#e4a23c] bg-[#f1efea]">
+              <div className="h-full w-full" style={tile} aria-hidden />
+            </div>
             <p className="mt-1.5 text-xs font-medium text-[#b07a1e]">Pro · full size</p>
           </div>
         </div>
