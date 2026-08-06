@@ -112,13 +112,22 @@ export function DownloadInterstitial({
           </div>
         </div>
 
+        {/* The button carries the immediate want — this painting, in 4K — and the
+            line beneath expands it to the subscription. Leading with the
+            catalogue talks past someone who just clicked Download on one work.
+            "4K" and "500,000+ masterpieces" echo the Pro landing headline so the
+            funnel reads as one message. No price here: that decision belongs on
+            the Pro page, where both plans are shown. */}
         <Link
           href={fineArtProPath(locale)}
           onClick={() => track("interstitial_upgrade_click", { artwork: title, locale })}
           className="mt-3 flex h-[38px] w-full items-center justify-center rounded-lg bg-gradient-to-br from-[#F5C278] to-[#E4A23C] text-sm font-bold text-[#1a1a1a] transition hover:brightness-95"
         >
-          Get the full resolution — $3.75/mo
+          Get this in 4K
         </Link>
+        <p className="mt-1.5 text-center text-[11px] text-[#9a9a9a]">
+          Plus unlimited 4K downloads of 500,000+ masterpieces
+        </p>
 
         <button
           type="button"
