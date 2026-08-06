@@ -4,6 +4,7 @@ import Link from "next/link";
 import { ArtworkGrid } from "@/components/ArtworkGrid";
 import { WebSiteJsonLd } from "@/components/JsonLd";
 import { HomeHero } from "@/components/HomeHero";
+import { buildHomeLanguageAlternates } from "@/lib/locale-routes";
 import { supabase } from "@/lib/supabase";
 import { getT } from "@/lib/translations";
 import { getCachedGenresForHomeStrip } from "@/lib/browse-genres";
@@ -25,11 +26,7 @@ export const metadata: Metadata = {
   },
   alternates: {
     canonical: "https://fineartfree.com/pt",
-    languages: {
-      'en': 'https://fineartfree.com',
-      'es': 'https://fineartfree.com/es',
-      'pt': 'https://fineartfree.com/pt',
-    },
+    languages: buildHomeLanguageAlternates(),
   },
 };
 

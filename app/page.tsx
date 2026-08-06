@@ -4,6 +4,7 @@ import Link from "next/link";
 import { ArtworkGrid } from "@/components/ArtworkGrid";
 import { WebSiteJsonLd } from "@/components/JsonLd";
 import { HomeHero } from "@/components/HomeHero";
+import { buildHomeLanguageAlternates } from "@/lib/locale-routes";
 import { supabase } from "@/lib/supabase";
 import { artworkImageUrl, slugify } from "@/lib/utils";
 import type { Artwork } from "@/types/artwork";
@@ -16,6 +17,10 @@ export const metadata: Metadata = {
     "Download 500,000+ public domain paintings, classic artworks and fine art images free. High resolution, from the world's top museums. Free for commercial use.",
   alternates: {
     canonical: "https://fineartfree.com",
+    // The English homepage previously declared no alternates at all, so search
+    // engines were never told the nine localised homepages exist — the one page
+    // most likely to be searched for by brand name from another country.
+    languages: buildHomeLanguageAlternates(),
   },
   openGraph: {
     title: "Fine Art Free — Download 500,000+ Public Domain Paintings & Art",
