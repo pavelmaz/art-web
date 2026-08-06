@@ -2,7 +2,7 @@
 
 import { track } from "@vercel/analytics";
 import Link from "next/link";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 
 import { fineArtProPath } from "@/lib/fineart-pro-path";
@@ -24,11 +24,17 @@ import type { Locale } from "@/lib/translations";
  * a paywall — the site is listed by university libraries on the promise that the
  * download is free and unblocked, and that has to stay true.
  */
+const FALLBACK = {
+  free: "/images/pro-detail/eyck-eye-free.jpg",
+  pro: "/images/pro-detail/eyck-eye.jpg",
+};
+
 export function DownloadInterstitial({
   open,
   onClose,
   onContinue,
   title,
+  slug,
   maxWidth,
   locale = "en",
 }: {
@@ -36,9 +42,37 @@ export function DownloadInterstitial({
   onClose: () => void;
   onContinue: () => void;
   title: string;
+  slug?: string;
   maxWidth: number | null;
   locale?: Locale;
 }) {
+  // Crops of THIS artwork, generated once then served from the CDN. The van
+  // Eyck pair shows while they load and stands in if generation fails — better
+  // a labelled example than an empty box.
+  const [crops, setCrops] = useState(FALLBACK);
+  const [isOwn, setIsOwn] = useState(false);
+
+  useEffect(() => {
+    if (!open || !slug) return;
+    let cancelled = false;
+    void (async () => {
+      try {
+        const res = await fetch(`/api/detail-crop?slug=${encodeURIComponent(slug)}`);
+        if (!res.ok || cancelled) return;
+        const d = (await res.json()) as { free?: string; pro?: string };
+        if (d.free && d.pro && !cancelled) {
+          setCrops({ free: d.free, pro: d.pro });
+          setIsOwn(true);
+        }
+      } catch {
+        // keep the fallback
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [open, slug]);
+
   useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => {
@@ -81,7 +115,7 @@ export function DownloadInterstitial({
             <div className="overflow-hidden rounded-lg border border-[#e8e6e1] bg-[#f1efea]">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
-                src="/images/pro-detail/eyck-eye-free.jpg"
+                src={crops.free}
                 alt="Detail at the free download's resolution"
                 className="h-24 w-full object-cover"
                 loading="eager"
@@ -94,7 +128,7 @@ export function DownloadInterstitial({
             <div className="overflow-hidden rounded-lg border border-[#e4a23c] bg-[#f1efea]">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
-                src="/images/pro-detail/eyck-eye.jpg"
+                src={crops.pro}
                 alt="The same detail at full resolution"
                 className="h-24 w-full object-cover"
                 loading="eager"
@@ -104,6 +138,10 @@ export function DownloadInterstitial({
             <p className="mt-1.5 text-xs font-medium text-[#b07a1e]">Pro · full size</p>
           </div>
         </div>
+
+        {!isOwn ? (
+          <p className="mt-1.5 text-[11px] text-[#9a9a9a]">Example: van Eyck at full resolution</p>
+        ) : null}
 
         <Link
           href={fineArtProPath(locale)}

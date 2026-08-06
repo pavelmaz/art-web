@@ -98,6 +98,7 @@ export function DownloadButton({
       <DownloadInterstitial
         open={showInterstitial}
         title={title ?? filename ?? ""}
+        slug={filename}
         maxWidth={maxWidth}
         locale={locale}
         onClose={() => setShowInterstitial(false)}
