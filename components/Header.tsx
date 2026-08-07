@@ -117,6 +117,10 @@ export default function Header({ browseGenres = [] }: HeaderProps) {
       : []),
     { href: `${prefix}/${stylesSegment}`, label: t.styles },
     { href: `${prefix}/${genresSegment}`, label: t.genres },
+    // English only for now: /prints has no localised route yet, and linking a
+    // Spanish or Japanese visitor to an English page is worse than not offering
+    // it. Drop the condition once the locale versions exist.
+    ...(locale === "en" ? [{ href: "/prints", label: "Prints" }] : []),
   ];
 
   const artworksSegment = segments.artworks;
