@@ -27,12 +27,13 @@ type Row = {
   collection: string | null;
   image_id: string | null;
   url: string | null;
+  artist_display: string | null;
 };
 
 export default async function PrintsPage() {
   const { data, error } = await supabase
     .from("artworks")
-    .select("collection, image_id, url")
+    .select("collection, image_id, url, artist_display")
     .eq("object_type", "print")
     .order("score", { ascending: false });
 
@@ -44,16 +45,32 @@ export default async function PrintsPage() {
   const rows = (data as Row[] | null) ?? [];
 
   // Group in memory: the set is small and this avoids a second round trip per card.
-  const groups = new Map<string, { count: number; cover: Row }>();
+  const groups = new Map<string, { count: number; cover: Row; artists: Map<string, number> }>();
   for (const row of rows) {
     const key = row.collection?.trim() || "Individual prints";
-    const existing = groups.get(key);
-    if (existing) existing.count += 1;
-    else groups.set(key, { count: 1, cover: row });
+    let g = groups.get(key);
+    if (!g) {
+      g = { count: 0, cover: row, artists: new Map() };
+      groups.set(key, g);
+    }
+    g.count += 1;
+    const a = row.artist_display?.trim();
+    if (a) g.artists.set(a, (g.artists.get(a) ?? 0) + 1);
   }
 
   const collections = [...groups.entries()]
-    .map(([name, g]) => ({ name, count: g.count, cover: g.cover }))
+    .map(([name, g]) => ({
+      name,
+      count: g.count,
+      cover: g.cover,
+      // A published series is usually one hand — name it, the way a bibliography
+      // would. The catch-all bucket is a mix of unrelated artists, so naming the
+      // most frequent one there would be a straightforward lie; it shows a count.
+      artist:
+        name === "Individual prints"
+          ? null
+          : [...g.artists.entries()].sort((a, b) => b[1] - a[1])[0]?.[0] ?? null,
+    }))
     // Real sets first, biggest first; the catch-all bucket always last.
     .sort((a, b) =>
       a.name === "Individual prints" ? 1 : b.name === "Individual prints" ? -1 : b.count - a.count
@@ -73,7 +90,7 @@ export default async function PrintsPage() {
       {collections.length === 0 ? (
         <p className="text-sm text-[#6b6b6b]">No collections yet.</p>
       ) : (
-        <ul className="grid grid-cols-2 gap-x-4 gap-y-7 sm:grid-cols-3 lg:grid-cols-4">
+        <ul className="grid grid-cols-2 gap-x-5 gap-y-9 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
           {collections.map((c) => {
             const src = artworkGridImageUrl({
               url: c.cover.url,
@@ -82,10 +99,11 @@ export default async function PrintsPage() {
             return (
               <li key={c.name}>
                 <Link href={`/prints/${slugify(c.name)}`} className="group block">
-                  {/* Fixed 4:5 box with object-cover. Letting each cover keep its
-                      own aspect ratio staggers the grid badly — these are prints,
-                      so they range from wide panoramas to tall plates. */}
-                  <div className="aspect-[4/5] overflow-hidden rounded-lg bg-[#f1efea]">
+                  {/* Wide landscape crop, uniform across the grid. Letting each
+                      cover keep its own ratio staggers the rows badly — prints
+                      run from panoramas to tall plates — and a letterbox crop
+                      reads as a collection rather than as a single work. */}
+                  <div className="aspect-[16/10] overflow-hidden bg-[#f1efea]">
                     {src ? (
                       // eslint-disable-next-line @next/next/no-img-element
                       <img
@@ -101,11 +119,9 @@ export default async function PrintsPage() {
                       </div>
                     )}
                   </div>
-                  <p className="line-clamp-2 pt-2.5 text-[13px] font-medium leading-snug text-[#1a1a1a]">
-                    {c.name}
-                  </p>
-                  <p className="mt-[2px] text-[12px] text-[#6b6b6b]">
-                    {c.count === 1 ? "1 work" : `${c.count} works`}
+                  <p className="pt-3 text-[15px] leading-snug text-[#1a1a1a]">{c.name}</p>
+                  <p className="mt-0.5 text-[13px] leading-snug text-[#8a8a8a]">
+                    {c.artist ?? `${c.count} ${c.count === 1 ? "work" : "works"}`}
                   </p>
                 </Link>
               </li>
