@@ -11,7 +11,6 @@ import { slugify } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
 
-const SCAN_BATCH = 1000;
 
 const XML_HEADERS = {
   "Content-Type": "application/xml; charset=utf-8",
@@ -63,58 +62,33 @@ export async function GET() {
     }
 
     const supabase = createClient(supabaseUrl, supabaseKey);
-    const artists = new Set<string>();
-    const genres = new Set<string>();
-    const styles = new Set<string>();
-    const museums = new Set<string>();
 
-    let from = 0;
-    while (true) {
-      const { data, error } = await supabase
-        .from("artworks")
-        .select("artist_display, genre_title, style_title, museum")
-        .order("id", { ascending: true })
-        .range(from, from + SCAN_BATCH - 1);
-
-      if (error) {
-        console.error("[sitemap/static] batch", from, error);
-        break;
-      }
-
-      const rows = data ?? [];
-      if (!rows.length) {
-        break;
-      }
-
-      for (const row of rows as Array<{
-        artist_display: string | null;
-        genre_title: string | null;
-        style_title: string | null;
-        museum: string | null;
-      }>) {
-        const a = row.artist_display?.trim();
-        if (a && !/^https?:\/\//i.test(a)) {
-          artists.add(a);
-        }
-        const g = row.genre_title?.trim();
-        if (g) {
-          genres.add(g);
-        }
-        const s = row.style_title?.trim();
-        if (s) {
-          styles.add(s);
-        }
-        const m = row.museum?.trim();
-        if (m && !isExcludedMuseum(m)) {
-          museums.add(m);
-        }
-      }
-
-      if (rows.length < SCAN_BATCH) {
-        break;
-      }
-      from += SCAN_BATCH;
+    // One indexed DISTINCT pass in Postgres instead of paging all 109k artworks
+    // in 1,000-row batches. That scan was 110 sequential round trips and took
+    // 29-88 seconds, so Googlebot abandoned the fetch — which is why Search
+    // Console reported "no referring sitemap" for pages that ARE listed here.
+    // The RPC returns the same values in ~2s.
+    const { data: facets, error: facetsError } = await supabase.rpc("sitemap_facets");
+    if (facetsError) {
+      console.error("[sitemap/static] facets", facetsError);
+      return new Response(emptyUrlset(), { status: 200, headers: XML_HEADERS });
     }
+
+    const f = (facets ?? {}) as {
+      artists?: string[];
+      genres?: string[];
+      styles?: string[];
+      museums?: string[];
+    };
+    // Same filters the row scan applied.
+    const artists = new Set(
+      (f.artists ?? []).map((s) => s.trim()).filter((s) => s && !/^https?:\/\//i.test(s))
+    );
+    const genres = new Set((f.genres ?? []).map((s) => s.trim()).filter(Boolean));
+    const styles = new Set((f.styles ?? []).map((s) => s.trim()).filter(Boolean));
+    const museums = new Set(
+      (f.museums ?? []).map((s) => s.trim()).filter((s) => s && !isExcludedMuseum(s))
+    );
 
     const base = getPublicSiteUrl();
     const entries: SitemapEntry[] = [];
