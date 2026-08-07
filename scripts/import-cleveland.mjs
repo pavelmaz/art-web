@@ -73,15 +73,36 @@ async function upload(path, body, contentType) {
 
 const summary = { imported: 0, upgraded: 0, dupes: 0, skipped: 0, bytes: 0 };
 
-const listUrl =
-  `https://openaccess-api.clevelandart.org/api/artworks/?cc0=1&has_image=1&type=Print` +
-  `&limit=${LIMIT}&skip=${SKIP}&fields=id,title,creators,creation_date,technique,` +
-  `description,series,department,images,url`;
+/**
+ * Series-first. Cleveland's individual prints are one-off acquisitions — only
+ * ~23% carry a series — but the ones that do belong to real published sets
+ * (Dürer's Apocalypse, The Temptation of Saint Anthony). Those sets are what
+ * makes a browsable collection, so `--with-series` takes only them and
+ * `--series="name"` pulls one complete set.
+ */
+const ONLY_SERIES = args.includes("--with-series");
+const SERIES_NAME = args.find((a) => a.startsWith("--series="))?.split("=").slice(1).join("=");
 
-console.log(`Cleveland import — limit ${LIMIT}, skip ${SKIP}${DRY ? " (DRY RUN)" : ""}\n`);
+const FIELDS = "id,title,creators,creation_date,technique,description,series,department,images,url";
+const listUrl = SERIES_NAME
+  ? `https://openaccess-api.clevelandart.org/api/artworks/?cc0=1&has_image=1` +
+    `&q=${encodeURIComponent(SERIES_NAME)}&limit=100&fields=${FIELDS}`
+  : `https://openaccess-api.clevelandart.org/api/artworks/?cc0=1&has_image=1&type=Print` +
+    `&limit=${LIMIT}&skip=${SKIP}&fields=${FIELDS}`;
+
+console.log(
+  `Cleveland import — ${SERIES_NAME ? `series "${SERIES_NAME}"` : `limit ${LIMIT}, skip ${SKIP}`}` +
+  `${ONLY_SERIES ? ", series only" : ""}${DRY ? " (DRY RUN)" : ""}\n`
+);
 const list = await (await fetch(listUrl, { headers: { "User-Agent": UA } })).json();
 
 for (const item of list.data ?? []) {
+  const series = (item.series || "").trim();
+  // When importing one named set, keep only exact members — a keyword search
+  // also returns works that merely mention the title.
+  if (SERIES_NAME && series.toLowerCase() !== SERIES_NAME.toLowerCase()) continue;
+  if (ONLY_SERIES && !series) continue;
+
   const title = (item.title || "").trim();
   const artist = (item.creators?.[0]?.description || "").replace(/\s*\(.*?\)\s*$/, "").trim();
   const full = item.images?.full;
@@ -193,7 +214,7 @@ for (const item of list.data ?? []) {
         medium_display: item.technique || null,
         museum: "Cleveland Museum of Art",
         object_type: "print",
-        collection: item.series || null,
+        collection: series || null,
         source: "cleveland",
         score: 50,
         ...imageFields,
