@@ -47,6 +47,13 @@ export function DownloadButton({
 
   const [showInterstitial, setShowInterstitial] = useState(false);
   const anchorRef = useRef<HTMLAnchorElement>(null);
+  /**
+   * "Continue free download" re-clicks the anchor to start the download, which
+   * re-enters handleClick. Without this the click would be counted a second
+   * time and download_free would read roughly double for every visitor who saw
+   * the interstitial — corrupting the exact ratio the experiment measures.
+   */
+  const resumingRef = useRef(false);
 
   const className =
     variant === "glass"
@@ -73,6 +80,13 @@ export function DownloadButton({
 
   const handleClick = useCallback(
     (e: MouseEvent<HTMLAnchorElement>) => {
+      // Programmatic re-click from the interstitial: the download proceeds, but
+      // this click is a continuation of one already counted, not a new one.
+      if (resumingRef.current) {
+        resumingRef.current = false;
+        return;
+      }
+
       track("download_free", { artwork: filename ?? "unknown", locale });
 
       // Skip when there is no larger file to sell: on those works the download
@@ -105,7 +119,8 @@ export function DownloadButton({
         onContinue={() => {
           setShowInterstitial(false);
           track("interstitial_continue_free", { artwork: filename ?? "unknown", locale });
-          anchorRef.current?.click(); // handleClick no-ops now that the session is marked
+          resumingRef.current = true;
+          anchorRef.current?.click(); // resumes the download without re-counting
         }}
       />
     </>
