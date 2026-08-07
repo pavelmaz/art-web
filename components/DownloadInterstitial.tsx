@@ -6,7 +6,7 @@ import { useEffect } from "react";
 import { createPortal } from "react-dom";
 
 import { fineArtProPath } from "@/lib/fineart-pro-path";
-import type { Locale } from "@/lib/translations";
+import { getT, type Locale } from "@/lib/translations";
 
 /**
  * Shown once per session when a visitor clicks the free Download button, before
@@ -112,18 +112,20 @@ export function DownloadInterstitial({
           </div>
         </div>
 
-        {/* The button carries the immediate want — this painting, in 4K — and the
-            line beneath expands it to the subscription. Leading with the
-            catalogue talks past someone who just clicked Download on one work.
-            "4K" and "500,000+ masterpieces" echo the Pro landing headline so the
-            funnel reads as one message. No price here: that decision belongs on
-            the Pro page, where both plans are shown. */}
+        {/* Deliberately identical to the Max Size row behind the modal — same
+            green, same padlock, same words. Two different-looking buttons for
+            one action reads as two different offers. The line beneath adds the
+            catalogue; no price, since the plan choice belongs on the Pro page. */}
         <Link
           href={fineArtProPath(locale)}
           onClick={() => track("interstitial_upgrade_click", { artwork: title, locale })}
-          className="mt-3 flex h-[38px] w-full items-center justify-center rounded-lg bg-gradient-to-br from-[#F5C278] to-[#E4A23C] text-sm font-bold text-[#1a1a1a] transition hover:brightness-95"
+          className="mt-3 flex h-[38px] w-full items-center justify-center gap-1.5 rounded-md bg-gradient-to-br from-[#4CAF50] to-[#1e9e57] text-sm font-medium text-white shadow-[0_6px_18px_rgba(76,175,80,0.4)] transition hover:brightness-110"
         >
-          Get this in 4K
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <rect x="4" y="10" width="16" height="11" rx="2" />
+            <path d="M8 10V7a4 4 0 0 1 8 0v3" />
+          </svg>
+          {getT(locale).downloadMaxCta}
         </Link>
         <p className="mt-1.5 text-center text-[11px] text-[#9a9a9a]">
           Plus unlimited 4K downloads of 500,000+ masterpieces
