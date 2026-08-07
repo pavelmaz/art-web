@@ -72,10 +72,16 @@ export function ProDownloadRow({ locale, isPro, downloadHref, filename, glass = 
         // the visitor was just looking at (filename = the artwork slug).
         href={filename ? `${fineArtProPath(locale)}?art=${encodeURIComponent(filename)}` : fineArtProPath(locale)}
         onClick={() => track("paywall_cta_click", { source: "download_4k", locale })}
-        className="inline-flex shrink-0 items-center gap-1 rounded-md bg-gradient-to-br from-[#4CAF50] to-[#1e9e57] px-3 py-2 text-[13px] font-medium text-white shadow-[0_6px_18px_rgba(76,175,80,0.4)] transition hover:brightness-110"
+        className="inline-flex shrink-0 items-center gap-1.5 rounded-md bg-gradient-to-br from-[#4CAF50] to-[#1e9e57] px-3 py-2 text-[13px] font-medium text-white shadow-[0_6px_18px_rgba(76,175,80,0.4)] transition hover:brightness-110"
       >
-        {t.insightsLimitCta}
-        <span aria-hidden="true">→</span>
+        {/* The padlock does the work the old arrow didn't: it says the file is
+            gated, so "Download Max" reads as locked rather than as a promise
+            that the click starts a download. */}
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <rect x="4" y="10" width="16" height="11" rx="2" />
+          <path d="M8 10V7a4 4 0 0 1 8 0v3" />
+        </svg>
+        {t.downloadMaxCta}
       </Link>
     </div>
   );

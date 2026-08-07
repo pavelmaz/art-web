@@ -61,6 +61,7 @@ export const translations = {
     insightsLimitTitle: 'Unlock unlimited insights',
     insightsLimitBody: "You've used your free Discover. Go Fine Art Free Pro for unlimited AI insights on every artwork.",
     insightsLimitCta: 'Become Pro',
+    downloadMaxCta: 'Download Max',
     // SEO page title templates
     artworkPageTitle: (title: string, artist: string) => 
       `${title} de ${artist} — Descarga Gratuita`,
@@ -129,6 +130,7 @@ export const translations = {
     insightsLimitTitle: 'Desbloquea información ilimitada',
     insightsLimitBody: 'Ya usaste tu Descubrir gratuito. Hazte Fine Art Free Pro para obtener información ilimitada en cada obra.',
     insightsLimitCta: 'Hazte Pro',
+    downloadMaxCta: 'Descargar máx.',
     // SEO page title templates
     artworkPageTitle: (title: string, artist: string) => 
       `${title} de ${artist} — Descarga Gratuita | Fine Art Free`,
@@ -197,6 +199,7 @@ export const translations = {
     insightsLimitTitle: 'Desbloqueie informações ilimitadas',
     insightsLimitBody: 'Você já usou o seu Descobrir gratuito. Torne-se Fine Art Free Pro para informações ilimitadas em todas as obras.',
     insightsLimitCta: 'Torne-se Pro',
+    downloadMaxCta: 'Baixar máx.',
     // SEO page title templates
     artworkPageTitle: (title: string, artist: string) => 
       `${title} de ${artist} — Download Gratuito | Fine Art Free`,
@@ -268,6 +271,7 @@ export const translations = {
     insightsLimitTitle: 'インサイトを無制限に',
     insightsLimitBody: '無料の「発見」を使い切りました。Fine Art Free Pro になると、すべての作品で無制限にインサイトを利用できます。',
     insightsLimitCta: 'Proになる',
+    downloadMaxCta: '最大サイズをダウンロード',
     artworkPageTitle: (title: string, artist: string) =>
       `${title} — ${artist} | 無料ダウンロード | Fine Art Free`,
     stylePageTitle: (style: string) =>
@@ -337,6 +341,7 @@ export const translations = {
     insightsLimitTitle: 'Débloquez des informations illimitées',
     insightsLimitBody: 'Vous avez utilisé votre Découverte gratuite. Passez à Fine Art Free Pro pour des informations illimitées sur chaque œuvre.',
     insightsLimitCta: 'Devenir Pro',
+    downloadMaxCta: 'Télécharger max',
     artworkPageTitle: (title: string, artist: string) =>
       `${title} par ${artist} — Téléchargement gratuit | Fine Art Free`,
     stylePageTitle: (style: string) =>
@@ -406,6 +411,7 @@ export const translations = {
     insightsLimitTitle: 'Unbegrenzte Einblicke freischalten',
     insightsLimitBody: 'Sie haben Ihr kostenloses Entdecken genutzt. Werden Sie Fine Art Free Pro für unbegrenzte Einblicke zu jedem Kunstwerk.',
     insightsLimitCta: 'Pro werden',
+    downloadMaxCta: 'Max. herunterladen',
     artworkPageTitle: (title: string, artist: string) =>
       `${title} von ${artist} — Kostenloser Download | Fine Art Free`,
     stylePageTitle: (style: string) =>
@@ -475,6 +481,7 @@ export const translations = {
     insightsLimitTitle: 'Sblocca approfondimenti illimitati',
     insightsLimitBody: 'Hai usato il tuo Scopri gratuito. Passa a Fine Art Free Pro per approfondimenti illimitati su ogni opera.',
     insightsLimitCta: 'Diventa Pro',
+    downloadMaxCta: 'Scarica max',
     artworkPageTitle: (title: string, artist: string) =>
       `${title} di ${artist} — Scarica gratuitamente | Fine Art Free`,
     stylePageTitle: (style: string) =>
@@ -543,6 +550,7 @@ export const translations = {
     insightsLimitTitle: '무제한 인사이트 잠금 해제',
     insightsLimitBody: '무료 발견을 모두 사용했습니다. Fine Art Free Pro로 업그레이드하면 모든 작품에서 무제한 인사이트를 이용할 수 있습니다.',
     insightsLimitCta: 'Pro 시작하기',
+    downloadMaxCta: '최대 크기 다운로드',
     artworkPageTitle: (title: string, artist: string) =>
       `${title} — ${artist} | 무료 다운로드 | Fine Art Free`,
     stylePageTitle: (style: string) =>
@@ -612,6 +620,7 @@ export const translations = {
     insightsLimitTitle: 'Откройте безлимитные инсайты',
     insightsLimitBody: 'Вы использовали бесплатное «Открыть». Оформите Fine Art Free Pro для безлимитных инсайтов к каждой работе.',
     insightsLimitCta: 'Стать Pro',
+    downloadMaxCta: 'Скачать макс.',
     artworkPageTitle: (title: string, artist: string) =>
       `${title} — ${artist} | Бесплатная загрузка | Fine Art Free`,
     stylePageTitle: (style: string) =>
@@ -680,6 +689,7 @@ export const translations = {
     insightsLimitTitle: '解锁无限解读',
     insightsLimitBody: '您已用完免费的“发现”。升级 Fine Art Free Pro，即可在每件作品上获得无限 AI 解读。',
     insightsLimitCta: '成为 Pro',
+    downloadMaxCta: '下载最大尺寸',
     artworkPageTitle: (title: string, artist: string) =>
       `${title} — ${artist} | 免费下载 | Fine Art Free`,
     stylePageTitle: (style: string) =>
