@@ -15,7 +15,7 @@ export async function generateMetadata({ searchParams }: ArtistsPageProps): Prom
   return hubListPageMetadata({
     canonicalPath: "/es/artistas",
     hub: "artists",
-    title: "Artistas — Obras Completas Gratis para Descargar | Fine Art Free",
+    title: { absolute: "Artistas — Obras Completas Gratis para Descargar | Fine Art Free" },
     description: "Explora obras de arte de dominio público por artista. Monet, Rembrandt, Van Gogh, Dürer y cientos más — gratis para descargar.",
     page,
     openGraph: {

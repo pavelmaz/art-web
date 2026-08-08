@@ -18,7 +18,7 @@ export async function generateMetadata({ searchParams }: ArtistsPageProps): Prom
   return hubListPageMetadata({
     canonicalPath: "/ja/artists",
     hub: "artists",
-    title: "芸術家一覧 — 全作品無料ダウンロード | Fine Art Free",
+    title: { absolute: "芸術家一覧 — 全作品無料ダウンロード | Fine Art Free" },
     description: "モネ、レンブラント、ゴッホ、デューラーなど、パブリックドメインの名作を作家別に無料で高解像度ダウンロード。",
     page,
     openGraph: {

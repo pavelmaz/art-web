@@ -15,7 +15,7 @@ export async function generateMetadata({ searchParams }: CountriesPageProps): Pr
   return topicsCountriesPageMetadata({
     canonicalPath: "/es/paises",
     kind: "countries",
-    title: "Arte por País — Descarga Gratuita Dominio Público | Fine Art Free",
+    title: { absolute: "Arte por País — Descarga Gratuita Dominio Público | Fine Art Free" },
     description: "Explora arte de dominio público por país de origen. Pinturas francesas, holandesas, italianas, alemanas y más — gratis para descargar.",
     page,
     openGraph: {

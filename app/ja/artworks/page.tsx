@@ -18,7 +18,7 @@ export async function generateMetadata({ searchParams }: ArtworksPageProps): Pro
   return hubListPageMetadata({
     canonicalPath: "/ja/artworks",
     hub: "artworks",
-    title: "作品一覧 — パブリックドメイン無料ダウンロード | Fine Art Free",
+    title: { absolute: "作品一覧 — パブリックドメイン無料ダウンロード | Fine Art Free" },
     description: "7万件以上のパブリックドメイン美術作品を高解像度で無料ダウンロード。古典絵画、版画、イラストを個人・商用にご利用いただけます。",
     page,
     q,

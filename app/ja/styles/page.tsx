@@ -18,7 +18,7 @@ export async function generateMetadata({ searchParams }: StylesPageProps): Promi
   return hubListPageMetadata({
     canonicalPath: "/ja/styles",
     hub: "styles",
-    title: "スタイル・美術運動 — パブリックドメイン無料 | Fine Art Free",
+    title: { absolute: "スタイル・美術運動 — パブリックドメイン無料 | Fine Art Free" },
     description: "バロック、印象派、オランダ黄金時代、ルネサンスなど、スタイル別にパブリックドメインの名作を無料で高解像度ダウンロード。",
     page,
     openGraph: {

@@ -18,7 +18,7 @@ export async function generateMetadata({ searchParams }: GenresPageProps): Promi
   return hubListPageMetadata({
     canonicalPath: "/ja/genres",
     hub: "genres",
-    title: "ジャンル一覧 — パブリックドメイン無料 | Fine Art Free",
+    title: { absolute: "ジャンル一覧 — パブリックドメイン無料 | Fine Art Free" },
     description: "風景、肖像、静物、宗教画など、ジャンル別にパブリックドメインの名作を高解像度で無料ダウンロード。",
     page,
     openGraph: {

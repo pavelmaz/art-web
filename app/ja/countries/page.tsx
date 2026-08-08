@@ -18,7 +18,7 @@ export async function generateMetadata({ searchParams }: CountriesPageProps): Pr
   return topicsCountriesPageMetadata({
     canonicalPath: "/ja/countries",
     kind: "countries",
-    title: "国・地域別の美術 — パブリックドメイン無料 | Fine Art Free",
+    title: { absolute: "国・地域別の美術 — パブリックドメイン無料 | Fine Art Free" },
     description: "フランス、オランダ、イタリア、ドイツなど、国・地域別にパブリックドメインの絵画を無料で高解像度ダウンロード。",
     page,
     openGraph: {

@@ -19,7 +19,7 @@ export async function generateMetadata({ searchParams }: ArtistsPageProps): Prom
   return hubListPageMetadata({
     canonicalPath: "/artists",
     hub: "artists",
-    title: "Artists — Complete Works Free to Download | Fine Art Free",
+    title: { absolute: "Artists — Complete Works Free to Download | Fine Art Free" },
     description:
       "Browse public domain artworks by artist. Monet, Rembrandt, Van Gogh, Dürer and hundreds more — all free to download.",
     page,

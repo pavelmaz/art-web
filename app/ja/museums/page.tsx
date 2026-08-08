@@ -18,7 +18,7 @@ export async function generateMetadata({ searchParams }: MuseumsPageProps): Prom
   return hubListPageMetadata({
     canonicalPath: "/ja/museums",
     hub: "museums",
-    title: "美術館コレクション — パブリックドメイン無料 | Fine Art Free",
+    title: { absolute: "美術館コレクション — パブリックドメイン無料 | Fine Art Free" },
     description: "プラド美術館、ライクスミュージアム、ボストン美術館、ナショナル・ギャラリーなど、世界の美術館所蔵のパブリックドメイン作品を無料ダウンロード。",
     page,
     openGraph: {

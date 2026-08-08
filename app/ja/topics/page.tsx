@@ -18,7 +18,7 @@ export async function generateMetadata({ searchParams }: TopicsPageProps): Promi
   return topicsCountriesPageMetadata({
     canonicalPath: "/ja/topics",
     kind: "topics",
-    title: "話題・タグから探す — パブリックドメイン無料 | Fine Art Free",
+    title: { absolute: "話題・タグから探す — パブリックドメイン無料 | Fine Art Free" },
     description: "夕焼け、馬、花、森など、人気のタグから7万件以上のパブリックドメイン作品を無料で高解像度ダウンロード。",
     page,
     openGraph: {

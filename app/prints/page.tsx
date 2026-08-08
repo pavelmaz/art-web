@@ -17,7 +17,7 @@ export const revalidate = 86400;
  * acquisitions with no set to belong to.
  */
 export const metadata: Metadata = {
-  title: "Print Collections — Free High-Resolution Downloads | Fine Art Free",
+  title: { absolute: "Print Collections — Free High-Resolution Downloads | Fine Art Free" },
   description:
     "Browse public domain print collections — complete published series of etchings, engravings and woodblock prints, free to download in high resolution.",
   alternates: { canonical: absoluteUrl("/prints") },

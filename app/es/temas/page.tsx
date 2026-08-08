@@ -15,7 +15,7 @@ export async function generateMetadata({ searchParams }: TopicsPageProps): Promi
   return topicsCountriesPageMetadata({
     canonicalPath: "/es/temas",
     kind: "topics",
-    title: "Temas Artísticos — Explorar por Tema | Fine Art Free",
+    title: { absolute: "Temas Artísticos — Explorar por Tema | Fine Art Free" },
     description: "Explora 72.000+ obras de arte de dominio público por tema. Atardeceres, caballos, flores, bosques y cientos más — gratis para descargar.",
     page,
     openGraph: {

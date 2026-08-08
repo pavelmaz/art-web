@@ -14,7 +14,7 @@ export async function generateMetadata({ searchParams }: GenresPageProps): Promi
   return hubListPageMetadata({
     canonicalPath: "/genres",
     hub: "genres",
-    title: "Art Genres — Free Public Domain Downloads | Fine Art Free",
+    title: { absolute: "Art Genres — Free Public Domain Downloads | Fine Art Free" },
     description: "Browse public domain art by genre. Landscape, Portrait, Still Life, Religious and more — all free to download in high resolution.",
     page,
     openGraph: {

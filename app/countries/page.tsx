@@ -15,7 +15,7 @@ export async function generateMetadata({ searchParams }: CountriesPageProps): Pr
   return topicsCountriesPageMetadata({
     canonicalPath: "/countries",
     kind: "countries",
-    title: "Art by Country — Free Public Domain Downloads | Fine Art Free",
+    title: { absolute: "Art by Country — Free Public Domain Downloads | Fine Art Free" },
     description: "Browse public domain art by country of origin. French, Dutch, Italian, German paintings and more — all free to download.",
     page,
     openGraph: {

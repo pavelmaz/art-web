@@ -15,7 +15,7 @@ export async function generateMetadata({ searchParams }: MuseumsPageProps): Prom
   return hubListPageMetadata({
     canonicalPath: "/pt/museus",
     hub: "museums",
-    title: "Coleções de Museus — Arte Grátis para Baixar | Fine Art Free",
+    title: { absolute: "Coleções de Museus — Arte Grátis para Baixar | Fine Art Free" },
     description: "Explore arte de domínio público por museu. Prado, Rijksmuseum, MFA Boston, National Gallery e mais — grátis para baixar.",
     page,
     openGraph: {

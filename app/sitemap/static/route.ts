@@ -115,6 +115,28 @@ export async function GET() {
       priority: 0.9,
     });
 
+    // Print collections. Each series gets its own page, so they belong here like
+    // the genre and museum hubs — without this they are unreachable to a crawler
+    // except through the Explore menu.
+    entries.push({ loc: `${base}/prints`, changefreq: "weekly", priority: 0.8 });
+    {
+      const { data: printRows } = await supabase
+        .from("artworks")
+        .select("collection")
+        .eq("object_type", "print");
+      const collections = new Set(
+        (printRows ?? [])
+          .map((r) => (r as { collection: string | null }).collection?.trim() || "Individual prints")
+          .filter(Boolean)
+      );
+      for (const name of Array.from(collections).sort()) {
+        const seg = slugify(name);
+        if (seg) {
+          entries.push({ loc: `${base}/prints/${seg}`, changefreq: "monthly", priority: 0.6 });
+        }
+      }
+    }
+
     for (const name of Array.from(artists).sort()) {
       const seg = slugify(name);
       if (seg) {

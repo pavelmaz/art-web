@@ -15,7 +15,7 @@ export async function generateMetadata({ searchParams }: GenresPageProps): Promi
   return hubListPageMetadata({
     canonicalPath: "/pt/generos",
     hub: "genres",
-    title: "Géneros Artísticos — Download Gratuito Domínio Público | Fine Art Free",
+    title: { absolute: "Géneros Artísticos — Download Gratuito Domínio Público | Fine Art Free" },
     description: "Explore arte de domínio público por género. Paisagem, Retrato, Natureza Morta, Religioso e mais — grátis para baixar em alta resolução.",
     page,
     openGraph: {

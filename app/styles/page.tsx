@@ -20,7 +20,7 @@ export async function generateMetadata({ searchParams }: StylesPageProps): Promi
   return hubListPageMetadata({
     canonicalPath: "/styles",
     hub: "styles",
-    title: "Art Movements & Styles — Free Downloads | Fine Art Free",
+    title: { absolute: "Art Movements & Styles — Free Downloads | Fine Art Free" },
     description: "Browse public domain art by movement. Baroque, Impressionism, Dutch Golden Age, Renaissance and more — all free to download.",
     page,
     openGraph: {

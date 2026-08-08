@@ -11,7 +11,7 @@ import { getT, translations, type Locale } from "@/lib/translations";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "Log in — Fine Art Free",
+  title: { absolute: "Log in — Fine Art Free" },
   robots: { index: false, follow: false },
 };
 

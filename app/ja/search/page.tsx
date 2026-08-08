@@ -14,7 +14,7 @@ export const dynamic = "force-dynamic";
 const t = getT("ja");
 
 export const metadata: Metadata = {
-  title: "検索 | Fine Art Free",
+  title: { absolute: "検索 | Fine Art Free" },
   description: "アーティスト名やキーワードから作品と作家を検索します。",
   alternates: {
     canonical: absoluteUrl("/ja/search"),

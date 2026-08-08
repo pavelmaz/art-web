@@ -15,7 +15,7 @@ export async function generateMetadata({ searchParams }: ArtworksPageProps): Pro
   return hubListPageMetadata({
     canonicalPath: "/pt/obras",
     hub: "artworks",
-    title: "Explorar Todas as Obras — Arte de Domínio Público Grátis | Fine Art Free",
+    title: { absolute: "Explorar Todas as Obras — Arte de Domínio Público Grátis | Fine Art Free" },
     description: "Baixe 72.000+ obras de arte de domínio público em alta resolução. Pinturas clássicas, gravuras e ilustrações grátis para qualquer uso.",
     page,
     q,

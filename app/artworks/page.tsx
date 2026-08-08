@@ -18,7 +18,7 @@ export async function generateMetadata({ searchParams }: ArtworksPageProps): Pro
   return hubListPageMetadata({
     canonicalPath: "/artworks",
     hub: "artworks",
-    title: "Browse All Artworks — Free Public Domain Art | Fine Art Free",
+    title: { absolute: "Browse All Artworks — Free Public Domain Art | Fine Art Free" },
     description:
       "Download 72,000+ public domain artworks in high resolution. Classic paintings, prints and illustrations free for any use.",
     page,

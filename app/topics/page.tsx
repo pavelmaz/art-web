@@ -16,7 +16,7 @@ export async function generateMetadata({ searchParams }: TopicsPageProps): Promi
   return topicsCountriesPageMetadata({
     canonicalPath: "/topics",
     kind: "topics",
-    title: "Art Topics — Browse by Subject | Fine Art Free",
+    title: { absolute: "Art Topics — Browse by Subject | Fine Art Free" },
     description: "Browse 72,000+ public domain artworks by topic. Sunset, horses, flowers, forests and hundreds more — all free to download.",
     page,
     openGraph: {

@@ -15,7 +15,7 @@ export async function generateMetadata({ searchParams }: StylesPageProps): Promi
   return hubListPageMetadata({
     canonicalPath: "/pt/estilos",
     hub: "styles",
-    title: "Movimentos e Estilos Artísticos — Download Gratuito | Fine Art Free",
+    title: { absolute: "Movimentos e Estilos Artísticos — Download Gratuito | Fine Art Free" },
     description: "Explore arte de domínio público por movimento. Barroco, Impressionismo, Idade de Ouro Holandesa, Renascimento e mais — grátis para baixar.",
     page,
     openGraph: {

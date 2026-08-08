@@ -10,7 +10,7 @@ import type { Artwork } from "@/types/artwork";
 export const dynamic = "force-dynamic";
 
 export const metadata = {
-  title: "Búsqueda | Fine Art Free",
+  title: { absolute: "Búsqueda | Fine Art Free" },
   robots: {
     index: false,
     follow: true,
