@@ -1,14 +1,46 @@
-import { createClient } from "@supabase/supabase-js";
+import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 
 import { LOCALE_ROUTE_CONFIG, type SiteLocale } from "@/lib/locale-routes";
 import { escapeXml, getPublicSiteUrl } from "@/lib/sitemap-xml";
 import { artworkGridImageUrl } from "@/lib/utils";
 
-export const ARTWORK_SITEMAP_PAGE_SIZE = 500;
+/**
+ * 10,000 URLs per sitemap file (Google's limit is 50,000 / 50MB). The old 500
+ * fragmented the catalog into 2,419 files, so Googlebot spent 2,419 fetches
+ * enumerating URLs before crawling a single page — on a site where crawl budget
+ * is the scarce resource. Now ~11 files per locale, ~120 total. PostgREST caps
+ * any single response at 1,000 rows, so one file is assembled from keyset
+ * batches of 1,000 (see fetchSitemapRows).
+ */
+export const ARTWORK_SITEMAP_PAGE_SIZE = 10000;
+const FETCH_BATCH_SIZE = 1000;
 // Generous abuse cap only. The sitemap index lists the real page count dynamically,
 // and out-of-range pages return an empty (valid) urlset via the keyset logic below.
 export const ARTWORK_SITEMAP_MAX_PAGE_INDEX = 1000;
 export const IMAGE_SITEMAP_MAX_PAGE_INDEX = 1000;
+
+/** Used only if the live count can't be read. Deliberately an OVER-estimate of the
+ *  real page count (~11 at ~109k artworks / 10k per file) with headroom for growth:
+ *  pages past the real end return empty-but-valid sitemaps, so over-listing is
+ *  harmless — whereas under-listing silently drops URLs across every locale. */
+export const FALLBACK_SITEMAP_COUNT = 40;
+
+/** Number of artwork sitemap pages = ceil(total artworks / page size), read live so
+ *  no index ever drops newly added artworks. Shared by the master sitemap index and
+ *  the per-locale indexes. */
+export async function artworkSitemapPageCount(supabase: SupabaseClient): Promise<number> {
+  try {
+    const { count, error } = await supabase
+      .from("artworks")
+      .select("id", { count: "exact", head: true });
+    if (error || !count || count <= 0) {
+      return FALLBACK_SITEMAP_COUNT;
+    }
+    return Math.ceil(count / ARTWORK_SITEMAP_PAGE_SIZE);
+  } catch {
+    return FALLBACK_SITEMAP_COUNT;
+  }
+}
 
 export const ARTWORK_SITEMAP_XML_HEADERS = {
   "Content-Type": "application/xml; charset=utf-8",
@@ -29,47 +61,17 @@ function emptyImageUrlset(): string {
 `;
 }
 
-type ArtworkUrlEntry = { loc: string; lastmod?: string };
-
 /**
- * Date of the last site-wide content refresh of artwork pages. The AI enrichment
- * backfill (unique descriptions, 10-locale SEO text and alt text on every artwork)
- * completed 2026-06-28, materially changing every page — but rows only carry
- * `created_at`, so a raw created_at <lastmod> would tell crawlers nothing changed
- * and suppress re-crawling of the now-enriched pages. Bump this when the next
- * site-wide content refresh lands.
+ * No <lastmod> anywhere. The old values were constants (every URL stamped with
+ * the enrichment date, every index entry with the last import wave), and Google
+ * uses lastmod only when it is "consistently and verifiably accurate" — thousands
+ * of URLs sharing one date is the textbook signal of the opposite, which teaches
+ * the crawler to distrust the whole sitemap. An absent lastmod is neutral; a fake
+ * one is a negative. changefreq/priority stay off these files for the same reason.
  */
-export const CONTENT_REFRESH_LASTMOD = Date.parse("2026-06-28T00:00:00.000Z");
-
-/**
- * Newest-content date for the sitemap INDEX `<lastmod>` — distinct from
- * CONTENT_REFRESH_LASTMOD (which is the last time EVERY page's text changed). This
- * is the date of the most recent artwork import wave (max(created_at) in the table),
- * used to tell crawlers the catalog gained fresh content worth re-crawling. It's a
- * constant, not a live query, because `created_at` is unindexed (a `created_at desc`
- * scan is ~6s cold and would risk the sitemap index timing out). Bump it when the
- * next import wave lands. Latest wave: 2026-07-23.
- */
-export const CATALOG_INDEX_LASTMOD = Date.parse("2026-07-23T00:00:00.000Z");
-
-/** Convert a Postgres timestamp string to a W3C/ISO-8601 <lastmod> value, floored
- *  at the last site-wide content refresh (newer rows keep their created_at). */
-export function toLastmod(value: string | null | undefined): string | undefined {
-  const created = typeof value === "string" && value.trim() ? Date.parse(value) : NaN;
-  const lastmod = Number.isNaN(created) ? CONTENT_REFRESH_LASTMOD : Math.max(created, CONTENT_REFRESH_LASTMOD);
-  return new Date(lastmod).toISOString();
-}
-
-function buildUrlset(entries: ArtworkUrlEntry[]): string {
-  const inner = entries
-    .map((e) => {
-      let xml = `  <url>\n    <loc>${escapeXml(e.loc)}</loc>`;
-      if (e.lastmod) {
-        xml += `\n    <lastmod>${e.lastmod}</lastmod>`;
-      }
-      xml += `\n  </url>`;
-      return xml;
-    })
+function buildUrlset(locs: string[]): string {
+  const inner = locs
+    .map((loc) => `  <url>\n    <loc>${escapeXml(loc)}</loc>\n  </url>`)
     .join("\n");
   return `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
@@ -152,6 +154,40 @@ async function keysetCursor(
   return { cursor: rows[0].id, pastEnd: false };
 }
 
+/**
+ * Fetch one sitemap page's rows (up to ARTWORK_SITEMAP_PAGE_SIZE) in id-ordered
+ * keyset batches of FETCH_BATCH_SIZE — PostgREST silently truncates any single
+ * response to 1,000 rows, so `.limit(10000)` alone would return a tenth of the
+ * page. Each batch is an indexed `id > cursor` scan (~30ms); a full file is ~10
+ * round trips.
+ */
+async function fetchSitemapRows<T extends { id: string }>(
+  supabase: SitemapClient,
+  columns: string,
+  startCursor: string | null,
+): Promise<T[]> {
+  const out: T[] = [];
+  let cursor = startCursor;
+  while (out.length < ARTWORK_SITEMAP_PAGE_SIZE) {
+    const want = Math.min(FETCH_BATCH_SIZE, ARTWORK_SITEMAP_PAGE_SIZE - out.length);
+    let q = supabase.from("artworks").select(columns);
+    if (cursor !== null) {
+      q = q.gt("id", cursor);
+    }
+    const { data, error } = await q.order("id", { ascending: true }).limit(want);
+    if (error) {
+      throw error;
+    }
+    const rows = (data as unknown as T[] | null) ?? [];
+    out.push(...rows);
+    if (rows.length < want) {
+      break; // end of table
+    }
+    cursor = rows[rows.length - 1].id;
+  }
+  return out;
+}
+
 export async function buildArtworkSitemapPageResponse(
   locale: SiteLocale,
   rawPage: string
@@ -194,16 +230,11 @@ export async function buildArtworkSitemapPageResponse(
       return new Response(emptyUrlset(), { status: 503, headers: ARTWORK_SITEMAP_XML_HEADERS });
     }
 
-    let pageQuery = supabase.from("artworks").select("slug, created_at");
-    if (cursor !== null) {
-      pageQuery = pageQuery.gt("id", cursor);
-    }
-    const { data, error } = await pageQuery
-      .order("id", { ascending: true })
-      .limit(ARTWORK_SITEMAP_PAGE_SIZE);
-
-    if (error) {
-      console.error(`[sitemap/${label}]`, page, error);
+    let rows: { id: string; slug: string | null }[];
+    try {
+      rows = await fetchSitemapRows(supabase, "id, slug", cursor);
+    } catch (rowsErr) {
+      console.error(`[sitemap/${label}]`, page, rowsErr);
       return new Response(emptyUrlset(), {
         status: 503,
         headers: ARTWORK_SITEMAP_XML_HEADERS,
@@ -211,16 +242,9 @@ export async function buildArtworkSitemapPageResponse(
     }
 
     const base = getPublicSiteUrl();
-    const rows =
-      (data as { slug: string | null; created_at: string | null }[] | null) ?? [];
-    const entries: ArtworkUrlEntry[] = rows
-      .filter((r): r is { slug: string; created_at: string | null } =>
-        Boolean(r.slug?.trim())
-      )
-      .map((r) => ({
-        loc: artworkLoc(base, locale, r.slug.trim()),
-        lastmod: toLastmod(r.created_at),
-      }));
+    const entries: string[] = rows
+      .filter((r): r is { id: string; slug: string } => Boolean(r.slug?.trim()))
+      .map((r) => artworkLoc(base, locale, r.slug.trim()));
 
     if (!entries.length && page === 0) {
       console.error(`[sitemap/${label}]`, page, "no URLs returned");
@@ -285,16 +309,17 @@ export async function buildArtworkImageSitemapPageResponse(
       return new Response(emptyImageUrlset(), { status: 503, headers: ARTWORK_SITEMAP_XML_HEADERS });
     }
 
-    let pageQuery = supabase.from("artworks").select("slug, title, artist_display, image_id");
-    if (cursor !== null) {
-      pageQuery = pageQuery.gt("id", cursor);
-    }
-    const { data, error } = await pageQuery
-      .order("id", { ascending: true })
-      .limit(ARTWORK_SITEMAP_PAGE_SIZE);
-
-    if (error) {
-      console.error(`[sitemap/${label}]`, page, error);
+    let rows: Array<{
+      id: string;
+      slug: string | null;
+      title: string | null;
+      artist_display: string | null;
+      image_id: string | null;
+    }>;
+    try {
+      rows = await fetchSitemapRows(supabase, "id, slug, title, artist_display, image_id", cursor);
+    } catch (rowsErr) {
+      console.error(`[sitemap/${label}]`, page, rowsErr);
       return new Response(emptyImageUrlset(), {
         status: 503,
         headers: ARTWORK_SITEMAP_XML_HEADERS,
@@ -302,13 +327,6 @@ export async function buildArtworkImageSitemapPageResponse(
     }
 
     const base = getPublicSiteUrl();
-    const rows =
-      (data as Array<{
-        slug: string | null;
-        title: string | null;
-        artist_display: string | null;
-        image_id: string | null;
-      }> | null) ?? [];
 
     const entries: ImageSitemapEntry[] = [];
     for (const row of rows) {

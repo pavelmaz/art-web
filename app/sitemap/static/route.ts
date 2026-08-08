@@ -26,7 +26,6 @@ function emptyUrlset(): string {
 
 type SitemapEntry = {
   loc: string;
-  lastmod?: string;
   changefreq?: string;
   priority?: number;
 };
@@ -35,7 +34,6 @@ function buildUrlset(entries: SitemapEntry[]): string {
   const inner = entries
     .map((e) => {
       let xml = `  <url>\n    <loc>${escapeXml(e.loc)}</loc>`;
-      if (e.lastmod) xml += `\n    <lastmod>${e.lastmod}</lastmod>`;
       if (e.changefreq) xml += `\n    <changefreq>${e.changefreq}</changefreq>`;
       if (e.priority != null) xml += `\n    <priority>${e.priority}</priority>`;
       xml += `\n  </url>`;
@@ -160,12 +158,10 @@ export async function GET() {
       "drawing", "illustration",
     ];
     const genreSlugsSet = new Set(GENRE_SLUGS);
-    const today = new Date().toISOString().split("T")[0];
 
     for (const slug of GENRE_SLUGS) {
       entries.push({
         loc: `${base}/genres/${slug}`,
-        lastmod: today,
         changefreq: "weekly",
         priority: 0.8,
       });
@@ -192,13 +188,11 @@ export async function GET() {
 
     entries.push({
       loc: `${base}/topics`,
-      lastmod: today,
       changefreq: "weekly",
       priority: 0.8,
     });
     entries.push({
       loc: `${base}/countries`,
-      lastmod: today,
       changefreq: "weekly",
       priority: 0.8,
     });
@@ -213,7 +207,6 @@ export async function GET() {
     for (const country of COUNTRY_NAMES) {
       entries.push({
         loc: `${base}/countries/${country.toLowerCase().replace(/\s+/g, "-")}`,
-        lastmod: today,
         changefreq: "monthly",
         priority: 0.7,
       });
@@ -233,7 +226,6 @@ export async function GET() {
     for (const tag of TOP_TOPICS) {
       entries.push({
         loc: `${base}/topics/${tag.replace(/\s+/g, "-")}`,
-        lastmod: today,
         changefreq: "monthly",
         priority: 0.6,
       });
@@ -241,7 +233,6 @@ export async function GET() {
 
     entries.push({
       loc: `${base}/blog`,
-      lastmod: today,
       changefreq: "weekly",
       priority: 0.7,
     });
@@ -259,13 +250,8 @@ export async function GET() {
     } else {
       for (const row of blogPosts ?? []) {
         if (typeof row.slug !== "string" || !row.slug.trim()) continue;
-        const lastmod =
-          typeof row.published_at === "string"
-            ? row.published_at.split("T")[0]
-            : today;
         entries.push({
           loc: `${base}/blog/${row.slug}`,
-          lastmod,
           changefreq: "monthly",
           priority: 0.6,
         });

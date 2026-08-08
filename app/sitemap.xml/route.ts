@@ -1,42 +1,12 @@
-import {
-  ARTWORK_SITEMAP_PAGE_SIZE,
-  CATALOG_INDEX_LASTMOD,
-  CONTENT_REFRESH_LASTMOD,
-} from "@/lib/artwork-sitemap-response";
+import { artworkSitemapPageCount } from "@/lib/artwork-sitemap-response";
 import { getPublicSiteUrl, escapeXml } from "@/lib/sitemap-xml";
 import { supabase } from "@/lib/supabase";
 
 export const dynamic = "force-dynamic";
 
-/** Used only if the live count can't be read. Deliberately an OVER-estimate of the
- *  real page count (~218 at ~109k artworks) with headroom for growth: pages past the
- *  real end return empty-but-valid sitemaps, so over-listing is harmless — whereas
- *  under-listing (the old 180) silently dropped pages 180-217 across every locale
- *  (~209k URLs). Raise further as the catalog approaches ~200k artworks. */
-const FALLBACK_SITEMAP_COUNT = 400;
-
-/** One honest site-wide date stamped on every child <sitemap>: the newest import
- *  wave, never older than the last content refresh. A constant (not a live query)
- *  so the sitemap index stays fast and can never time out. */
-const INDEX_LASTMOD = new Date(
-  Math.max(CATALOG_INDEX_LASTMOD, CONTENT_REFRESH_LASTMOD)
-).toISOString();
-
-/** Number of artwork sitemap pages = ceil(total artworks / page size), read live so
- *  the index never drops newly added artworks. */
-async function artworkSitemapPageCount(): Promise<number> {
-  try {
-    const { count, error } = await supabase
-      .from("artworks")
-      .select("id", { count: "exact", head: true });
-    if (error || !count || count <= 0) {
-      return FALLBACK_SITEMAP_COUNT;
-    }
-    return Math.ceil(count / ARTWORK_SITEMAP_PAGE_SIZE);
-  } catch {
-    return FALLBACK_SITEMAP_COUNT;
-  }
-}
+// No <lastmod> on index entries. The old value was one constant stamped on all
+// 2,419 children; Google uses lastmod only when "consistently and verifiably
+// accurate", and an identical date across the board is the opposite signal.
 
 function emptySitemapIndex(): string {
   return `<?xml version="1.0" encoding="UTF-8"?>
@@ -48,8 +18,7 @@ function emptySitemapIndex(): string {
 export async function GET() {
   try {
     const base = getPublicSiteUrl();
-    const pageCount = await artworkSitemapPageCount();
-    const lastmod = INDEX_LASTMOD;
+    const pageCount = await artworkSitemapPageCount(supabase);
     const locs: string[] = [`${base}/sitemap/static`];
     for (let i = 0; i < pageCount; i++) {
       locs.push(`${base}/sitemap/artworks/${i}`);
@@ -80,10 +49,7 @@ export async function GET() {
       `<?xml version="1.0" encoding="UTF-8"?>\n` +
       `<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n` +
       locs
-        .map(
-          (loc) =>
-            `  <sitemap>\n    <loc>${escapeXml(loc)}</loc>\n    <lastmod>${lastmod}</lastmod>\n  </sitemap>`
-        )
+        .map((loc) => `  <sitemap>\n    <loc>${escapeXml(loc)}</loc>\n  </sitemap>`)
         .join("\n") +
       "\n</sitemapindex>\n";
 
