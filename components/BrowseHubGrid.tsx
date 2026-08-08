@@ -51,7 +51,7 @@ export function BrowseHubGrid({ items }: { items: BrowseHubItem[] }) {
                       // eslint-disable-next-line @next/next/no-img-element
                       <img
                         src={item.logoSrc}
-                        alt={item.name}
+                        alt=""
                         className="max-h-12 w-auto max-w-[80%] object-contain opacity-95"
                         loading="lazy"
                       />
@@ -62,6 +62,14 @@ export function BrowseHubGrid({ items }: { items: BrowseHubItem[] }) {
                     )}
                   </div>
                   <div className="pointer-events-none absolute bottom-0 left-0 p-3">
+                    {/* The wordmark carries the name visually, but a logo is an
+                        image: on the museums hub that left "Louvre", "Prado",
+                        "Rijksmuseum" and thirteen more present only as alt text,
+                        so the page's own subject never appeared in its copy.
+                        The name is text now; the logo is decorative (alt=""). */}
+                    {item.logoSrc ? (
+                      <p className="text-xs font-medium text-white/90">{item.name}</p>
+                    ) : null}
                     <p className="text-xs text-white/65">
                       {item.count} {item.count === 1 ? "artwork" : "artworks"}
                     </p>

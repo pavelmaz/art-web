@@ -7,7 +7,7 @@ import { ArtworkGrid } from "@/components/ArtworkGrid";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { CollectionPageJsonLd } from "@/components/JsonLd";
 import { Pagination } from "@/components/Pagination";
-import { getPaginationParams, getTotalPages } from "@/lib/pagination";
+import { getPaginationParams, pagesOrNotFound } from "@/lib/pagination";
 import { supabase } from "@/lib/supabase";
 import { absoluteUrl, styleSlugLookupVariants } from "@/lib/utils";
 import type { Artwork } from "@/types/artwork";
@@ -196,7 +196,7 @@ export default async function StylePage({ params, searchParams }: StylePageProps
       <ArtworkGrid artworks={artworks} basePath="/ko" />
       <Pagination
         currentPage={page}
-        totalPages={Math.max(1, getTotalPages(totalCount))}
+        totalPages={pagesOrNotFound(page, totalCount)}
         basePath={`/ko/styles/${linkSlug}`}
       />
     </div>

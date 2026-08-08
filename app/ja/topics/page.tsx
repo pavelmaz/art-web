@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 
 import { Pagination } from "@/components/Pagination";
-import { getPaginationParams, getTotalPages } from "@/lib/pagination";
+import { getPaginationParams, pagesOrNotFound } from "@/lib/pagination";
 import { supabase } from "@/lib/supabase";
 import { absoluteUrl, artworkImageUrl } from "@/lib/utils";
 import { getT } from "@/lib/translations";
@@ -56,7 +56,7 @@ export default async function TopicsPage({ searchParams }: TopicsPageProps) {
       slug: row.tag.toLowerCase().replace(/\s+/g, "-"),
     }));
 
-  const totalPages = Math.max(1, getTotalPages(allTags.length));
+  const totalPages = pagesOrNotFound(page, allTags.length);
   const paginated = allTags.slice(from, to + 1);
 
   const paginatedWithImages = await Promise.all(

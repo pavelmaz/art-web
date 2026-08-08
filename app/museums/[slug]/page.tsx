@@ -10,7 +10,7 @@ import { MuseumTopArtists } from "@/components/MuseumTopArtists";
 import { Pagination } from "@/components/Pagination";
 import { buildMuseumLanguageAlternates } from "@/lib/locale-routes";
 import { fetchMuseumArtworks, fetchMuseumTopArtists, getMuseumPageData } from "@/lib/museum-page-data";
-import { getPaginationParams, getTotalPages } from "@/lib/pagination";
+import { getPaginationParams, pagesOrNotFound } from "@/lib/pagination";
 import { getT } from "@/lib/translations";
 import { absoluteUrl } from "@/lib/utils";
 
@@ -108,7 +108,7 @@ export default async function MuseumPage({ params, searchParams }: MuseumPagePro
       <ArtworkGrid artworks={artworks} />
       <Pagination
         currentPage={page}
-        totalPages={Math.max(1, getTotalPages(totalCount || artworks.length))}
+        totalPages={pagesOrNotFound(page, totalCount || artworks.length)}
         basePath={`/museums/${slug}`}
       />
     </div>

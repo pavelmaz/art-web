@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import { BrowseHubGrid, type BrowseHubItem } from "@/components/BrowseHubGrid";
 import { Pagination } from "@/components/Pagination";
 import { getCachedStylesHubData } from "@/lib/cached-hub-data";
-import { getPaginationParams, getTotalPages } from "@/lib/pagination";
+import { getPaginationParams, pagesOrNotFound } from "@/lib/pagination";
 import { hubListPageMetadata } from "@/lib/list-page-metadata";
 import { slugify } from "@/lib/utils";
 
@@ -79,7 +79,7 @@ export default async function StylesPage({ searchParams }: StylesPageProps) {
     }));
   }
 
-  const totalPages = Math.max(1, getTotalPages(hubItems.length));
+  const totalPages = pagesOrNotFound(page, hubItems.length);
   const paginated = hubItems.slice(from, to + 1);
 
   return (

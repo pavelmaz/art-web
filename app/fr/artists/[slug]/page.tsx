@@ -7,7 +7,7 @@ import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { ArtistJsonLd } from "@/components/JsonLd";
 import { Pagination } from "@/components/Pagination";
 import { getArtistBioForLocale, getArtistProfileBySlug } from "@/lib/get-artist-profile";
-import { getPaginationParams, getTotalPages } from "@/lib/pagination";
+import { getPaginationParams, pagesOrNotFound } from "@/lib/pagination";
 import { supabase } from "@/lib/supabase";
 import { buildArtistLanguageAlternates, localePath } from "@/lib/locale-routes";
 import { getT } from "@/lib/translations";
@@ -157,7 +157,7 @@ export default async function ArtistPage({ params, searchParams }: ArtistPagePro
       <ArtworkGrid artworks={artworks} basePath="/fr" />
       <Pagination
         currentPage={page}
-        totalPages={Math.max(1, getTotalPages(artworkCount))}
+        totalPages={pagesOrNotFound(page, artworkCount)}
         basePath={`${artistsHubPath}/${slug}`}
       />
     </div>

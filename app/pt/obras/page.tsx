@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import { ArtworkGrid } from "@/components/ArtworkGrid";
 import { Pagination } from "@/components/Pagination";
 import { getCachedArtworksBrowseSlice, getCachedArtworksSearchResults } from "@/lib/cached-artworks-page";
-import { getPaginationParams, getTotalPages } from "@/lib/pagination";
+import { getPaginationParams, pagesOrNotFound } from "@/lib/pagination";
 import { hubListPageMetadata } from "@/lib/list-page-metadata";
 import { absoluteUrl } from "@/lib/utils";
 import type { Artwork } from "@/types/artwork";
@@ -139,7 +139,7 @@ export default async function ArtworksPage({ searchParams }: ArtworksPageProps) 
       <ArtworkGrid artworks={artworks} basePath="/pt" />
       <Pagination
         currentPage={page}
-        totalPages={Math.max(1, getTotalPages(totalCount))}
+        totalPages={pagesOrNotFound(page, totalCount)}
         basePath="/pt/obras"
       />
     </div>

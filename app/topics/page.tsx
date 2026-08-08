@@ -5,7 +5,7 @@ import Link from "next/link";
 
 import { Pagination } from "@/components/Pagination";
 import { getCachedTagsHub } from "@/lib/cached-hub-data";
-import { getPaginationParams, getTotalPages } from "@/lib/pagination";
+import { getPaginationParams, pagesOrNotFound } from "@/lib/pagination";
 import { supabase } from "@/lib/supabase";
 import { artworkImageUrl } from "@/lib/utils";
 
@@ -69,7 +69,7 @@ export default async function TopicsPage({ searchParams }: TopicsPageProps) {
     }))
     .sort((a, b) => b.count - a.count);
 
-  const totalPages = Math.max(1, getTotalPages(allTags.length));
+  const totalPages = pagesOrNotFound(page, allTags.length);
   const paginated = allTags.slice(from, to + 1);
 
   const paginatedWithImages = await Promise.all(

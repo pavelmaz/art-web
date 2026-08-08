@@ -4,7 +4,7 @@ import { ArtistAzNav } from "@/components/ArtistAzNav";
 import { BrowseHubGrid } from "@/components/BrowseHubGrid";
 import { Pagination } from "@/components/Pagination";
 import { getArtistsHubPage } from "@/lib/cached-hub-data";
-import { getPaginationParams, getTotalPages } from "@/lib/pagination";
+import { getPaginationParams, pagesOrNotFound } from "@/lib/pagination";
 import { hubListPageMetadata } from "@/lib/list-page-metadata";
 import { absoluteUrl, slugify } from "@/lib/utils";
 import { getT } from "@/lib/translations";
@@ -39,7 +39,7 @@ export default async function ArtistsPage({ searchParams }: ArtistsPageProps) {
   const { page } = getPaginationParams(resolvedSearchParams);
 
   const { artists, totalCount } = await getArtistsHubPage(page);
-  const totalPages = Math.max(1, getTotalPages(totalCount));
+  const totalPages = pagesOrNotFound(page, totalCount);
 
   return (
     <div className="space-y-8 px-5">

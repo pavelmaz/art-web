@@ -6,7 +6,7 @@ import { ArtworkGrid } from "@/components/ArtworkGrid";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { CollectionPageJsonLd } from "@/components/JsonLd";
 import { Pagination } from "@/components/Pagination";
-import { getPaginationParams, getTotalPages } from "@/lib/pagination";
+import { getPaginationParams, pagesOrNotFound } from "@/lib/pagination";
 import { supabase } from "@/lib/supabase";
 import { buildGenreLanguageAlternates } from "@/lib/locale-routes";
 import { absoluteUrl } from "@/lib/utils";
@@ -180,7 +180,7 @@ export default async function GenrePage({ params, searchParams }: GenrePageProps
       <ArtworkGrid artworks={uniqueArtworks} basePath="/es" />
       <Pagination
         currentPage={page}
-        totalPages={Math.max(1, getTotalPages(totalCount || artworks.length))}
+        totalPages={pagesOrNotFound(page, totalCount || artworks.length)}
         basePath={`/es/generos/${esSlug}`}
       />
     </div>

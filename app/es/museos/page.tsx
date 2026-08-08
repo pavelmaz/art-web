@@ -4,7 +4,7 @@ import { BrowseHubGrid } from "@/components/BrowseHubGrid";
 import { Pagination } from "@/components/Pagination";
 import { getCachedMuseumHub } from "@/lib/cached-hub-data";
 import { hubListPageMetadata } from "@/lib/list-page-metadata";
-import { getPaginationParams, getTotalPages } from "@/lib/pagination";
+import { getPaginationParams, pagesOrNotFound } from "@/lib/pagination";
 import { absoluteUrl, slugify } from "@/lib/utils";
 import { museumLogoSrc } from "@/lib/museum-logos";
 
@@ -50,7 +50,7 @@ export default async function MuseumsPage({ searchParams }: MuseumsPageProps) {
     };
   });
 
-  const totalPages = Math.max(1, getTotalPages(items.length));
+  const totalPages = pagesOrNotFound(page, items.length);
   const paginated = items.slice(from, to + 1);
 
   return (

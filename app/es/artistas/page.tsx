@@ -5,7 +5,7 @@ import { BrowseHubGrid } from "@/components/BrowseHubGrid";
 import { Pagination } from "@/components/Pagination";
 import { getArtistsHubPage } from "@/lib/cached-hub-data";
 import { hubListPageMetadata } from "@/lib/list-page-metadata";
-import { getPaginationParams, getTotalPages } from "@/lib/pagination";
+import { getPaginationParams, pagesOrNotFound } from "@/lib/pagination";
 import { absoluteUrl, slugify } from "@/lib/utils";
 
 export const revalidate = 86400;
@@ -36,7 +36,7 @@ export default async function ArtistsPage({ searchParams }: ArtistsPageProps) {
   const { page } = getPaginationParams(resolvedSearchParams);
 
   const { artists, totalCount } = await getArtistsHubPage(page);
-  const totalPages = Math.max(1, getTotalPages(totalCount));
+  const totalPages = pagesOrNotFound(page, totalCount);
 
   return (
     <div className="space-y-8 px-5">

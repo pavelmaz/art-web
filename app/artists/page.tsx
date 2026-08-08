@@ -4,7 +4,7 @@ import { ArtistAzNav } from "@/components/ArtistAzNav";
 import { BrowseHubGrid } from "@/components/BrowseHubGrid";
 import { Pagination } from "@/components/Pagination";
 import { fillArtistHubPreviewImages, getCachedArtistsHubList } from "@/lib/cached-hub-data";
-import { getPaginationParams, getTotalPages } from "@/lib/pagination";
+import { getPaginationParams, pagesOrNotFound } from "@/lib/pagination";
 import { hubListPageMetadata } from "@/lib/list-page-metadata";
 import { slugify } from "@/lib/utils";
 
@@ -36,7 +36,7 @@ export default async function ArtistsPage({ searchParams }: ArtistsPageProps) {
   const { page, from, to } = getPaginationParams(resolvedSearchParams);
 
   const artists = await getCachedArtistsHubList();
-  const totalPages = Math.max(1, getTotalPages(artists.length));
+  const totalPages = pagesOrNotFound(page, artists.length);
   const paginatedArtists = await fillArtistHubPreviewImages(artists.slice(from, to + 1));
 
   return (

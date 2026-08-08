@@ -5,7 +5,7 @@ import Link from "next/link";
 
 import { Pagination } from "@/components/Pagination";
 import { getCachedCountriesHub } from "@/lib/cached-hub-data";
-import { getPaginationParams, getTotalPages } from "@/lib/pagination";
+import { getPaginationParams, pagesOrNotFound } from "@/lib/pagination";
 import { absoluteUrl, artworkImageUrl } from "@/lib/utils";
 
 export const revalidate = 86400;
@@ -54,7 +54,7 @@ export default async function CountriesPage({ searchParams }: CountriesPageProps
     }))
     .sort((a, b) => b.count - a.count);
 
-  const totalPages = Math.max(1, getTotalPages(allCountries.length));
+  const totalPages = pagesOrNotFound(page, allCountries.length);
   const paginated = allCountries.slice(from, to + 1);
 
   return (

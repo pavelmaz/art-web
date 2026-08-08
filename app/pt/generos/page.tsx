@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import { BrowseHubGrid } from "@/components/BrowseHubGrid";
 import { Pagination } from "@/components/Pagination";
 import { getCachedGenreHub } from "@/lib/cached-hub-data";
-import { getPaginationParams, getTotalPages } from "@/lib/pagination";
+import { getPaginationParams, pagesOrNotFound } from "@/lib/pagination";
 import { hubListPageMetadata } from "@/lib/list-page-metadata";
 import { supabase } from "@/lib/supabase";
 import { absoluteUrl } from "@/lib/utils";
@@ -62,7 +62,7 @@ export default async function GenresPage({ searchParams }: GenresPageProps) {
     ];
   });
 
-  const totalPages = Math.max(1, getTotalPages(items.length));
+  const totalPages = pagesOrNotFound(page, items.length);
   const paginated = items.slice(from, to + 1);
 
   return (

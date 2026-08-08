@@ -5,7 +5,7 @@ import { notFound } from "next/navigation";
 import { ArtworkGrid } from "@/components/ArtworkGrid";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { Pagination } from "@/components/Pagination";
-import { getPaginationParams, getTotalPages } from "@/lib/pagination";
+import { getPaginationParams, pagesOrNotFound } from "@/lib/pagination";
 import { supabase } from "@/lib/supabase";
 import { absoluteUrl } from "@/lib/utils";
 import { getT } from "@/lib/translations";
@@ -152,7 +152,7 @@ export default async function CountryPageJa({ params, searchParams }: CountryPag
       <ArtworkGrid artworks={uniqueArtworks} basePath="/ja" />
       <Pagination
         currentPage={page}
-        totalPages={Math.max(1, getTotalPages(totalCount || uniqueArtworks.length))}
+        totalPages={pagesOrNotFound(page, totalCount || uniqueArtworks.length)}
         basePath={`/ja/countries/${slug}`}
       />
     </div>
