@@ -5,8 +5,9 @@ import { ArtworkGrid } from "@/components/ArtworkGrid";
 import { WebSiteJsonLd } from "@/components/JsonLd";
 import { HomeHero } from "@/components/HomeHero";
 import { buildHomeLanguageAlternates } from "@/lib/locale-routes";
+import { getPrintCollections, INDIVIDUAL_PRINTS } from "@/lib/print-collections";
 import { supabase } from "@/lib/supabase";
-import { artworkImageUrl, slugify } from "@/lib/utils";
+import { artworkImageUrl, artworkGridImageUrl, slugify } from "@/lib/utils";
 import type { Artwork } from "@/types/artwork";
 
 export const revalidate = 86400;
@@ -51,6 +52,12 @@ const GENRE_STRIPS = [
 ];
 
 export default async function HomePage() {
+  // Real published sets only for the homepage strip — the catch-all bucket is
+  // browsing chrome, not a "collection" worth diving into.
+  const printCollections = (await getPrintCollections())
+    .filter((c) => c.name !== INDIVIDUAL_PRINTS)
+    .slice(0, 10);
+
   const orderedQuery = await supabase
     .from("daily_artworks")
     .select("id, title, slug, artist_display, image_id, url, museum, style_title, genre_title, score, alt_text")
@@ -237,6 +244,44 @@ export default async function HomePage() {
           )}
         </div>
       </section>
+
+      {printCollections.length > 0 ? (
+        <section className="w-full bg-[#f6f4ee] py-8">
+          <div className="px-5">
+            <div className="mb-8 flex items-baseline justify-between">
+              <h2 className="text-xl font-semibold text-[#1a1a1a]">Dive into Books &amp; Wall Charts</h2>
+              <Link href="/prints" className="text-sm text-[#6b6b6b] underline underline-offset-2 hover:text-[#1a1a1a]">
+                View all
+              </Link>
+            </div>
+            <div className="flex gap-5 overflow-x-auto pb-2">
+              {printCollections.map((c) => {
+                const src = artworkGridImageUrl({ url: c.cover.url, image_id: c.cover.image_id });
+                return (
+                  <Link key={c.name} href={`/prints/${slugify(c.name)}`} className="group w-64 shrink-0 md:w-72">
+                    <div className="aspect-[16/10] overflow-hidden bg-[#e8e4de]">
+                      {src ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                          src={src}
+                          alt=""
+                          loading="lazy"
+                          decoding="async"
+                          className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
+                        />
+                      ) : null}
+                    </div>
+                    <p className="pt-3 text-[15px] leading-snug text-[#1a1a1a]">{c.name}</p>
+                    <p className="mt-0.5 text-[13px] leading-snug text-[#8a8a8a]">
+                      {c.artist ?? `${c.count} ${c.count === 1 ? "work" : "works"}`}
+                    </p>
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+      ) : null}
 
       <section className="w-full bg-[#f6f4ee] py-12">
         <div className="px-5">

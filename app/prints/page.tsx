@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 
-import { supabase } from "@/lib/supabase";
+import { getPrintCollections } from "@/lib/print-collections";
 import { absoluteUrl, artworkGridImageUrl, slugify } from "@/lib/utils";
 
 export const revalidate = 86400;
@@ -23,58 +23,9 @@ export const metadata: Metadata = {
   alternates: { canonical: absoluteUrl("/prints") },
 };
 
-type Row = {
-  collection: string | null;
-  image_id: string | null;
-  url: string | null;
-  artist_display: string | null;
-};
-
 export default async function PrintsPage() {
-  const { data, error } = await supabase
-    .from("artworks")
-    .select("collection, image_id, url, artist_display")
-    .eq("object_type", "print")
-    .order("score", { ascending: false });
-
-  if (error) {
-    console.error("[PrintsPage]", error);
-    return <p className="px-5">Error loading prints</p>;
-  }
-
-  const rows = (data as Row[] | null) ?? [];
-
-  // Group in memory: the set is small and this avoids a second round trip per card.
-  const groups = new Map<string, { count: number; cover: Row; artists: Map<string, number> }>();
-  for (const row of rows) {
-    const key = row.collection?.trim() || "Individual prints";
-    let g = groups.get(key);
-    if (!g) {
-      g = { count: 0, cover: row, artists: new Map() };
-      groups.set(key, g);
-    }
-    g.count += 1;
-    const a = row.artist_display?.trim();
-    if (a) g.artists.set(a, (g.artists.get(a) ?? 0) + 1);
-  }
-
-  const collections = [...groups.entries()]
-    .map(([name, g]) => ({
-      name,
-      count: g.count,
-      cover: g.cover,
-      // A published series is usually one hand — name it, the way a bibliography
-      // would. The catch-all bucket is a mix of unrelated artists, so naming the
-      // most frequent one there would be a straightforward lie; it shows a count.
-      artist:
-        name === "Individual prints"
-          ? null
-          : [...g.artists.entries()].sort((a, b) => b[1] - a[1])[0]?.[0] ?? null,
-    }))
-    // Real sets first, biggest first; the catch-all bucket always last.
-    .sort((a, b) =>
-      a.name === "Individual prints" ? 1 : b.name === "Individual prints" ? -1 : b.count - a.count
-    );
+  const collections = await getPrintCollections();
+  const totalWorks = collections.reduce((sum, c) => sum + c.count, 0);
 
   return (
     <div className="space-y-8 px-5">
@@ -83,7 +34,7 @@ export default async function PrintsPage() {
         <p className="mb-8 max-w-2xl text-sm text-[#6b6b6b]">
           Complete published series of etchings, engravings and woodblock prints — scanned
           at full plate size and free to download.
-          {rows.length ? ` ${collections.length} collections, ${rows.length} works.` : ""}
+          {totalWorks ? ` ${collections.length} collections, ${totalWorks} works.` : ""}
         </p>
       </div>
 
