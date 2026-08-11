@@ -6,13 +6,13 @@ import { absoluteUrl } from "@/lib/utils";
 
 export const revalidate = 86400;
 
-const cfg = COLLECTION_HUBS["print"];
+const cfg = COLLECTION_HUBS["wall-chart"];
 
 type Props = { params: Promise<{ collection: string }> };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { collection } = await params;
-  const { name, matched } = await loadCollectionWorks("print", collection);
+  const { name, matched } = await loadCollectionWorks("wall-chart", collection);
   if (!name) return {};
   return {
     title: { absolute: `${name} — Free High-Resolution Downloads | Fine Art Free` },
@@ -23,5 +23,5 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function Page({ params }: Props) {
   const { collection } = await params;
-  return <CollectionDetailPage hub="print" slugParam={collection} />;
+  return <CollectionDetailPage hub="wall-chart" slugParam={collection} />;
 }

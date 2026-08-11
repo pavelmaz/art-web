@@ -52,10 +52,15 @@ const GENRE_STRIPS = [
 ];
 
 export default async function HomePage() {
-  // Real published sets only for the homepage strip — the catch-all bucket is
+  // The strip is literally titled "Books & Wall Charts", so it shows those two
+  // hubs; true print series live under /prints and the catch-all bucket is
   // browsing chrome, not a "collection" worth diving into.
   const printCollections = (await getPrintCollections())
-    .filter((c) => c.name !== INDIVIDUAL_PRINTS)
+    .filter(
+      (c) =>
+        c.name !== INDIVIDUAL_PRINTS &&
+        (c.objectType === "wall-chart" || c.objectType === "book-illustration")
+    )
     .slice(0, 10);
 
   const orderedQuery = await supabase
@@ -258,7 +263,7 @@ export default async function HomePage() {
               {printCollections.map((c) => {
                 const src = artworkGridImageUrl({ url: c.cover.url, image_id: c.cover.image_id });
                 return (
-                  <Link key={c.name} href={`/prints/${slugify(c.name)}`} className="group w-64 shrink-0 md:w-72">
+                  <Link key={c.name} href={`${c.basePath}/${slugify(c.name)}`} className="group w-64 shrink-0 md:w-72">
                     <div className="aspect-[16/10] overflow-hidden bg-[#e8e4de]">
                       {src ? (
                         // eslint-disable-next-line @next/next/no-img-element

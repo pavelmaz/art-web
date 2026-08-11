@@ -6,7 +6,7 @@ import { absoluteUrl } from "@/lib/utils";
 
 export const revalidate = 86400;
 
-const cfg = COLLECTION_HUBS["print"];
+const cfg = COLLECTION_HUBS["wall-chart"];
 
 export const metadata: Metadata = {
   title: { absolute: cfg.metaTitle },
@@ -15,5 +15,5 @@ export const metadata: Metadata = {
 };
 
 export default function Page() {
-  return <CollectionHubPage hub="print" />;
+  return <CollectionHubPage hub="wall-chart" />;
 }

@@ -120,7 +120,13 @@ export default function Header({ browseGenres = [] }: HeaderProps) {
     // English only for now: /prints has no localised route yet, and linking a
     // Spanish or Japanese visitor to an English page is worse than not offering
     // it. Drop the condition once the locale versions exist.
-    ...(locale === "en" ? [{ href: "/prints", label: "Prints" }] : []),
+    ...(locale === "en"
+      ? [
+          { href: "/prints", label: "Prints" },
+          { href: "/wall-charts", label: "Wall Charts" },
+          { href: "/book-illustrations", label: "Book Illustrations" },
+        ]
+      : []),
   ];
 
   const artworksSegment = segments.artworks;

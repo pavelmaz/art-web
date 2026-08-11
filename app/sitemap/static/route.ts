@@ -113,24 +113,32 @@ export async function GET() {
       priority: 0.9,
     });
 
-    // Print collections. Each series gets its own page, so they belong here like
-    // the genre and museum hubs — without this they are unreachable to a crawler
-    // except through the Explore menu.
-    entries.push({ loc: `${base}/prints`, changefreq: "weekly", priority: 0.8 });
+    // Curated-set hubs (prints / wall charts / book illustrations). Each series
+    // gets its own page, so they belong here like the genre and museum hubs —
+    // without this they are unreachable to a crawler except through the menu.
     {
+      const HUB_PATHS: Record<string, string> = {
+        print: "/prints",
+        "wall-chart": "/wall-charts",
+        "book-illustration": "/book-illustrations",
+      };
+      for (const path of Object.values(HUB_PATHS)) {
+        entries.push({ loc: `${base}${path}`, changefreq: "weekly", priority: 0.8 });
+      }
       const { data: printRows } = await supabase
         .from("artworks")
-        .select("collection")
-        .eq("object_type", "print");
-      const collections = new Set(
-        (printRows ?? [])
-          .map((r) => (r as { collection: string | null }).collection?.trim() || "Individual prints")
-          .filter(Boolean)
-      );
-      for (const name of Array.from(collections).sort()) {
+        .select("collection, object_type")
+        .in("object_type", Object.keys(HUB_PATHS));
+      const seen = new Set<string>();
+      for (const r of (printRows ?? []) as { collection: string | null; object_type: string | null }[]) {
+        const path = HUB_PATHS[r.object_type ?? "print"];
+        const name = r.collection?.trim() || (r.object_type === "print" ? "Individual prints" : "");
         const seg = slugify(name);
-        if (seg) {
-          entries.push({ loc: `${base}/prints/${seg}`, changefreq: "monthly", priority: 0.6 });
+        if (!seg || !path) continue;
+        const loc = `${base}${path}/${seg}`;
+        if (!seen.has(loc)) {
+          seen.add(loc);
+          entries.push({ loc, changefreq: "monthly", priority: 0.6 });
         }
       }
     }
