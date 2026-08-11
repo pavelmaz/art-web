@@ -47,6 +47,8 @@ export async function getAllArtistsForIndex(): Promise<ArtistIndexEntry[]> {
       .select("name, slug, artwork_count, image_url")
       .gt("artwork_count", 0)
       .not("name", "ilike", "http%") // skip junk records whose "name" is a source URI
+      // Placeholder "artists" are not artists; keep them out of the A–Z index too.
+      .not("name", "in", '("Unknown Artist","Unidentified artist")')
       .order("name", { ascending: true })
       .range(from, from + BATCH - 1);
 

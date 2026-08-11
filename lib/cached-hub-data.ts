@@ -99,6 +99,9 @@ export async function getCachedArtistsHubList(): Promise<ArtistHubListItem[]> {
     .select("name, slug, image_url, artwork_count")
     .gt("artwork_count", 0)
     .not("name", "ilike", "http%") // skip junk records whose "name" is a source URI
+    // Placeholder "artists" are not artists; they don't belong in a browse grid.
+    // (The get_artist_hub RPC fallback applies the same exclusion in SQL.)
+    .not("name", "in", '("Unknown Artist","Unidentified artist")')
     .order("artwork_count", { ascending: false });
 
   if (error || !data || data.length === 0) {
