@@ -35,8 +35,15 @@ jobs:
 
       - run: npm ci
 
-      - name: Import up to 25 missing artworks (A→Z drip)
-        run: node import-wikipedia.mjs --drip=25 --max-artists=150
+      # Cap raised 25 → 75. The cursor only advances past an artist once ALL
+      # their works are checked, so a prolific artist with more importable works
+      # than the cap parks the walk on them indefinitely: every run imports
+      # `cap` works, hits the cap mid-artist, and writes the SAME cursor back.
+      # That is what froze the A→Z walk on "Abraham Hulk" for 13 days — Abraham
+      # Janssens (the next artist) had far more than 25 available. A higher cap
+      # drains such artists in one run instead of parking on them.
+      - name: Import up to 75 missing artworks (A→Z drip)
+        run: node import-wikipedia.mjs --drip=75 --max-artists=150
 
       - name: Migrate new external images to storage
         run: |
