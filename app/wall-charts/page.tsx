@@ -1,19 +1,7 @@
-import type { Metadata } from "next";
+import { permanentRedirect } from "next/navigation";
 
-import { CollectionHubPage } from "@/components/CollectionHubPage";
-import { COLLECTION_HUBS } from "@/lib/print-collections";
-import { absoluteUrl } from "@/lib/utils";
-
-export const revalidate = 86400;
-
-const cfg = COLLECTION_HUBS["wall-chart"];
-
-export const metadata: Metadata = {
-  title: { absolute: cfg.metaTitle },
-  description: cfg.metaDescription,
-  alternates: { canonical: absoluteUrl(cfg.basePath) },
-};
-
+// Wall charts merged back into /prints (user decision) — 308 keeps the
+// briefly-indexed /wall-charts URLs alive.
 export default function Page() {
-  return <CollectionHubPage hub="wall-chart" />;
+  permanentRedirect("/prints");
 }

@@ -2,33 +2,24 @@ import { supabase } from "@/lib/supabase";
 import { slugify } from "@/lib/utils";
 
 /**
- * The three curated-set hubs, mirroring Artvee's shelving (which the catalog
- * deliberately replicates): true printmaking series under /prints, educational
- * charts under /wall-charts, plates from illustrated books and portfolios under
- * /book-illustrations. `object_type` on the artworks row decides the hub.
+ * The two curated-set hubs: print series and wall charts together under
+ * /prints (one thing to visitors), plates from illustrated books and
+ * portfolios under /book-illustrations. `object_type` decides the hub;
+ * /wall-charts/* 308s here since the 12 Aug merge.
  */
 export const COLLECTION_HUBS = {
+  // Prints and wall charts share one hub — the user's call: to a visitor they
+  // are the same kind of thing (published series of printed sheets).
   print: {
     objectType: "print",
     basePath: "/prints",
-    navLabel: "Prints",
-    heading: "Print collections",
-    metaTitle: "Print Collections — Free High-Resolution Downloads | Fine Art Free",
+    navLabel: "Prints & Wall Charts",
+    heading: "Prints & wall charts",
+    metaTitle: "Prints & Wall Charts — Free High-Resolution Downloads | Fine Art Free",
     metaDescription:
-      "Browse public domain print collections — complete published series of etchings, engravings and woodblock prints, free to download in high resolution.",
+      "Browse public domain print series and vintage wall charts — etchings, engravings, school posters, anatomy and astronomy charts, free to download in high resolution.",
     intro:
-      "Complete published series of etchings, engravings and woodblock prints — scanned at full plate size and free to download.",
-  },
-  "wall-chart": {
-    objectType: "wall-chart",
-    basePath: "/wall-charts",
-    navLabel: "Wall Charts",
-    heading: "Wall charts",
-    metaTitle: "Vintage Wall Charts — Free High-Resolution Downloads | Fine Art Free",
-    metaDescription:
-      "Browse vintage educational wall charts — astronomy, anatomy, natural history, maps and school posters from the 19th and early 20th century, free to download in high resolution.",
-    intro:
-      "Educational charts that once hung in classrooms — astronomy, anatomy, natural history and pictorial maps, scanned at full size and free to download.",
+      "Published print series and the educational charts that once hung in classrooms — etchings, engravings, maps and school posters, scanned at full size and free to download.",
   },
   "book-illustration": {
     objectType: "book-illustration",

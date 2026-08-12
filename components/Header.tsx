@@ -122,8 +122,7 @@ export default function Header({ browseGenres = [] }: HeaderProps) {
     // it. Drop the condition once the locale versions exist.
     ...(locale === "en"
       ? [
-          { href: "/prints", label: "Prints" },
-          { href: "/wall-charts", label: "Wall Charts" },
+          { href: "/prints", label: "Prints & Wall Charts" },
           { href: "/book-illustrations", label: "Book Illustrations" },
         ]
       : []),

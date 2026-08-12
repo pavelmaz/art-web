@@ -119,7 +119,6 @@ export async function GET() {
     {
       const HUB_PATHS: Record<string, string> = {
         print: "/prints",
-        "wall-chart": "/wall-charts",
         "book-illustration": "/book-illustrations",
       };
       for (const path of Object.values(HUB_PATHS)) {

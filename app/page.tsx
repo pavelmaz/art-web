@@ -52,15 +52,10 @@ const GENRE_STRIPS = [
 ];
 
 export default async function HomePage() {
-  // The strip is literally titled "Books & Wall Charts", so it shows those two
-  // hubs; true print series live under /prints and the catch-all bucket is
-  // browsing chrome, not a "collection" worth diving into.
+  // All curated sets qualify for the strip since the prints/wall-charts merge;
+  // the catch-all bucket stays out — it's browsing chrome, not a "collection".
   const printCollections = (await getPrintCollections())
-    .filter(
-      (c) =>
-        c.name !== INDIVIDUAL_PRINTS &&
-        (c.objectType === "wall-chart" || c.objectType === "book-illustration")
-    )
+    .filter((c) => c.name !== INDIVIDUAL_PRINTS)
     .slice(0, 10);
 
   const orderedQuery = await supabase
