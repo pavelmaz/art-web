@@ -33,7 +33,7 @@ const UA = "FineArtFree-reupgrade/1.0 (https://fineartfree.com; pavelmazuelas@gm
 const COMMONS_API = "https://commons.wikimedia.org/w/api.php";
 const CDN = "https://cdn.fineartfree.com/";
 const BUCKET = "art-images";
-const MAX_WIDTH = 6000;
+const MAX_WIDTH = Number(process.env.REUP_MAX_WIDTH || 6000);
 const MIN_GAIN = Number(process.env.REUP_MIN_GAIN || 1.3);   // must be >=1.3x wider
 const ASPECT_TOL = Number(process.env.REUP_ASPECT_TOL || 0.06); // aspect within 6%
 const HASH_MAX = Number(process.env.REUP_HASH_MAX || 14);    // Hamming <=14 (of 64)
@@ -134,9 +134,16 @@ async function reupgrade(row) {
   }
   if (!chosen) return { skip: "no hash-confirmed" };
 
-  // Download the chosen file at <=MAX_WIDTH, store, renditions, update.
-  const dlInfo = chosen.width > MAX_WIDTH ? await commonsInfo(chosen.name, MAX_WIDTH) : chosen;
-  const dlUrl = chosen.width > MAX_WIDTH ? dlInfo.thumb : chosen.url;
+  // Download the file and downscale to <=MAX_WIDTH. Prefer the ORIGINAL over a
+  // Commons thumbnail: for very large sources the thumbnailer silently caps its
+  // rendered output near 3840px, so a requested 6000px thumb comes back at 3840.
+  // Pulling the original (then resizing locally) is the only way to reach the
+  // real cap. REUP_FROM_ORIGINAL=1 forces it; otherwise thumbnails are fine for
+  // moderate sources and far cheaper to fetch.
+  const fromOriginal = process.env.REUP_FROM_ORIGINAL === "1";
+  const useThumb = !fromOriginal && chosen.width > MAX_WIDTH;
+  const dlInfo = useThumb ? await commonsInfo(chosen.name, MAX_WIDTH) : chosen;
+  const dlUrl = useThumb ? dlInfo.thumb : chosen.url;
   const src = Buffer.from(await (await gentleFetch(dlUrl)).arrayBuffer());
   const jpegBuf = await sharp(src, { limitInputPixels: false })
     .rotate().resize({ width: MAX_WIDTH, withoutEnlargement: true }).jpeg({ quality: 92, mozjpeg: true }).toBuffer();
