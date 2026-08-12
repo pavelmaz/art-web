@@ -230,16 +230,15 @@ if (process.env.REUP_DAILY) {
   // (Commons gains new scans over time). Batch size = REUP_LIMIT.
   const batchN = LIMIT > 0 ? LIMIT : 300;
   console.log(`REUP DAILY: up to ${batchN} works, img_width < ${MAX_SRC}, cap ${MAX_WIDTH}px`);
-  // Only never-checked works, ordered by popularity — matches the partial index
-  // idx_artworks_reup_sweep (img_width < 7000 AND reup_checked_at IS NULL, by
-  // score DESC, id) exactly, so it's an index scan not a 78k-row sort. An OR with
-  // a staleness cutoff would defeat the index and time out (Postgres 57014). The
-  // 90-day re-check for new Commons scans is a later concern; the first full walk
-  // of the ~78k backlog is months of nightly runs regardless.
+  // Stable id-ordered walk so the sweep marches through the WHOLE catalogue in a
+  // fixed sequence (not popularity-first) — every low-res work is reached in
+  // order, checked once, stamped. Matches idx_artworks_reup_sweep_id
+  // (img_width < 7000 AND reup_checked_at IS NULL, by id) exactly: index scan,
+  // no sort, no timeout. The 90-day re-check for new Commons scans is a later
+  // concern; the first full walk of the ~78k backlog is months of runs anyway.
   const { data, error } = await supabase.from("artworks").select(cols)
     .lt("img_width", MAX_SRC)
     .is("reup_checked_at", null)
-    .order("score", { ascending: false })
     .order("id", { ascending: true })
     .limit(batchN);
   if (error) throw error;
