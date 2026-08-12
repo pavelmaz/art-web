@@ -1,13 +1,13 @@
 name: Daily artwork drip import
 
-# Adds ~25 missing artworks per day for artists already in the catalog, walking
-# the artist list A→Z (cursor in _import_drip_state). Full chain per run:
-#   1. import  — import-wikipedia.mjs --drip=25 (dedupe, dims, IndexNow,
+# Adds missing artworks per day for artists already in the catalog, walking the
+# artist list A→Z (cursor in _import_drip_state). Full chain per run:
+#   1. import  — import-wikipedia.mjs --drip=75 (dedupe, dims, IndexNow,
 #                artist-portrait backfill for touched artists)
-#   2. migrate — copy the new external images into storage/R2
-#   3. renditions — WebP/JPEG renditions for just the new images
-#   4. enrich  — grounded Prado-style descriptions + 10-locale translations
-# Runs at 02:00 UTC, before the 03:00 image-renditions sweep (safety net).
+#   2. migrate — copy the new images to Cloudflare R2 + build renditions
+#                (scripts/migrate-new-to-r2.mjs — R2 only, never Supabase)
+#   3. enrich  — grounded Prado-style descriptions + 10-locale translations
+# Runs at 02:00 UTC.
 
 on:
   schedule:
@@ -25,6 +25,10 @@ jobs:
     env:
       NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
       SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+      R2_ACCOUNT_ID: ${{ secrets.R2_ACCOUNT_ID }}
+      R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+      R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+      R2_BUCKET: ${{ secrets.R2_BUCKET }}
     steps:
       - uses: actions/checkout@v4
 
@@ -45,21 +49,12 @@ jobs:
       - name: Import up to 75 missing artworks (A→Z drip)
         run: node import-wikipedia.mjs --drip=75 --max-artists=150
 
-      - name: Migrate new external images to storage
-        run: |
-          BASE="${NEXT_PUBLIC_SUPABASE_URL%/}/functions/v1"
-          for i in $(seq 1 15); do
-            resp=$(curl -s -m 240 -X POST "$BASE/migrate-external-images" \
-              -H "Authorization: Bearer $SUPABASE_SERVICE_KEY" -H "apikey: $SUPABASE_SERVICE_KEY" \
-              -H "Content-Type: application/json" -d '{}')
-            echo "migrate #$i: $(echo "$resp" | head -c 200)"
-            remaining=$(echo "$resp" | grep -oE '"artworks_remaining":[0-9]+' | grep -oE '[0-9]+' || echo "")
-            [ "$remaining" = "0" ] && break
-            sleep 2
-          done
-
-      - name: Renditions for the new images
-        run: node scripts/renditions-recent.mjs
+      # Copy the new works' images to Cloudflare R2 (never Supabase storage) and
+      # generate their renditions in the same pass. Replaces the old
+      # migrate-external-images edge function, which uploaded to Supabase and so
+      # grew the bucket the project keeps flat (memory: storage-egress-lockdown).
+      - name: Migrate new images to R2 (+ renditions)
+        run: node scripts/migrate-new-to-r2.mjs --since-hours=6 --limit=300
 
       - name: Enrich (Prado-style descriptions, 10 locales)
         run: |
@@ -75,10 +70,8 @@ jobs:
             sleep 2
           done
 
-      # Safety net: an image that finished migrating after the first renditions
-      # pass would otherwise ship with no renditions and render as a broken image
-      # until the nightly sweep. Re-running is cheap — it HEAD-checks and skips
-      # everything already done.
-      - name: Renditions (second pass, catches late migrations)
+      # Safety net: catch any image that finished importing late (renditions are
+      # produced inside the migrate step, so this only mops up stragglers).
+      - name: Migrate stragglers to R2 (second pass)
         if: always()
-        run: node scripts/renditions-recent.mjs
+        run: node scripts/migrate-new-to-r2.mjs --since-hours=6 --limit=300
