@@ -124,6 +124,55 @@ function ourCdnUrl(imageId) {
   return imageId.replace(/^https:\/\/[a-z0-9-]+\.supabase\.co\//i, CDN).split("?")[0];
 }
 
+// Last-name token used to confirm a candidate is by the same hand as our row —
+// coarse, but the perceptual-hash gate is the real guard against wrong matches.
+function artistSurname(name) {
+  const parts = (name || "").trim().split(/\s+/);
+  return parts.length ? parts[parts.length - 1].toLowerCase() : "";
+}
+
+const EUROPEANA_KEY = process.env.EUROPEANA_KEY;
+
+/**
+ * Europeana — aggregates hundreds of European institutions (Rijksmuseum, SMK,
+ * national museums…). Its image links for Google-hosted providers are
+ * lh3.googleusercontent.com URLs that serve the FULL original at `=s0` and any
+ * width at `=s<N>`; a small `=s400` derivative feeds the hash. Europeana does
+ * not report pixel dimensions, so these candidates are "deferred": we only learn
+ * the real size after downloading, and the gain/aspect gate is applied then
+ * (see the deferDims branch in reupgrade). Requires EUROPEANA_KEY.
+ */
+async function europeanaCandidates(row) {
+  if (!EUROPEANA_KEY) return [];
+  const surname = artistSurname(row.artist_display);
+  if (!surname || !row.title) return [];
+  const q = new URLSearchParams({
+    wskey: EUROPEANA_KEY,
+    query: `${row.artist_display} ${row.title}`,
+    rows: "6", qf: "TYPE:IMAGE", media: "true", profile: "standard",
+  });
+  let items;
+  try {
+    const d = await (await gentleFetch(`https://api.europeana.eu/record/v2/search.json?${q}`)).json();
+    items = d?.items ?? [];
+  } catch { return []; }
+  const out = [];
+  for (const it of items) {
+    const url = (it.edmIsShownBy || [])[0];
+    if (!url || !/googleusercontent\.com/.test(url)) continue; // only the full-res-capable hosts
+    // No creator filter: Europeana's dcCreator is often a URI, not a name, and
+    // the search query is already artist-scoped — the perceptual-hash gate below
+    // is what actually proves it's the same painting.
+    const base = url.replace(/=s\d+.*$/, "").replace(/=w\d+.*$/, "");
+    out.push({
+      source: "europeana", deferDims: true,
+      name: `Europeana ${(it.dataProvider || [])[0] || ""}`.slice(0, 60),
+      hashUrl: `${base}=s400`, url: `${base}=s0`,
+    });
+  }
+  return out;
+}
+
 async function reupgrade(row) {
   const ourW = row.img_width, ourH = row.img_height;
   if (!ourW || !ourH) return { skip: "no dims" };
@@ -136,20 +185,19 @@ async function reupgrade(row) {
     : await commonsSearch(`${row.artist_display || ""} ${row.title || ""}`.trim());
   if (!names.length) return { skip: "no search hits" };
 
-  // Gather candidate sizes, keep bigger + aspect-matched ones.
+  // Commons candidates first — dimensions are known from the API, so the
+  // gain/aspect gate is cheap and no image is fetched until one is hash-confirmed.
   const cands = [];
   for (const name of names.slice(0, 6)) {
     let info; try { info = await commonsInfo(name, 256); } catch { continue; }
     if (!info || !/image\/(jpeg|png|tiff)/i.test(info.mime || "")) continue;
-    if (info.width < ourW * MIN_GAIN) continue;
+    if (!info.width || info.width < ourW * MIN_GAIN) continue;
     const aspOff = Math.abs(info.width / info.height - ourAspect) / ourAspect;
     if (aspOff > ASPECT_TOL) continue;
-    cands.push({ name, ...info, aspOff });
+    cands.push({ source: "commons", name, ...info, aspOff });
   }
-  if (!cands.length) return { skip: "no bigger aspect-match" };
   cands.sort((a, b) => b.width - a.width);
 
-  // Confirm same painting via perceptual hash vs our current image.
   let ourHash; try { ourHash = await dhash(ourCdnUrl(row.image_id)); } catch { return { skip: "our-hash fail" }; }
   let chosen = null;
   for (const c of cands.slice(0, 4)) {
@@ -157,6 +205,27 @@ async function reupgrade(row) {
     const dist = hamming(ourHash, ch);
     if (VERBOSE) console.log(`    · ${c.name}  ${c.width}x${c.height}  asp${c.aspOff.toFixed(3)}  ham${dist}`);
     if (dist <= HASH_MAX) { chosen = { ...c, dist }; break; }
+  }
+
+  // Fallback to extra aggregator sources only when Commons found nothing — these
+  // don't report dimensions, so we hash a small derivative first, then download
+  // the full image and apply the gain/aspect gate on its real size.
+  if (!chosen && !row.__forcedFile && process.env.REUP_NO_EXTRA_SOURCES !== "1") {
+    let extra = [];
+    try { extra = await europeanaCandidates(row); } catch { /* source down */ }
+    for (const c of extra.slice(0, 3)) {
+      let ch; try { ch = await dhash(c.hashUrl); } catch { continue; }
+      const dist = hamming(ourHash, ch);
+      if (dist > HASH_MAX) continue;
+      let buf; try { buf = Buffer.from(await (await gentleFetch(c.url)).arrayBuffer()); } catch { continue; }
+      let meta; try { meta = await sharp(buf, { limitInputPixels: false }).metadata(); } catch { continue; }
+      if (!meta.width || meta.width < ourW * MIN_GAIN) continue;
+      const aspOff = Math.abs(meta.width / meta.height - ourAspect) / ourAspect;
+      if (aspOff > ASPECT_TOL) continue;
+      if (VERBOSE) console.log(`    · ${c.name}  ${meta.width}x${meta.height}  asp${aspOff.toFixed(3)}  ham${dist}`);
+      chosen = { ...c, width: meta.width, height: meta.height, aspOff, dist, __buf: buf };
+      break;
+    }
   }
   if (!chosen) return { skip: "no hash-confirmed" };
 
@@ -166,11 +235,18 @@ async function reupgrade(row) {
   // Pulling the original (then resizing locally) is the only way to reach the
   // real cap. REUP_FROM_ORIGINAL=1 forces it; otherwise thumbnails are fine for
   // moderate sources and far cheaper to fetch.
+  // Commons giants need the thumbnail-at-cap dance (their thumbnailer caps ~3840
+  // so we pull the original instead). Other sources already hand back a URL at
+  // our cap, so just fetch it and let sharp enforce MAX_WIDTH.
   const fromOriginal = process.env.REUP_FROM_ORIGINAL === "1";
-  const useThumb = !fromOriginal && chosen.width > MAX_WIDTH;
-  const dlInfo = useThumb ? await commonsInfo(chosen.name, MAX_WIDTH) : chosen;
-  const dlUrl = useThumb ? dlInfo.thumb : chosen.url;
-  const src = Buffer.from(await (await gentleFetch(dlUrl)).arrayBuffer());
+  let src;
+  if (chosen.__buf) {
+    src = chosen.__buf; // aggregator sources already downloaded the full image to verify dims
+  } else {
+    const useThumb = chosen.source === "commons" && !fromOriginal && chosen.width > MAX_WIDTH;
+    const dlUrl = useThumb ? (await commonsInfo(chosen.name, MAX_WIDTH)).thumb : chosen.url;
+    src = Buffer.from(await (await gentleFetch(dlUrl)).arrayBuffer());
+  }
   const jpegBuf = await sharp(src, { limitInputPixels: false })
     .rotate().resize({ width: MAX_WIDTH, withoutEnlargement: true }).jpeg({ quality: 92, mozjpeg: true }).toBuffer();
   const meta = await sharp(jpegBuf).metadata();
