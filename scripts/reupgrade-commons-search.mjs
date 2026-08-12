@@ -22,13 +22,39 @@
  * Run: nohup node --env-file=.env.local scripts/reupgrade-commons-search.mjs &
  */
 import { createHash } from "node:crypto";
-import { appendFileSync } from "node:fs";
+import { appendFileSync, mkdtempSync, writeFileSync, rmSync } from "node:fs";
+import { execFileSync } from "node:child_process";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { createClient } from "@supabase/supabase-js";
 import sharp from "sharp";
 
 const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY, {
   auth: { persistSession: false },
 });
+
+// Upgraded images go to Cloudflare R2, never Supabase storage (hard rule: keep
+// Supabase storage from growing — serving is R2-first via the CDN Worker). The
+// image_id URL stays the Supabase-shaped path because the Worker maps that same
+// key to R2; only the bytes' destination changes.
+const R2 = {
+  account: process.env.R2_ACCOUNT_ID,
+  key: process.env.R2_ACCESS_KEY_ID,
+  secret: process.env.R2_SECRET_ACCESS_KEY,
+  bucket: process.env.R2_BUCKET,
+};
+if (!R2.account || !R2.key || !R2.secret || !R2.bucket) throw new Error("Missing R2_* env");
+const R2TMP = mkdtempSync(join(tmpdir(), "reup-r2-"));
+function r2Put(objectKey, body, contentType) {
+  const f = join(R2TMP, "up.bin");
+  writeFileSync(f, body);
+  execFileSync("curl", [
+    "-s", "-f", "-m", "300", "--aws-sigv4", "aws:amz:auto:s3",
+    "--user", `${R2.key}:${R2.secret}`, "-X", "PUT",
+    "-H", `Content-Type: ${contentType}`, "--data-binary", `@${f}`,
+    `https://${R2.account}.r2.cloudflarestorage.com/${R2.bucket}/${objectKey}`,
+  ]);
+}
 const UA = "FineArtFree-reupgrade/1.0 (https://fineartfree.com; pavelmazuelas@gmail.com)";
 const COMMONS_API = "https://commons.wikimedia.org/w/api.php";
 const CDN = "https://cdn.fineartfree.com/";
@@ -150,18 +176,15 @@ async function reupgrade(row) {
   const meta = await sharp(jpegBuf).metadata();
   const sha = createHash("sha256").update(jpegBuf).digest("hex");
   const newKey = `artworks/${sha}.jpg`;
-  const up = await supabase.storage.from(BUCKET).upload(newKey, jpegBuf, { contentType: "image/jpeg", upsert: true });
-  if (up.error) throw new Error(`upload ${up.error.message}`);
+  r2Put(newKey, jpegBuf, "image/jpeg");
 
   let stdBytes = null;
   for (const v of VARIANTS) {
     const pipe = sharp(jpegBuf, { limitInputPixels: false }).rotate().resize({ width: v.width, withoutEnlargement: true });
     const out = await (v.format === "jpeg" ? pipe.jpeg({ quality: v.quality, mozjpeg: true }) : pipe.webp({ quality: v.quality })).toBuffer();
     if (v.key === "w1400") stdBytes = out.length;
-    const ru = await supabase.storage.from(BUCKET).upload(
-      `renditions/${v.key}/artworks/${sha}.${v.format === "jpeg" ? "jpg" : "webp"}`, out,
-      { contentType: v.format === "jpeg" ? "image/jpeg" : "image/webp", upsert: true });
-    if (ru.error) throw new Error(`rend ${v.key} ${ru.error.message}`);
+    r2Put(`renditions/${v.key}/artworks/${sha}.${v.format === "jpeg" ? "jpg" : "webp"}`, out,
+      v.format === "jpeg" ? "image/jpeg" : "image/webp");
   }
   const oldMatch = row.image_id?.match(/\/art-images\/(artworks\/[^?]+)/);
   if (oldMatch) {
