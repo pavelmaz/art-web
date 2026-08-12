@@ -223,7 +223,31 @@ async function runBatch(rows) {
   return false;
 }
 
-if (process.env.REUP_PAIRS) {
+if (process.env.REUP_DAILY) {
+  // Nightly incremental sweep. Take the most popular still-low-res works that
+  // haven't been checked in COOLDOWN days, attempt an upgrade, and stamp
+  // reup_checked_at either way so we walk the whole catalog once, then re-check
+  // (Commons gains new scans over time). Batch size = REUP_LIMIT.
+  const batchN = LIMIT > 0 ? LIMIT : 300;
+  const cooldownDays = Number(process.env.REUP_COOLDOWN_DAYS || 90);
+  const cutoff = new Date(Date.now() - cooldownDays * 864e5).toISOString();
+  console.log(`REUP DAILY: up to ${batchN} works, img_width < ${MAX_SRC}, cooldown ${cooldownDays}d, cap ${MAX_WIDTH}px`);
+  const { data, error } = await supabase.from("artworks").select(cols)
+    .lt("img_width", MAX_SRC)
+    .or(`reup_checked_at.is.null,reup_checked_at.lt.${cutoff}`)
+    .order("score", { ascending: false, nullsFirst: false })
+    .limit(batchN);
+  if (error) throw error;
+  const rows = data ?? [];
+  console.log(`  ${rows.length} candidates this run`);
+  for (let i = 0; i < rows.length; i += CONCURRENCY) {
+    const batch = rows.slice(i, i + CONCURRENCY);
+    await Promise.all(batch.map(async (row) => {
+      await processOne(row);
+      await supabase.from("artworks").update({ reup_checked_at: new Date().toISOString() }).eq("id", row.id);
+    }));
+  }
+} else if (process.env.REUP_PAIRS) {
   // REUP_PAIRS=<json file of [slug, "File:..."] pairs> — candidate files found by
   // an external matching pass (e.g. category-tree fuzzy titles); hash still rules.
   const { readFileSync } = await import("node:fs");
