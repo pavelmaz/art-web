@@ -103,7 +103,11 @@ async function reupgrade(row) {
   if (!ourW || !ourH) return { skip: "no dims" };
   const ourAspect = ourW / ourH;
 
-  const names = await commonsSearch(`${row.artist_display || ""} ${row.title || ""}`.trim());
+  // Pairs mode supplies the exact Commons file (search misses French/English
+  // title variants); the aspect + hash gates below still decide the swap.
+  const names = row.__forcedFile
+    ? [row.__forcedFile]
+    : await commonsSearch(`${row.artist_display || ""} ${row.title || ""}`.trim());
   if (!names.length) return { skip: "no search hits" };
 
   // Gather candidate sizes, keep bigger + aspect-matched ones.
@@ -189,7 +193,19 @@ async function runBatch(rows) {
   return false;
 }
 
-if (process.env.REUP_SLUGS) {
+if (process.env.REUP_PAIRS) {
+  // REUP_PAIRS=<json file of [slug, "File:..."] pairs> — candidate files found by
+  // an external matching pass (e.g. category-tree fuzzy titles); hash still rules.
+  const { readFileSync } = await import("node:fs");
+  const pairs = JSON.parse(readFileSync(process.env.REUP_PAIRS, "utf8"));
+  console.log(`REUP START (pairs mode): ${pairs.length}`);
+  const bySlug = new Map(pairs.map((p) => [p[0], p[2] ?? p[1]]));
+  const { data } = await supabase.from("artworks").select(cols).in("slug", [...bySlug.keys()]);
+  for (const row of data ?? []) {
+    row.__forcedFile = String(bySlug.get(row.slug) ?? "").replace(/^File:/, "");
+    await processOne(row);
+  }
+} else if (process.env.REUP_SLUGS) {
   const slugs = process.env.REUP_SLUGS.split(",").map((s) => s.trim()).filter(Boolean);
   console.log(`REUP START (slugs mode): ${slugs.length}`);
   const { data } = await supabase.from("artworks").select(cols).in("slug", slugs);
