@@ -183,7 +183,10 @@ async function reupgrade(row) {
   const names = row.__forcedFile
     ? [row.__forcedFile]
     : await commonsSearch(`${row.artist_display || ""} ${row.title || ""}`.trim());
-  if (!names.length) return { skip: "no search hits" };
+  // Empty Commons search is NOT a dead end — fall through to the aggregator
+  // sources below, which are most valuable exactly where Commons has nothing.
+  // Only forced/pairs mode (which targets one Commons file) bails here.
+  if (row.__forcedFile && !names.length) return { skip: "no search hits" };
 
   // Commons candidates first — dimensions are known from the API, so the
   // gain/aspect gate is cheap and no image is fetched until one is hash-confirmed.
