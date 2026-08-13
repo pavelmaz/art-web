@@ -27,6 +27,7 @@ const LISTED_BY = [
   { name: "the University of Waterloo", country: "Canada", file: "waterloo.png", href: "https://subjectguides.uwaterloo.ca/az/fine-art-free" },
   { name: "the University of Alberta", country: "Canada", file: "alberta.png", href: "https://guides.library.ualberta.ca/c.php?g=332470&p=5354482" },
   { name: "UCLA", country: "USA", file: "ucla.svg", href: "https://guides.library.ucla.edu/images/finding" },
+  { name: "Vanderbilt University", country: "USA", file: "vanderbilt.svg", href: "https://researchguides.library.vanderbilt.edu/c.php?g=68837&p=446111" },
   { name: "Skidmore College", country: "USA", file: "skidmore.png", href: "https://libguides.skidmore.edu/art/images" },
   { name: "the University of Seville", country: "Spain", file: "seville.png", href: "https://guiasbus.us.es/bellasartes/sitiosweb" },
   { name: "the National and University Library of Iceland", country: "Iceland", file: "landsbokasafn.svg", href: "https://leidarvisar.is/c.php?g=710927&p=6518871" },
