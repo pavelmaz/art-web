@@ -15,8 +15,10 @@ export const metadata: Metadata = {
 
 /**
  * University libraries that list Fine Art Free in their art/image research guides.
- * Every entry is verified live and dofollow before being added here — this is the
- * page's strongest trust signal, so it must never contain an unverified claim.
+ * Every entry is verified before being added here — either a live dofollow link
+ * (most), or a listing the library confirmed to us directly (e.g. Tampere, whose
+ * Databases A-Z is a JS-rendered SpringShare list). This is the page's strongest
+ * trust signal, so it must never contain an unverified claim.
  * Adding a new win is one line plus a logo in /images/university-logos.
  */
 const LISTED_BY = [
@@ -24,9 +26,11 @@ const LISTED_BY = [
   { name: "the University of York", country: "UK", file: "york.png", href: "https://subjectguides.york.ac.uk/historyofart/images" },
   { name: "the University of Waterloo", country: "Canada", file: "waterloo.png", href: "https://subjectguides.uwaterloo.ca/az/fine-art-free" },
   { name: "the University of Alberta", country: "Canada", file: "alberta.png", href: "https://guides.library.ualberta.ca/c.php?g=332470&p=5354482" },
+  { name: "UCLA", country: "USA", file: "ucla.svg", href: "https://guides.library.ucla.edu/images/finding" },
   { name: "Skidmore College", country: "USA", file: "skidmore.png", href: "https://libguides.skidmore.edu/art/images" },
   { name: "the University of Seville", country: "Spain", file: "seville.png", href: "https://guiasbus.us.es/bellasartes/sitiosweb" },
   { name: "the National and University Library of Iceland", country: "Iceland", file: "landsbokasafn.svg", href: "https://leidarvisar.is/c.php?g=710927&p=6518871" },
+  { name: "Tampere University", country: "Finland", file: "tampere.svg", href: "https://libguides.tuni.fi/az/databases?q=Fine%20Art%20Free" },
 ] as const;
 
 export default function AboutPage() {
