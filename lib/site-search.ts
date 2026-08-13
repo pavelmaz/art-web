@@ -1,4 +1,5 @@
 import { fillArtistHubPreviewImages } from "@/lib/cached-hub-data";
+import { expandSearchTerm } from "@/lib/search-expansions";
 import { supabase } from "@/lib/supabase";
 import { slugify } from "@/lib/utils";
 
@@ -52,6 +53,20 @@ async function fetchArtworksByFilter(term: string) {
     .or(`title.ilike.%${safe}%,artist_display.ilike.%${safe}%,museum.ilike.%${safe}%,genre_title.ilike.%${safe}%,style_title.ilike.%${safe}%,tags.cs.{${safe}}`)
     .order("score", { ascending: false })
     .limit(50);
+}
+
+/** Broaden a search across correlated concept terms — title text OR the tags array. */
+async function fetchArtworksByExpansions(terms: string[], limit: number) {
+  const clauses = terms.flatMap((t) => {
+    const safe = escapeOrFilterValue(t);
+    return [`title.ilike.%${safe}%`, `tags.cs.{${safe}}`];
+  });
+  return supabase
+    .from("artworks")
+    .select(ARTWORK_SELECT)
+    .or(clauses.join(","))
+    .order("score", { ascending: false })
+    .limit(limit);
 }
 
 async function fetchArtistsByName(term: string) {
@@ -147,6 +162,89 @@ export function getMatchingTagsFromArtworks(
   return matches.sort((a, b) => a.localeCompare(b)).slice(0, limit);
 }
 
+/**
+ * Search within one object_type bucket. `objectType: null` = paintings.
+ * Matches the primary term across title/artist/museum/genre/style, plus every
+ * expanded (correlated) term across title text and the tags array — so e.g.
+ * "botanical" catches the Botanical genre + flower/plant/tree neighbours.
+ */
+async function fetchTypedArtworks(
+  rawQuery: string,
+  objectType: "print" | "book-illustration" | null,
+  limit = 60,
+): Promise<SiteSearchArtworkRow[]> {
+  const term = sanitizeSearchTerm(rawQuery);
+  if (!term) return [];
+  const primary = escapeOrFilterValue(term);
+  const clauses = [
+    `title.ilike.%${primary}%`,
+    `artist_display.ilike.%${primary}%`,
+    `museum.ilike.%${primary}%`,
+    `genre_title.ilike.%${primary}%`,
+    `style_title.ilike.%${primary}%`,
+  ];
+  for (const t of expandSearchTerm(term)) {
+    const safe = escapeOrFilterValue(t);
+    clauses.push(`title.ilike.%${safe}%`, `tags.cs.{${safe}}`);
+  }
+  let builder = supabase.from("artworks").select(ARTWORK_SELECT).or(clauses.join(","));
+  builder = objectType === null ? builder.is("object_type", null) : builder.eq("object_type", objectType);
+  const { data } = await builder.order("score", { ascending: false }).limit(limit);
+  return (data as SiteSearchArtworkRow[] | null) ?? [];
+}
+
+/** Merge result lists, preserving order and dropping duplicate ids, up to `limit`. */
+function mergeUniqueArtworks(lists: SiteSearchArtworkRow[][], limit: number): SiteSearchArtworkRow[] {
+  const seen = new Set<string>();
+  const out: SiteSearchArtworkRow[] = [];
+  for (const list of lists) {
+    for (const row of list) {
+      if (seen.has(row.id)) continue;
+      seen.add(row.id);
+      out.push(row);
+      if (out.length >= limit) return out;
+    }
+  }
+  return out;
+}
+
+export type SegmentedSearch = {
+  paintings: SiteSearchArtworkRow[];
+  prints: SiteSearchArtworkRow[];
+  books: SiteSearchArtworkRow[];
+  artists: SiteSearchArtist[];
+  error: string | null;
+};
+
+/**
+ * Search split into the tabs the results page renders: Artworks (paintings),
+ * Prints, Books, Artists. Paintings reuse runSiteSearch (FTS + typo tolerance)
+ * then are enriched with object_type to drop any print/book that snuck in;
+ * Prints and Books get their own typed queries so those tabs are never starved.
+ */
+export async function runSegmentedSearch(rawQuery: string): Promise<SegmentedSearch> {
+  const base = await runSiteSearch(rawQuery);
+
+  const ids = base.artworks.map((a) => a.id);
+  const typeById = new Map<string, string | null>();
+  if (ids.length) {
+    const { data } = await supabase.from("artworks").select("id, object_type").in("id", ids);
+    for (const r of data ?? []) typeById.set(r.id as string, (r.object_type as string | null) ?? null);
+  }
+  const basePaintings = base.artworks.filter((a) => (typeById.get(a.id) ?? null) === null);
+
+  // Base = RPC (FTS + typo tolerance) ranked first; typed = genre/tag/correlated
+  // matches that the FTS vector misses (e.g. the Botanical genre for "botanical").
+  const [typedPaintings, prints, books] = await Promise.all([
+    fetchTypedArtworks(rawQuery, null, 100),
+    fetchTypedArtworks(rawQuery, "print"),
+    fetchTypedArtworks(rawQuery, "book-illustration"),
+  ]);
+  const paintings = mergeUniqueArtworks([basePaintings, typedPaintings], 100);
+
+  return { paintings, prints, books, artists: base.artists, error: base.error };
+}
+
 export async function runSiteSearch(rawQuery: string): Promise<{
   artworks: SiteSearchArtworkRow[];
   artists: SiteSearchArtist[];
@@ -175,6 +273,23 @@ export async function runSiteSearch(rawQuery: string): Promise<{
       const fallback = await fetchArtworksByFilter(term);
       if (!fallback.error) {
         artworks = (fallback.data as SiteSearchArtworkRow[] | null) ?? [];
+      }
+    }
+  }
+
+  // Smart correlation: if the query maps to related concepts (e.g. botanical →
+  // trees, mushrooms, ferns), append those matches after the exact ones so the
+  // search never dead-ends and surfaces the semantic neighbourhood.
+  const expanded = expandSearchTerm(term);
+  if (expanded.length > 1 && artworks.length < 50) {
+    const seenIds = new Set(artworks.map((a) => a.id));
+    const exp = await fetchArtworksByExpansions(expanded, 80);
+    if (!exp.error) {
+      for (const row of (exp.data as SiteSearchArtworkRow[] | null) ?? []) {
+        if (seenIds.has(row.id)) continue;
+        seenIds.add(row.id);
+        artworks.push(row);
+        if (artworks.length >= 50) break;
       }
     }
   }
