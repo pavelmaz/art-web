@@ -38,6 +38,29 @@ const FEATURED_ARTIST_SLUGS = [
   "joseph-mallord-william-turner",
 ];
 
+// Hand-picked, instantly recognisable masterpieces for the featured strip.
+// Curated (not score-ordered) because score alone let one B&W book-illustration
+// series (Delacroix's Hamlet lithographs, score 50) monopolise all 16 tiles.
+// A paintings-only score query backfills if any slug is ever missing.
+const FEATURED_ARTWORK_SLUGS = [
+  "the-kiss", // Klimt
+  "starry-night", // Van Gogh
+  "water-lilies-nympheas-claude-monet", // Monet
+  "the-birth-of-venus-sandro-botticelli", // Botticelli
+  "girl-with-a-pearl-earring", // Vermeer
+  "sunflowers-vincent-van-gogh", // Van Gogh
+  "a-sunday-afternoon-on-the-island-of-la-grande-jatte-georges-seurat", // Seurat
+  "luncheon-of-the-boating-party-pierre-auguste-renoir", // Renoir
+  "the-night-watch-rembrandt-van-rijn", // Rembrandt
+  "cafe-terrace-at-night-vincent-van-gogh", // Van Gogh
+  "bal-du-moulin-de-la-galette-pierre-auguste-renoir", // Renoir
+  "impression-sunrise-claude-monet", // Monet
+  "almond-blossom-vincent-van-gogh", // Van Gogh
+  "the-fighting-temeraire-joseph-mallord-william-turner", // Turner
+  "wanderer-above-the-sea-of-fog", // Friedrich
+  "bedroom-in-arles-vincent-van-gogh", // Van Gogh
+];
+
 const USE_CASES = [
   { title: "Print-on-demand products", text: "T-shirts, mugs, phone cases — Etsy, Redbubble, Printful and more." },
   { title: "Wall art & framed prints", text: "Canvas prints, posters and gallery walls, printed at any size." },
@@ -95,10 +118,17 @@ function FaqJsonLd() {
 }
 
 export default async function CommercialUsePage() {
-  const [{ data: artworkRows }, { data: artistRows }] = await Promise.all([
+  const SELECT =
+    "id, title, slug, artist_display, image_id, url, museum, style_title, genre_title, score, alt_text, death_year";
+  const [{ data: curatedRows }, { data: fallbackRows }, { data: artistRows }] = await Promise.all([
+    // Curated masterpieces (paintings only).
+    supabase.from("artworks").select(SELECT).is("object_type", null).in("slug", FEATURED_ARTWORK_SLUGS),
+    // Paintings-only score fallback to backfill any missing slug. `object_type IS
+    // NULL` keeps prints/book-illustrations (which carry score 50) out of the strip.
     supabase
       .from("artworks")
-      .select("id, title, slug, artist_display, image_id, url, museum, style_title, genre_title, score, alt_text, death_year")
+      .select(SELECT)
+      .is("object_type", null)
       .not("image_id", "is", null)
       // Commercial-safety filter: only artists dead 90+ years — the catalog holds a
       // few 20th-century works (Dalí d.1989, Hopper d.1967) that must never appear
@@ -109,12 +139,30 @@ export default async function CommercialUsePage() {
       // lead tiles for a paintings pitch.
       .not("artist_display", "ilike", "%bartholdi%")
       .order("score", { ascending: false })
-      .limit(16),
-    supabase
-      .from("artists")
-      .select("name, slug, image_url, artwork_count")
-      .in("slug", FEATURED_ARTIST_SLUGS),
+      .limit(24),
+    supabase.from("artists").select("name, slug, image_url, artwork_count").in("slug", FEATURED_ARTIST_SLUGS),
   ]);
+
+  // Curated first, in the order listed; backfill from the score fallback up to 16.
+  type FeaturedRow = NonNullable<typeof curatedRows>[number];
+  const curatedBySlug = new Map<string, FeaturedRow>();
+  for (const r of curatedRows ?? []) if (r.slug) curatedBySlug.set(r.slug, r);
+  const artworkRows: FeaturedRow[] = [];
+  const seenSlugs = new Set<string>();
+  for (const slug of FEATURED_ARTWORK_SLUGS) {
+    const r = curatedBySlug.get(slug);
+    if (r) {
+      artworkRows.push(r);
+      seenSlugs.add(slug);
+    }
+  }
+  for (const r of fallbackRows ?? []) {
+    if (artworkRows.length >= 16) break;
+    if (r.slug && !seenSlugs.has(r.slug)) {
+      artworkRows.push(r);
+      seenSlugs.add(r.slug);
+    }
+  }
 
   const artworks: Artwork[] = (artworkRows ?? []).map((item) => ({
     id: item.id,
