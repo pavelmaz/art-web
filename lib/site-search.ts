@@ -162,11 +162,20 @@ export function getMatchingTagsFromArtworks(
   return matches.sort((a, b) => a.localeCompare(b)).slice(0, limit);
 }
 
+/** "still life" -> "Still Life" so we can hit the genre_title btree with `.eq`. */
+function titleCase(s: string): string {
+  return s.replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
 /**
  * Search within one object_type bucket. `objectType: null` = paintings.
- * Matches the primary term across title/artist/museum/genre/style, plus every
- * expanded (correlated) term across title text and the tags array — so e.g.
- * "botanical" catches the Botanical genre + flower/plant/tree neighbours.
+ *
+ * IMPORTANT: only `title`, `artist_display` (trigram GIN) and `tags` (GIN) are
+ * indexed for substring/array matching — `genre_title`/`style_title`/`museum`
+ * are NOT, so OR-ing an ilike on them forces a full seq-scan of 110k paintings
+ * (times out on prod). So for paintings we split into index-backed queries run
+ * in parallel: title/artist trigram, genre exact-match btree, tags overlap.
+ * Prints/books first filter object_type (a tiny set), so a plain OR is cheap.
  */
 async function fetchTypedArtworks(
   rawQuery: string,
@@ -176,21 +185,55 @@ async function fetchTypedArtworks(
   const term = sanitizeSearchTerm(rawQuery);
   if (!term) return [];
   const primary = escapeOrFilterValue(term);
-  const clauses = [
-    `title.ilike.%${primary}%`,
-    `artist_display.ilike.%${primary}%`,
-    `museum.ilike.%${primary}%`,
-    `genre_title.ilike.%${primary}%`,
-    `style_title.ilike.%${primary}%`,
-  ];
-  for (const t of expandSearchTerm(term)) {
-    const safe = escapeOrFilterValue(t);
-    clauses.push(`title.ilike.%${safe}%`, `tags.cs.{${safe}}`);
+  const expanded = expandSearchTerm(term);
+
+  if (objectType !== null) {
+    const clauses = [`title.ilike.%${primary}%`, `artist_display.ilike.%${primary}%`];
+    for (const t of expanded) {
+      const safe = escapeOrFilterValue(t);
+      clauses.push(`title.ilike.%${safe}%`, `tags.cs.{${safe}}`);
+    }
+    const { data } = await supabase
+      .from("artworks")
+      .select(ARTWORK_SELECT)
+      .eq("object_type", objectType)
+      .or(clauses.join(","))
+      .order("score", { ascending: false })
+      .limit(limit);
+    return (data as SiteSearchArtworkRow[] | null) ?? [];
   }
-  let builder = supabase.from("artworks").select(ARTWORK_SELECT).or(clauses.join(","));
-  builder = objectType === null ? builder.is("object_type", null) : builder.eq("object_type", objectType);
-  const { data } = await builder.order("score", { ascending: false }).limit(limit);
-  return (data as SiteSearchArtworkRow[] | null) ?? [];
+
+  const [byText, byGenre, byTags] = await Promise.all([
+    supabase
+      .from("artworks")
+      .select(ARTWORK_SELECT)
+      .is("object_type", null)
+      .or(`title.ilike.%${primary}%,artist_display.ilike.%${primary}%`)
+      .order("score", { ascending: false })
+      .limit(limit),
+    supabase
+      .from("artworks")
+      .select(ARTWORK_SELECT)
+      .is("object_type", null)
+      .eq("genre_title", titleCase(term))
+      .order("score", { ascending: false })
+      .limit(limit),
+    supabase
+      .from("artworks")
+      .select(ARTWORK_SELECT)
+      .is("object_type", null)
+      .overlaps("tags", expanded)
+      .order("score", { ascending: false })
+      .limit(limit),
+  ]);
+  return mergeUniqueArtworks(
+    [
+      (byText.data as SiteSearchArtworkRow[] | null) ?? [],
+      (byGenre.data as SiteSearchArtworkRow[] | null) ?? [],
+      (byTags.data as SiteSearchArtworkRow[] | null) ?? [],
+    ],
+    limit,
+  );
 }
 
 /** Merge result lists, preserving order and dropping duplicate ids, up to `limit`. */
