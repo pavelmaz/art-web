@@ -42,6 +42,7 @@ type ArtworkRow = {
   dimensions: string | null;
   description: string | null;
   description_it: string | null;
+  title_it: string | null;
   death_year: number | null;
   img_width: number | null;
   img_height: number | null;
@@ -259,7 +260,9 @@ async function getArtworkBySlug(slug: string): Promise<ArtworkRow | null> {
     .single();
 
   if (!primary.error && primary.data) {
-    return primary.data as ArtworkRow;
+    const row = primary.data as ArtworkRow;
+    row.title = row.title_it?.trim() || row.title;
+    return row;
   }
 
   if (primary.error && primary.error.code !== "PGRST116") {

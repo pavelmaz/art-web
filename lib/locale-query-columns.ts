@@ -34,12 +34,12 @@ const ARTWORK_DETAIL_BASE =
   "id, slug, title, artist_display, url, image_id, museum, genre_title, style_title, score, medium_display, date_display, dimensions, alt_text, description, death_year, img_width, img_height, orig_bytes, std_bytes" as const;
 
 export const ARTWORK_DETAIL_SELECT = {
-  fr: `${ARTWORK_DETAIL_BASE}, description_fr`,
-  de: `${ARTWORK_DETAIL_BASE}, description_ger`,
-  it: `${ARTWORK_DETAIL_BASE}, description_it`,
-  ko: `${ARTWORK_DETAIL_BASE}, description_ko`,
-  ru: `${ARTWORK_DETAIL_BASE}, description_ru`,
-  zh: `${ARTWORK_DETAIL_BASE}, description_ch`,
+  fr: `${ARTWORK_DETAIL_BASE}, description_fr, title_fr`,
+  de: `${ARTWORK_DETAIL_BASE}, description_ger, title_ger`,
+  it: `${ARTWORK_DETAIL_BASE}, description_it, title_it`,
+  ko: `${ARTWORK_DETAIL_BASE}, description_ko, title_ko`,
+  ru: `${ARTWORK_DETAIL_BASE}, description_ru, title_ru`,
+  zh: `${ARTWORK_DETAIL_BASE}, description_ch, title_ch`,
 } as const;
 
 export function artworkDetailSelectColumns<L extends NewLocaleSlug>(

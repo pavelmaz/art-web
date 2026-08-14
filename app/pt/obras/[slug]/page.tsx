@@ -42,6 +42,7 @@ type ArtworkRow = {
   dimensions: string | null;
   description: string | null;
   description_pt: string | null;
+  title_pt: string | null;
   death_year: number | null;
   img_width: number | null;
   img_height: number | null;
@@ -199,7 +200,7 @@ function ArtworkDescriptionFormatted({ description }: { description: string }) {
 
 async function getArtworkBySlug(slug: string): Promise<ArtworkRow | null> {
   const selectColumns =
-    "id, slug, title, artist_display, url, image_id, museum, style_title, genre_title, medium_display, date_display, dimensions, description, description_pt, img_width, img_height, orig_bytes, std_bytes";
+    "id, slug, title, artist_display, url, image_id, museum, style_title, genre_title, medium_display, date_display, dimensions, description, description_pt, title_pt, img_width, img_height, orig_bytes, std_bytes";
 
   const primary = await supabase
     .from("artworks")
@@ -208,7 +209,9 @@ async function getArtworkBySlug(slug: string): Promise<ArtworkRow | null> {
     .single();
 
   if (!primary.error && primary.data) {
-    return primary.data as ArtworkRow;
+    const row = primary.data as ArtworkRow;
+    row.title = row.title_pt?.trim() || row.title;
+    return row;
   }
 
   if (primary.error && primary.error.code !== "PGRST116") {
