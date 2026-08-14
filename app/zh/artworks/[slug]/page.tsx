@@ -22,7 +22,8 @@ import { supabase } from "@/lib/supabase";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { getT } from "@/lib/translations";
 import { parseArtworkDeathYear } from "@/lib/artwork-death-year";
-import { artworkDetailImageUrl, artworkGridImageUrl, artworkImageUrl, artworkMaxSize, artworkMaxSpecs, artworkMediumKind, artworkOgImageUrl, artworkOriginalUrl, artworkStandardSize, artworkStandardSpecs, generateAltText, slugify } from "@/lib/utils";
+import { artworkDetailImageUrl, artworkGridImageUrl, artworkImageUrl, artworkMaxSize, artworkMaxSpecs, artworkMediumKind, artworkOgImageUrl, artworkOriginalUrl, artworkStandardSize, artworkStandardSpecs, slugify } from "@/lib/utils";
+import { localizeAltText, localizeMedium } from "@/lib/artwork-i18n";
 import type { Artwork } from "@/types/artwork";
 
 export const revalidate = 86400;
@@ -575,7 +576,7 @@ export default async function ArtworkDetailPageZh({ params }: ArtworkPageProps) 
                 {artwork.medium_display?.trim() ? (
                   <div>
                     <p className="text-xs text-[#999]">{t.medium}</p>
-                    <p className="text-sm text-[#1a1a1a]">{artwork.medium_display}</p>
+                    <p className="text-sm text-[#1a1a1a]">{localizeMedium(artwork.medium_display, "zh")}</p>
                   </div>
                 ) : null}
 
@@ -629,7 +630,7 @@ export default async function ArtworkDetailPageZh({ params }: ArtworkPageProps) 
                         <ArtworkZoomImage
                           src={imageUrl}
                           fullSrc={artworkOriginalUrl(artwork) || imageUrl}
-                          alt={localeTranslation?.alt_text || generateAltText(artwork)}
+                          alt={localeTranslation?.alt_text || localizeAltText(artwork, "zh")}
                         />
                         <ArtworkInsightsOverlay />
                       </div>

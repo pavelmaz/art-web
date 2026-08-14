@@ -22,7 +22,8 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { getT } from "@/lib/translations";
 import { resolveGenreHubLink, resolveStyleHubLink } from "@/lib/resolve-genre-style-links";
 import { parseArtworkDeathYear } from "@/lib/artwork-death-year";
-import { absoluteUrl, artworkDetailImageUrl, artworkGridImageUrl, artworkImageUrl, artworkMaxSize, artworkMaxSpecs, artworkMediumKind, artworkOgImageUrl, artworkOriginalUrl, artworkStandardSize, artworkStandardSpecs, generateAltText, slugify } from "@/lib/utils";
+import { absoluteUrl, artworkDetailImageUrl, artworkGridImageUrl, artworkImageUrl, artworkMaxSize, artworkMaxSpecs, artworkMediumKind, artworkOgImageUrl, artworkOriginalUrl, artworkStandardSize, artworkStandardSpecs, slugify } from "@/lib/utils";
+import { localizeAltText, localizeMedium } from "@/lib/artwork-i18n";
 import type { Artwork } from "@/types/artwork";
 
 export const revalidate = 86400;
@@ -432,7 +433,7 @@ export default async function ArtworkDetailPageJa({ params }: ArtworkPageProps) 
 
   const descriptionText = (artwork.description_jp || artwork.description)?.trim() || null;
 
-  const imageAlt = jaTranslation?.alt_text?.trim() || generateAltText(artwork);
+  const imageAlt = jaTranslation?.alt_text?.trim() || localizeAltText(artwork, "ja");
 
   return (
     <article className="py-8">
@@ -526,7 +527,7 @@ export default async function ArtworkDetailPageJa({ params }: ArtworkPageProps) 
                 {artwork.medium_display?.trim() ? (
                   <div>
                     <p className="text-xs text-[#999]">{t.medium}</p>
-                    <p className="text-sm text-[#1a1a1a]">{artwork.medium_display}</p>
+                    <p className="text-sm text-[#1a1a1a]">{localizeMedium(artwork.medium_display, "ja")}</p>
                   </div>
                 ) : null}
 
