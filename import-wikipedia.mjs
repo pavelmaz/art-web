@@ -25,7 +25,11 @@ const SERVICE_KEY = process.env.SUPABASE_SERVICE_KEY;
 const UA = "FineArtFree-importer/1.0 (https://fineartfree.com; pavelmazuelas@gmail.com)";
 const COMMONS_API = "https://commons.wikimedia.org/w/api.php";
 const INDEXNOW_KEY = "faf-indexnow-2026-xK9mP3qR";
-const MIN_WIDTH = 600;
+// Resolution floor for the source file. Was 600 — far too low; it let 1,200px
+// museum thumbnails in as "artworks". A work whose only Commons scan is below
+// this is skipped entirely (better no art than junk-res art), which also lets
+// the A→Z walk move past low-res-only artists instead of parking on them.
+const MIN_WIDTH = Number(process.env.DRIP_MIN_WIDTH || 1600);
 
 if (!SUPABASE_URL || !SERVICE_KEY) {
   console.error("Missing NEXT_PUBLIC_SUPABASE_URL / SUPABASE_SERVICE_KEY (.env.local)");
@@ -39,6 +43,9 @@ const ARTIST_ALIASES = {
   "raffaello sanzio": "Raphael",
   "rafael": "Raphael",
   "raphael sanzio": "Raphael",
+  // Commons credits her full maiden name; the catalog holds 15 works as
+  // "Sophie Anderson" — without this the import would fork a second artist.
+  "sophie gengembre anderson": "Sophie Anderson",
 };
 
 const args = process.argv.slice(2);
@@ -245,7 +252,7 @@ async function expandCategory(cat) {
 }
 
 // ---------- metadata ----------
-async function fileInfo(fileTitle) {
+async function fileInfo(fileTitle, canonicalArtistHint = "") {
   const data = await commons({
     action: "query",
     titles: fileTitle,
@@ -268,19 +275,59 @@ async function fileInfo(fileTitle) {
     return { skip: `too small: ${ii.width}px wide (${fileTitle})` };
   }
 
-  const artistRaw = stripHtml(meta.Artist?.value || "");
+  let artistRaw = stripHtml(meta.Artist?.value || "");
+  // Google Art Project uploads append "Details on Google Art Project" (and
+  // similar) to the Artist field — left alone it forks a bogus new artist.
+  artistRaw = artistRaw
+    .replace(/\s*Details on Google Art Project.*$/i, "")
+    .replace(/\s*\(.*?(painter|artist|dutch|british|english|french)\b.*?\)\s*$/i, "")
+    .replace(/\s{2,}/g, " ")
+    .trim();
   let title = stripHtml(meta.ObjectName?.value || "");
+  // Commons stores multilingual titles as QuickStatements markup
+  // (`title QS:P1476,nl:"Stilleven"`). Take the English value when one exists,
+  // otherwise drop to the filename fallback below — treating the whole field as
+  // unusable skipped most of a painter's catalogue (13 of 15 Sophie Andersons).
+  if (/QS:/i.test(title)) {
+    const en = title.match(/[,|]\s*en\s*:\s*"?([^"|]+)"?/i);
+    title = en ? en[1].trim() : "";
+  }
   if (!title) {
-    // Fall back to the filename: drop extension/underscores and a leading "Artist -" prefix.
+    // Fall back to the filename: drop extension/underscores, the artist's name
+    // wherever it sits (leading "Artist -", "Surname, Forename -", or trailing),
+    // and the museum/accession furniture galleries append — "… - FAMAG 2010.42 -
+    // Falmouth Art Gallery", "- Google Art Project", "(1823-1903)".
     title = fileTitle
       .replace(/^File:/i, "")
       .replace(/\.[a-z0-9]+$/i, "")
       .replace(/_/g, " ")
       .trim();
-    if (artistRaw) {
-      const prefix = new RegExp(`^${artistRaw.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\s*[-–—]\\s*`, "i");
-      title = title.replace(prefix, "");
+    const names = new Set();
+    for (const raw of [artistRaw, canonicalArtistHint].filter(Boolean)) {
+      names.add(raw);
+      const parts = raw.split(/\s+/).filter((w) => w.length > 2);
+      if (parts.length > 1) {
+        const last = parts[parts.length - 1];
+        const rest = parts.slice(0, -1).join(" ");
+        names.add(parts.join(" "));
+        names.add(`${last}, ${rest}`);   // "Anderson, Sophie Gengembre"
+        names.add(`${last} ${rest}`);    // "Anderson Sophie Gengembre"
+        names.add(`${last} ${parts[0]}`);// "Anderson Sophie"
+        names.add(`${parts[0]} ${last}`);// "Sophie Anderson"
+      }
     }
+    for (const n of names) {
+      title = title.replace(new RegExp(n.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "gi"), " ");
+    }
+    title = title
+      .replace(/\(\s*\d{4}\s*[-–—]\s*\d{4}\s*\)/g, " ")        // life dates
+      .replace(/\s*[-–—]\s*Google Art Project\s*/gi, " ")
+      .replace(/\s*[-–—]\s*[A-Z]{2,6}\s?[\d.]+\s*[-–—].*$/g, " ") // "- FAMAG 2010.42 - Gallery"
+      .replace(/\s*[-–—]\s*(Birmingham Museums Trust|Falmouth Art Gallery|York Art Gallery|Tate|National Trust)\s*$/gi, " ")
+      .replace(/[-–—_]+/g, " ")
+      .replace(/\s+/g, " ")
+      .trim()
+      .replace(/^[,.;\s]+|[,.;\s]+$/g, "");
   }
   // Browsers can't render TIFF: use the Commons JPEG thumb instead of the
   // original file URL (e.g. Nationalmuseum uploads whole scans as .tif).
@@ -357,7 +404,7 @@ async function processItem(item) {
   const fileTitle = item.file;
   await sleep(150);
   try {
-    const info = await fileInfo(fileTitle);
+    const info = await fileInfo(fileTitle, item.artistHint ?? "");
     if (info.skip) { console.log(`— SKIP  ${info.skip}`); summary.skipped++; return "skip"; }
     if (item.titleOverride) info.title = normalizeTitle(item.titleOverride);
     if (item.artistHint) info.artistRaw = item.artistHint;
