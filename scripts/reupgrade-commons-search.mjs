@@ -62,7 +62,12 @@ const BUCKET = "art-images";
 const MAX_WIDTH = Number(process.env.REUP_MAX_WIDTH || 6000);
 const MIN_GAIN = Number(process.env.REUP_MIN_GAIN || 1.3);   // must be >=1.3x wider
 const ASPECT_TOL = Number(process.env.REUP_ASPECT_TOL || 0.06); // aspect within 6%
-const HASH_MAX = Number(process.env.REUP_HASH_MAX || 14);    // Hamming <=14 (of 64)
+// Hamming distance ceiling (of 64) for the perceptual-hash same-painting check.
+// Was 14 — too strict: it rejected valid bigger scans of the SAME work (a Klee
+// whose 2427px Guggenheim scan matched on identical aspect ratio scored 17 and
+// was thrown out). 18 catches those; the title-search + aspect(<=6%) + gain(>=1.3x)
+// gates still guard against swapping in a different painting.
+const HASH_MAX = Number(process.env.REUP_HASH_MAX || 18);
 const MAX_SRC = Number(process.env.REUP_MAX_SRC || 1400);
 const CONCURRENCY = Number(process.env.REUP_CONCURRENCY || 2);
 const LIMIT = Number(process.env.REUP_LIMIT || 0);
