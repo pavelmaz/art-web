@@ -33,6 +33,7 @@ const LISTED_BY = [
   { name: "the University of Seville", country: "Spain", file: "seville.png", href: "https://guiasbus.us.es/bellasartes/sitiosweb" },
   { name: "the National and University Library of Iceland", country: "Iceland", file: "landsbokasafn.svg", href: "https://leidarvisar.is/c.php?g=710927&p=6518871" },
   { name: "Tampere University", country: "Finland", file: "tampere.svg", href: "https://libguides.tuni.fi/az/databases?q=Fine%20Art%20Free" },
+  { name: "Middlesex University", country: "UK", file: "middlesex.svg", href: "https://libguides.mdx.ac.uk/c.php?g=711009&p=5131361" },
 ] as const;
 
 export default function AboutPage() {
