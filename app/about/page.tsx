@@ -24,6 +24,7 @@ export const metadata: Metadata = {
 const LISTED_BY = [
   { name: "Durham University", country: "UK", file: "durham.png", href: "https://libguides.durham.ac.uk/visualarts/databases" },
   { name: "the University of York", country: "UK", file: "york.png", href: "https://subjectguides.york.ac.uk/historyofart/images" },
+  { name: "the University of Leeds", country: "UK", file: "leeds.svg", href: "https://library.leeds.ac.uk/subjects/1156" },
   { name: "the University of Waterloo", country: "Canada", file: "waterloo.png", href: "https://subjectguides.uwaterloo.ca/az/fine-art-free" },
   { name: "the University of Alberta", country: "Canada", file: "alberta.png", href: "https://guides.library.ualberta.ca/c.php?g=332470&p=5354482" },
   { name: "UCLA", country: "USA", file: "ucla.svg", href: "https://guides.library.ucla.edu/images/finding" },
