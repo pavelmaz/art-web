@@ -309,22 +309,28 @@ if (process.env.REUP_DAILY) {
   // (Commons gains new scans over time). Batch size = REUP_LIMIT.
   const batchN = LIMIT > 0 ? LIMIT : 300;
   console.log(`REUP DAILY: up to ${batchN} works, img_width < ${MAX_SRC}, cap ${MAX_WIDTH}px`);
-  // Worst-images-first: order by img_width ascending so each night fixes the
-  // LOWEST-resolution unchecked works — the ones that most need it — rather than
-  // a blind alphabetical id-walk that wasted whole nights on obscure artists with
-  // no better scan available. Still covers the whole catalogue (each work is
-  // stamped reup_checked_at once), just in quality-priority order. The candidate
-  // set (img_width < MAX_SRC AND reup_checked_at IS NULL) is index-backed via
-  // idx_artworks_reup_sweep_id; sorting that bounded set by width is cheap.
-  const { data, error } = await supabase.from("artworks").select(cols)
-    .lt("img_width", MAX_SRC)
-    .is("reup_checked_at", null)
-    .order("img_width", { ascending: true })
-    .order("id", { ascending: true })
-    .limit(batchN);
-  if (error) throw error;
-  const rows = data ?? [];
-  console.log(`  ${rows.length} candidates this run`);
+  // Worst-images-first WITHOUT a global ORDER BY img_width (that sort blew the
+  // statement timeout — no index backs it). Instead walk ASCENDING SIZE BANDS:
+  // each band query is id-ordered, so it rides idx_artworks_reup_sweep_id
+  // (img_width < 7000 AND reup_checked_at IS NULL, by id) — pure index scan, no
+  // sort, no timeout. We process the tightest non-empty band first, so every
+  // sub-1000px work is upgraded before any sub-1500px one, etc. Still covers the
+  // whole catalogue (each work is stamped reup_checked_at once).
+  const bands = [...new Set([1000, 1500, MAX_SRC].filter((c) => c <= MAX_SRC))].sort((a, b) => a - b);
+  let rows = [];
+  for (const ceil of bands) {
+    const { data, error } = await supabase.from("artworks").select(cols)
+      .lt("img_width", ceil)
+      .is("reup_checked_at", null)
+      .order("id", { ascending: true })
+      .limit(batchN);
+    if (error) throw error;
+    if (data && data.length) {
+      rows = data;
+      console.log(`  band <${ceil}px: ${rows.length} candidates this run`);
+      break;
+    }
+  }
   for (let i = 0; i < rows.length; i += CONCURRENCY) {
     const batch = rows.slice(i, i + CONCURRENCY);
     await Promise.all(batch.map(async (row) => {
