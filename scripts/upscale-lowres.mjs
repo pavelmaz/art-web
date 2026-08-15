@@ -96,26 +96,32 @@ while (done + skipped + failed < LIMIT) {
   rmSync(IN, { recursive: true, force: true }); rmSync(OUT, { recursive: true, force: true });
   mkdirSync(IN, { recursive: true }); mkdirSync(OUT, { recursive: true });
   const byId = {};
+  let fi = 0;
   for (const r of rows) {
-    const buf = await getOriginal(r.image_id);
-    if (!buf) { console.log(`✗ ${r.slug} (no source)`); failed++; await stamp(r.id); continue; }
-    writeFileSync(join(IN, r.id + ".jpg"), buf);
-    byId[r.id] = r;
+    try {
+      const buf = await getOriginal(r.image_id);
+      if (!buf) { console.log(`✗ ${r.slug} (no source)`); failed++; await stamp(r.id); continue; }
+      // id may contain "/" (e.g. Europeana ids) — sanitize + index-prefix so the
+      // filename is always valid and unique within the batch.
+      const fkey = (fi++) + "_" + r.id.replace(/[^a-z0-9._-]/gi, "_");
+      writeFileSync(join(IN, fkey + ".jpg"), buf);
+      byId[fkey] = r;
+    } catch (e) { console.log(`✗ ${r.slug} (dl: ${e.message})`); failed++; try { await stamp(r.id); } catch {} }
   }
   if (!Object.keys(byId).length) continue;
 
   const res = spawnSync(`${TOOL}/venv/bin/python`, [`${TOOL}/upscale_dir.py`, IN, OUT, String(CAP)], { stdio: "inherit" });
   if (res.status !== 0) { console.log("python upscaler failed — stopping"); break; }
 
-  for (const id of Object.keys(byId)) {
-    const row = byId[id];
-    const outp = join(OUT, id + ".jpg");
-    if (!existsSync(outp)) { console.log(`✗ ${row.slug} (no output)`); failed++; await stamp(id); continue; }
+  for (const fkey of Object.keys(byId)) {
+    const row = byId[fkey];
+    const outp = join(OUT, fkey + ".jpg");
+    if (!existsSync(outp)) { console.log(`✗ ${row.slug} (no output)`); failed++; await stamp(row.id); continue; }
     try {
       const jpegBuf = await sharp(readFileSync(outp), { limitInputPixels: false })
         .rotate().resize({ width: CAP, withoutEnlargement: true }).jpeg({ quality: 92, mozjpeg: true }).toBuffer();
       const meta = await sharp(jpegBuf).metadata();
-      if (meta.width <= row.img_width) { console.log(`· ${row.slug} (no gain)`); skipped++; await stamp(id); continue; }
+      if (meta.width <= row.img_width) { console.log(`· ${row.slug} (no gain)`); skipped++; await stamp(row.id); continue; }
       const sha = createHash("sha256").update(jpegBuf).digest("hex");
       const newKey = `artworks/${sha}.jpg`;
       if (!DRY) r2Put(newKey, jpegBuf, "image/jpeg");
@@ -130,7 +136,7 @@ while (done + skipped + failed < LIMIT) {
       // before|after review montage (height 420) so we can build a contact sheet without re-fetching
       try {
         const H = 420, gap = 6;
-        const a = await sharp(readFileSync(join(IN, id + ".jpg"))).resize({ height: H, kernel: "cubic" }).toBuffer();
+        const a = await sharp(readFileSync(join(IN, fkey + ".jpg"))).resize({ height: H, kernel: "cubic" }).toBuffer();
         const b = await sharp(jpegBuf, { limitInputPixels: false }).resize({ height: H }).toBuffer();
         const am = await sharp(a).metadata(), bm = await sharp(b).metadata();
         await sharp({ create: { width: am.width + gap + bm.width, height: H, channels: 3, background: "#ffffff" } })
@@ -146,7 +152,7 @@ while (done + skipped + failed < LIMIT) {
       }
       done++;
       console.log(`✓ ${row.slug}  ${row.img_width}px -> ${meta.width}px  (${done})`);
-    } catch (e) { failed++; console.log(`✗ ${row.slug}: ${e.message}`); await stamp(id); }
+    } catch (e) { failed++; console.log(`✗ ${row.slug}: ${e.message}`); await stamp(row.id); }
   }
 }
 console.log(`\nUPSCALE DONE — upgraded=${done} skipped=${skipped} failed=${failed}`);
