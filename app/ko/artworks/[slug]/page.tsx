@@ -371,6 +371,7 @@ export default async function ArtworkDetailPageKo({ params }: ArtworkPageProps) 
   }
 
   const category = await resolveCategoryBreadcrumbKo(artwork);
+  const styleLink = artwork.style_title?.trim() ? await resolveStyleHubLinkLocal(artwork.style_title.trim()) : null;
   const breadcrumbItems = [
     { label: "홈", href: "/ko" },
     ...(category ? [category] : []),
@@ -567,10 +568,10 @@ export default async function ArtworkDetailPageKo({ params }: ArtworkPageProps) 
                   <div>
                     <p className="text-xs text-[#999]">{t.styleLabel}</p>
                     <Link
-                      href={`/ko/styles/${slugify(artwork.style_title)}`}
+                      href={styleLink?.href ?? `/ko/styles/${slugify(artwork.style_title)}`}
                       className="text-sm text-[#1a1a1a] underline"
                     >
-                      {artwork.style_title}
+                      {styleLink?.label ?? artwork.style_title}
                     </Link>
                   </div>
                 ) : null}

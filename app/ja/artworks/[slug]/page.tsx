@@ -324,6 +324,7 @@ export default async function ArtworkDetailPageJa({ params }: ArtworkPageProps) 
   }
 
   const category = await resolveCategoryBreadcrumbJa(artwork);
+  const styleLink = artwork.style_title?.trim() ? await resolveStyleHubLink(artwork.style_title.trim(), "ja") : null;
   const breadcrumbItems = [
     { label: "ホーム", href: "/ja" },
     ...(category ? [category] : []),
@@ -516,10 +517,10 @@ export default async function ArtworkDetailPageJa({ params }: ArtworkPageProps) 
                   <div>
                     <p className="text-xs text-[#999]">{t.styleLabel}</p>
                     <Link
-                      href={`/ja/styles/${slugify(artwork.style_title)}`}
+                      href={styleLink?.href ?? `/ja/styles/${slugify(artwork.style_title)}`}
                       className="text-sm text-[#1a1a1a] underline"
                     >
-                      {artwork.style_title}
+                      {styleLink?.label ?? artwork.style_title}
                     </Link>
                   </div>
                 ) : null}

@@ -371,6 +371,7 @@ export default async function ArtworkDetailPageFr({ params }: ArtworkPageProps) 
   }
 
   const category = await resolveCategoryBreadcrumbFr(artwork);
+  const styleLink = artwork.style_title?.trim() ? await resolveStyleHubLinkLocal(artwork.style_title.trim()) : null;
   const breadcrumbItems = [
     { label: "Accueil", href: "/fr" },
     ...(category ? [category] : []),
@@ -568,10 +569,10 @@ export default async function ArtworkDetailPageFr({ params }: ArtworkPageProps) 
                   <div>
                     <p className="text-xs text-[#999]">{t.styleLabel}</p>
                     <Link
-                      href={`/fr/styles/${slugify(artwork.style_title)}`}
+                      href={styleLink?.href ?? `/fr/styles/${slugify(artwork.style_title)}`}
                       className="text-sm text-[#1a1a1a] underline"
                     >
-                      {artwork.style_title}
+                      {styleLink?.label ?? artwork.style_title}
                     </Link>
                   </div>
                 ) : null}
