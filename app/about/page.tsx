@@ -34,6 +34,7 @@ const LISTED_BY = [
   { name: "the National and University Library of Iceland", country: "Iceland", file: "landsbokasafn.svg", href: "https://leidarvisar.is/c.php?g=710927&p=6518871" },
   { name: "Tampere University", country: "Finland", file: "tampere.svg", href: "https://libguides.tuni.fi/az/databases?q=Fine%20Art%20Free" },
   { name: "Middlesex University", country: "UK", file: "middlesex.svg", href: "https://libguides.mdx.ac.uk/c.php?g=711009&p=5131361" },
+  { name: "Ontario Tech University", country: "Canada", file: "ontario-tech.svg", href: "https://guides.library.ontariotechu.ca/open-images-media" },
 ] as const;
 
 export default function AboutPage() {
