@@ -14,7 +14,6 @@ import {
 } from "@/lib/browse-genres";
 import { localePath } from "@/lib/locale-routes";
 import { artworkImageUrl, slugify } from "@/lib/utils";
-import { localizeRowTitle } from "@/lib/artwork-i18n";
 import type { Artwork } from "@/types/artwork";
 
 const t = getT('ko');
@@ -39,7 +38,7 @@ export const metadata: Metadata = {
 export default async function HomePageKo() {
   const orderedQuery = await supabase
     .from("daily_artworks")
-    .select("id, title, title_ko, slug, artist_display, image_id, url, museum, style_title, genre_title, score, alt_text")
+    .select("id, title, slug, artist_display, image_id, url, museum, style_title, genre_title, score, alt_text")
     .order("score", { ascending: false })
     .limit(12);
 
@@ -48,7 +47,7 @@ export default async function HomePageKo() {
   if (orderedQuery.error?.code === "57014") {
     const fallbackQuery = await supabase
       .from("daily_artworks")
-      .select("id, title, title_ko, slug, artist_display, image_id, url, museum, style_title, genre_title, score, alt_text")
+      .select("id, title, slug, artist_display, image_id, url, museum, style_title, genre_title, score, alt_text")
       .limit(300);
 
     if (fallbackQuery.error) {
@@ -62,7 +61,7 @@ export default async function HomePageKo() {
 
   const artworks: Artwork[] = rows.map((item) => ({
     id: item.id,
-    title: localizeRowTitle(item, "ko"),
+    title: item.title,
     slug: item.slug,
     artistName: item.artist_display ?? "Unknown artist",
     artistDisplay: item.artist_display ?? undefined,

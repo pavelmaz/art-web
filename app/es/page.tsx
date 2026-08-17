@@ -9,7 +9,6 @@ import { supabase } from "@/lib/supabase";
 import { getT } from "@/lib/translations";
 import { getCachedGenresForHomeStrip } from "@/lib/browse-genres";
 import { artworkImageUrl, slugify } from "@/lib/utils";
-import { localizeRowTitle } from "@/lib/artwork-i18n";
 import type { Artwork } from "@/types/artwork";
 
 const t = getT('es');
@@ -34,7 +33,7 @@ export const metadata: Metadata = {
 export default async function HomePageEs() {
   const orderedQuery = await supabase
     .from("daily_artworks")
-    .select("id, title, title_sp, slug, artist_display, image_id, url, museum, style_title, genre_title, score, alt_text")
+    .select("id, title, slug, artist_display, image_id, url, museum, style_title, genre_title, score, alt_text")
     .order("score", { ascending: false })
     .limit(12);
 
@@ -43,7 +42,7 @@ export default async function HomePageEs() {
   if (orderedQuery.error?.code === "57014") {
     const fallbackQuery = await supabase
       .from("daily_artworks")
-      .select("id, title, title_sp, slug, artist_display, image_id, url, museum, style_title, genre_title, score, alt_text")
+      .select("id, title, slug, artist_display, image_id, url, museum, style_title, genre_title, score, alt_text")
       .limit(300);
 
     if (fallbackQuery.error) {
@@ -57,7 +56,7 @@ export default async function HomePageEs() {
 
   const artworks: Artwork[] = rows.map((item) => ({
     id: item.id,
-    title: localizeRowTitle(item, "es"),
+    title: item.title,
     slug: item.slug,
     artistName: item.artist_display ?? "Unknown artist",
     artistDisplay: item.artist_display ?? undefined,
