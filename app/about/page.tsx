@@ -99,6 +99,20 @@ export default function AboutPage() {
           ))}
         </div>
 
+        <p>
+          Fine Art Free is also indexed in{" "}
+          <a
+            href="https://dbis.ur.de/resources/107038"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="underline hover:text-[#1a1a1a]"
+          >
+            DBIS (Datenbank-Infosystem)
+          </a>
+          , a scholarly database directory maintained by the University of Regensburg and used by over 400 academic
+          institutions.
+        </p>
+
         <h2 className="text-lg font-semibold text-[#1a1a1a]">Are these images really free to use?</h2>
         <p>
           Yes. In recent years, major museums and libraries around the world — including the Rijksmuseum, the
