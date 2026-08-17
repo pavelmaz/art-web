@@ -11,6 +11,7 @@ import { getPaginationParams, pagesOrNotFound } from "@/lib/pagination";
 import { buildArtistLanguageAlternates } from "@/lib/locale-routes";
 import { supabase } from "@/lib/supabase";
 import { absoluteUrl, artworkGridImageUrl } from "@/lib/utils";
+import { localizeRowTitle } from "@/lib/artwork-i18n";
 import { getT } from "@/lib/translations";
 import type { Artwork } from "@/types/artwork";
 
@@ -83,7 +84,7 @@ export default async function ArtistPage({ params, searchParams }: ArtistPagePro
   const { data, error } = await supabase
     .from("artworks")
     .select(
-      "id, title, slug, artist_display, image_id, url, museum, style_title, genre_title, score, alt_text",
+      "id, title, title_jp, slug, artist_display, image_id, url, museum, style_title, genre_title, score, alt_text",
     )
     .eq("artist_display", artistName)
     .order("score", { ascending: false })
@@ -104,7 +105,7 @@ export default async function ArtistPage({ params, searchParams }: ArtistPagePro
 
   const artworks: Artwork[] = rows.map((item) => ({
     id: item.id,
-    title: item.title,
+    title: localizeRowTitle(item, "ja"),
     slug: item.slug,
     artistName: item.artist_display ?? artistName,
     artistDisplay: item.artist_display ?? undefined,

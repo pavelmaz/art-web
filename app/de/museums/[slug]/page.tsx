@@ -61,7 +61,7 @@ export default async function MuseumPage({ params, searchParams }: MuseumPagePro
   }
 
   const [{ artworks, totalCount, error }, topArtists] = await Promise.all([
-    fetchMuseumArtworks(museum.name, from, to),
+    fetchMuseumArtworks(museum.name, from, to, "de"),
     fetchMuseumTopArtists(museum.name),
   ]);
 

@@ -8,6 +8,19 @@ export type ArtworkLocale = "es" | "pt" | "fr" | "de" | "it" | "ja" | "ko" | "ru
 
 type Nine = Record<ArtworkLocale, string>;
 
+// locale -> per-locale title column on `artworks`. Add `TITLE_COL[locale]` to a
+// grid query's select, then map the card title through localizeRowTitle().
+export const TITLE_COL: Nine = {
+  es: "title_sp", pt: "title_pt", fr: "title_fr", de: "title_ger", it: "title_it",
+  ja: "title_jp", ko: "title_ko", ru: "title_ru", zh: "title_ch",
+};
+
+/** Localized card title for a raw artworks row: title_<locale> if present, else the English title. */
+export function localizeRowTitle(row: Record<string, unknown>, locale: ArtworkLocale): string {
+  const loc = row[TITLE_COL[locale]];
+  return typeof loc === "string" && loc.trim() ? loc : ((row.title as string) ?? "");
+}
+
 // "by <artist>" connective. Empty string = list the artist with no prefix (CJK/RU read
 // more naturally that way in a comma list).
 const BY: Nine = { es: "de", pt: "de", fr: "par", de: "von", it: "di", ja: "", ko: "", ru: "", zh: "" };

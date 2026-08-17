@@ -6,6 +6,7 @@ import { Pagination } from "@/components/Pagination";
 import { getCachedArtworksBrowseSlice, getCachedArtworksSearchResults } from "@/lib/cached-artworks-page";
 import { getPaginationParams, pagesOrNotFound } from "@/lib/pagination";
 import { absoluteUrl } from "@/lib/utils";
+import { localizeRowTitle } from "@/lib/artwork-i18n";
 import type { Artwork } from "@/types/artwork";
 
 export const revalidate = 86400;
@@ -59,7 +60,7 @@ export default async function ArtworksPage({ searchParams }: ArtworksPageProps) 
 
     const artworks: Artwork[] = searchRows.map((item) => ({
       id: item.id,
-      title: item.title,
+      title: localizeRowTitle(item, "fr"),
       slug: item.slug,
       artistName: item.artist_display ?? "Unknown artist",
       artistDisplay: item.artist_display ?? undefined,
@@ -107,7 +108,7 @@ export default async function ArtworksPage({ searchParams }: ArtworksPageProps) 
 
   const artworks: Artwork[] = rows.map((item) => ({
     id: item.id,
-    title: item.title,
+    title: localizeRowTitle(item, "fr"),
     slug: item.slug,
     artistName: item.artist_display ?? "Unknown artist",
     artistDisplay: item.artist_display ?? undefined,

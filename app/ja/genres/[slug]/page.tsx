@@ -10,6 +10,7 @@ import { getPaginationParams, pagesOrNotFound } from "@/lib/pagination";
 import { supabase } from "@/lib/supabase";
 import { buildGenreLanguageAlternates } from "@/lib/locale-routes";
 import { absoluteUrl } from "@/lib/utils";
+import { localizeRowTitle } from "@/lib/artwork-i18n";
 import { getT } from "@/lib/translations";
 import type { Artwork } from "@/types/artwork";
 
@@ -118,7 +119,7 @@ export default async function GenrePage({ params, searchParams }: GenrePageProps
   const { data, count, error } = await supabase
     .from("artworks")
     .select(
-      "id, title, slug, artist_display, image_id, url, museum, style_title, genre_title, score, alt_text",
+      "id, title, title_jp, slug, artist_display, image_id, url, museum, style_title, genre_title, score, alt_text",
       { count: "exact" }
     )
     .eq("genre_title", genre.name)
@@ -135,7 +136,7 @@ export default async function GenrePage({ params, searchParams }: GenrePageProps
 
   const artworks: Artwork[] = rows.map((item) => ({
     id: item.id,
-    title: item.title,
+    title: localizeRowTitle(item, "ja"),
     slug: item.slug,
     artistName: item.artist_display ?? "Unknown artist",
     artistDisplay: item.artist_display ?? undefined,

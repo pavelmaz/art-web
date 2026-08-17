@@ -5,6 +5,7 @@ import { resolveMuseumBySlug } from "@/lib/resolve-museum-by-slug";
 import { supabase } from "@/lib/supabase";
 import type { Locale } from "@/lib/translations";
 import { artworkGridImageUrl, slugify } from "@/lib/utils";
+import { localizeRowTitle } from "@/lib/artwork-i18n";
 import type { Artwork } from "@/types/artwork";
 
 export type MuseumPageData = {
@@ -41,10 +42,11 @@ type ArtworkRow = {
   genre_title: string | null;
   score: number | null;
   alt_text: string | null;
+  [key: string]: unknown;
 };
 
 const ARTWORK_COLUMNS =
-  "id, title, slug, artist_display, image_id, url, museum, style_title, genre_title, score, alt_text";
+  "id, title, title_sp, title_pt, title_fr, title_ger, title_it, title_jp, title_ko, title_ru, title_ch, slug, artist_display, image_id, url, museum, style_title, genre_title, score, alt_text";
 
 async function fetchMuseumRow(slug: string): Promise<MuseumRow | null> {
   const { data, error } = await supabase
@@ -236,6 +238,7 @@ export async function fetchMuseumArtworks(
   museumName: string,
   from: number,
   to: number,
+  locale: Locale = "en",
 ): Promise<{
   artworks: Artwork[];
   totalCount: number;
@@ -255,7 +258,7 @@ export async function fetchMuseumArtworks(
   const rows = (data as ArtworkRow[] | null) ?? [];
   const artworks: Artwork[] = rows.map((item) => ({
     id: item.id,
-    title: item.title,
+    title: locale === "en" ? item.title : localizeRowTitle(item, locale),
     slug: item.slug,
     artistName: item.artist_display ?? "Unknown artist",
     artistDisplay: item.artist_display ?? undefined,

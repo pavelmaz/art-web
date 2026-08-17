@@ -23,7 +23,7 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { getT } from "@/lib/translations";
 import { parseArtworkDeathYear } from "@/lib/artwork-death-year";
 import { artworkDetailImageUrl, artworkGridImageUrl, artworkImageUrl, artworkMaxSize, artworkMaxSpecs, artworkMediumKind, artworkOgImageUrl, artworkOriginalUrl, artworkStandardSize, artworkStandardSpecs, slugify } from "@/lib/utils";
-import { localizeAltText, localizeMedium } from "@/lib/artwork-i18n";
+import { localizeAltText, localizeMedium, localizeRowTitle } from "@/lib/artwork-i18n";
 import type { Artwork } from "@/types/artwork";
 
 export const revalidate = 86400;
@@ -386,7 +386,7 @@ export default async function ArtworkDetailPageRu({ params }: ArtworkPageProps) 
   if (artwork.artist_display?.trim()) {
     const relatedQuery = await supabase
       .from("artworks")
-      .select("id, title, slug, artist_display, image_id, url, museum, style_title, genre_title, score, alt_text")
+      .select("id, title, title_ru, slug, artist_display, image_id, url, museum, style_title, genre_title, score, alt_text")
       .eq("artist_display", artwork.artist_display)
       .order("score", { ascending: false })
       .limit(20);
@@ -414,7 +414,7 @@ export default async function ArtworkDetailPageRu({ params }: ArtworkPageProps) 
         .slice(0, 10)
         .map((item) => ({
           id: item.id,
-          title: item.title,
+          title: localizeRowTitle(item, "ru"),
           slug: item.slug,
           artistName: item.artist_display ?? artist,
           artistDisplay: item.artist_display ?? undefined,
@@ -441,7 +441,7 @@ export default async function ArtworkDetailPageRu({ params }: ArtworkPageProps) 
   if (artwork.genre_title) {
     const { data: genreData } = await supabase
       .from("artworks")
-      .select("id, title, slug, artist_display, image_id, url, museum, style_title, genre_title, alt_text")
+      .select("id, title, title_ru, slug, artist_display, image_id, url, museum, style_title, genre_title, alt_text")
       .eq("genre_title", artwork.genre_title)
       .neq("id", artwork.id)
       .limit(6);
@@ -460,7 +460,7 @@ export default async function ArtworkDetailPageRu({ params }: ArtworkPageProps) 
         alt_text: string | null;
       }>).map((item) => ({
         id: item.id,
-        title: item.title,
+        title: localizeRowTitle(item, "ru"),
         slug: item.slug,
         artistName: item.artist_display ?? "Unknown artist",
         artistDisplay: item.artist_display ?? undefined,

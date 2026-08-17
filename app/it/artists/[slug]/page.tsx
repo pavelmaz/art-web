@@ -12,6 +12,7 @@ import { supabase } from "@/lib/supabase";
 import { buildArtistLanguageAlternates, localePath } from "@/lib/locale-routes";
 import { getT } from "@/lib/translations";
 import { artworkGridImageUrl } from "@/lib/utils";
+import { localizeRowTitle } from "@/lib/artwork-i18n";
 import type { Artwork } from "@/types/artwork";
 
 const t = getT("it");
@@ -84,7 +85,7 @@ export default async function ArtistPage({ params, searchParams }: ArtistPagePro
   const { data, error } = await supabase
     .from("artworks")
     .select(
-      "id, title, slug, artist_display, image_id, url, museum, style_title, genre_title, score, alt_text",
+      "id, title, title_it, slug, artist_display, image_id, url, museum, style_title, genre_title, score, alt_text",
     )
     .eq("artist_display", artistName)
     .order("score", { ascending: false })
@@ -105,7 +106,7 @@ export default async function ArtistPage({ params, searchParams }: ArtistPagePro
 
   const artworks: Artwork[] = rows.map((item) => ({
     id: item.id,
-    title: item.title,
+    title: localizeRowTitle(item, "it"),
     slug: item.slug,
     artistName: item.artist_display ?? artistName,
     artistDisplay: item.artist_display ?? undefined,
