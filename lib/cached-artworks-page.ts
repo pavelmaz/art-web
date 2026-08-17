@@ -66,8 +66,8 @@ export const getCachedArtworksBrowseSlice = unstable_cache(
 
     return { rows, totalCount };
   },
-  ["artworks-browse"],
-  { revalidate: REVALIDATE_SECONDS, tags: ["artworks-browse"] }
+  ["artworks-browse-v2"],
+  { revalidate: REVALIDATE_SECONDS, tags: ["artworks-browse", "artworks-browse-v2"] }
 );
 
 /**
