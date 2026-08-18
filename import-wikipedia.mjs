@@ -46,6 +46,10 @@ const ARTIST_ALIASES = {
   // Commons credits her full maiden name; the catalog holds 15 works as
   // "Sophie Anderson" — without this the import would fork a second artist.
   "sophie gengembre anderson": "Sophie Anderson",
+  // Spelling variants merged 18 Aug (the drip had forked both into duplicate
+  // artist pages + re-imported the same Commons files under each).
+  "adam pynacker": "Adam Pijnacker",
+  "adam-françois van der meulen": "Adam Frans van der Meulen",
 };
 
 const args = process.argv.slice(2);
@@ -432,6 +436,19 @@ async function processItem(item) {
     const hit = allKeys.find((k) => seenKeys.has(k));
     if (hit) {
       console.log(`— SKIP  already in catalog${hit !== key ? " (matched alt-language title)" : ""}: "${info.title}" — ${canonical}`);
+      summary.skipped++; return "skip";
+    }
+
+    // Cross-artist dedupe: the per-artist title check above only sees works under
+    // `canonical`, so the same Commons file re-fetched under a variant artist
+    // spelling (e.g. "Adam Pynacker" vs "Adam Pijnacker") slips through. The source
+    // file URL is the work's true identity — skip if the catalog already has it
+    // under ANY name. (Needs the idx_artworks_url index to stay fast.)
+    if (
+      info.pageUrl &&
+      (await pgrest(`artworks?select=id&url=eq.${encodeURIComponent(info.pageUrl)}&limit=1`)).length
+    ) {
+      console.log(`— SKIP  already in catalog (same source file): "${info.title}"`);
       summary.skipped++; return "skip";
     }
 
