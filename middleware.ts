@@ -6,7 +6,6 @@ import {
   buildHreflangLinkHeader,
   detectLocaleFromPathname,
   enPathToLocalized,
-  isEnOnlyPathname,
   localizedPathToEn,
 } from "@/lib/hreflang-paths";
 import type { SiteLocale } from "@/lib/locale-routes";
@@ -15,14 +14,30 @@ import { claimsSearchBot } from "@/lib/verified-search-bot";
 
 type CookieRow = { name: string; value: string; options: CookieOptions };
 
-const LOCALE_COOKIE = "faf_locale";
+// Renamed from "faf_locale" (Aug 18): the first version wrote a preference on EVERY
+// localized-page view, which trapped anyone who merely glanced at a /fr page. Bumping the
+// name ignores those stale cookies; going forward only an explicit ?lang override writes it.
+const LOCALE_COOKIE = "faf_lang";
 const LOCALE_COOKIE_MAX_AGE = 60 * 60 * 24 * 365; // 1 year
 const SUPPORTED_LOCALES = new Set<SiteLocale>([
   "en", "es", "pt", "ja", "fr", "de", "it", "ko", "ru", "zh",
 ]);
 
+// Only these English paths have a localized twin in EVERY locale. Redirecting anything
+// else (e.g. /login, /account, /prints, /topics, /countries) would 404 in locales that
+// lack that page — which is exactly the /login -> /fr/login bug this replaces.
+const REDIRECTABLE_SEGMENTS = new Set([
+  "artworks", "artists", "museums", "genres", "styles", "search",
+]);
+
 function isSupportedLocale(value: string | undefined | null): value is SiteLocale {
   return !!value && SUPPORTED_LOCALES.has(value as SiteLocale);
+}
+
+/** True only for the homepage and the core hub sections that exist in all locales. */
+function isRedirectableEnglishPath(pathname: string): boolean {
+  if (pathname === "/") return true;
+  return REDIRECTABLE_SEGMENTS.has(pathname.split("/")[1] ?? "");
 }
 
 /** Best supported locale (incl. "en") from an Accept-Language header, or null. */
@@ -81,14 +96,20 @@ export async function middleware(request: NextRequest) {
     !pathname.includes(".");
 
   if (isPageRequest) {
-    // 1) Explicit override: ?lang=xx sets a durable preference, strips the param, and lands on
-    //    the right-locale URL. A future language switcher can just link to `?lang=xx`.
+    const here = detectLocaleFromPathname(pathname);
+    const enPath = localizedPathToEn(pathname, here);
+
+    // 1) Explicit override: ?lang=xx sets a durable preference and lands on the equivalent page
+    //    in that language, staying put on English-only pages so it never 404s. A future language
+    //    switcher can just link to `?lang=xx`.
     const langParam = request.nextUrl.searchParams.get("lang");
     if (isSupportedLocale(langParam)) {
-      const here = detectLocaleFromPathname(pathname);
-      const enPath = localizedPathToEn(pathname, here);
+      const destPath =
+        langParam !== "en" && isRedirectableEnglishPath(enPath)
+          ? enPathToLocalized(enPath, langParam)
+          : enPath;
       const target = request.nextUrl.clone();
-      target.pathname = enPathToLocalized(enPath, langParam);
+      target.pathname = destPath;
       target.searchParams.delete("lang");
       const res = NextResponse.redirect(target, 307);
       res.cookies.set(LOCALE_COOKIE, langParam, {
@@ -99,15 +120,23 @@ export async function middleware(request: NextRequest) {
       return res;
     }
 
-    // 2) Auto-redirect: only on English (default) URLs that have a localized twin, never for bots.
-    const here = detectLocaleFromPathname(pathname);
+    // 2) Auto-redirect English (default) URLs to the visitor's language — homepage + hub sections
+    //    only (never /login, /account, /prints, /topics… which lack a localized twin), never bots.
     const isCrawler = claimsSearchBot(userAgent) !== null || looksLikeCrawler(userAgent);
-    if (here === "en" && !isEnOnlyPathname(pathname) && !isCrawler) {
+    if (here === "en" && isRedirectableEnglishPath(pathname) && !isCrawler) {
       const cookieLocale = request.cookies.get(LOCALE_COOKIE)?.value;
       const preferred = isSupportedLocale(cookieLocale)
         ? cookieLocale
         : pickPreferredLocale(request.headers.get("accept-language") ?? "");
-      if (preferred && preferred !== "en") {
+
+      // Diagnostic: append ?debuglang to any English URL to log the raw signals without redirecting.
+      if (request.nextUrl.searchParams.has("debuglang")) {
+        console.log(
+          `[locale-debug] path=${pathname} accept-language=${JSON.stringify(
+            request.headers.get("accept-language"),
+          )} cookie=${cookieLocale ?? "-"} preferred=${preferred ?? "-"}`,
+        );
+      } else if (preferred && preferred !== "en") {
         const dest = enPathToLocalized(pathname, preferred);
         if (dest !== pathname) {
           const target = request.nextUrl.clone();
@@ -171,17 +200,6 @@ export async function middleware(request: NextRequest) {
     const linkHeader = buildHreflangLinkHeader(pathname, page);
     if (linkHeader) {
       response.headers.set("Link", linkHeader);
-    }
-
-    // Remember the locale the visitor is actively browsing, so a later visit to a bare
-    // English URL (e.g. "/") sends them back to it. Only write when it actually changes.
-    const activeLocale = detectLocaleFromPathname(pathname);
-    if (activeLocale !== "en" && request.cookies.get(LOCALE_COOKIE)?.value !== activeLocale) {
-      response.cookies.set(LOCALE_COOKIE, activeLocale, {
-        path: "/",
-        maxAge: LOCALE_COOKIE_MAX_AGE,
-        sameSite: "lax",
-      });
     }
   }
 
