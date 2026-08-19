@@ -35,6 +35,9 @@ const LISTED_BY = [
   { name: "Tampere University", country: "Finland", file: "tampere.svg", href: "https://libguides.tuni.fi/az/databases?q=Fine%20Art%20Free" },
   { name: "Middlesex University", country: "UK", file: "middlesex.svg", href: "https://libguides.mdx.ac.uk/c.php?g=711009&p=5131361" },
   { name: "Ontario Tech University", country: "Canada", file: "ontario-tech.svg", href: "https://guides.library.ontariotechu.ca/open-images-media" },
+  // Listed in the A-Z Databases (dofollow link to fineartfree.com, verified live); no logo yet,
+  // so it shows in the text credit only — the logo bar skips entries without a `file`.
+  { name: "the Glasgow School of Art", country: "UK", file: null, href: "https://gsa.libguides.com/az.php?q=Fine%20Art%20Free" },
 ] as const;
 
 export default function AboutPage() {
@@ -69,7 +72,7 @@ export default function AboutPage() {
           Fine Art Free is included as a recommended resource in the art and image research guides of
           universities and colleges around the world — among them{" "}
           {LISTED_BY.map((u, i) => (
-            <span key={u.file}>
+            <span key={u.name}>
               {i > 0 ? (i === LISTED_BY.length - 1 ? " and " : ", ") : ""}
               <a
                 href={u.href}
@@ -86,8 +89,8 @@ export default function AboutPage() {
         </p>
 
         <div className="not-prose flex flex-wrap items-center gap-x-8 gap-y-5 py-1">
-          {LISTED_BY.map((u) => (
-            <a key={u.file} href={u.href} target="_blank" rel="noopener noreferrer" aria-label={u.name}>
+          {LISTED_BY.filter((u) => u.file).map((u) => (
+            <a key={u.name} href={u.href} target="_blank" rel="noopener noreferrer" aria-label={u.name}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={`/images/university-logos/${u.file}`}
