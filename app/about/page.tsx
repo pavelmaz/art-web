@@ -38,6 +38,8 @@ const LISTED_BY = [
   // Listed in the A-Z Databases (dofollow link to fineartfree.com, verified live); no logo yet,
   // so it shows in the text credit only — the logo bar skips entries without a `file`.
   { name: "the Glasgow School of Art", country: "UK", file: null, href: "https://gsa.libguides.com/az.php?q=Fine%20Art%20Free" },
+  // Indexable + dofollow (robots: noarchive only) on the Art & Art History "Images" guide — a real SEO link, not just credibility.
+  { name: "Carleton College", country: "USA", file: null, href: "https://gouldguides.carleton.edu/art/images" },
 ] as const;
 
 export default function AboutPage() {
