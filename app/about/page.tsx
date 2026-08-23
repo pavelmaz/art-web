@@ -40,6 +40,8 @@ const LISTED_BY = [
   { name: "the Glasgow School of Art", country: "UK", file: null, href: "https://gsa.libguides.com/az.php?q=Fine%20Art%20Free" },
   // Indexable + dofollow (robots: noarchive only) on the Art & Art History "Images" guide — a real SEO link, not just credibility.
   { name: "Carleton College", country: "USA", file: null, href: "https://gouldguides.carleton.edu/art/images" },
+  // Library e-resources page, listed between Europeana and Getty Research; dofollow (no rel=nofollow), verified live. No logo yet → text credit only.
+  { name: "Oslo National Academy of the Arts", country: "Norway", file: null, href: "https://khio.no/en/about/the-library" },
 ] as const;
 
 export default function AboutPage() {
