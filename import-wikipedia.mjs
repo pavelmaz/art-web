@@ -50,6 +50,9 @@ const ARTIST_ALIASES = {
   // artist pages + re-imported the same Commons files under each).
   "adam pynacker": "Adam Pijnacker",
   "adam-françois van der meulen": "Adam Frans van der Meulen",
+  // 23 Aug 2026 — the drip forked this painter under his full baptismal name
+  // (88 works + a duplicate artist page). Fold to the name he's known by.
+  "adolphe joseph thomas monticelli": "Adolphe Monticelli",
 };
 
 const args = process.argv.slice(2);

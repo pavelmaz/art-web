@@ -54,6 +54,32 @@ function buildLocalePathRedirects() {
   return redirects;
 }
 
+// Artists merged after a spelling fork (the A-Z drip imported the same painter
+// under two name variants → two artist pages). Reassign the works in the DB, then
+// list the pair here so the retired slug 301s to the canonical one in every locale.
+const ARTIST_MERGE_REDIRECTS: { from: string; to: string }[] = [
+  // 23 Aug 2026 — full baptismal name folded into the common name (88 works + page).
+  { from: "adolphe-joseph-thomas-monticelli", to: "adolphe-monticelli" },
+];
+
+function buildArtistMergeRedirects() {
+  const redirects: { source: string; destination: string; permanent: boolean }[] = [];
+  for (const { from, to } of ARTIST_MERGE_REDIRECTS) {
+    // Base (English) path
+    redirects.push({ source: `/artists/${from}`, destination: `/artists/${to}`, permanent: true });
+    // Every non-English locale, using that locale's artists segment (es/pt → "artistas")
+    for (const config of Object.values(LOCALE_ROUTE_CONFIG)) {
+      const seg = config.segments.artists;
+      redirects.push({
+        source: `${config.prefix}/${seg}/${from}`,
+        destination: `${config.prefix}/${seg}/${to}`,
+        permanent: true,
+      });
+    }
+  }
+  return redirects;
+}
+
 function buildTopicsCountriesRedirects() {
   const locales = ["/fr", "/de", "/it", "/ko", "/ru", "/zh"] as const;
   const redirects: { source: string; destination: string; permanent: boolean }[] = [];
@@ -96,6 +122,7 @@ const nextConfig: NextConfig = {
       ...buildLocalePathRedirects(),
       ...buildLegacyLocalePathRedirects(),
       ...buildTopicsCountriesRedirects(),
+      ...buildArtistMergeRedirects(),
       {
         source: "/genres/theatrical",
         destination: "/genres",
