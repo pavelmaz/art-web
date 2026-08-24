@@ -42,6 +42,8 @@ const LISTED_BY = [
   { name: "Carleton College", country: "USA", file: null, href: "https://gouldguides.carleton.edu/art/images" },
   // Library e-resources page, listed between Europeana and Getty Research; dofollow (no rel=nofollow), verified live. No logo yet → text credit only.
   { name: "Oslo National Academy of the Arts", country: "Norway", file: null, href: "https://khio.no/en/about/the-library" },
+  // Art & Design subject guide; dofollow (rel=noopener noreferrer only), indexable. Link is a JS-rendered LibGuides widget. No logo yet → text credit.
+  { name: "the University of Portsmouth", country: "UK", file: null, href: "https://library.port.ac.uk/subjects/creative-and-cultural-industries/art-and-design" },
 ] as const;
 
 export default function AboutPage() {
