@@ -35,8 +35,9 @@ const LISTED_BY = [
   { name: "Tampere University", country: "Finland", file: "tampere.svg", href: "https://libguides.tuni.fi/az/databases?q=Fine%20Art%20Free" },
   { name: "Middlesex University", country: "UK", file: "middlesex.svg", href: "https://libguides.mdx.ac.uk/c.php?g=711009&p=5131361" },
   { name: "Ontario Tech University", country: "Canada", file: "ontario-tech.svg", href: "https://guides.library.ontariotechu.ca/open-images-media" },
-  // Listed in the A-Z Databases (dofollow link to fineartfree.com, verified live). Logo: non-free wordmark (en.wikipedia).
-  { name: "the Glasgow School of Art", country: "UK", file: "glasgow.png", href: "https://gsa.libguides.com/az.php?q=Fine%20Art%20Free" },
+  // Listed in the A-Z Databases (dofollow link to fineartfree.com, verified live). Text credit only:
+  // GSA's only available wordmark is light/non-free, so it can't sit on the white logo tiles.
+  { name: "the Glasgow School of Art", country: "UK", file: null, href: "https://gsa.libguides.com/az.php?q=Fine%20Art%20Free" },
   // Indexable + dofollow (robots: noarchive only) on the Art & Art History "Images" guide — a real SEO link, not just credibility. Logo: Wikimedia Commons (PD-textlogo).
   { name: "Carleton College", country: "USA", file: "carleton.svg", href: "https://gouldguides.carleton.edu/art/images" },
   // Library e-resources page, listed between Europeana and Getty Research; dofollow (no rel=nofollow), verified live. Logo: Wikimedia Commons.
@@ -93,14 +94,24 @@ export default function AboutPage() {
           .
         </p>
 
-        <div className="not-prose flex flex-wrap items-center gap-x-8 gap-y-5 py-1">
+        {/* Each logo sits on its own white tile: many of the source wordmarks ship with an
+            opaque white background, so a white tile makes those seamless while keeping the
+            transparent, dark ones (and the black Leeds mark) fully legible. */}
+        <div className="not-prose flex flex-wrap items-center gap-3 py-1">
           {LISTED_BY.filter((u) => u.file).map((u) => (
-            <a key={u.name} href={u.href} target="_blank" rel="noopener noreferrer" aria-label={u.name}>
+            <a
+              key={u.name}
+              href={u.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label={u.name}
+              className="flex h-16 items-center justify-center rounded-lg border border-[#e8e6e1] bg-white px-5 shadow-sm transition hover:shadow-md"
+            >
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={`/images/university-logos/${u.file}`}
                 alt={u.name}
-                className="h-9 w-auto opacity-70 transition hover:opacity-100"
+                className="h-8 max-w-[150px] object-contain"
                 loading="lazy"
               />
             </a>
