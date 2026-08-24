@@ -62,6 +62,13 @@ export const translations = {
     insightsLimitBody: "You've used your free Discover. Go Fine Art Free Pro for unlimited AI insights on every artwork.",
     insightsLimitCta: 'Become Pro',
     downloadMaxCta: 'Download Max',
+    // Download interstitial (upsell modal before a free download)
+    dlHeadline: `You're downloading 6% of this painting`,
+    dlOf: 'of',
+    dlFree: 'Free',
+    dlFullSize: 'full size',
+    dlPlusCatalog: 'Plus unlimited 4K downloads of 500,000+ masterpieces',
+    dlContinueFree: 'Continue free download',
     // SEO page title templates
     artworkPageTitle: (title: string, artist: string) => 
       `${title} de ${artist} — Descarga Gratuita`,
@@ -131,6 +138,13 @@ export const translations = {
     insightsLimitBody: 'Ya usaste tu Descubrir gratuito. Hazte Fine Art Free Pro para obtener información ilimitada en cada obra.',
     insightsLimitCta: 'Hazte Pro',
     downloadMaxCta: 'Descargar máx.',
+    // Download interstitial (upsell modal before a free download)
+    dlHeadline: 'Estás descargando el 6% de esta pintura',
+    dlOf: 'de',
+    dlFree: 'Gratis',
+    dlFullSize: 'tamaño completo',
+    dlPlusCatalog: 'Además, descargas 4K ilimitadas de más de 500.000 obras maestras',
+    dlContinueFree: 'Continuar descarga gratuita',
     // SEO page title templates
     artworkPageTitle: (title: string, artist: string) => 
       `${title} de ${artist} — Descarga Gratuita | Fine Art Free`,
@@ -200,6 +214,13 @@ export const translations = {
     insightsLimitBody: 'Você já usou o seu Descobrir gratuito. Torne-se Fine Art Free Pro para informações ilimitadas em todas as obras.',
     insightsLimitCta: 'Torne-se Pro',
     downloadMaxCta: 'Baixar máx.',
+    // Download interstitial (upsell modal before a free download)
+    dlHeadline: 'Você está baixando 6% desta pintura',
+    dlOf: 'de',
+    dlFree: 'Grátis',
+    dlFullSize: 'tamanho total',
+    dlPlusCatalog: 'Além de downloads 4K ilimitados de mais de 500.000 obras-primas',
+    dlContinueFree: 'Continuar download gratuito',
     // SEO page title templates
     artworkPageTitle: (title: string, artist: string) => 
       `${title} de ${artist} — Download Gratuito | Fine Art Free`,
@@ -272,6 +293,13 @@ export const translations = {
     insightsLimitBody: '無料の「発見」を使い切りました。Fine Art Free Pro になると、すべての作品で無制限にインサイトを利用できます。',
     insightsLimitCta: 'Proになる',
     downloadMaxCta: '最大サイズをダウンロード',
+    // Download interstitial (upsell modal before a free download)
+    dlHeadline: 'この絵画の6%をダウンロードしています',
+    dlOf: '/',
+    dlFree: '無料',
+    dlFullSize: 'フルサイズ',
+    dlPlusCatalog: 'さらに、50万点以上の名画を4Kで無制限にダウンロード',
+    dlContinueFree: '無料ダウンロードを続ける',
     artworkPageTitle: (title: string, artist: string) =>
       `${title} — ${artist} | 無料ダウンロード | Fine Art Free`,
     stylePageTitle: (style: string) =>
@@ -342,6 +370,13 @@ export const translations = {
     insightsLimitBody: 'Vous avez utilisé votre Découverte gratuite. Passez à Fine Art Free Pro pour des informations illimitées sur chaque œuvre.',
     insightsLimitCta: 'Devenir Pro',
     downloadMaxCta: 'Télécharger max',
+    // Download interstitial (upsell modal before a free download)
+    dlHeadline: 'Vous téléchargez 6% de cette peinture',
+    dlOf: 'sur',
+    dlFree: 'Gratuit',
+    dlFullSize: 'taille réelle',
+    dlPlusCatalog: 'Plus des téléchargements 4K illimités de plus de 500 000 chefs-d’œuvre',
+    dlContinueFree: 'Continuer le téléchargement gratuit',
     artworkPageTitle: (title: string, artist: string) =>
       `${title} par ${artist} — Téléchargement gratuit | Fine Art Free`,
     stylePageTitle: (style: string) =>
@@ -412,6 +447,13 @@ export const translations = {
     insightsLimitBody: 'Sie haben Ihr kostenloses Entdecken genutzt. Werden Sie Fine Art Free Pro für unbegrenzte Einblicke zu jedem Kunstwerk.',
     insightsLimitCta: 'Pro werden',
     downloadMaxCta: 'Max. herunterladen',
+    // Download interstitial (upsell modal before a free download)
+    dlHeadline: 'Sie laden 6% dieses Gemäldes herunter',
+    dlOf: 'von',
+    dlFree: 'Kostenlos',
+    dlFullSize: 'volle Größe',
+    dlPlusCatalog: 'Plus unbegrenzte 4K-Downloads von über 500.000 Meisterwerken',
+    dlContinueFree: 'Kostenlosen Download fortsetzen',
     artworkPageTitle: (title: string, artist: string) =>
       `${title} von ${artist} — Kostenloser Download | Fine Art Free`,
     stylePageTitle: (style: string) =>
@@ -482,6 +524,13 @@ export const translations = {
     insightsLimitBody: 'Hai usato il tuo Scopri gratuito. Passa a Fine Art Free Pro per approfondimenti illimitati su ogni opera.',
     insightsLimitCta: 'Diventa Pro',
     downloadMaxCta: 'Scarica max',
+    // Download interstitial (upsell modal before a free download)
+    dlHeadline: 'Stai scaricando il 6% di questo dipinto',
+    dlOf: 'su',
+    dlFree: 'Gratis',
+    dlFullSize: 'dimensione intera',
+    dlPlusCatalog: 'Inoltre download 4K illimitati di oltre 500.000 capolavori',
+    dlContinueFree: 'Continua il download gratuito',
     artworkPageTitle: (title: string, artist: string) =>
       `${title} di ${artist} — Scarica gratuitamente | Fine Art Free`,
     stylePageTitle: (style: string) =>
@@ -551,6 +600,13 @@ export const translations = {
     insightsLimitBody: '무료 발견을 모두 사용했습니다. Fine Art Free Pro로 업그레이드하면 모든 작품에서 무제한 인사이트를 이용할 수 있습니다.',
     insightsLimitCta: 'Pro 시작하기',
     downloadMaxCta: '최대 크기 다운로드',
+    // Download interstitial (upsell modal before a free download)
+    dlHeadline: '이 그림의 6%를 다운로드하고 있습니다',
+    dlOf: '/',
+    dlFree: '무료',
+    dlFullSize: '전체 크기',
+    dlPlusCatalog: '또한 50만 점 이상의 명작을 4K로 무제한 다운로드',
+    dlContinueFree: '무료 다운로드 계속하기',
     artworkPageTitle: (title: string, artist: string) =>
       `${title} — ${artist} | 무료 다운로드 | Fine Art Free`,
     stylePageTitle: (style: string) =>
@@ -621,6 +677,13 @@ export const translations = {
     insightsLimitBody: 'Вы использовали бесплатное «Открыть». Оформите Fine Art Free Pro для безлимитных инсайтов к каждой работе.',
     insightsLimitCta: 'Стать Pro',
     downloadMaxCta: 'Скачать макс.',
+    // Download interstitial (upsell modal before a free download)
+    dlHeadline: 'Вы скачиваете 6% этой картины',
+    dlOf: 'из',
+    dlFree: 'Бесплатно',
+    dlFullSize: 'полный размер',
+    dlPlusCatalog: 'Плюс безлимитные 4K-загрузки более 500 000 шедевров',
+    dlContinueFree: 'Продолжить бесплатную загрузку',
     artworkPageTitle: (title: string, artist: string) =>
       `${title} — ${artist} | Бесплатная загрузка | Fine Art Free`,
     stylePageTitle: (style: string) =>
@@ -690,6 +753,13 @@ export const translations = {
     insightsLimitBody: '您已用完免费的“发现”。升级 Fine Art Free Pro，即可在每件作品上获得无限 AI 解读。',
     insightsLimitCta: '成为 Pro',
     downloadMaxCta: '下载最大尺寸',
+    // Download interstitial (upsell modal before a free download)
+    dlHeadline: '您正在下载这幅画作的 6%',
+    dlOf: '/',
+    dlFree: '免费',
+    dlFullSize: '完整尺寸',
+    dlPlusCatalog: '外加超过 500,000 幅杰作的无限 4K 下载',
+    dlContinueFree: '继续免费下载',
     artworkPageTitle: (title: string, artist: string) =>
       `${title} — ${artist} | 免费下载 | Fine Art Free`,
     stylePageTitle: (style: string) =>

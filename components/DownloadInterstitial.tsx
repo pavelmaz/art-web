@@ -58,6 +58,9 @@ export function DownloadInterstitial({
 
   if (!open) return null;
 
+  const t = getT(locale);
+  const FREE_PX = 1400; // the free download is 1400 px wide
+
   // Zoom to the centre so the panels read as a detail, not a thumbnail — a whole
   // painting shrunk to this size looks identical at any resolution.
   const tile: React.CSSProperties = imageUrl
@@ -82,11 +85,11 @@ export function DownloadInterstitial({
         onClick={(e) => e.stopPropagation()}
       >
         <p id="dl-interstitial-title" className="text-[17px] font-semibold text-[#1a1a1a]">
-          You&apos;re downloading 6% of this painting
+          {t.dlHeadline}
         </p>
         <p className="mt-0.5 text-[13px] text-[#6b6b6b]">
           {title}
-          {maxWidth ? ` · 1400 px of ${maxWidth} px` : ""}
+          {maxWidth ? ` · ${FREE_PX} px ${t.dlOf} ${maxWidth} px` : ""}
         </p>
 
         <div className="mt-3 grid grid-cols-2 gap-2">
@@ -102,13 +105,13 @@ export function DownloadInterstitial({
                 aria-hidden
               />
             </div>
-            <p className="mt-1.5 text-xs text-[#6b6b6b]">Free · 1400 px</p>
+            <p className="mt-1.5 text-xs text-[#6b6b6b]">{t.dlFree} · {FREE_PX} px</p>
           </div>
           <div>
             <div className="h-24 w-full overflow-hidden rounded-lg border border-[#e4a23c] bg-[#f1efea]">
               <div className="h-full w-full" style={tile} aria-hidden />
             </div>
-            <p className="mt-1.5 text-xs font-medium text-[#b07a1e]">Pro · full size</p>
+            <p className="mt-1.5 text-xs font-medium text-[#b07a1e]">Pro · {t.dlFullSize}</p>
           </div>
         </div>
 
@@ -128,7 +131,7 @@ export function DownloadInterstitial({
           {getT(locale).downloadMaxCta}
         </Link>
         <p className="mt-1.5 text-center text-[11px] text-[#9a9a9a]">
-          Plus unlimited 4K downloads of 500,000+ masterpieces
+          {t.dlPlusCatalog}
         </p>
 
         <button
@@ -139,7 +142,7 @@ export function DownloadInterstitial({
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
             <path d="M12 3v12m0 0 4-4m-4 4-4-4M4 19h16" />
           </svg>
-          Continue free download
+          {t.dlContinueFree}
         </button>
       </div>
     </div>,
