@@ -35,15 +35,14 @@ const LISTED_BY = [
   { name: "Tampere University", country: "Finland", file: "tampere.svg", href: "https://libguides.tuni.fi/az/databases?q=Fine%20Art%20Free" },
   { name: "Middlesex University", country: "UK", file: "middlesex.svg", href: "https://libguides.mdx.ac.uk/c.php?g=711009&p=5131361" },
   { name: "Ontario Tech University", country: "Canada", file: "ontario-tech.svg", href: "https://guides.library.ontariotechu.ca/open-images-media" },
-  // Listed in the A-Z Databases (dofollow link to fineartfree.com, verified live); no logo yet,
-  // so it shows in the text credit only — the logo bar skips entries without a `file`.
-  { name: "the Glasgow School of Art", country: "UK", file: null, href: "https://gsa.libguides.com/az.php?q=Fine%20Art%20Free" },
-  // Indexable + dofollow (robots: noarchive only) on the Art & Art History "Images" guide — a real SEO link, not just credibility.
-  { name: "Carleton College", country: "USA", file: null, href: "https://gouldguides.carleton.edu/art/images" },
-  // Library e-resources page, listed between Europeana and Getty Research; dofollow (no rel=nofollow), verified live. No logo yet → text credit only.
-  { name: "Oslo National Academy of the Arts", country: "Norway", file: null, href: "https://khio.no/en/about/the-library" },
-  // Art & Design subject guide; dofollow (rel=noopener noreferrer only), indexable. Link is a JS-rendered LibGuides widget. No logo yet → text credit.
-  { name: "the University of Portsmouth", country: "UK", file: null, href: "https://library.port.ac.uk/subjects/creative-and-cultural-industries/art-and-design" },
+  // Listed in the A-Z Databases (dofollow link to fineartfree.com, verified live). Logo: non-free wordmark (en.wikipedia).
+  { name: "the Glasgow School of Art", country: "UK", file: "glasgow.png", href: "https://gsa.libguides.com/az.php?q=Fine%20Art%20Free" },
+  // Indexable + dofollow (robots: noarchive only) on the Art & Art History "Images" guide — a real SEO link, not just credibility. Logo: Wikimedia Commons (PD-textlogo).
+  { name: "Carleton College", country: "USA", file: "carleton.svg", href: "https://gouldguides.carleton.edu/art/images" },
+  // Library e-resources page, listed between Europeana and Getty Research; dofollow (no rel=nofollow), verified live. Logo: Wikimedia Commons.
+  { name: "Oslo National Academy of the Arts", country: "Norway", file: "khio.png", href: "https://khio.no/en/about/the-library" },
+  // Art & Design subject guide; dofollow (rel=noopener noreferrer only), indexable. Link is a JS-rendered LibGuides widget. Logo: Wikimedia Commons.
+  { name: "the University of Portsmouth", country: "UK", file: "portsmouth.png", href: "https://library.port.ac.uk/subjects/creative-and-cultural-industries/art-and-design" },
 ] as const;
 
 export default function AboutPage() {
