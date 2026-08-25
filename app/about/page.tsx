@@ -44,6 +44,8 @@ const LISTED_BY = [
   { name: "Oslo National Academy of the Arts", country: "Norway", file: "khio.png", href: "https://khio.no/en/about/the-library" },
   // Art & Design subject guide; dofollow (rel=noopener noreferrer only), indexable. Link is a JS-rendered LibGuides widget. Logo: Wikimedia Commons.
   { name: "the University of Portsmouth", country: "UK", file: "portsmouth.png", href: "https://library.port.ac.uk/subjects/creative-and-cultural-industries/art-and-design" },
+  // "Finding and Using Free-Use Online Content" guide; dofollow, indexable (robots=noarchive only), on NUS's own .sg subdomain — a strong link. Round-6 outreach win.
+  { name: "the National University of Singapore", country: "Singapore", file: "nus.svg", href: "https://libguides.nus.edu.sg/freesources/Images" },
 ] as const;
 
 export default function AboutPage() {
