@@ -200,8 +200,29 @@ async function run() {
   if (errors.length) {
     console.log(`\nFirst ${Math.min(20, errors.length)} errors:`);
     for (const e of errors.slice(0, 20)) console.log(` - ${e.key}: ${e.error}`);
-    console.log("\nRe-run the script to retry failed items (already-done ones are skipped).");
-    process.exitCode = 1;
+
+    // A handful of individual images that just can't be processed (a corrupt scan,
+    // the odd sharp failure) must NOT fail the whole scheduled run. They never get
+    // renditions, so they're retried every night and would spam a red "all jobs
+    // failed" email forever. Only fail on a SYSTEMIC problem — nothing succeeded at
+    // all, or a large error share (bad credentials / storage outage) — which is what
+    // actually warrants the alert.
+    const attempted = done + skip + err;
+    const nothingWorked = done + skip === 0;
+    const highErrorRate = attempted > 0 && err / attempted > 0.25;
+    if (nothingWorked || highErrorRate) {
+      console.error(
+        `\nFailing run: ${err} error(s) look systemic ` +
+          `(nothingWorked=${nothingWorked}, rate=${((err / Math.max(1, attempted)) * 100).toFixed(1)}%). ` +
+          `Check SUPABASE_SERVICE_KEY / storage.`
+      );
+      process.exitCode = 1;
+    } else {
+      console.log(
+        `\n${err} image(s) couldn't be processed, but ${done} done / ${skip} skipped — ` +
+          `not failing the run. Re-run to retry (done items are skipped).`
+      );
+    }
   }
 }
 
