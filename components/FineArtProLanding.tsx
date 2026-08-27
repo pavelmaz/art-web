@@ -22,6 +22,41 @@ const playfair = Playfair_Display({
 /** Google-review-style avatar background colors, assigned per testimonial by index. */
 const AVATAR_COLORS = ["#4285F4", "#DB4437", "#0F9D58", "#F4B400", "#7E57C2", "#00897B"];
 
+/** Reviewers who supplied a real photo (square, cropped to the face). Anyone not
+ *  listed keeps the coloured-initial avatar, which is also the graceful fallback. */
+const REVIEW_PHOTOS: Record<string, string> = {
+  "Yuki Tanaka": "/images/reviews/yuki-tanaka.jpg",
+  "Sophie Martin": "/images/reviews/sophie-martin.jpg",
+  "Chen Wei": "/images/reviews/chen-wei.jpg",
+};
+
+/** Round reviewer avatar: the supplied photo if there is one, otherwise the
+ *  coloured initial (also the fallback if a photo is ever missing). */
+function ReviewAvatar({ name, colorIndex, px }: { name: string; colorIndex: number; px: 28 | 40 }) {
+  const photo = REVIEW_PHOTOS[name];
+  const box = px === 28 ? "h-7 w-7" : "h-10 w-10";
+  if (photo) {
+    return (
+      <Image
+        src={photo}
+        alt={name}
+        width={px}
+        height={px}
+        className={`${box} shrink-0 rounded-full object-cover`}
+      />
+    );
+  }
+  return (
+    <span
+      className={`flex ${box} shrink-0 items-center justify-center rounded-full ${px === 28 ? "text-xs" : "text-sm"} font-semibold text-white`}
+      style={{ backgroundColor: AVATAR_COLORS[colorIndex % AVATAR_COLORS.length] }}
+      aria-hidden
+    >
+      {name.charAt(0)}
+    </span>
+  );
+}
+
 type FineArtProLandingProps = {
   locale: Locale;
   /** Slug of the artwork the visitor came from ("Become Pro" on an artwork page)
@@ -131,13 +166,7 @@ export async function FineArtProLanding({ locale, leadArtSlug }: FineArtProLandi
                       aria-hidden={i >= c.testimonials.length}
                     >
                       <div className="flex items-center gap-2.5">
-                        <span
-                          className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-semibold text-white"
-                          style={{ backgroundColor: AVATAR_COLORS[i % AVATAR_COLORS.length] }}
-                          aria-hidden
-                        >
-                          {t.name.charAt(0)}
-                        </span>
+                        <ReviewAvatar name={t.name} colorIndex={i} px={28} />
                         <span className="truncate text-[13px] font-semibold text-white">
                           {t.name}
                         </span>
@@ -263,13 +292,7 @@ export async function FineArtProLanding({ locale, leadArtSlug }: FineArtProLandi
                 className="flex flex-col rounded-2xl border border-[#ece9e3] bg-white p-5"
               >
                 <div className="flex items-center gap-3">
-                  <span
-                    className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-sm font-semibold text-white"
-                    style={{ backgroundColor: AVATAR_COLORS[i % AVATAR_COLORS.length] }}
-                    aria-hidden
-                  >
-                    {t.name.charAt(0)}
-                  </span>
+                  <ReviewAvatar name={t.name} colorIndex={i} px={40} />
                   <figcaption className="min-w-0">
                     <p className="truncate text-sm font-semibold text-[#1a1a1a]">{t.name}</p>
                     <p className="truncate text-xs text-[#8a8a8a]">{t.meta}</p>
