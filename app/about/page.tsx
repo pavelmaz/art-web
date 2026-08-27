@@ -46,6 +46,8 @@ const LISTED_BY = [
   { name: "the University of Portsmouth", country: "UK", file: "portsmouth.png", href: "https://library.port.ac.uk/subjects/creative-and-cultural-industries/art-and-design" },
   // "Finding and Using Free-Use Online Content" guide; dofollow, indexable (robots=noarchive only), on NUS's own .sg subdomain — a strong link. Round-6 outreach win.
   { name: "the National University of Singapore", country: "Singapore", file: "nus.svg", href: "https://libguides.nus.edu.sg/freesources/Images" },
+  // "Risorse digitali arte e architettura" guide; dofollow (rel=null), links to /it with a full descriptive blurb. Top Italian art/architecture university. Text credit only for now (no free wordmark on the white tiles yet).
+  { name: "Università Iuav di Venezia", country: "Italy", file: null, href: "https://www.iuav.it/it/biblioteca/risorse-digitali-arte-e-architettura" },
 ] as const;
 
 export default function AboutPage() {
