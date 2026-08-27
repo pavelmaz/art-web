@@ -117,6 +117,11 @@ export async function middleware(request: NextRequest) {
         maxAge: LOCALE_COOKIE_MAX_AGE,
         sameSite: "lax",
       });
+      // This 307 depends on the visitor (Accept-Language + faf_lang cookie), so no
+      // shared cache/proxy may replay it to a different visitor — otherwise the
+      // first-cached locale gets pinned onto everyone hitting the same URL.
+      res.headers.set("Vary", "Accept-Language, Cookie");
+      res.headers.set("Cache-Control", "private, no-store");
       return res;
     }
 
@@ -141,7 +146,12 @@ export async function middleware(request: NextRequest) {
         if (dest !== pathname) {
           const target = request.nextUrl.clone();
           target.pathname = dest;
-          return NextResponse.redirect(target, 307);
+          const res = NextResponse.redirect(target, 307);
+          // Per-visitor redirect (Accept-Language + faf_lang cookie): forbid shared
+          // caching so a proxy can never serve one visitor's locale to another.
+          res.headers.set("Vary", "Accept-Language, Cookie");
+          res.headers.set("Cache-Control", "private, no-store");
+          return res;
         }
       }
     }
