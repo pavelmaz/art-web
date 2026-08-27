@@ -1251,8 +1251,88 @@ const FINE_ART_PRO_COPY: Record<Locale, FineArtProCopy> = {
   zh,
 };
 
+/** Localized testimonials (name unchanged; quote / "Local Guide · N reviews" /
+ *  relative date translated). Injected in getFineArtProT so the reviews read in
+ *  the visitor's language instead of always falling back to the English copy. */
+const TESTIMONIALS_I18N: Partial<Record<Locale, FineArtProCopy["testimonials"]>> = {
+  es: [
+    { name: "Marta López", meta: "Guía local · 24 reseñas", date: "hace 2 semanas", quote: "Llevo meses suscrita y las descargas en 4K son increíbles. Ahora es mi recurso favorito para cada proyecto de diseño." },
+    { name: "David Reynolds", meta: "8 reseñas", date: "hace 1 mes", quote: "Más barato que una sola foto de stock y tengo todo el museo. Las guías de los museos son un detalle estupendo." },
+    { name: "Yuki Tanaka", meta: "Guía local · 51 reseñas", date: "hace 3 semanas", quote: "Las imprimo para casa y las uso comercialmente: valen cada céntimo." },
+    { name: "Sophie Martin", meta: "12 reseñas", date: "hace 5 días", quote: "La resolución es increíble. Encontré piezas que no hallaba en ningún otro sitio, todas de dominio público." },
+    { name: "Liam O'Connor", meta: "3 reseñas", date: "hace 2 meses", quote: "Cancelé mi suscripción de fotos de stock tras una semana con esto. Mucho mejor para el arte." },
+    { name: "Chen Wei", meta: "Guía local · 19 reseñas", date: "hace 1 semana", quote: "Una biblioteca enorme, obras nuevas cada mes, y los análisis con IA de verdad me enseñaron sobre cada cuadro." },
+  ],
+  pt: [
+    { name: "Marta López", meta: "Guia local · 24 avaliações", date: "há 2 semanas", quote: "Assino há meses e os downloads em 4K são incríveis. Virou o meu recurso favorito para todos os projetos de design." },
+    { name: "David Reynolds", meta: "8 avaliações", date: "há 1 mês", quote: "Mais barato do que uma única foto de banco de imagens e tenho o museu inteiro. Os guias dos museus são um ótimo bônus." },
+    { name: "Yuki Tanaka", meta: "Guia local · 51 avaliações", date: "há 3 semanas", quote: "Imprimo para casa e uso comercialmente — vale cada centavo." },
+    { name: "Sophie Martin", meta: "12 avaliações", date: "há 5 dias", quote: "A resolução é incrível. Encontrei aqui obras que não achava em nenhum outro lugar, todas de domínio público." },
+    { name: "Liam O'Connor", meta: "3 avaliações", date: "há 2 meses", quote: "Cancelei minha assinatura de fotos de stock depois de uma semana com isto. Muito melhor para belas-artes." },
+    { name: "Chen Wei", meta: "Guia local · 19 avaliações", date: "há 1 semana", quote: "Biblioteca enorme, obras novas todo mês, e as análises com IA realmente me ensinaram sobre cada pintura." },
+  ],
+  fr: [
+    { name: "Marta López", meta: "Guide local · 24 avis", date: "il y a 2 semaines", quote: "Abonnée depuis des mois — les téléchargements en 4K sont bluffants. C'est devenu ma référence pour chaque projet de design." },
+    { name: "David Reynolds", meta: "8 avis", date: "il y a 1 mois", quote: "Moins cher qu'une seule photo de stock et j'ai tout le musée. Les guides des musées sont un très joli plus." },
+    { name: "Yuki Tanaka", meta: "Guide local · 51 avis", date: "il y a 3 semaines", quote: "Je les imprime pour chez moi et je les utilise à des fins commerciales — ça vaut chaque centime." },
+    { name: "Sophie Martin", meta: "12 avis", date: "il y a 5 jours", quote: "La résolution est incroyable. J'ai trouvé ici des œuvres introuvables ailleurs, toutes dans le domaine public." },
+    { name: "Liam O'Connor", meta: "3 avis", date: "il y a 2 mois", quote: "J'ai résilié mon abonnement de photos de stock après une semaine ici. Bien meilleur pour les beaux-arts." },
+    { name: "Chen Wei", meta: "Guide local · 19 avis", date: "il y a 1 semaine", quote: "Bibliothèque immense, de nouvelles œuvres chaque mois, et les analyses par IA m'ont vraiment appris sur chaque tableau." },
+  ],
+  de: [
+    { name: "Marta López", meta: "Local Guide · 24 Rezensionen", date: "vor 2 Wochen", quote: "Seit Monaten abonniert – die 4K-Downloads sind der Wahnsinn. Meine erste Wahl für jedes Designprojekt." },
+    { name: "David Reynolds", meta: "8 Rezensionen", date: "vor 1 Monat", quote: "Günstiger als ein einziges Stockfoto, und ich bekomme das ganze Museum. Die Museumsführer sind ein schönes Extra." },
+    { name: "Yuki Tanaka", meta: "Local Guide · 51 Rezensionen", date: "vor 3 Wochen", quote: "Ich drucke sie für zu Hause und nutze sie kommerziell – jeden Cent wert." },
+    { name: "Sophie Martin", meta: "12 Rezensionen", date: "vor 5 Tagen", quote: "Die Auflösung ist unglaublich. Ich habe hier Werke gefunden, die es nirgends sonst gibt – alle gemeinfrei." },
+    { name: "Liam O'Connor", meta: "3 Rezensionen", date: "vor 2 Monaten", quote: "Nach einer Woche hier habe ich mein Stockfoto-Abo gekündigt. Viel besser für bildende Kunst." },
+    { name: "Chen Wei", meta: "Local Guide · 19 Rezensionen", date: "vor 1 Woche", quote: "Riesige Bibliothek, jeden Monat neue Werke, und die KI-Einblicke haben mir wirklich etwas über jedes Gemälde beigebracht." },
+  ],
+  it: [
+    { name: "Marta López", meta: "Guida locale · 24 recensioni", date: "2 settimane fa", quote: "Abbonata da mesi: i download in 4K sono pazzeschi. Ormai è il mio punto di riferimento per ogni progetto di design." },
+    { name: "David Reynolds", meta: "8 recensioni", date: "1 mese fa", quote: "Costa meno di una singola foto stock e ho tutto il museo. Le guide dei musei sono un bel bonus." },
+    { name: "Yuki Tanaka", meta: "Guida locale · 51 recensioni", date: "3 settimane fa", quote: "Le stampo per casa e le uso a fini commerciali: valgono ogni centesimo." },
+    { name: "Sophie Martin", meta: "12 recensioni", date: "5 giorni fa", quote: "La risoluzione è incredibile. Qui ho trovato opere introvabili altrove, tutte di pubblico dominio." },
+    { name: "Liam O'Connor", meta: "3 recensioni", date: "2 mesi fa", quote: "Ho disdetto l'abbonamento alle foto stock dopo una settimana qui. Molto meglio per le belle arti." },
+    { name: "Chen Wei", meta: "Guida locale · 19 recensioni", date: "1 settimana fa", quote: "Libreria enorme, nuove opere ogni mese, e gli approfondimenti con l'IA mi hanno davvero insegnato qualcosa su ogni dipinto." },
+  ],
+  ja: [
+    { name: "Marta López", meta: "ローカルガイド · レビュー24件", date: "2週間前", quote: "何か月も利用していますが、4Kのダウンロードは本当にすごいです。今ではデザイン案件のたびに使っています。" },
+    { name: "David Reynolds", meta: "レビュー8件", date: "1か月前", quote: "ストック写真1枚より安いのに、美術館まるごと手に入ります。美術館ガイドも嬉しいおまけです。" },
+    { name: "Yuki Tanaka", meta: "ローカルガイド · レビュー51件", date: "3週間前", quote: "自宅用にプリントし、商用でも使っています。値段以上の価値があります。" },
+    { name: "Sophie Martin", meta: "レビュー12件", date: "5日前", quote: "解像度が素晴らしい。ほかでは見つからない作品に出会えました。しかもすべてパブリックドメインです。" },
+    { name: "Liam O'Connor", meta: "レビュー3件", date: "2か月前", quote: "1週間使ってストック写真のサブスクを解約しました。ファインアートにはこちらの方がずっと良いです。" },
+    { name: "Chen Wei", meta: "ローカルガイド · レビュー19件", date: "1週間前", quote: "膨大なライブラリで、毎月新作が増えます。AIの解説のおかげで一枚一枚の絵について学べました。" },
+  ],
+  ko: [
+    { name: "Marta López", meta: "지역 가이드 · 리뷰 24개", date: "2주 전", quote: "몇 달째 구독 중인데 4K 다운로드가 정말 놀라워요. 이제 모든 디자인 프로젝트의 필수 사이트예요." },
+    { name: "David Reynolds", meta: "리뷰 8개", date: "1개월 전", quote: "스톡 사진 한 장보다 싸면서 미술관 전체를 얻는 셈이에요. 미술관 가이드는 멋진 덤이고요." },
+    { name: "Yuki Tanaka", meta: "지역 가이드 · 리뷰 51개", date: "3주 전", quote: "집에 걸려고 인쇄하고 상업적으로도 쓰는데, 한 푼도 아깝지 않아요." },
+    { name: "Sophie Martin", meta: "리뷰 12개", date: "5일 전", quote: "해상도가 놀라워요. 다른 곳에서는 못 찾던 작품들을 여기서 찾았어요. 전부 퍼블릭 도메인이고요." },
+    { name: "Liam O'Connor", meta: "리뷰 3개", date: "2개월 전", quote: "일주일 써보고 스톡 사진 구독을 해지했어요. 미술 작품에는 이쪽이 훨씬 좋아요." },
+    { name: "Chen Wei", meta: "지역 가이드 · 리뷰 19개", date: "1주 전", quote: "라이브러리가 방대하고 매달 새 작품이 올라와요. AI 해설 덕분에 그림 하나하나에 대해 배웠어요." },
+  ],
+  ru: [
+    { name: "Marta López", meta: "Местный эксперт · 24 отзыва", date: "2 недели назад", quote: "Подписана уже несколько месяцев — загрузки в 4K просто потрясающие. Теперь это мой основной ресурс для любого дизайн-проекта." },
+    { name: "David Reynolds", meta: "8 отзывов", date: "1 месяц назад", quote: "Дешевле одной стоковой фотографии, а я получаю целый музей. Путеводители по музеям — приятный бонус." },
+    { name: "Yuki Tanaka", meta: "Местный эксперт · 51 отзыв", date: "3 недели назад", quote: "Печатаю их для дома и использую в коммерции — стоит каждой копейки." },
+    { name: "Sophie Martin", meta: "12 отзывов", date: "5 дней назад", quote: "Разрешение невероятное. Здесь я нашла работы, которых нигде больше не было, и все в общественном достоянии." },
+    { name: "Liam O'Connor", meta: "3 отзыва", date: "2 месяца назад", quote: "Через неделю здесь отменил подписку на сток-фото. Для изящного искусства намного лучше." },
+    { name: "Chen Wei", meta: "Местный эксперт · 19 отзывов", date: "1 неделю назад", quote: "Огромная библиотека, каждый месяц новые работы, а ИИ-разборы правда научили меня понимать каждую картину." },
+  ],
+  zh: [
+    { name: "Marta López", meta: "本地向导 · 24 条评价", date: "2周前", quote: "已经订阅好几个月了，4K 下载效果太惊艳了。现在每个设计项目都靠它。" },
+    { name: "David Reynolds", meta: "8 条评价", date: "1个月前", quote: "比单张图库照片还便宜，却能拥有整座美术馆。美术馆导览更是贴心的额外惊喜。" },
+    { name: "Yuki Tanaka", meta: "本地向导 · 51 条评价", date: "3周前", quote: "我打印出来挂在家里，也用于商业用途——物超所值。" },
+    { name: "Sophie Martin", meta: "12 条评价", date: "5天前", quote: "分辨率高得惊人。我在这里找到了别处找不到的作品，而且全部属于公有领域。" },
+    { name: "Liam O'Connor", meta: "3 条评价", date: "2个月前", quote: "用了一周就取消了图库照片的订阅。用于美术作品好太多了。" },
+    { name: "Chen Wei", meta: "本地向导 · 19 条评价", date: "1周前", quote: "馆藏庞大，每月都有新作品，AI 解读还真的让我了解了每一幅画。" },
+  ],
+};
+
 export function getFineArtProT(locale: Locale): FineArtProCopy {
-  return FINE_ART_PRO_COPY[locale] ?? en;
+  const base = FINE_ART_PRO_COPY[locale] ?? en;
+  const localized = TESTIMONIALS_I18N[locale];
+  return localized ? { ...base, testimonials: localized } : base;
 }
 
 export function fineArtProMetadata(locale: Locale): Metadata {
