@@ -28,6 +28,9 @@ const REVIEW_PHOTOS: Record<string, string> = {
   "Yuki Tanaka": "/images/reviews/yuki-tanaka.jpg",
   "Sophie Martin": "/images/reviews/sophie-martin.jpg",
   "Chen Wei": "/images/reviews/chen-wei.jpg",
+  "Marta López": "/images/reviews/marta-lopez.jpg",
+  "David Reynolds": "/images/reviews/david-reynolds.jpg",
+  "Liam O'Connor": "/images/reviews/liam-oconnor.jpg",
 };
 
 /** Round reviewer avatar: the supplied photo if there is one, otherwise the
