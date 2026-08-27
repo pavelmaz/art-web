@@ -83,7 +83,7 @@ export async function getCachedArtworksSearchResults(q: string): Promise<Artwork
   const { data, error } = await supabase
     .from("artworks")
     .select("id, title, title_sp, title_pt, title_fr, title_ger, title_it, title_jp, title_ko, title_ru, title_ch, slug, artist_display, image_id, museum, alt_text")
-    .or(`title.ilike.%${safe}%,artist_display.ilike.%${safe}%`)
+    .or(`title.ilike.%${safe}%,artist_display.ilike.%${safe}%,medium_display.ilike.%${safe}%`)
     .order("score", { ascending: false })
     .limit(48);
 

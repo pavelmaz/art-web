@@ -50,7 +50,7 @@ async function fetchArtworksByFilter(term: string) {
   return supabase
     .from("artworks")
     .select(ARTWORK_SELECT)
-    .or(`title.ilike.%${safe}%,artist_display.ilike.%${safe}%,museum.ilike.%${safe}%,genre_title.ilike.%${safe}%,style_title.ilike.%${safe}%,tags.cs.{${safe}}`)
+    .or(`title.ilike.%${safe}%,artist_display.ilike.%${safe}%,museum.ilike.%${safe}%,genre_title.ilike.%${safe}%,style_title.ilike.%${safe}%,medium_display.ilike.%${safe}%,tags.cs.{${safe}}`)
     .order("score", { ascending: false })
     .limit(50);
 }
@@ -188,7 +188,7 @@ async function fetchTypedArtworks(
   const expanded = expandSearchTerm(term);
 
   if (objectType !== null) {
-    const clauses = [`title.ilike.%${primary}%`, `artist_display.ilike.%${primary}%`];
+    const clauses = [`title.ilike.%${primary}%`, `artist_display.ilike.%${primary}%`, `medium_display.ilike.%${primary}%`];
     for (const t of expanded) {
       const safe = escapeOrFilterValue(t);
       clauses.push(`title.ilike.%${safe}%`, `tags.cs.{${safe}}`);
@@ -208,7 +208,7 @@ async function fetchTypedArtworks(
       .from("artworks")
       .select(ARTWORK_SELECT)
       .is("object_type", null)
-      .or(`title.ilike.%${primary}%,artist_display.ilike.%${primary}%`)
+      .or(`title.ilike.%${primary}%,artist_display.ilike.%${primary}%,medium_display.ilike.%${primary}%`)
       .order("score", { ascending: false })
       .limit(limit),
     supabase
