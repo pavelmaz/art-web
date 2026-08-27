@@ -83,7 +83,22 @@ for (let i = 0; i < set.images.length; i++) {
     if ((set.source ?? "commons") === "commons" && !OK_LICENSES.test(r.lic)) { console.log(`  ✗ licence "${r.lic}": ${entry}`); summary.skipped++; continue; }
     if (DRY) { console.log(`  → would import ${slug.padEnd(30)} ${r.lic}`); summary.imported++; continue; }
 
-    const orig = Buffer.from(await (await fetch(r.url, { headers: { "User-Agent": UA } })).arrayBuffer());
+    // Retry the download — some sources (archive.org IIIF) are slow/flaky and
+    // generate the rendition on first request, timing out before it's ready.
+    let orig = null;
+    for (let a = 0; a < 5 && !orig; a++) {
+      try {
+        const ac = new AbortController();
+        const to = setTimeout(() => ac.abort(), 45000);
+        const resp = await fetch(r.url, { headers: { "User-Agent": UA }, signal: ac.signal });
+        clearTimeout(to);
+        if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+        const buf = Buffer.from(await resp.arrayBuffer());
+        if (buf.length < 1000) throw new Error("too small");
+        orig = buf;
+      } catch (e) { await new Promise((z) => setTimeout(z, 2000 * (a + 1))); }
+    }
+    if (!orig) { console.log(`  ✗ download failed after retries: ${slug}`); summary.skipped++; continue; }
     const jpeg = await sharp(orig, { limitInputPixels: false, failOn: "none" }).rotate().resize({ width: MAX_EDGE, height: MAX_EDGE, fit: "inside", withoutEnlargement: true }).jpeg({ quality: 88 }).toBuffer();
     const outMeta = await sharp(jpeg).metadata();
     const objectPath = `artworks/${slug}.jpg`;
