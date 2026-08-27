@@ -48,6 +48,8 @@ const LISTED_BY = [
   { name: "the National University of Singapore", country: "Singapore", file: "nus.svg", href: "https://libguides.nus.edu.sg/freesources/Images" },
   // "Risorse digitali arte e architettura" guide; dofollow (rel=null), links to /it with a full descriptive blurb. Top Italian art/architecture university. Text credit only for now (no free wordmark on the white tiles yet).
   { name: "Università Iuav di Venezia", country: "Italy", file: null, href: "https://www.iuav.it/it/biblioteca/risorse-digitali-arte-e-architettura" },
+  // A-Z Databases listing (dofollow, rel=null; JS-rendered LibGuides widget like Tampere/Middlesex). Ireland's largest technological university, has art & design schools. Text credit for now.
+  { name: "Technological University Dublin", country: "Ireland", file: null, href: "https://tudublin.libguides.com/az/databases?q=Fine%20Art%20Free" },
 ] as const;
 
 export default function AboutPage() {
