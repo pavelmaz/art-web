@@ -127,9 +127,12 @@ for (const item of set.items) {
       date_display: item.date ?? null,
       museum: null,
       object_type: set.objectType ?? "print",
-      collection: set.collection,
+      collection: item.collection ?? set.collection,
       source: set.source ?? "commons",
-      score: 0.01,
+      // per-item score orders a book's pages (cover highest) on the collection
+      // page, which sorts by score DESC; all values stay in the ~0.01 print tier
+      // so they never surface in the main /artworks browse.
+      score: item.score ?? set.score ?? 0.01,
       tags: item.tags ?? set.tags ?? ["sheet music", "classical music"],
       image_id: `${URL_BASE}/storage/v1/object/public/art-images/${objectPath}`,
       img_width: outMeta.width, img_height: outMeta.height,
