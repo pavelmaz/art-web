@@ -191,38 +191,42 @@ export async function FineArtProLanding({ locale, leadArtSlug }: FineArtProLandi
                 comparison follows as supporting proof. */}
             <p className="mt-7 text-sm font-medium text-white/90">{c.valueNote}</p>
 
-            <div className="mt-5 grid gap-4 sm:grid-cols-2 sm:gap-5">
-              <div className="glass-dark-strong relative flex flex-col rounded-2xl p-6">
-                <span className="absolute -top-3 left-6 rounded-full bg-white px-3 py-1 text-xs font-semibold text-[#12100E]">
-                  {c.yearlyBadge}
+            {/* Annual is the hero (gold, price anchored against the monthly rate);
+                monthly is a quiet one-line secondary — biases toward yearly. */}
+            <div className="mt-5 space-y-3">
+              <div className="glass-dark-strong relative rounded-2xl p-6 ring-1 ring-[#E4A23C]/45 shadow-[0_0_44px_-10px_rgba(228,162,60,0.4)]">
+                <span className="absolute -top-3 left-6 rounded-full bg-gradient-to-br from-[#F5C278] to-[#E4A23C] px-3 py-1 text-xs font-bold text-[#1a1a1a]">
+                  {c.yearlyBadge} · {c.yearlySave}
                 </span>
-                <p className="text-sm text-white/70">{c.yearlyPlan}</p>
-                <p className="mt-3 text-2xl font-bold tracking-tight text-white sm:text-[1.65rem]">
-                  {c.yearlyPrice}
-                </p>
-                <p className="mt-1 text-xs font-semibold text-[#8FBF9B]">{c.yearlySave}</p>
-                <p className="mt-1 text-xs text-white/55">{c.yearlyBilling}</p>
-                <PlanCtaLink
-                  href={fineArtProLandingJoinHref(locale, "yearly")}
-                  plan="yearly"
-                  locale={locale}
-                  className="mt-6 inline-flex w-full items-center justify-center rounded-lg bg-gradient-to-br from-[#F5C278] to-[#E4A23C] px-4 py-3 text-sm font-bold text-[#1a1a1a] shadow-[0_6px_18px_rgba(228,162,60,0.45)] transition hover:brightness-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1a1a1a] focus-visible:ring-offset-2"
-                >
-                  {c.cta}
-                </PlanCtaLink>
+                <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="min-w-0">
+                    <p className="text-sm text-white/70">{c.yearlyPlan}</p>
+                    <div className="mt-2 flex flex-wrap items-baseline gap-x-3 gap-y-1">
+                      <span className="text-3xl font-bold tracking-tight text-white sm:text-[2rem]">{c.yearlyPrice}</span>
+                      <span className="text-sm text-white/40 line-through decoration-white/40">{c.monthlyPrice}</span>
+                    </div>
+                    <p className="mt-1.5 text-xs text-white/55">{c.yearlyBilling}</p>
+                  </div>
+                  <PlanCtaLink
+                    href={fineArtProLandingJoinHref(locale, "yearly")}
+                    plan="yearly"
+                    locale={locale}
+                    className="inline-flex w-full shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-[#F5C278] to-[#E4A23C] px-8 py-3.5 text-sm font-bold text-[#1a1a1a] shadow-[0_6px_18px_rgba(228,162,60,0.45)] transition hover:brightness-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1a1a1a] focus-visible:ring-offset-2 sm:w-auto"
+                  >
+                    {c.cta}
+                  </PlanCtaLink>
+                </div>
               </div>
 
-              <div className="glass-dark flex flex-col rounded-2xl p-6">
-                <p className="text-sm text-white/70">{c.monthlyPlan}</p>
-                <p className="mt-3 text-2xl font-bold tracking-tight text-white sm:text-[1.65rem]">
-                  {c.monthlyPrice}
+              <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-white/10 px-5 py-3.5">
+                <p className="text-sm text-white/55">
+                  <span className="font-medium text-white/80">{c.monthlyPlan}</span> · {c.monthlyPrice}
                 </p>
-                <p className="mt-1 text-xs text-white/55">{c.monthlyBilling}</p>
                 <PlanCtaLink
                   href={fineArtProLandingJoinHref(locale, "monthly")}
                   plan="monthly"
                   locale={locale}
-                  className="glass-dark-btn mt-6 inline-flex w-full items-center justify-center rounded-lg px-4 py-3 text-sm font-bold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50"
+                  className="inline-flex items-center justify-center rounded-lg border border-white/15 px-5 py-2 text-[13px] font-semibold text-white/75 transition hover:border-white/30 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50"
                 >
                   {c.cta}
                 </PlanCtaLink>
