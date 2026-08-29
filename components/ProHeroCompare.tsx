@@ -3,25 +3,30 @@
 import { useState } from "react";
 
 /**
- * Fine Art Pro hero: a drag-to-compare of the artwork the visitor just came from
- * (or a default detail crop). Both halves are the SAME image — the "Free" side is
- * blurred and dimmed (the same idiom as the download popup) to stand in for the
- * web-size preview, the "Pro" side is the crisp 4K original. A clip-path driven by
- * a range input reveals the free side to the left of the handle. No rotation — one
- * still image the visitor controls.
+ * Fine Art Pro hero: a drag-to-compare of the artwork the visitor came from (or a
+ * default detail crop). Like the download popup, it ZOOMS into the centre
+ * (background-size) so the panels read as a detail — a whole painting shrunk to
+ * this size looks identical at any resolution and proves nothing. Both halves are
+ * the same image: the "Free download" side is blurred + dimmed to stand in for the
+ * web-size file, the "Pro · 4K" side is crisp. A clip-path driven by a range input
+ * reveals the free side to the left of the handle. One still image the visitor
+ * controls — no rotation.
  */
 export function ProHeroCompare({ src, alt }: { src: string; alt: string }) {
   const [v, setV] = useState(50);
+  const tile: React.CSSProperties = {
+    backgroundImage: `url("${src}")`,
+    backgroundSize: "280%",
+    backgroundPosition: "center",
+  };
   return (
-    <div className="relative aspect-[799/1024] w-full select-none overflow-hidden">
-      {/* Pro · crisp 4K original (base layer) */}
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src={src} alt={alt} className="absolute inset-0 h-full w-full object-cover" fetchPriority="high" />
+    <div className="relative aspect-[799/1024] w-full select-none overflow-hidden" role="img" aria-label={alt}>
+      {/* Pro · crisp 4K original (base layer, zoomed detail) */}
+      <div className="absolute inset-0 bg-no-repeat" style={tile} />
 
-      {/* Free · web preview — blurred + a dimming layer, revealed left of the handle */}
+      {/* Free download · blurred + dimmed, revealed left of the handle */}
       <div className="absolute inset-0" style={{ clipPath: `inset(0 ${100 - v}% 0 0)` }}>
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={src} alt="" aria-hidden className="absolute inset-0 h-full w-full scale-[1.06] object-cover blur-[6px]" />
+        <div className="absolute inset-0 bg-no-repeat" style={{ ...tile, filter: "blur(6px)" }} aria-hidden />
         <div className="absolute inset-0 bg-[#0f1115]/20" />
       </div>
 
