@@ -36,7 +36,7 @@ export function ProHeroCompare({ src, alt }: { src: string; alt: string }) {
         Drag to compare
       </div>
       <span className="pointer-events-none absolute bottom-3 left-3 rounded-md bg-black/55 px-2.5 py-1 text-[11px] font-medium tracking-wide text-white backdrop-blur-sm">
-        Free · web preview
+        Free download
       </span>
       <span className="pointer-events-none absolute bottom-3 right-3 rounded-md bg-[#E4A23C] px-2.5 py-1 text-[11px] font-semibold tracking-wide text-[#1a1a1a]">
         Pro · 4K
@@ -48,7 +48,7 @@ export function ProHeroCompare({ src, alt }: { src: string; alt: string }) {
         max={100}
         value={v}
         onChange={(e) => setV(Number(e.target.value))}
-        aria-label="Drag to compare the free web preview with the Pro 4K download"
+        aria-label="Drag to compare the free download with the Pro 4K download"
         className="absolute inset-0 h-full w-full cursor-ew-resize opacity-0"
       />
     </div>

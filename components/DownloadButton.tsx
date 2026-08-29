@@ -112,6 +112,7 @@ export function DownloadButton({
       <DownloadInterstitial
         open={showInterstitial}
         title={title ?? filename ?? ""}
+        slug={filename}
         imageUrl={imageUrl}
         maxWidth={maxWidth}
         locale={locale}

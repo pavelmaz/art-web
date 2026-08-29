@@ -29,6 +29,7 @@ export function DownloadInterstitial({
   onClose,
   onContinue,
   title,
+  slug,
   imageUrl,
   maxWidth,
   locale = "en",
@@ -37,6 +38,8 @@ export function DownloadInterstitial({
   onClose: () => void;
   onContinue: () => void;
   title: string;
+  /** Artwork slug — carried to the Pro page so its hero opens on this piece. */
+  slug?: string;
   /** The artwork image the page already displays — reused, never re-fetched. */
   imageUrl?: string;
   maxWidth: number | null;
@@ -120,7 +123,7 @@ export function DownloadInterstitial({
             one action reads as two different offers. The line beneath adds the
             catalogue; no price, since the plan choice belongs on the Pro page. */}
         <Link
-          href={fineArtProPath(locale)}
+          href={slug ? `${fineArtProPath(locale)}?art=${encodeURIComponent(slug)}` : fineArtProPath(locale)}
           onClick={() => track("interstitial_upgrade_click", { artwork: title, locale })}
           className="mt-3 flex h-[38px] w-full items-center justify-center gap-1.5 rounded-md bg-gradient-to-br from-[#4CAF50] to-[#1e9e57] text-sm font-medium text-white shadow-[0_6px_18px_rgba(76,175,80,0.4)] transition hover:brightness-110"
         >
