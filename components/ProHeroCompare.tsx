@@ -26,8 +26,8 @@ export function ProHeroCompare({ src, alt }: { src: string; alt: string }) {
 
       {/* Free download · blurred + dimmed, revealed left of the handle */}
       <div className="absolute inset-0" style={{ clipPath: `inset(0 ${100 - v}% 0 0)` }}>
-        <div className="absolute inset-0 bg-no-repeat" style={{ ...tile, filter: "blur(6px)" }} aria-hidden />
-        <div className="absolute inset-0 bg-[#0f1115]/20" />
+        <div className="absolute inset-0 bg-no-repeat" style={{ ...tile, filter: "blur(3px)" }} aria-hidden />
+        <div className="absolute inset-0 bg-[#0f1115]/15" />
       </div>
 
       {/* divider + knob */}
