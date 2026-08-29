@@ -3,6 +3,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 
 import { FineArtProJoinAuth } from "@/components/FineArtProJoinAuth";
+import { currencyForCountry, localizedProCopy } from "@/lib/currency";
 import { fineArtProJoinPath, fineArtProPath } from "@/lib/fineart-pro-path";
 import { getFineArtProT } from "@/lib/fineart-pro-translations";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
@@ -32,7 +33,11 @@ export async function FineArtProJoinPage({
   const sp = await searchParams;
   const plan = sp.plan === "yearly" || sp.plan === "monthly" ? sp.plan : null;
   const authError = sp.error;
-  const c = getFineArtProT(locale);
+  // Match the landing page: show plan prices in the visitor's local currency
+  // (Stripe Adaptive Pricing charges the same currency at checkout).
+  const baseT = getFineArtProT(locale);
+  const currency = currencyForCountry((await headers()).get("x-vercel-ip-country"));
+  const c = currency ? localizedProCopy(baseT, currency, locale) : baseT;
 
   const supabase = await createSupabaseServerClient();
   const {

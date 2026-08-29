@@ -1,11 +1,13 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Playfair_Display } from "next/font/google";
+import { headers } from "next/headers";
 
 import { PlanCtaLink } from "@/components/PlanCtaLink";
 import { ProHeroCompare } from "@/components/ProHeroCompare";
 
 import { FineArtProFaq } from "@/components/FineArtProFaq";
+import { currencyForCountry, localizedProCopy } from "@/lib/currency";
 import {
   fineArtProLandingJoinHref,
   getFineArtProT,
@@ -111,8 +113,15 @@ function comparisonCell(value: string | boolean) {
 }
 
 export async function FineArtProLanding({ locale, leadArtSlug }: FineArtProLandingProps) {
-  const c = getFineArtProT(locale);
-  const leadImage = await leadImageForSlug(leadArtSlug);
+  // Show prices in the visitor's local currency (Stripe Adaptive Pricing charges
+  // the matching currency at checkout). Country from Vercel geo; unknown/US → USD.
+  const base = getFineArtProT(locale);
+  const currency = currencyForCountry((await headers()).get("x-vercel-ip-country"));
+  const c = currency ? localizedProCopy(base, currency, locale) : base;
+  // The hero opens on the artwork the visitor came from; on a direct visit to
+  // /fineart-pro (no referral) it defaults to Las Meninas.
+  const leadImage =
+    (await leadImageForSlug(leadArtSlug)) ?? (await leadImageForSlug("las-meninas"));
 
   return (
     <div className="bg-[#f6f4ee]">
