@@ -3,7 +3,7 @@ import Link from "next/link";
 import { Playfair_Display } from "next/font/google";
 
 import { PlanCtaLink } from "@/components/PlanCtaLink";
-import { RotatingProHero } from "@/components/RotatingProHero";
+import { ProHeroCompare } from "@/components/ProHeroCompare";
 
 import { FineArtProFaq } from "@/components/FineArtProFaq";
 import {
@@ -137,7 +137,7 @@ export async function FineArtProLanding({ locale, leadArtSlug }: FineArtProLandi
           {/* Image — shown after the value/price on mobile, left on desktop */}
           <div className="order-2 -ml-1 w-full shrink-0 lg:order-1 lg:max-w-[42%]">
             <div className="glass-dark overflow-hidden rounded-2xl">
-              <RotatingProHero alt={c.heroImageAlt} leadImage={leadImage} />
+              <ProHeroCompare src={leadImage ?? "/images/pro-detail/raphael-face.jpg"} alt={c.heroImageAlt} />
             </div>
           </div>
 
