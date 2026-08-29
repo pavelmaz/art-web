@@ -60,6 +60,8 @@ function buildLocalePathRedirects() {
 const ARTIST_MERGE_REDIRECTS: { from: string; to: string }[] = [
   // 23 Aug 2026 — full baptismal name folded into the common name (88 works + page).
   { from: "adolphe-joseph-thomas-monticelli", to: "adolphe-monticelli" },
+  // 29 Aug 2026 — patronymic form folded into the common name (7 works + page).
+  { from: "rembrandt-harmensz-van-rijn", to: "rembrandt-van-rijn" },
 ];
 
 function buildArtistMergeRedirects() {
