@@ -210,12 +210,13 @@ export async function POST(req: NextRequest) {
   // engines now discover sitemap changes by crawling robots.txt. Nothing is
   // lost by dropping them — they had not worked for a long time.
 
-  // Submit new URLs to IndexNow for fast indexing.
-  //
-  // OFF BY DEFAULT since 5 Aug 2026 while the effect of the daily submissions is
-  // being tested. Set INDEXNOW_ENABLED=1 to switch back on — no code change.
+  // Submit each day's NEW work URLs to IndexNow (Bing/Yandex) — fresh-content
+  // notification, the tool's ideal use case (NOT the 1.1M bulk dump, which stays
+  // off in /api/indexnow-bulk). ON by default from 1 Sep 2026; set
+  // INDEXNOW_ENABLED=0 to kill-switch. The IndexNow key is public by design
+  // (served at the keyLocation below), so it is safe to inline.
   try {
-    const indexNowEnabled = process.env.INDEXNOW_ENABLED === '1'
+    const indexNowEnabled = process.env.INDEXNOW_ENABLED !== '0'
     const newUrls = insertedSlugs.flatMap((slug: string) => [
       `https://fineartfree.com/artworks/${slug}`,
       `https://fineartfree.com/es/obras/${slug}`,
@@ -228,7 +229,7 @@ export async function POST(req: NextRequest) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           host: 'fineartfree.com',
-          key: process.env.INDEXNOW_KEY,
+          key: 'faf-indexnow-2026-xK9mP3qR',
           keyLocation: 'https://fineartfree.com/faf-indexnow-2026-xK9mP3qR.txt',
           urlList: newUrls
         })
