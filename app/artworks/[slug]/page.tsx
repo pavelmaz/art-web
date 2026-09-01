@@ -302,6 +302,9 @@ export default async function ArtworkDetailPage({ params }: ArtworkPageProps) {
   const maxDownloadHref = artworkOriginalUrl(artwork) || imageUrl;
   const artist = artwork.artist_display ?? "Unknown artist";
   const artistDeathYear = parseArtworkDeathYear(artwork.death_year);
+  // A few works use a CC-BY-SA photographic reproduction of a public-domain original
+  // (e.g. the Sodoma fresco), so we do NOT assert public domain for the image itself.
+  const suppressPdNotice = new Set(["the-wedding-of-alexander-and-roxana-il-sodoma"]).has(artwork.slug);
   const artistSlug = artwork.artist_display?.trim() ? slugify(artwork.artist_display) : null;
   let artistArtworkCount = 0;
   let artistPortrait: string | null = null;
@@ -506,18 +509,20 @@ export default async function ArtworkDetailPage({ params }: ArtworkPageProps) {
                 <p className="text-xs leading-relaxed text-[#4a4a4a]">
                   {t.artworkSeoLine(artworkMediumKind(artwork.medium_display), artist, artwork.date_display)}
                 </p>
-                <details className="mt-2 text-xs text-[#4a4a4a]">
-                  <summary className="inline-flex cursor-pointer list-none select-none items-center gap-1 text-[#6b6b6b] marker:content-none">
-                    ⓘ Why is this image in the public domain?
-                  </summary>
-                  <div className="mt-3 rounded-lg bg-white p-4">
-                    <p className="leading-relaxed text-[#4a4a4a]">
-                      The Artist died in {artistDeathYear ?? "an unknown year"}, so this work is in
-                      the public domain in its country of origin and other countries where the
-                      copyright term is the Artist&apos;s life plus 70 years or fewer.
-                    </p>
-                  </div>
-                </details>
+                {artistDeathYear !== null && !suppressPdNotice ? (
+                  <details className="mt-2 text-xs text-[#4a4a4a]">
+                    <summary className="inline-flex cursor-pointer list-none select-none items-center gap-1 text-[#6b6b6b] marker:content-none">
+                      ⓘ Why is this image in the public domain?
+                    </summary>
+                    <div className="mt-3 rounded-lg bg-white p-4">
+                      <p className="leading-relaxed text-[#4a4a4a]">
+                        The Artist died in {artistDeathYear}, so this work is in the public domain in
+                        its country of origin and other countries where the copyright term is the
+                        Artist&apos;s life plus 70 years or fewer.
+                      </p>
+                    </div>
+                  </details>
+                ) : null}
               </div>
 
               <div className="my-4 border-t border-[#e8e6e1]" />
