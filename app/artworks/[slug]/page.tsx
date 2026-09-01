@@ -302,9 +302,6 @@ export default async function ArtworkDetailPage({ params }: ArtworkPageProps) {
   const maxDownloadHref = artworkOriginalUrl(artwork) || imageUrl;
   const artist = artwork.artist_display ?? "Unknown artist";
   const artistDeathYear = parseArtworkDeathYear(artwork.death_year);
-  // A few works use a CC-BY-SA photographic reproduction of a public-domain original
-  // (e.g. the Sodoma fresco), so we do NOT assert public domain for the image itself.
-  const suppressPdNotice = new Set(["the-wedding-of-alexander-and-roxana-il-sodoma"]).has(artwork.slug);
   const artistSlug = artwork.artist_display?.trim() ? slugify(artwork.artist_display) : null;
   let artistArtworkCount = 0;
   let artistPortrait: string | null = null;
@@ -509,7 +506,7 @@ export default async function ArtworkDetailPage({ params }: ArtworkPageProps) {
                 <p className="text-xs leading-relaxed text-[#4a4a4a]">
                   {t.artworkSeoLine(artworkMediumKind(artwork.medium_display), artist, artwork.date_display)}
                 </p>
-                {artistDeathYear !== null && !suppressPdNotice ? (
+                {artistDeathYear !== null ? (
                   <details className="mt-2 text-xs text-[#4a4a4a]">
                     <summary className="inline-flex cursor-pointer list-none select-none items-center gap-1 text-[#6b6b6b] marker:content-none">
                       ⓘ Why is this image in the public domain?
