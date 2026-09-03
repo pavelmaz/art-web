@@ -4,6 +4,7 @@ import { ARTIST_INDEX_LETTERS } from "@/lib/artist-index";
 import { CONTACT_PATHS } from "@/lib/contact-translations";
 import { fineArtProPath } from "@/lib/fineart-pro-path";
 import { HREFLANG_LOCALES, LOCALE_ROUTE_CONFIG } from "@/lib/locale-routes";
+import { COMMERCIAL_USE_PATHS } from "@/lib/commercial-use-landing";
 import { escapeXml, getPublicSiteUrl } from "@/lib/sitemap-xml";
 import { supabase as blogSupabase } from "@/lib/supabase";
 import type { Locale } from "@/lib/translations";
@@ -107,11 +108,10 @@ export async function GET() {
       entries.push({ loc: `${base}${CONTACT_PATHS[locale as Locale]}`, changefreq: "monthly", priority: 0.5 });
     }
     entries.push({ loc: `${base}/terms`, changefreq: "monthly", priority: 0.3 });
-    entries.push({
-      loc: `${base}/public-domain-images-for-commercial-use`,
-      changefreq: "weekly",
-      priority: 0.9,
-    });
+    // "Public domain images for commercial use" landing, one per locale.
+    for (const path of Object.values(COMMERCIAL_USE_PATHS)) {
+      entries.push({ loc: `${base}${path}`, changefreq: "weekly", priority: 0.9 });
+    }
 
     // Curated-set hubs (prints / wall charts / book illustrations). Each series
     // gets its own page, so they belong here like the genre and museum hubs —

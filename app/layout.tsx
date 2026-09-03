@@ -7,6 +7,8 @@ import { Analytics } from "@vercel/analytics/next";
 import Header from "@/components/Header";
 import { MicrosoftUet } from "@/components/MicrosoftUet";
 import { getCachedGenresForBrowse } from "@/lib/browse-genres";
+import { COMMERCIAL_USE_PATHS, COMMERCIAL_USE_FOOTER_LABEL } from "@/lib/commercial-use-landing";
+import type { SiteLocale } from "@/lib/locale-routes";
 
 import "./globals.css";
 
@@ -65,6 +67,9 @@ export default async function RootLayout({
   const contactHref = ["es", "pt", "de", "fr", "it", "ja", "ko", "ru", "zh"].includes(localeSeg)
     ? `/${localeSeg}/contact`
     : "/contact";
+  const footerLocale = htmlLang as SiteLocale;
+  const commercialHref = COMMERCIAL_USE_PATHS[footerLocale];
+  const commercialLabel = COMMERCIAL_USE_FOOTER_LABEL[footerLocale];
 
   let browseGenres = [] as Awaited<ReturnType<typeof getCachedGenresForBrowse>>;
   try {
@@ -91,10 +96,10 @@ export default async function RootLayout({
                 |
               </span>
               <Link
-                href="/public-domain-images-for-commercial-use"
+                href={commercialHref}
                 className="text-[#a3a3a3] transition-colors hover:text-white"
               >
-                Commercial Use
+                {commercialLabel}
               </Link>
               <span className="mx-2 text-[#404040]" aria-hidden>
                 |

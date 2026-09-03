@@ -5,7 +5,8 @@ import { MuseumLogoStrip } from "@/components/MuseumLogoStrip";
 import { RotatingProHero } from "@/components/RotatingProHero";
 
 import { supabase } from "@/lib/supabase";
-import { absoluteUrl, artworkImageUrl } from "@/lib/utils";
+import { artworkImageUrl } from "@/lib/utils";
+import { buildCommercialUseAlternates } from "@/lib/commercial-use-landing";
 import type { Artwork } from "@/types/artwork";
 
 export const revalidate = 86400;
@@ -17,9 +18,7 @@ const DESCRIPTION =
 export const metadata: Metadata = {
   title: { absolute: TITLE },
   description: DESCRIPTION,
-  alternates: {
-    canonical: absoluteUrl("/public-domain-images-for-commercial-use"),
-  },
+  alternates: buildCommercialUseAlternates("en"),
   openGraph: {
     title: TITLE,
     description: DESCRIPTION,
