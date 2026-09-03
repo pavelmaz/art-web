@@ -120,12 +120,27 @@ export async function getPrintCollections(): Promise<PrintCollection[]> {
  * museum's own series title, so the slug is matched by slugifying candidates
  * rather than a reverse lookup — same approach as /genres/[slug].
  */
-export async function loadCollectionWorks(objectType: CollectionHubKey, slugParam: string) {
+// Localized artwork-title column per locale (kept in sync with print-collections-i18n).
+const LOCALE_TITLE_COL: Record<string, string> = {
+  en: "title", es: "title_sp", pt: "title_pt", fr: "title_fr", de: "title_ger",
+  it: "title_it", ja: "title_jp", ko: "title_ko", ru: "title_ru", zh: "title_ch",
+};
+
+export async function loadCollectionWorks(
+  objectType: CollectionHubKey,
+  slugParam: string,
+  locale = "en"
+) {
+  const titleCol = LOCALE_TITLE_COL[locale] ?? "title";
+  const cols = [
+    "id", "title", "slug", "artist_display", "image_id", "url", "museum",
+    "style_title", "genre_title", "score", "alt_text", "collection",
+  ];
+  if (titleCol !== "title") cols.push(titleCol);
+
   const { data } = await supabase
     .from("artworks")
-    .select(
-      "id, title, slug, artist_display, image_id, url, museum, style_title, genre_title, score, alt_text, collection"
-    )
+    .select(cols.join(", "))
     .eq("object_type", objectType)
     .order("score", { ascending: false })
     .range(0, 4999);
@@ -135,7 +150,11 @@ export async function loadCollectionWorks(objectType: CollectionHubKey, slugPara
     image_id: string | null; url: string | null; museum: string | null; style_title: string | null;
     genre_title: string | null; score: number | null; alt_text: string | null; collection: string | null;
   };
-  const rows = (data as WorkRow[] | null) ?? [];
+  const rows = ((data as unknown as Array<Record<string, unknown>>) ?? []).map((r) => ({
+    ...(r as unknown as WorkRow),
+    // Prefer the localized title; fall back to English.
+    title: (r[titleCol] as string | null) || (r.title as string | null),
+  })) as WorkRow[];
   const isCatchAll = objectType === "print" && slugParam === slugify(INDIVIDUAL_PRINTS);
   const matched = rows.filter((r) =>
     isCatchAll ? !r.collection?.trim() : slugify(r.collection ?? "") === slugParam

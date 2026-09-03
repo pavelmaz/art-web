@@ -3,33 +3,39 @@ import { notFound, permanentRedirect } from "next/navigation";
 
 import { ArtworkGrid } from "@/components/ArtworkGrid";
 import {
-  COLLECTION_HUBS,
   findCollectionHub,
   loadCollectionWorks,
   type CollectionHubKey,
 } from "@/lib/print-collections";
+import { HUB_COPY, hubBasePath } from "@/lib/print-collections-i18n";
+import type { SiteLocale } from "@/lib/locale-routes";
 import { slugify } from "@/lib/utils";
 import type { Artwork } from "@/types/artwork";
 
 /**
- * Shared body for one collection under any of the three hubs. If the slug
- * exists but under a different hub (a collection was reclassified), 301 to its
- * new home so previously indexed /prints/... URLs never dead-end.
+ * Shared body for one collection under any hub. If the slug exists but under a
+ * different hub (a collection was reclassified), 301 to its new home so
+ * previously indexed URLs never dead-end. Localized per `locale`: chrome +
+ * artwork titles; the collection name stays as stored.
  */
 export async function CollectionDetailPage({
   hub,
   slugParam,
+  locale = "en",
 }: {
   hub: CollectionHubKey;
   slugParam: string;
+  locale?: SiteLocale;
 }) {
-  const cfg = COLLECTION_HUBS[hub];
-  const { matched, name } = await loadCollectionWorks(hub, slugParam);
+  const copy = HUB_COPY[locale];
+  const heading = (hub === "print" ? copy.print : copy.book).heading;
+  const basePath = hubBasePath(hub, locale);
+  const { matched, name } = await loadCollectionWorks(hub, slugParam, locale);
 
   if (!name || matched.length === 0) {
     const actualHub = await findCollectionHub(slugParam);
     if (actualHub && actualHub !== hub) {
-      permanentRedirect(`${COLLECTION_HUBS[actualHub].basePath}/${slugParam}`);
+      permanentRedirect(`${hubBasePath(actualHub, locale)}/${slugParam}`);
     }
     notFound();
   }
@@ -57,15 +63,14 @@ export async function CollectionDetailPage({
     <div className="space-y-8 px-5">
       <div>
         <Link
-          href={cfg.basePath}
+          href={basePath}
           className="text-sm text-[#6b6b6b] underline-offset-2 hover:underline"
         >
-          ← {cfg.heading}
+          ← {heading}
         </Link>
         <h1 className="mb-2 mt-2 text-2xl font-semibold">{name}</h1>
         <p className="mb-8 text-sm text-[#6b6b6b]">
-          {artworks.length === 1 ? "1 work" : `${artworks.length} works`} · free to download in
-          high resolution
+          {copy.worksCount(artworks.length)} · {copy.freeHiRes}
         </p>
       </div>
 

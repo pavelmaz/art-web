@@ -15,6 +15,7 @@ import { fineArtProPath } from "@/lib/fineart-pro-path";
 import { detectLocaleFromPathname } from "@/lib/hreflang-paths";
 import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
 import { HREFLANG_LOCALES, LOCALE_ROUTE_CONFIG, getSegments, localePath } from "@/lib/locale-routes";
+import { HUB_COPY, hubBasePath } from "@/lib/print-collections-i18n";
 import { getT, type Locale } from "@/lib/translations";
 
 function SearchIcon({ className }: { className?: string }) {
@@ -117,15 +118,8 @@ export default function Header({ browseGenres = [] }: HeaderProps) {
       : []),
     { href: `${prefix}/${stylesSegment}`, label: t.styles },
     { href: `${prefix}/${genresSegment}`, label: t.genres },
-    // English only for now: /prints has no localised route yet, and linking a
-    // Spanish or Japanese visitor to an English page is worse than not offering
-    // it. Drop the condition once the locale versions exist.
-    ...(locale === "en"
-      ? [
-          { href: "/prints", label: "Prints & Wall Charts" },
-          { href: "/book-illustrations", label: "Book Illustrations" },
-        ]
-      : []),
+    { href: hubBasePath("print", locale), label: HUB_COPY[locale].print.heading },
+    { href: hubBasePath("book-illustration", locale), label: HUB_COPY[locale].book.heading },
   ];
 
   const artworksSegment = segments.artworks;

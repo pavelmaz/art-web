@@ -5,6 +5,7 @@ import { CONTACT_PATHS } from "@/lib/contact-translations";
 import { fineArtProPath } from "@/lib/fineart-pro-path";
 import { HREFLANG_LOCALES, LOCALE_ROUTE_CONFIG } from "@/lib/locale-routes";
 import { COMMERCIAL_USE_PATHS } from "@/lib/commercial-use-landing";
+import { HUB_LOCALES, hubBasePath } from "@/lib/print-collections-i18n";
 import { escapeXml, getPublicSiteUrl } from "@/lib/sitemap-xml";
 import { supabase as blogSupabase } from "@/lib/supabase";
 import type { Locale } from "@/lib/translations";
@@ -117,27 +118,30 @@ export async function GET() {
     // gets its own page, so they belong here like the genre and museum hubs —
     // without this they are unreachable to a crawler except through the menu.
     {
-      const HUB_PATHS: Record<string, string> = {
-        print: "/prints",
-        "book-illustration": "/book-illustrations",
-      };
-      for (const path of Object.values(HUB_PATHS)) {
-        entries.push({ loc: `${base}${path}`, changefreq: "weekly", priority: 0.8 });
+      const HUB_KEYS = ["print", "book-illustration"] as const;
+      // Hub landing, per locale.
+      for (const hub of HUB_KEYS) {
+        for (const loc of HUB_LOCALES) {
+          entries.push({ loc: `${base}${hubBasePath(hub, loc)}`, changefreq: "weekly", priority: 0.8 });
+        }
       }
       const { data: printRows } = await supabase
         .from("artworks")
         .select("collection, object_type")
-        .in("object_type", Object.keys(HUB_PATHS));
+        .in("object_type", ["print", "book-illustration"]);
       const seen = new Set<string>();
       for (const r of (printRows ?? []) as { collection: string | null; object_type: string | null }[]) {
-        const path = HUB_PATHS[r.object_type ?? "print"];
-        const name = r.collection?.trim() || (r.object_type === "print" ? "Individual prints" : "");
+        const hub = (r.object_type ?? "print") as (typeof HUB_KEYS)[number];
+        const name = r.collection?.trim() || (hub === "print" ? "Individual prints" : "");
         const seg = slugify(name);
-        if (!seg || !path) continue;
-        const loc = `${base}${path}/${seg}`;
-        if (!seen.has(loc)) {
-          seen.add(loc);
-          entries.push({ loc, changefreq: "monthly", priority: 0.6 });
+        if (!seg) continue;
+        // The collection page exists in every locale (same slug).
+        for (const loc of HUB_LOCALES) {
+          const url = `${base}${hubBasePath(hub, loc)}/${seg}`;
+          if (!seen.has(url)) {
+            seen.add(url);
+            entries.push({ loc: url, changefreq: "monthly", priority: loc === "en" ? 0.6 : 0.5 });
+          }
         }
       }
     }
