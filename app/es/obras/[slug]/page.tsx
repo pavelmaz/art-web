@@ -557,14 +557,13 @@ export default async function ArtworkDetailPageEs({ params }: ArtworkPageProps) 
 
               <div className="border-t border-[#e8e6e1]" />
 
-              <div className="flex items-center gap-1.5">
-                <span className="glass-chip inline-flex items-center gap-1 whitespace-nowrap rounded-full px-1.5 py-1 text-[11px]">
-                  {t.publicDomain}
-                </span>
-                <span className="glass-chip inline-flex items-center gap-1 whitespace-nowrap rounded-full px-1.5 py-1 text-[11px]">
-                  {t.freeCommercialUse}
-                </span>
-              </div>
+              <Link
+                href="/es/imagenes-de-dominio-publico-para-uso-comercial"
+                className="glass-chip inline-flex items-center gap-1 rounded-full px-2 py-1 text-[11px] leading-snug transition-colors hover:bg-white/60"
+              >
+                <span aria-hidden>✓</span>
+                Imágenes de dominio público para uso comercial
+              </Link>
             </div>
           </aside>
 
