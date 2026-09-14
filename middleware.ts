@@ -73,6 +73,14 @@ export async function middleware(request: NextRequest) {
     "unknown";
   const userAgent = request.headers.get("user-agent") ?? "";
 
+  // Hard-block abusive scrapers that ignore robots.txt (identified from logs 14 Sep
+  // 2026: KeenableBot + Amzn-SearchBot enumerated /zh from datacenter IPs at cache-miss
+  // cost). 403 at the edge, before any page render. Verified search bots
+  // (Google/Bing/Baidu/Yandex) and real users are unaffected — remove a name to re-allow.
+  if (/KeenableBot|Amzn-SearchBot/i.test(userAgent)) {
+    return new NextResponse("Forbidden", { status: 403 });
+  }
+
   if (await shouldRateLimit(ip, userAgent)) {
     return new NextResponse("Too Many Requests", {
       status: 429,
@@ -81,11 +89,6 @@ export async function middleware(request: NextRequest) {
   }
 
   const { pathname } = request.nextUrl;
-
-  // TEMP diag (remove after capture): identify who is crawling /zh.
-  if (pathname.startsWith("/zh")) {
-    console.log(`[zh-diag] ua=${JSON.stringify(userAgent)} ip=${ip} path=${pathname}`);
-  }
 
   // Sitemaps must stay fast and must not get hreflang Link headers (e.g. /es/sitemap/...).
   if (pathname === "/sitemap.xml" || pathname.startsWith("/sitemap/")) {

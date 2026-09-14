@@ -78,6 +78,14 @@ export default function robots(): MetadataRoute.Robots {
         userAgent: "Amazonbot",
         disallow: ["/"],
       },
+      {
+        userAgent: "KeenableBot",
+        disallow: ["/"],
+      },
+      {
+        userAgent: "Amzn-SearchBot",
+        disallow: ["/"],
+      },
     ],
     sitemap: `${baseUrl}/sitemap.xml`,
   };
