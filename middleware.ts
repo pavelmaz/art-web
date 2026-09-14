@@ -73,11 +73,14 @@ export async function middleware(request: NextRequest) {
     "unknown";
   const userAgent = request.headers.get("user-agent") ?? "";
 
-  // Hard-block abusive scrapers that ignore robots.txt (identified from logs 14 Sep
-  // 2026: KeenableBot + Amzn-SearchBot enumerated /zh from datacenter IPs at cache-miss
-  // cost). 403 at the edge, before any page render. Verified search bots
-  // (Google/Bing/Baidu/Yandex) and real users are unaffected — remove a name to re-allow.
-  if (/KeenableBot|Amzn-SearchBot/i.test(userAgent)) {
+  // Hard-block abusive scrapers at the edge (403, before any render). Verified search
+  // bots (Google/Bing/Baidu/Yandex) and real users are unaffected.
+  //  - KeenableBot / Amzn-SearchBot: self-identifying AI scrapers (14 Sep 2026).
+  //  - 47.79.0.0/16: Alibaba Cloud datacenter range running a Chinese scraper farm that
+  //    hammered /zh with SPOOFED browser UAs (can't be UA-matched); no real users there.
+  //    Stopgap only — a distributed scraper can rotate ASNs; the durable fix is a Vercel
+  //    Firewall ASN block / rate-limit rule.
+  if (/KeenableBot|Amzn-SearchBot/i.test(userAgent) || ip.startsWith("47.79.")) {
     return new NextResponse("Forbidden", { status: 403 });
   }
 
@@ -89,11 +92,6 @@ export async function middleware(request: NextRequest) {
   }
 
   const { pathname } = request.nextUrl;
-
-  // TEMP diag (remove after capture): log UA/IP of /zh traffic that passed the scraper block.
-  if (pathname.startsWith("/zh")) {
-    console.log(`[zh-diag2] ua=${JSON.stringify(userAgent)} ip=${ip} path=${pathname}`);
-  }
 
   // Sitemaps must stay fast and must not get hreflang Link headers (e.g. /es/sitemap/...).
   if (pathname === "/sitemap.xml" || pathname.startsWith("/sitemap/")) {
