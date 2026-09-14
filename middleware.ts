@@ -82,6 +82,11 @@ export async function middleware(request: NextRequest) {
 
   const { pathname } = request.nextUrl;
 
+  // TEMP diag (remove after capture): identify who is crawling /zh.
+  if (pathname.startsWith("/zh")) {
+    console.log(`[zh-diag] ua=${JSON.stringify(userAgent)} ip=${ip} path=${pathname}`);
+  }
+
   // Sitemaps must stay fast and must not get hreflang Link headers (e.g. /es/sitemap/...).
   if (pathname === "/sitemap.xml" || pathname.startsWith("/sitemap/")) {
     return NextResponse.next();
