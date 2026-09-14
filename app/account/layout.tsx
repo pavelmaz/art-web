@@ -8,7 +8,7 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "My account — Fine Art Free",
+  title: { absolute: "My account — Fine Art Free" },
   robots: { index: false, follow: false },
 };
 

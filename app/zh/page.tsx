@@ -21,7 +21,7 @@ const t = getT('zh');
 export const revalidate = 86400;
 
 export const metadata: Metadata = {
-  title: "Fine Art Free — 免费下载500,000+公共领域艺术作品",
+  title: { absolute: "Fine Art Free — 免费下载500,000+公共领域艺术作品" },
   description:
     "探索并免费下载500,000+幅经典画作。来自世界顶级博物馆的公共领域艺术。免费用于个人和商业用途。",
   openGraph: {

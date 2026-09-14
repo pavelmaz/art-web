@@ -19,7 +19,7 @@ export async function generateMetadata({ params }: GuidePageProps): Promise<Meta
   const visit = await loadGuidedVisit(museum, token);
 
   if (!visit) {
-    return { title: "Guide not found | Fine Art Free" };
+    return { title: { absolute: "Guide not found | Fine Art Free" } };
   }
 
   const guide = visit.guide_data as GuideData;

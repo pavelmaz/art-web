@@ -16,7 +16,7 @@ const t = getT('pt');
 export const revalidate = 86400;
 
 export const metadata: Metadata = {
-  title: "Fine Art Free — Baixe 500.000+ Obras de Arte de Domínio Público",
+  title: { absolute: "Fine Art Free — Baixe 500.000+ Obras de Arte de Domínio Público" },
   description:
     "Explore e baixe 500.000+ pinturas clássicas grátis. Arte de domínio público dos melhores museus do mundo. Grátis para uso pessoal e comercial.",
   openGraph: {

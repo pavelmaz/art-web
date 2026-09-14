@@ -4,7 +4,7 @@ import { buildEnOnlyLanguageAlternates } from "@/lib/hreflang-paths";
 import { absoluteUrl } from "@/lib/utils";
 
 export const metadata: Metadata = {
-  title: "About Fine Art Free — Public Domain Art Downloads",
+  title: { absolute: "About Fine Art Free — Public Domain Art Downloads" },
   description:
     "Fine Art Free aggregates public domain artwork from the world's top museums. All artworks are free to download and use for personal and commercial purposes.",
   alternates: {

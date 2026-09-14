@@ -16,7 +16,7 @@ const t = getT('ja');
 export const revalidate = 86400;
 
 export const metadata: Metadata = {
-  title: "Fine Art Free — 50万件以上のパブリックドメイン美術を無料ダウンロード",
+  title: { absolute: "Fine Art Free — 50万件以上のパブリックドメイン美術を無料ダウンロード" },
   description:
     "世界の美術館所蔵の古典絵画・版画・イラストを50万件以上、無料で高解像度ダウンロード。個人・商用利用可。",
   openGraph: {

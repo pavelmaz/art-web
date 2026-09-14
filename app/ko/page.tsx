@@ -21,7 +21,7 @@ const t = getT('ko');
 export const revalidate = 86400;
 
 export const metadata: Metadata = {
-  title: "Fine Art Free — 500,000+ 퍼블릭 도메인 예술 작품 무료 다운로드",
+  title: { absolute: "Fine Art Free — 500,000+ 퍼블릭 도메인 예술 작품 무료 다운로드" },
   description:
     "500,000개 이상의 클래식 그림을 무료로 탐색하고 다운로드하세요. 세계 최고의 박물관에서 온 퍼블릭 도메인 예술. 개인 및 상업적 사용 무료.",
   openGraph: {

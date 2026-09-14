@@ -21,7 +21,7 @@ const t = getT('de');
 export const revalidate = 86400;
 
 export const metadata: Metadata = {
-  title: "Fine Art Free — 500.000+ gemeinfreie Kunstwerke herunterladen",
+  title: { absolute: "Fine Art Free — 500.000+ gemeinfreie Kunstwerke herunterladen" },
   description:
     "Entdecken und laden Sie 500.000+ klassische Gemälde kostenlos herunter. Gemeinfreie Kunst aus den bedeutendsten Museen der Welt. Kostenlos für persönliche und kommerzielle Nutzung.",
   openGraph: {
