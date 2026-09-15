@@ -62,7 +62,7 @@ export function DownloadInterstitial({
   if (!open) return null;
 
   const t = getT(locale);
-  const FREE_PX = 1400; // the free download is 1400 px wide
+  const FREE_PX = 1200; // the free download is 1200 px wide (og1200 rendition)
 
   // Zoom to the centre so the panels read as a detail, not a thumbnail — a whole
   // painting shrunk to this size looks identical at any resolution.

@@ -380,14 +380,22 @@ export function artworkStandardSpecs(artwork: ArtworkSpecSource): string | null 
   if (!w || !h) {
     return null;
   }
-  const stdW = Math.min(1400, w);
+  // Matches the `og` rendition (1200px JPEG) the free-download button now serves —
+  // see the downloadImageUrl comment on each artwork page. Was 1400 when the free
+  // download reused the `detail` (w1400 WebP) rendition; keep this in sync with
+  // whichever rendition artwork pages actually pass to <DownloadButton>.
+  const stdW = Math.min(1200, w);
   const stdH = Math.round((h * stdW) / w);
   return `${stdW} x ${stdH}px`;
 }
 
-/** File size for the standard download, e.g. "0.4 MB". */
-export function artworkStandardSize(artwork: ArtworkSpecSource): string | null {
-  return formatFileSize(artwork.std_bytes);
+/** File size for the standard download, e.g. "0.4 MB". Deliberately null for now:
+ *  `std_bytes` was computed from the old w1400 WebP rendition the free download used
+ *  to serve, not the og1200 JPEG it serves now — showing it would show a wrong number.
+ *  Callers already fall back to plain "JPG" when this is null. Re-enable once
+ *  `std_bytes` is backfilled against the actual og1200 file size. */
+export function artworkStandardSize(_artwork: ArtworkSpecSource): string | null {
+  return null;
 }
 
 /** "6407 x 4789px" — dimensions of the Pro/original download. Null only when the

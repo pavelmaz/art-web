@@ -290,6 +290,11 @@ export default async function ArtworkDetailPageEs({ params }: ArtworkPageProps) 
   }
 
   const imageUrl = artworkDetailImageUrl(artwork);
+  // Already JPEG (unlike the WebP `detail` rendition used for on-page display), so the
+  // free-download proxy can stream it straight through with no server-side format
+  // conversion — that conversion was real Fluid CPU + Fast Origin Transfer cost on
+  // every single free download.
+  const downloadImageUrl = artworkOgImageUrl(artwork);
   const maxDownloadHref = artworkOriginalUrl(artwork) || imageUrl;
   const artist = artwork.artist_display ?? "Artista desconocido";
 
@@ -480,7 +485,7 @@ export default async function ArtworkDetailPageEs({ params }: ArtworkPageProps) 
                       {artworkStandardSize(artwork) ? `JPG, Size: ${artworkStandardSize(artwork)}` : "JPG"}
                     </p>
                   </div>
-                  <DownloadButton imageUrl={imageUrl} filename={artwork.slug} title={artwork.title} maxWidth={artwork.img_width ?? null} label={t.downloadStandard} variant="glass" />
+                  <DownloadButton imageUrl={downloadImageUrl} filename={artwork.slug} title={artwork.title} maxWidth={artwork.img_width ?? null} label={t.downloadStandard} variant="glass" />
                 </div>
 
                 <ProDownloadRow locale="es" isPro={isPro} downloadHref={maxDownloadHref} filename={artwork.slug} glass maxDims={artworkMaxSpecs(artwork)} maxSize={artworkMaxSize(artwork)} />
