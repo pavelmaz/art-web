@@ -86,6 +86,10 @@ export default function robots(): MetadataRoute.Robots {
         userAgent: "Amzn-SearchBot",
         disallow: ["/"],
       },
+      {
+        userAgent: "Reflectionbot",
+        disallow: ["/"],
+      },
     ],
     sitemap: `${baseUrl}/sitemap.xml`,
   };
