@@ -389,13 +389,12 @@ export function artworkStandardSpecs(artwork: ArtworkSpecSource): string | null 
   return `${stdW} x ${stdH}px`;
 }
 
-/** File size for the standard download, e.g. "0.4 MB". Deliberately null for now:
- *  `std_bytes` was computed from the old w1400 WebP rendition the free download used
- *  to serve, not the og1200 JPEG it serves now — showing it would show a wrong number.
- *  Callers already fall back to plain "JPG" when this is null. Re-enable once
- *  `std_bytes` is backfilled against the actual og1200 file size. */
-export function artworkStandardSize(_artwork: ArtworkSpecSource): string | null {
-  return null;
+/** File size for the standard download, e.g. "0.4 MB". A background backfill
+ *  (scripts/backfill-og-std-bytes.mjs) is correcting std_bytes to the real og1200
+ *  size row by row; until a row is reached it still shows the prior rendition's
+ *  size, which is close but not exact. */
+export function artworkStandardSize(artwork: ArtworkSpecSource): string | null {
+  return formatFileSize(artwork.std_bytes);
 }
 
 /** "6407 x 4789px" — dimensions of the Pro/original download. Null only when the
