@@ -20,8 +20,19 @@
  *   Flags: --dry  --limit=N (category cap, default 200)
  */
 
+import { readFileSync, writeFileSync, existsSync, mkdirSync } from "node:fs";
+import { dirname } from "node:path";
+
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const SERVICE_KEY = process.env.SUPABASE_SERVICE_KEY;
+// The A→Z walk cursor used to live in Supabase (_import_drip_state), gated behind
+// RLS with zero policies — only a true bypass-RLS service_role key can touch it.
+// The GitHub Actions secret silently couldn't (still unclear exactly why — it can
+// write artworks/artists fine, which have explicit permissive policies), so the
+// cursor sat frozen on "Albrecht Altdorfer" for 7 weeks while the daily job kept
+// reporting green and importing real rows nearby. A git-committed file has no such
+// failure mode: the workflow's own push either succeeds visibly or fails loudly.
+const CURSOR_FILE = process.env.DRIP_CURSOR_FILE || ".github/state/drip-cursor.txt";
 const UA = "FineArtFree-importer/1.0 (https://fineartfree.com; pavelmazuelas@gmail.com)";
 const COMMONS_API = "https://commons.wikimedia.org/w/api.php";
 const INDEXNOW_KEY = "faf-indexnow-2026-xK9mP3qR";
@@ -60,7 +71,7 @@ const DRY = args.includes("--dry");
 const limitArg = args.find((a) => a.startsWith("--limit="));
 const CATEGORY_CAP = limitArg ? parseInt(limitArg.split("=")[1], 10) : 200;
 // --drip[=N]: walk existing artists A→Z and import up to N new works (default 25),
-// resuming from a saved cursor (_import_drip_state). --after=Name overrides the
+// resuming from the saved cursor (CURSOR_FILE). --after=Name overrides the
 // start; --max-artists=M caps how many artists one run will scan (safety).
 const dripArg = args.find((a) => a.startsWith("--drip"));
 const DRIP = dripArg ? (parseInt(dripArg.split("=")[1] ?? "", 10) || 25) : 0;
@@ -523,9 +534,8 @@ if (DRIP) {
   // imported (or MAX_ARTISTS scanned). Drains a prolific artist across days:
   // the cursor only advances past an artist once ALL their works are checked.
   let cursor = DRIP_CURSOR;
-  if (!cursor && !DRY) {
-    const st = await pgrest(`_import_drip_state?select=cursor&id=eq.1&limit=1`).catch(() => null);
-    if (st && st[0]?.cursor) cursor = st[0].cursor;
+  if (!cursor && existsSync(CURSOR_FILE)) {
+    cursor = readFileSync(CURSOR_FILE, "utf-8").trim();
   }
   console.log(`\n${DRY ? "DRY RUN — " : ""}DRIP: up to ${DRIP} new works, starting after artist "${cursor}"\n`);
 
@@ -552,12 +562,14 @@ if (DRIP) {
     }
   }
   console.log(`\n${DRY ? "DRY " : ""}DRIP result: ${imported} ${DRY ? "would import" : "imported"} · scanned ${scanned} artist(s) · next run resumes after "${lastCompleted}"`);
-  if (!DRY) {
-    await pgrest(`_import_drip_state?on_conflict=id`, {
-      method: "POST",
-      headers: { Prefer: "resolution=merge-duplicates" },
-      body: JSON.stringify({ id: 1, cursor: lastCompleted }),
-    }).catch((e) => console.error("cursor save failed:", e.message));
+  if (!DRY && lastCompleted) {
+    try {
+      mkdirSync(dirname(CURSOR_FILE), { recursive: true });
+      writeFileSync(CURSOR_FILE, lastCompleted + "\n");
+    } catch (e) {
+      console.error("cursor save failed:", e.message);
+      process.exitCode = 1; // loud failure — a silent one is what caused the 7-week stall
+    }
   }
 
   // Automation step: ensure every artist we touched has a portrait; find one via

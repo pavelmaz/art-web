@@ -1,12 +1,18 @@
 name: Daily artwork drip import
 
 # Adds missing artworks per day for artists already in the catalog, walking the
-# artist list A→Z (cursor in _import_drip_state). Full chain per run:
-#   1. import  — import-wikipedia.mjs --drip=75 (dedupe, dims, IndexNow,
+# artist list A→Z (cursor committed to .github/state/drip-cursor.txt — NOT
+# Supabase; that table (_import_drip_state) has RLS with zero policies and the
+# repo's Supabase key silently couldn't write to it for 7+ weeks (16 Sep 2026),
+# freezing the walk on "Albrecht Altdorfer" while the job kept reporting green.
+# A committed file fails loudly instead: the push step either succeeds or the
+# job goes red). Full chain per run:
+#   1. import  — import-wikipedia.mjs --drip=200 (dedupe, dims, IndexNow,
 #                artist-portrait backfill for touched artists)
 #   2. migrate — copy the new images to Cloudflare R2 + build renditions
 #                (scripts/migrate-new-to-r2.mjs — R2 only, never Supabase)
 #   3. enrich  — grounded Prado-style descriptions + 10-locale translations
+#   4. commit  — push the advanced cursor back to the repo
 # Runs at 02:00 UTC.
 
 on:
@@ -18,10 +24,13 @@ concurrency:
   group: daily-import
   cancel-in-progress: false
 
+permissions:
+  contents: write # needed to commit the advanced cursor file back
+
 jobs:
   drip:
     runs-on: ubuntu-latest
-    timeout-minutes: 110
+    timeout-minutes: 170
     env:
       NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
       SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
@@ -39,27 +48,29 @@ jobs:
 
       - run: npm ci
 
-      # Cap raised 25 → 75. The cursor only advances past an artist once ALL
-      # their works are checked, so a prolific artist with more importable works
-      # than the cap parks the walk on them indefinitely: every run imports
-      # `cap` works, hits the cap mid-artist, and writes the SAME cursor back.
-      # That is what froze the A→Z walk on "Abraham Hulk" for 13 days — Abraham
-      # Janssens (the next artist) had far more than 25 available. A higher cap
-      # drains such artists in one run instead of parking on them.
-      - name: Import up to 75 missing artworks (A→Z drip)
-        run: node import-wikipedia.mjs --drip=75 --max-artists=150
+      # Cap raised 75 → 200, scan ceiling 150 → 400 (16 Sep 2026, alongside the
+      # cursor-storage fix above — raising the cap alone wouldn't have helped
+      # while the cursor couldn't persist at all). The cursor only advances past
+      # an artist once ALL their works are checked, so a prolific artist with
+      # more importable works than the cap parks the walk on them indefinitely:
+      # every run imports `cap` works, hits the cap mid-artist, and never reaches
+      # the "save cursor" step for anyone after. That is what froze the walk on
+      # "Abraham Hulk" for 13 days before (fixed by raising 25→75) and, combined
+      # with the Supabase write failure, on "Albrecht Altdorfer" for 7 weeks.
+      - name: Import up to 200 missing artworks (A→Z drip)
+        run: node import-wikipedia.mjs --drip=200 --max-artists=400
 
       # Copy the new works' images to Cloudflare R2 (never Supabase storage) and
       # generate their renditions in the same pass. Replaces the old
       # migrate-external-images edge function, which uploaded to Supabase and so
       # grew the bucket the project keeps flat (memory: storage-egress-lockdown).
       - name: Migrate new images to R2 (+ renditions)
-        run: node scripts/migrate-new-to-r2.mjs --since-hours=6 --limit=300
+        run: node scripts/migrate-new-to-r2.mjs --since-hours=6 --limit=400
 
       - name: Enrich (Prado-style descriptions, 10 locales)
         run: |
           BASE="${NEXT_PUBLIC_SUPABASE_URL%/}/functions/v1"
-          for i in $(seq 1 20); do
+          for i in $(seq 1 40); do
             resp=$(curl -s -m 280 -X POST "$BASE/enrich-artworks" \
               -H "Authorization: Bearer $SUPABASE_SERVICE_KEY" -H "apikey: $SUPABASE_SERVICE_KEY" \
               -H "Content-Type: application/json" -d '{}')
@@ -74,4 +85,20 @@ jobs:
       # produced inside the migrate step, so this only mops up stragglers).
       - name: Migrate stragglers to R2 (second pass)
         if: always()
-        run: node scripts/migrate-new-to-r2.mjs --since-hours=6 --limit=300
+        run: node scripts/migrate-new-to-r2.mjs --since-hours=6 --limit=400
+
+      # Push the advanced cursor. Runs even if a later step failed, as long as the
+      # import step itself produced a new cursor value worth keeping.
+      - name: Commit advanced drip cursor
+        if: always()
+        run: |
+          if git diff --quiet -- .github/state/drip-cursor.txt; then
+            echo "No cursor change to commit."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add .github/state/drip-cursor.txt
+          git commit -m "chore: advance drip cursor [skip ci]"
+          git pull --rebase origin main
+          git push
