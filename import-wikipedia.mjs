@@ -79,7 +79,14 @@ const afterArg = args.find((a) => a.startsWith("--after="));
 const DRIP_CURSOR = afterArg ? afterArg.split("=").slice(1).join("=") : "";
 const maxArtistsArg = args.find((a) => a.startsWith("--max-artists="));
 const MAX_ARTISTS = maxArtistsArg ? parseInt(maxArtistsArg.split("=")[1], 10) : 150;
-const inputs = args.filter((a) => !a.startsWith("--"));
+const fromFileArg = args.find((a) => a.startsWith("--from-file="));
+const fileInputs = fromFileArg
+  ? readFileSync(fromFileArg.slice("--from-file=".length), "utf-8")
+      .split("\n").map((l) => l.trim()).filter(Boolean)
+  : [];
+// One input per line (e.g. "wd:Full Artist Name") — sidesteps shell quoting/
+// word-splitting issues that unquoted argv entries with spaces run into.
+const inputs = [...args.filter((a) => !a.startsWith("--")), ...fileInputs];
 if (inputs.length === 0 && !DRIP) {
   console.error("No inputs. Pass Wikipedia media URLs, File:… titles, Category:… names, or use --drip[=N].");
   process.exit(1);
