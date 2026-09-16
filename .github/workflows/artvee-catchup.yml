@@ -1,0 +1,104 @@
+name: Artvee artist catch-up
+
+# Finds artists listed in Artvee's public directory (artvee.com/artists) that
+# Fine Art Free doesn't have yet, and imports a small daily batch through the
+# same Wikidata/Commons pipeline the A→Z drip uses — real museum-sourced
+# PD/CC0 images only, never Artvee's own files (their PD status isn't
+# independently verified here, so we use their artist list as a lead, not a
+# source).
+#
+# Self-terminating: the diff (scripts/diff-artvee-artists.mjs) is recomputed
+# fresh every run, so an artist imported today just stops showing up as
+# "missing" tomorrow. No cursor/queue file needed, unlike the A→Z drip.
+#
+# "Possible naming variants" (e.g. Artvee's "Jacopo Tintoretto" vs our
+# existing "Tintoretto") are written to imports/artvee/artvee-artists-review.json
+# but never auto-imported — that would risk forking a duplicate artist page.
+# imports/ is gitignored (bulky scraped data, same convention as the existing
+# artvee-books.json/artvee-wallcharts.json), so those files are per-run only —
+# re-scraped fresh at the top of every job rather than carried between runs.
+#
+# Runs at 04:00 UTC, after the 02:00 daily-import A→Z walk finishes.
+
+on:
+  schedule:
+    - cron: "0 4 * * *"
+  workflow_dispatch:
+    inputs:
+      batch_size:
+        description: "How many new artists to import this run"
+        default: "8"
+
+concurrency:
+  group: artvee-catchup
+  cancel-in-progress: false
+
+jobs:
+  catchup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    env:
+      NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+      SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+      R2_ACCOUNT_ID: ${{ secrets.R2_ACCOUNT_ID }}
+      R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+      R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+      R2_BUCKET: ${{ secrets.R2_BUCKET }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+
+      - run: npm ci
+
+      - name: Refresh Artvee artist directory
+        run: node scripts/scrape-artvee-artists.mjs
+
+      - name: Diff against FAF + build today's batch
+        run: |
+          node --env-file=.env.local scripts/diff-artvee-artists.mjs \
+            --batch-size=${{ github.event.inputs.batch_size || '8' }} \
+            --batch-file=/tmp/artvee-batch.txt
+
+      - name: Import today's batch (new artists + their artworks)
+        id: import
+        run: |
+          if [ -s /tmp/artvee-batch.txt ]; then
+            node --env-file=.env.local import-wikipedia.mjs --from-file=/tmp/artvee-batch.txt
+            # Bare names (no "wd:" prefix) for the portrait backfill's NAMES filter.
+            sed 's/^wd://' /tmp/artvee-batch.txt | paste -sd '|' - > /tmp/artvee-batch-names.txt
+          else
+            echo "Nothing new to import today."
+            : > /tmp/artvee-batch-names.txt
+          fi
+
+      - name: Migrate new images to R2 (+ renditions)
+        run: node scripts/migrate-new-to-r2.mjs --since-hours=6 --limit=200
+
+      - name: Backfill portraits for today's new artists
+        run: |
+          NAMES="$(cat /tmp/artvee-batch-names.txt 2>/dev/null || true)"
+          if [ -n "$NAMES" ]; then
+            NAMES="$NAMES" node backfill-artist-portraits.mjs
+          else
+            echo "No new artists today — nothing to backfill."
+          fi
+
+      - name: Enrich (Prado-style descriptions + bios, 10 locales)
+        run: |
+          BASE="${NEXT_PUBLIC_SUPABASE_URL%/}/functions/v1"
+          for fn in enrich-artworks enrich-artists; do
+            for i in $(seq 1 20); do
+              resp=$(curl -s -m 280 -X POST "$BASE/$fn" \
+                -H "Authorization: Bearer $SUPABASE_SERVICE_KEY" -H "apikey: $SUPABASE_SERVICE_KEY" \
+                -H "Content-Type: application/json" -d '{}')
+              echo "$fn #$i: $(echo "$resp" | head -c 200)"
+              echo "$resp" | grep -q 'need enrichment' && break
+              remaining=$(echo "$resp" | grep -oE '"remaining":[0-9]+' | grep -oE '[0-9]+' || echo "")
+              [ "$remaining" = "0" ] && break
+              sleep 2
+            done
+          done
