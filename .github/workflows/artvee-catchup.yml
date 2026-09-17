@@ -78,6 +78,13 @@ jobs:
       - name: Migrate new images to R2 (+ renditions)
         run: node scripts/migrate-new-to-r2.mjs --since-hours=6 --limit=200
 
+      # migrate-new-to-r2.mjs only handles rows whose image_id is still an
+      # external URL — a TIFF-sourced work goes straight to Supabase storage
+      # at import time and would otherwise never get renditions (16 Sep 2026
+      # incident: this exact gap on a Fernand Léger import).
+      - name: Rendition backfill for TIFF-sourced imports
+        run: node scripts/backfill-r2-renditions-direct.mjs --since-hours=6 --limit=100
+
       - name: Backfill portraits for today's new artists
         run: |
           NAMES="$(cat /tmp/artvee-batch-names.txt 2>/dev/null || true)"
