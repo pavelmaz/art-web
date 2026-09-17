@@ -510,7 +510,13 @@ async function processItem(item) {
         artist_display: canonical,
         image_id: stored ? stored.publicUrl : info.imageUrl,
         url: info.pageUrl,
-        score: 50,
+        // Was 50 — the real scoring scale is 0-1 (see refresh_daily_artworks(),
+        // whose "high score" bucket is score >= 0.75), so a bare 50 shot every
+        // fresh import to the very top of the homepage and /artworks browse —
+        // ahead of every legitimately-scored masterpiece, before its renditions
+        // even existed. Same class of bug as the prints/books flat-50 fix
+        // (memory: artwork-browse-scoring); use that same low default here.
+        score: 0.01,
         ...(item.year ? { date_display: String(item.year) } : {}),
         // Commons reports the original's dimensions — write them at insert time so
         // the download rows can show real specs (they were NULL until the nightly
