@@ -59,7 +59,7 @@ jobs:
 
       - name: Diff against FAF + build today's batch
         run: |
-          node --env-file=.env.local scripts/diff-artvee-artists.mjs \
+          node scripts/diff-artvee-artists.mjs \
             --batch-size=${{ github.event.inputs.batch_size || '8' }} \
             --batch-file=/tmp/artvee-batch.txt
 
@@ -67,7 +67,7 @@ jobs:
         id: import
         run: |
           if [ -s /tmp/artvee-batch.txt ]; then
-            node --env-file=.env.local import-wikipedia.mjs --from-file=/tmp/artvee-batch.txt
+            node import-wikipedia.mjs --from-file=/tmp/artvee-batch.txt
             # Bare names (no "wd:" prefix) for the portrait backfill's NAMES filter.
             sed 's/^wd://' /tmp/artvee-batch.txt | paste -sd '|' - > /tmp/artvee-batch-names.txt
           else
