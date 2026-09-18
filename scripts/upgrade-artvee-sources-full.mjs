@@ -8,8 +8,15 @@
  * sweep. Reads from Commons/Wikidata (external) + our CDN (R2, zero Supabase
  * egress); writes INTO Supabase (ingress). Gentle: 1 at a time, 429 backoff.
  *
- * Resumable: candidates are re-queried each run with img_width < 1800, so
- * already-upgraded rows (now big) drop out automatically. Safe to Ctrl-C.
+ * Resumable: candidates are re-queried each run with img_width < ELIGIBLE_CEILING,
+ * so already-upgraded rows (now big) drop out automatically. Safe to Ctrl-C.
+ *
+ * 17 Sep 2026: the eligibility query used to be a hardcoded `< 1800`, which is
+ * Artvee's own standard export width — meaning every one of the 43k+ artworks
+ * sitting at EXACTLY 1800px (not < 1800) was permanently excluded from ever
+ * being reconsidered, forever. Also raised the ceiling well past 1800 itself:
+ * "1800px" isn't truly high-res by today's bar, and MIN_GAIN already guards
+ * against replacing a row with only a marginally-bigger file.
  *
  * Run: nohup node --env-file=.env.local scripts/upgrade-artvee-sources-full.mjs &
  */
@@ -27,6 +34,11 @@ const CDN = "https://cdn.fineartfree.com/";
 const BUCKET = "art-images";
 const MAX_WIDTH = 6000;
 const MIN_GAIN = 1.3;
+// A row is worth reconsidering below this width (was a hardcoded, exclusive 1800).
+const ELIGIBLE_CEILING = Number(process.env.UPGRADE_ELIGIBLE_CEILING || 3500);
+// A replacement must clear this absolute floor regardless of how small the row
+// currently is (was a hardcoded 1800 — too low to count as "truly high res").
+const MIN_TARGET_WIDTH = Number(process.env.UPGRADE_MIN_TARGET_WIDTH || 2500);
 const SUPABASE_PUBLIC_BASE = `${process.env.NEXT_PUBLIC_SUPABASE_URL.replace(/\/$/, "")}/storage/v1/object/public/${BUCKET}/`;
 const DELETION_LIST = "/private/tmp/claude-502/-Users-pavelm-Desktop-art-web-main/cfb5e529-46ad-481e-9adc-49afc177a88f/scratchpad/artvee-full-old-keys.txt";
 
@@ -119,7 +131,7 @@ async function upgrade(row, info) {
   const res = await gentleFetch(info.downloadUrl);
   const buf = Buffer.from(await res.arrayBuffer());
   const meta = await sharp(buf, { limitInputPixels: false }).metadata();
-  if (!meta.width || meta.width < 1800) throw new Error(`too small ${meta.width}`);
+  if (!meta.width || meta.width < MIN_TARGET_WIDTH) throw new Error(`too small ${meta.width}`);
   const jpegBuf = /\.jpe?g$/i.test(info.downloadUrl) ? buf
     : await sharp(buf, { limitInputPixels: false }).jpeg({ quality: 92, mozjpeg: true }).toBuffer();
   const sha = createHash("sha256").update(jpegBuf).digest("hex");
@@ -130,7 +142,7 @@ async function upgrade(row, info) {
   for (const v of VARIANTS) {
     const pipe = sharp(jpegBuf, { limitInputPixels: false }).rotate().resize({ width: v.width, withoutEnlargement: true });
     const out = await (v.format === "jpeg" ? pipe.jpeg({ quality: v.quality, mozjpeg: true }) : pipe.webp({ quality: v.quality })).toBuffer();
-    if (v.key === "w1400") stdBytes = out.length;
+    if (v.key === "og1200") stdBytes = out.length; // matches the free-download rendition (was w1400 — stale after that switch)
     const ru = await supabase.storage.from(BUCKET).upload(
       `renditions/${v.key}/artworks/${sha}.${v.format === "jpeg" ? "jpg" : "webp"}`, out,
       { contentType: v.format === "jpeg" ? "image/jpeg" : "image/webp", upsert: true });
@@ -154,15 +166,16 @@ async function upgrade(row, info) {
 let scanned = 0, upgraded = 0, noMatch = 0, hashRej = 0, tooSmall = 0, errors = 0;
 const startedAt = Date.now();
 
-// Pull all remaining candidates (img_width<1800 drops already-upgraded rows), grouped
-// by artist. PostgREST caps a single response at ~1000 rows, so page with .range().
+// Pull all remaining candidates (img_width<ELIGIBLE_CEILING drops already-upgraded
+// rows), grouped by artist. PostgREST caps a single response at ~1000 rows, so
+// page with .range().
 const rows = [];
 for (let from = 0; ; from += 1000) {
   const { data, error } = await supabase
     .from("artworks")
     .select("id, slug, title, artist_display, image_id, img_width, img_height, score")
     .like("url", "%artvee.com%")
-    .lt("img_width", 1800)
+    .lt("img_width", ELIGIBLE_CEILING)
     .not("img_width", "is", null)
     .not("artist_display", "is", null)
     .order("score", { ascending: false })
@@ -198,7 +211,7 @@ for (const [artist, artRows] of byArtist) {
       if (!cand) { noMatch++; continue; }
       const info = await commonsFileInfo(cand.fileName, MAX_WIDTH);
       if (!info || !/public domain|^pd\b|pd-|cc0/i.test(info.license)) { noMatch++; continue; }
-      if (info.width < Math.max(1800, row.img_width * MIN_GAIN)) { tooSmall++; continue; }
+      if (info.width < Math.max(MIN_TARGET_WIDTH, row.img_width * MIN_GAIN)) { tooSmall++; continue; }
       const ourThumb = row.image_id.replace(/^https:\/\/[a-z0-9-]+\.supabase\.co\//i, CDN).split("?")[0]
         .replace("/art-images/artworks/", "/art-images/renditions/w800/artworks/").replace(/\.[a-z0-9]+$/i, ".webp");
       const [a, b] = await Promise.all([dhash(ourThumb), dhash(info.thumb)]);
