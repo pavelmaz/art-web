@@ -174,7 +174,12 @@ for (let from = 0; ; from += 1000) {
   const { data, error } = await supabase
     .from("artworks")
     .select("id, slug, title, artist_display, image_id, img_width, img_height, score")
-    .like("url", "%artvee.com%")
+    // Prefix match (not a leading-wildcard %artvee.com%) so this can actually use
+    // idx_artworks_url — a leading wildcard can't seek a btree at all, and with
+    // ~73k eligible rows under the widened ceiling that was enough to blow the
+    // statement timeout outright (17 Sep 2026). Every Artvee-sourced url in this
+    // catalog is https://artvee.com/dl/... (checked: 100% of ~43k+ sampled).
+    .like("url", "https://artvee.com%")
     .lt("img_width", ELIGIBLE_CEILING)
     .not("img_width", "is", null)
     .not("artist_display", "is", null)
