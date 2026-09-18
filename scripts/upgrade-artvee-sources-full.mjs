@@ -167,11 +167,20 @@ let scanned = 0, upgraded = 0, noMatch = 0, hashRej = 0, tooSmall = 0, errors = 
 const startedAt = Date.now();
 
 // Pull all remaining candidates (img_width<ELIGIBLE_CEILING drops already-upgraded
-// rows), grouped by artist. PostgREST caps a single response at ~1000 rows, so
-// page with .range().
+// rows), grouped by artist. PostgREST caps a single response at ~1000 rows.
+//
+// Keyset (not OFFSET) pagination: with ~73k eligible rows under the widened
+// ceiling, .range() page N has to scan-and-discard N*1000 sorted rows just to
+// find its starting point — cheap for the first few pages, a statement-timeout
+// crash by the time it reaches deep pages (17 Sep 2026, hit even after the url
+// index fix above). Same class of problem the IndexNow bulk route hit at ~80k
+// OFFSET (memory: indexnow-full-catalog) — same fix: page by "last row seen"
+// (score, id) instead of a row count, which can always seek directly in via
+// the (score DESC, id ASC) sort order regardless of how deep the page is.
 const rows = [];
-for (let from = 0; ; from += 1000) {
-  const { data, error } = await supabase
+let cursor = null; // { score, id } of the last row from the previous page
+for (;;) {
+  let q = supabase
     .from("artworks")
     .select("id, slug, title, artist_display, image_id, img_width, img_height, score")
     // Prefix match (not a leading-wildcard %artvee.com%) so this can actually use
@@ -185,11 +194,16 @@ for (let from = 0; ; from += 1000) {
     .not("artist_display", "is", null)
     .order("score", { ascending: false })
     .order("id", { ascending: true })
-    .range(from, from + 999);
+    .limit(1000);
+  if (cursor) {
+    q = q.or(`score.lt.${cursor.score},and(score.eq.${cursor.score},id.gt.${cursor.id})`);
+  }
+  const { data, error } = await q;
   if (error) throw error;
   if (!data?.length) break;
   rows.push(...data);
   if (data.length < 1000) break;
+  cursor = { score: data[data.length - 1].score, id: data[data.length - 1].id };
 }
 console.log(`${rows.length} candidate artworks to consider (highest score first)`);
 
