@@ -36,11 +36,19 @@ const ART_OCCUPATIONS = new Set([
   "Q1114448", // cartoonist
 ]);
 
+// CI (GitHub Actions) sets these as real process.env vars via the job's env:
+// block — there's no .env.local file there. Prefer process.env; only fall back
+// to reading the file for plain `node backfill-artist-portraits.mjs` local runs
+// without --env-file. (This function reading the file unconditionally was why
+// the portrait backfill silently died in CI: caught and swallowed inside the
+// daily A→Z drip's own try/catch, and a hard job failure inside the standalone
+// artvee-catchup workflow — 18 Sep 2026.)
 function env(key) {
+  if (process.env[key]) return process.env[key];
   const line = readFileSync(".env.local", "utf8")
     .split("\n")
     .find((l) => l.replace(/^export\s+/, "").startsWith(`${key}=`));
-  if (!line) throw new Error(`missing ${key} in .env.local`);
+  if (!line) throw new Error(`missing ${key} in process.env or .env.local`);
   return line.split("=").slice(1).join("=").trim().replace(/^["']|["']$/g, "");
 }
 
