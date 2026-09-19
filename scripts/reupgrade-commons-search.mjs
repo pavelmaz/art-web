@@ -15,17 +15,26 @@
  * regenerating renditions and logging the old keys for the deletion sweep.
  *
  * Reads Commons + our CDN (for the hash), writes Supabase. Modes:
+ *   REUP_ARTIST_WALK=1   walk the artists table A→Z (cursor file, resumable —
+ *                        19 Sep 2026), fully resolving each artist's low-res
+ *                        backlog before moving to the next. REUP_AFTER=Name
+ *                        overrides the saved cursor; REUP_MAX_ARTISTS caps how
+ *                        many artists one run scans (default 150).
+ *   REUP_DAILY=1         nightly incremental sweep, smallest-images-first by
+ *                        size band, reup_checked_at-stamped so dead ends aren't
+ *                        retried forever
  *   REUP_SLUGS="a,b,c"   process specific slugs (proof / testing)
- *   (default)            keyset over img_width < REUP_MAX_SRC (needs a partial
- *                        index on (id) where img_width < N)
+ *   REUP_PAIRS=path.json process [slug, "File:..."] pairs from an external match
+ *   (default)            popularity-first (score bands), keyset over
+ *                        img_width < REUP_MAX_SRC
  *
  * Run: nohup node --env-file=.env.local scripts/reupgrade-commons-search.mjs &
  */
 import { createHash } from "node:crypto";
-import { appendFileSync, mkdtempSync, writeFileSync, rmSync } from "node:fs";
+import { appendFileSync, mkdtempSync, writeFileSync, rmSync, readFileSync, existsSync, mkdirSync } from "node:fs";
 import { execFileSync } from "node:child_process";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { join, dirname } from "node:path";
 import { createClient } from "@supabase/supabase-js";
 import sharp from "sharp";
 
@@ -307,7 +316,49 @@ async function runBatch(rows) {
   return false;
 }
 
-if (process.env.REUP_DAILY) {
+if (process.env.REUP_ARTIST_WALK) {
+  // Walk the `artists` table A→Z (same pattern as the daily A→Z drip's own
+  // cursor — a git-committed file, not Supabase: that table's RLS silently
+  // swallowed writes in CI for 7 weeks before anyone noticed — see the
+  // daily-import.yml history). For each artist, resolve ALL of their still-low-res
+  // artworks before moving on, so an artist is either fully done or the run
+  // ended mid-artist (cursor stays put, same artist resumes next run — never
+  // marked "done" on a partial pass). REUP_LIMIT caps upgrades per run, same
+  // meaning as everywhere else in this script.
+  const CURSOR_FILE = process.env.REUP_ARTIST_CURSOR_FILE || ".github/state/reupgrade-artist-cursor.txt";
+  const MAX_ARTISTS = Number(process.env.REUP_MAX_ARTISTS || 150);
+  let cursor = process.env.REUP_AFTER || "";
+  if (!cursor && existsSync(CURSOR_FILE)) cursor = readFileSync(CURSOR_FILE, "utf-8").trim();
+  console.log(`REUP ARTIST WALK: starting after "${cursor}", img_width < ${MAX_SRC}, cap ${MAX_WIDTH}px, up to ${LIMIT || "∞"} upgrades / ${MAX_ARTISTS} artists`);
+
+  let scanned = 0, lastCompleted = cursor, pageCursor = cursor;
+  outer:
+  for (;;) {
+    const { data: rows, error } = pageCursor
+      ? await supabase.from("artists").select("name").gt("name", pageCursor).order("name", { ascending: true }).limit(25)
+      : await supabase.from("artists").select("name").order("name", { ascending: true }).limit(25);
+    if (error) throw error;
+    if (!rows?.length) { console.log("Reached the end of the artist list."); break; }
+    for (const { name } of rows) {
+      if (scanned >= MAX_ARTISTS) break outer;
+      scanned++;
+      pageCursor = name;
+      const { data: artRows, error: e2 } = await supabase.from("artworks").select(cols)
+        .eq("artist_display", name).lt("img_width", MAX_SRC).limit(500);
+      if (e2) { console.log(`  (skip ${name}: ${e2.message})`); lastCompleted = name; continue; }
+      if (artRows?.length) {
+        console.log(`-- ${name}: ${artRows.length} candidate(s)`);
+        if (await runBatch(artRows)) break outer; // LIMIT hit mid-artist — don't mark them done
+      }
+      lastCompleted = name;
+    }
+  }
+  console.log(`\nREUP ARTIST WALK result: ${up} upgraded · scanned ${scanned} artist(s) · next run resumes after "${lastCompleted}"`);
+  if (lastCompleted) {
+    mkdirSync(dirname(CURSOR_FILE), { recursive: true });
+    writeFileSync(CURSOR_FILE, lastCompleted + "\n");
+  }
+} else if (process.env.REUP_DAILY) {
   // Nightly incremental sweep. Take the most popular still-low-res works that
   // haven't been checked in COOLDOWN days, attempt an upgrade, and stamp
   // reup_checked_at either way so we walk the whole catalog once, then re-check
