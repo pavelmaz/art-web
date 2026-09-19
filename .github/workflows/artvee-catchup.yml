@@ -22,7 +22,7 @@ name: Artvee artist catch-up
 
 on:
   schedule:
-    - cron: "9 10 19 9 *" # TEMP: one-off live test today, revert to "0 4 * * *" after
+    - cron: "0 4 * * *"
   workflow_dispatch:
     inputs:
       batch_size:

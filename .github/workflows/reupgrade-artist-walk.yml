@@ -26,7 +26,7 @@ name: Reupgrade artist walk
 
 on:
   schedule:
-    - cron: "11 10 19 9 *" # TEMP: one-off live test today, revert to "0 6 * * *" after
+    - cron: "0 6 * * *"
   workflow_dispatch:
     inputs:
       limit:
