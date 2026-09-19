@@ -94,6 +94,25 @@ jobs:
             echo "No new artists today — nothing to backfill."
           fi
 
+      # enrich-artists' default mode grabs "any 3 artists with null bio, no
+      # ordering" against a several-hundred-deep backlog — today's new
+      # artists could wait days for the blind loop below to reach them by
+      # chance. Target them directly first (19 Sep 2026 fix, after Edward
+      # Penfield shipped live with a portrait but no bio).
+      - name: Bios for today's new artists (targeted)
+        run: |
+          NAMES="$(cat /tmp/artvee-batch-names.txt 2>/dev/null || true)"
+          if [ -n "$NAMES" ]; then
+            BASE="${NEXT_PUBLIC_SUPABASE_URL%/}/functions/v1"
+            BODY=$(node -e "console.log(JSON.stringify({names: process.argv[1].split('|')}))" "$NAMES")
+            resp=$(curl -s -m 280 -X POST "$BASE/enrich-artists" \
+              -H "Authorization: Bearer $SUPABASE_SERVICE_KEY" -H "apikey: $SUPABASE_SERVICE_KEY" \
+              -H "Content-Type: application/json" -d "$BODY")
+            echo "enrich-artists (targeted): $resp"
+          else
+            echo "No new artists today — nothing to target."
+          fi
+
       - name: Enrich (Prado-style descriptions + bios, 10 locales)
         run: |
           BASE="${NEXT_PUBLIC_SUPABASE_URL%/}/functions/v1"
