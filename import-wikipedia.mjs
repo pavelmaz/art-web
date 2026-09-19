@@ -290,10 +290,11 @@ async function fileInfo(fileTitle, canonicalArtistHint = "") {
   const data = await commons({
     action: "query",
     titles: fileTitle,
-    prop: "imageinfo",
+    prop: "imageinfo|categories",
     iiprop: "url|size|extmetadata",
     // Thumb URL for formats browsers can't render (TIFF) — see imageUrl below.
     iiurlwidth: "1920",
+    cllimit: "100",
   });
   const pages = data?.query?.pages ?? {};
   const page = Object.values(pages)[0];
@@ -304,6 +305,16 @@ async function fileInfo(fileTitle, canonicalArtistHint = "") {
   const license = stripHtml(meta.LicenseShortName?.value || meta.License?.value || "");
   if (!/public domain|^pd\b|pd-|cc0/i.test(license)) {
     return { skip: `license not PD/CC0: "${license || "unknown"}" (${fileTitle})` };
+  }
+  // Commons tags gallery/auction photos that show the physical frame around
+  // the canvas — reject these outright rather than showing a wall-mounted
+  // photo as the artwork (19 Sep 2026: caught on Antonio Diziani's "The
+  // Laundry House"). Catches only files Commons itself has tagged; it is not
+  // a general frame detector (no vision check here), so some framed photos
+  // still slip through — see the memory note on eyeballing thumbs.
+  const categories = (page?.categories ?? []).map((c) => c.title || "");
+  if (categories.some((c) => /framed paintings?/i.test(c))) {
+    return { skip: `Commons-tagged as framed (${fileTitle})` };
   }
   if ((ii.width ?? 0) < MIN_WIDTH) {
     return { skip: `too small: ${ii.width}px wide (${fileTitle})` };
