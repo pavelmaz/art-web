@@ -118,16 +118,22 @@ export function DownloadInterstitial({
           </div>
         </div>
 
-        {/* Deliberately identical to the Max Size row behind the modal — same
-            green, same words. Two different-looking buttons for one action
-            reads as two different offers. The line beneath adds the catalogue;
-            no price, since the plan choice belongs on the Pro page. */}
+        {/* Restored 19 Sep 2026: "Download Max" + padlock here specifically —
+            the interstitial is the upsell moment, so the lock reads as "this
+            one needs Pro" rather than a plain, unexplained second Download
+            button. The Max Size row behind the modal stays plain "Download"
+            (unchanged) — this wording/icon is scoped to the modal only via
+            the separate dlMaxCta key. */}
         <Link
           href={slug ? `${fineArtProPath(locale)}?art=${encodeURIComponent(slug)}` : fineArtProPath(locale)}
           onClick={() => track("interstitial_upgrade_click", { artwork: title, locale })}
-          className="mt-3 flex h-[38px] w-full items-center justify-center rounded-md bg-gradient-to-br from-[#4CAF50] to-[#1e9e57] text-sm font-medium text-white shadow-[0_6px_18px_rgba(76,175,80,0.4)] transition hover:brightness-110"
+          className="mt-3 flex h-[38px] w-full items-center justify-center gap-1.5 rounded-md bg-gradient-to-br from-[#4CAF50] to-[#1e9e57] text-sm font-medium text-white shadow-[0_6px_18px_rgba(76,175,80,0.4)] transition hover:brightness-110"
         >
-          {getT(locale).downloadMaxCta}
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <rect x="4" y="10" width="16" height="11" rx="2" />
+            <path d="M8 10V7a4 4 0 0 1 8 0v3" />
+          </svg>
+          {getT(locale).dlMaxCta}
         </Link>
         <p className="mt-1.5 text-center text-[11px] text-[#9a9a9a]">
           {t.dlPlusCatalog}

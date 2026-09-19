@@ -63,6 +63,7 @@ export const translations = {
     insightsLimitCta: 'Become Pro',
     downloadMaxCta: 'Download',
     // Download interstitial (upsell modal before a free download)
+    dlMaxCta: 'Download Max',
     dlHeadline: `You're downloading 6% of this painting`,
     dlOf: 'of',
     dlFree: 'Free',
@@ -138,6 +139,7 @@ export const translations = {
     insightsLimitBody: 'Ya usaste tu Descubrir gratuito. Hazte Fine Art Free Pro para obtener información ilimitada en cada obra.',
     insightsLimitCta: 'Hazte Pro',
     downloadMaxCta: 'Descargar',
+    dlMaxCta: 'Descargar Máx.',
     // Download interstitial (upsell modal before a free download)
     dlHeadline: 'Estás descargando el 6% de esta pintura',
     dlOf: 'de',
@@ -214,6 +216,7 @@ export const translations = {
     insightsLimitBody: 'Você já usou o seu Descobrir gratuito. Torne-se Fine Art Free Pro para informações ilimitadas em todas as obras.',
     insightsLimitCta: 'Torne-se Pro',
     downloadMaxCta: 'Baixar',
+    dlMaxCta: 'Baixar Máx.',
     // Download interstitial (upsell modal before a free download)
     dlHeadline: 'Você está baixando 6% desta pintura',
     dlOf: 'de',
@@ -293,6 +296,7 @@ export const translations = {
     insightsLimitBody: '無料の「発見」を使い切りました。Fine Art Free Pro になると、すべての作品で無制限にインサイトを利用できます。',
     insightsLimitCta: 'Proになる',
     downloadMaxCta: 'ダウンロード',
+    dlMaxCta: '最大画質でダウンロード',
     // Download interstitial (upsell modal before a free download)
     dlHeadline: 'この絵画の6%をダウンロードしています',
     dlOf: '/',
@@ -370,6 +374,7 @@ export const translations = {
     insightsLimitBody: 'Vous avez utilisé votre Découverte gratuite. Passez à Fine Art Free Pro pour des informations illimitées sur chaque œuvre.',
     insightsLimitCta: 'Devenir Pro',
     downloadMaxCta: 'Télécharger',
+    dlMaxCta: 'Télécharger Max',
     // Download interstitial (upsell modal before a free download)
     dlHeadline: 'Vous téléchargez 6% de cette peinture',
     dlOf: 'sur',
@@ -447,6 +452,7 @@ export const translations = {
     insightsLimitBody: 'Sie haben Ihr kostenloses Entdecken genutzt. Werden Sie Fine Art Free Pro für unbegrenzte Einblicke zu jedem Kunstwerk.',
     insightsLimitCta: 'Pro werden',
     downloadMaxCta: 'Herunterladen',
+    dlMaxCta: 'Max herunterladen',
     // Download interstitial (upsell modal before a free download)
     dlHeadline: 'Sie laden 6% dieses Gemäldes herunter',
     dlOf: 'von',
@@ -524,6 +530,7 @@ export const translations = {
     insightsLimitBody: 'Hai usato il tuo Scopri gratuito. Passa a Fine Art Free Pro per approfondimenti illimitati su ogni opera.',
     insightsLimitCta: 'Diventa Pro',
     downloadMaxCta: 'Scarica',
+    dlMaxCta: 'Scarica Max',
     // Download interstitial (upsell modal before a free download)
     dlHeadline: 'Stai scaricando il 6% di questo dipinto',
     dlOf: 'su',
@@ -600,6 +607,7 @@ export const translations = {
     insightsLimitBody: '무료 발견을 모두 사용했습니다. Fine Art Free Pro로 업그레이드하면 모든 작품에서 무제한 인사이트를 이용할 수 있습니다.',
     insightsLimitCta: 'Pro 시작하기',
     downloadMaxCta: '다운로드',
+    dlMaxCta: '최대 화질 다운로드',
     // Download interstitial (upsell modal before a free download)
     dlHeadline: '이 그림의 6%를 다운로드하고 있습니다',
     dlOf: '/',
@@ -677,6 +685,7 @@ export const translations = {
     insightsLimitBody: 'Вы использовали бесплатное «Открыть». Оформите Fine Art Free Pro для безлимитных инсайтов к каждой работе.',
     insightsLimitCta: 'Стать Pro',
     downloadMaxCta: 'Скачать',
+    dlMaxCta: 'Скачать Макс.',
     // Download interstitial (upsell modal before a free download)
     dlHeadline: 'Вы скачиваете 6% этой картины',
     dlOf: 'из',
@@ -753,6 +762,7 @@ export const translations = {
     insightsLimitBody: '您已用完免费的“发现”。升级 Fine Art Free Pro，即可在每件作品上获得无限 AI 解读。',
     insightsLimitCta: '成为 Pro',
     downloadMaxCta: '下载',
+    dlMaxCta: '下载最大尺寸',
     // Download interstitial (upsell modal before a free download)
     dlHeadline: '您正在下载这幅画作的 6%',
     dlOf: '/',
