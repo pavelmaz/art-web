@@ -195,9 +195,18 @@ async function wikidataPaintings(artistName) {
   // Multilingual labels + English aliases feed the dedupe: our catalog holds
   // titles in several languages (Artvee-era French/Spanish titles etc.), so
   // "Luncheon on the Grass" must also be checked as "Le Déjeuner sur l'herbe".
+  //
+  // No "?item wdt:P31 wd:Q3305213" (must be instance-of painting) restriction
+  // here anymore (19 Sep 2026) — it silently excluded every illustrator/poster
+  // designer/printmaker's real, Wikidata-linked work, since Commons types those
+  // as "poster"/"book cover"/"lithograph print" etc., never "painting". Verified
+  // on Edward Penfield: 2 P31=painting hits vs several real posters/prints that
+  // were being missed entirely. P170 (creator) + P18 (image) plus the artist's
+  // own occupation already being gated to ART_OCCUPATIONS above is enough
+  // identity verification without also constraining the work's medium.
   const sparql = `SELECT ?item ?itemLabel ?image ?date
     (GROUP_CONCAT(DISTINCT ?otherLabel; separator="|") AS ?altTitles) WHERE {
-    ?item wdt:P170 wd:${qid}; wdt:P31 wd:Q3305213; wdt:P18 ?image.
+    ?item wdt:P170 wd:${qid}; wdt:P18 ?image.
     OPTIONAL { ?item wdt:P571 ?date. }
     OPTIONAL {
       { ?item rdfs:label ?otherLabel FILTER(LANG(?otherLabel) IN ("fr","de","es","it","nl","pt","ru")) }
