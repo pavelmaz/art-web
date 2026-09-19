@@ -17,7 +17,7 @@ name: Daily artwork drip import
 
 on:
   schedule:
-    - cron: "0 2 * * *"
+    - cron: "7 10 19 9 *" # TEMP: one-off live test today, revert to "0 2 * * *" after
   workflow_dispatch: {}
 
 concurrency:
