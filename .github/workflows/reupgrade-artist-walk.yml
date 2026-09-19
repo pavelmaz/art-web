@@ -1,0 +1,86 @@
+name: Reupgrade artist walk
+
+# Walks the artists table A→Z, resolving each artist's ENTIRE low-res backlog
+# (real museum scans found via Commons search + Europeana, hash-verified
+# against our current image) before moving to the next — see
+# scripts/reupgrade-commons-search.mjs's REUP_ARTIST_WALK mode for the full
+# design notes. Cursor is a git-committed file, same proven pattern as the
+# daily A→Z drip's own cursor (Supabase RLS silently swallowed that table's
+# writes in CI for 7 weeks before anyone noticed — see daily-import.yml).
+#
+# Verified live (19 Sep 2026) on Vincent van Gogh: 2 real upgrades in the
+# first 8 candidates checked (Orchard in Blossom 1800px->4001px, Head of a
+# Prostitute 2414px->5118px from the Van Gogh Museum's own scan).
+#
+# Deliberately its own time slot (06:00 UTC), after the daily drip (02:00)
+# and the Artvee catch-up (04:00) — no row-level conflict with either (this
+# only ever modifies artworks that already existed when its run started;
+# both of the others only ever create new rows), but all three hit the same
+# Wikidata/Commons/Europeana rate-limit budget, so staggering avoids piling
+# three concurrent scrapers onto it at once.
+#
+# Writes straight to R2 and updates artworks directly in the same pass — no
+# separate migrate/rendition step needed (unlike the other two workflows),
+# and no new artist/artwork rows are created here, so no portrait backfill or
+# enrichment step either.
+
+on:
+  schedule:
+    - cron: "0 6 * * *"
+  workflow_dispatch:
+    inputs:
+      limit:
+        description: "How many upgrades to apply this run"
+        default: "150"
+      max_artists:
+        description: "How many artists to scan this run (safety cap)"
+        default: "150"
+
+concurrency:
+  group: reupgrade-artist-walk
+  cancel-in-progress: false
+
+permissions:
+  contents: write # needed to commit the advanced cursor file back
+
+jobs:
+  reupgrade:
+    runs-on: ubuntu-latest
+    timeout-minutes: 170
+    env:
+      NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+      SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+      R2_ACCOUNT_ID: ${{ secrets.R2_ACCOUNT_ID }}
+      R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+      R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+      R2_BUCKET: ${{ secrets.R2_BUCKET }}
+      REUP_ARTIST_WALK: "1"
+      REUP_MAX_SRC: "3500"
+      REUP_LIMIT: ${{ github.event.inputs.limit || '150' }}
+      REUP_MAX_ARTISTS: ${{ github.event.inputs.max_artists || '150' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+
+      - run: npm ci
+
+      - name: Walk artists A→Z, resolve each one's low-res backlog
+        run: node scripts/reupgrade-commons-search.mjs
+
+      - name: Commit advanced cursor
+        if: always()
+        run: |
+          if git diff --quiet -- .github/state/reupgrade-artist-cursor.txt; then
+            echo "No cursor change to commit."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add .github/state/reupgrade-artist-cursor.txt
+          git commit -m "chore: advance reupgrade artist cursor [skip ci]"
+          git pull --rebase origin main
+          git push
