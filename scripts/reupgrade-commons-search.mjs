@@ -187,6 +187,43 @@ async function europeanaCandidates(row) {
   return out;
 }
 
+/**
+ * Van Gogh Museum's own collection — discovered live 20 Sep 2026 while
+ * investigating why the artist walk's Van Gogh hit rate was so low: their
+ * frontend (vangoghmuseum.nl/en/collection) is backed by a real, undocumented
+ * but CORS-open, no-auth-required search endpoint and an IIIF Image API 3.0
+ * server on iiif.micr.io. This is the single richest source for exactly this
+ * artist — verified real (org confirmed "Van Gogh Museum" in info.json, native
+ * resolutions in the thousands of px, e.g. Sunflowers at 6133x8061). NOT an
+ * officially documented third-party API (no /developers page found) — same
+ * caution as any scraped endpoint: gentleFetch throttling, VGM-only, small
+ * request volume. Unlike Europeana, IIIF's info.json gives real dimensions
+ * upfront, so this behaves like a Commons candidate (dims-gated before any
+ * image download), not a deferred-dims aggregator.
+ */
+async function vanGoghMuseumCandidates(row) {
+  if (!/van gogh/i.test(row.artist_display || "")) return [];
+  if (!row.title) return [];
+  const q = new URLSearchParams({ q: row.title, from: "0" });
+  let html;
+  try {
+    html = await (await gentleFetch(`https://www.vangoghmuseum.nl/en/collection/search?${q}`)).text();
+  } catch { return []; }
+  const ids = [...new Set([...html.matchAll(/iiif\.micr\.io\/([A-Za-z0-9]+)\/full\//g)].map((m) => m[1]))];
+  const out = [];
+  for (const id of ids.slice(0, 5)) {
+    let info;
+    try { info = await (await gentleFetch(`https://iiif.micr.io/${id}/info.json`)).json(); } catch { continue; }
+    if (!info?.width || !info?.height) continue;
+    out.push({
+      source: "vgm", name: `VGM ${id}`, width: info.width, height: info.height,
+      thumb: `https://iiif.micr.io/${id}/full/400,/0/default.jpg`,
+      url: `https://iiif.micr.io/${id}/full/max/0/default.jpg`,
+    });
+  }
+  return out;
+}
+
 async function reupgrade(row) {
   const ourW = row.img_width, ourH = row.img_height;
   if (!ourW || !ourH) return { skip: "no dims" };
@@ -212,6 +249,15 @@ async function reupgrade(row) {
     const aspOff = Math.abs(info.width / info.height - ourAspect) / ourAspect;
     if (aspOff > ASPECT_TOL) continue;
     cands.push({ source: "commons", name, ...info, aspOff });
+  }
+  if (!row.__forcedFile) {
+    let vgm = []; try { vgm = await vanGoghMuseumCandidates(row); } catch { /* source down */ }
+    for (const c of vgm) {
+      if (c.width < ourW * MIN_GAIN) continue;
+      const aspOff = Math.abs(c.width / c.height - ourAspect) / ourAspect;
+      if (aspOff > ASPECT_TOL) continue;
+      cands.push({ ...c, aspOff });
+    }
   }
   cands.sort((a, b) => b.width - a.width);
 
