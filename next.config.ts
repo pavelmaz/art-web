@@ -39,14 +39,18 @@ function buildLocalePathRedirects() {
         });
         continue;
       }
-      redirects.push({
-        source: `${prefix}/${enSeg}/:path*`,
-        destination: `${prefix}/${locSeg}/:path*`,
-        permanent: true,
-      });
+      // Exact hub first, then sub-paths with `:path+` (one or more segments).
+      // A leading `:path*` rule matched the bare hub with an EMPTY param: Next
+      // substituted "" (→ `/es/obras/`, then a second hop to strip the slash),
+      // while the Cloudflare adapter left the literal `:path*` in the Location.
       redirects.push({
         source: `${prefix}/${enSeg}`,
         destination: `${prefix}/${locSeg}`,
+        permanent: true,
+      });
+      redirects.push({
+        source: `${prefix}/${enSeg}/:path+`,
+        destination: `${prefix}/${locSeg}/:path+`,
         permanent: true,
       });
     }
