@@ -69,6 +69,16 @@ function looksLikeCrawler(ua: string): boolean {
 }
 
 export async function middleware(request: NextRequest) {
+  // One canonical host: everything (canonicals, hreflang, sitemaps) says the
+  // bare domain, so www must not serve a duplicate copy of the site.
+  if (request.headers.get("host") === "www.fineartfree.com") {
+    const canonical = request.nextUrl.clone();
+    canonical.protocol = "https:";
+    canonical.host = "fineartfree.com";
+    canonical.port = "";
+    return NextResponse.redirect(canonical, 301);
+  }
+
   const ip =
     request.headers.get("x-forwarded-for")?.split(",")[0].trim() ??
     request.headers.get("x-real-ip") ??
