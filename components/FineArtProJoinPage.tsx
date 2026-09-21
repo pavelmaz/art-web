@@ -3,8 +3,8 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 
 import { FineArtProJoinAuth } from "@/components/FineArtProJoinAuth";
-import { currencyForCountry, localizedProCopy } from "@/lib/currency";
-import { fineArtProJoinPath, fineArtProPath } from "@/lib/fineart-pro-path";
+import { currencyForCountry, localizedProCopy, priceAnchors } from "@/lib/currency";
+import { fineArtProJoinPath, fineArtProPath, PROMO_COUPON_ID } from "@/lib/fineart-pro-path";
 import { getFineArtProT } from "@/lib/fineart-pro-translations";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import type { Locale } from "@/lib/translations";
@@ -83,23 +83,41 @@ export async function FineArtProJoinPage({
     continueEmailLabel: c.joinContinueEmail,
   };
 
+  // The coupon only ever gets linked to the yearly plan (the blog banner's only
+  // link target) — a monthly URL carrying it is out of scope, not "coupon applies
+  // to nothing" by accident.
+  const couponApplied = plan === "yearly" && coupon === PROMO_COUPON_ID;
+
   // Plan-aware order summary: whichever card they clicked (yearly | monthly) is
   // echoed back with its real price, so the number never disappears at the moment
   // of commitment. Strings come from the same localized copy as the landing page.
+  //
+  // Coupon variant: `priceAnchors` (lib/currency.ts) is `localizedProCopy`'s own
+  // anchor-swap generalized with a multiplier — it must run on the RAW `baseT`,
+  // not the already-converted `c`, since once localizedProCopy has run the
+  // literal "3.75"/"45" tokens it looks for no longer exist in the string.
+  const discounted = couponApplied ? priceAnchors(baseT, currency, locale, 0.5) : null;
+
   const planCopy =
     plan === "yearly"
       ? {
           name: c.yearlyPlan,
-          price: c.yearlyPrice,
-          billing: c.yearlyBilling,
-          save: c.yearlySave,
+          price: discounted ? discounted.yearlyPrice : c.yearlyPrice,
+          originalPrice: discounted ? c.yearlyPrice : null,
+          billing: discounted ? discounted.yearlyBilling : c.yearlyBilling,
+          originalBilling: discounted ? c.yearlyBilling : null,
+          save: discounted ? c.yearlyCouponBadge : c.yearlySave,
+          couponNote: discounted ? c.yearlyCouponNote : null,
         }
       : plan === "monthly"
         ? {
             name: c.monthlyPlan,
             price: c.monthlyPrice,
+            originalPrice: null,
             billing: c.monthlyBilling,
+            originalBilling: null,
             save: null,
+            couponNote: null,
           }
         : null;
 
@@ -149,20 +167,41 @@ export async function FineArtProJoinPage({
                 <span className="text-sm font-semibold text-[#1a1a1a]">
                   {planCopy.name}
                 </span>
-                <span className="text-lg font-bold tracking-tight text-[#1a1a1a]">
-                  {planCopy.price}
+                <span className="flex items-baseline gap-2">
+                  {planCopy.originalPrice ? (
+                    <span className="text-sm text-[#9a9a9a] line-through">
+                      {planCopy.originalPrice}
+                    </span>
+                  ) : null}
+                  <span className="text-lg font-bold tracking-tight text-[#1a1a1a]">
+                    {planCopy.price}
+                  </span>
                 </span>
               </div>
               <div className="mt-1 flex items-center justify-between gap-3">
                 <span className="text-xs text-[#6b6b6b]">
+                  {planCopy.originalBilling ? (
+                    <span className="mr-1.5 text-[#b6b2a8] line-through">
+                      {planCopy.originalBilling}
+                    </span>
+                  ) : null}
                   {planCopy.billing}
                 </span>
                 {planCopy.save ? (
-                  <span className="rounded-full bg-[#e7f4e7] px-2 py-0.5 text-[11px] font-semibold text-[#2c6e30]">
+                  <span
+                    className={
+                      planCopy.originalPrice
+                        ? "rounded-full bg-gradient-to-br from-[#F5C278] to-[#E4A23C] px-2 py-0.5 text-[11px] font-bold text-[#1a1a1a]"
+                        : "rounded-full bg-[#e7f4e7] px-2 py-0.5 text-[11px] font-semibold text-[#2c6e30]"
+                    }
+                  >
                     {planCopy.save}
                   </span>
                 ) : null}
               </div>
+              {planCopy.couponNote ? (
+                <p className="mt-2 text-[11px] text-[#9a9a9a]">{planCopy.couponNote}</p>
+              ) : null}
             </div>
           ) : null}
 

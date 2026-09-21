@@ -65,16 +65,61 @@ export function localizedProCopy(c: FineArtProCopy, cur: string, locale: string)
   const m375 = fmt(3.75, cur, comma);
   const m999 = fmt(9.99, cur, comma);
   const m45 = fmt(45, cur, comma);
-  const swap = (s: string) =>
+  const swapFaq = (s: string) =>
     s.replace(/\$?\s?(3[.,]75|9[.,]99|45)(\s?USD)?/g, (_m, num: string) =>
       num[0] === "3" ? m375 : num[0] === "9" ? m999 : m45,
     );
   return {
     ...c,
-    yearlyPrice: swap(c.yearlyPrice),
-    monthlyPrice: swap(c.monthlyPrice),
-    yearlyBilling: swap(c.yearlyBilling),
-    monthlyBilling: swap(c.monthlyBilling),
-    faq: c.faq.map((f) => ({ ...f, answer: swap(f.answer) })),
+    ...priceAnchors(c, cur, locale, 1),
+    faq: c.faq.map((f) => ({ ...f, answer: swapFaq(f.answer) })),
+  };
+}
+
+/**
+ * Same anchor-swap `localizedProCopy` does, generalized with a price
+ * multiplier (1 = normal, 0.5 = the "just today" coupon) — always operating
+ * on the RAW pre-conversion copy (e.g. `getFineArtProT(locale)`), never on an
+ * already-localized `c`: once `localizedProCopy` has run, the literal
+ * "3.75"/"45" tokens this regex looks for no longer exist in the string (they
+ * were already replaced by the converted amount), so a second pass over
+ * already-converted text would silently match nothing.
+ *
+ * `cur: null` keeps the locale's own raw-copy style (the "$" prefix for en,
+ * the "NN USD" suffix style other locales use) by formatting the discounted
+ * number the same way and re-inserting it in place of the matched anchor,
+ * rather than presuming every locale's fallback uses a "$" prefix.
+ */
+export function priceAnchors(
+  baseCopy: FineArtProCopy,
+  cur: string | null,
+  locale: string,
+  multiplier: number
+): Pick<FineArtProCopy, "yearlyPrice" | "monthlyPrice" | "yearlyBilling" | "monthlyBilling"> {
+  const comma = COMMA_LOCALES.has(locale);
+  const localAnchor = (usd: number) => {
+    const value = usd * multiplier;
+    return comma
+      ? value.toFixed(2).replace(".", ",")
+      : Number.isInteger(value)
+        ? value.toFixed(0)
+        : value.toFixed(2);
+  };
+  const m375 = cur && RATES[cur] ? fmt(3.75 * multiplier, cur, comma) : null;
+  const m999 = cur && RATES[cur] ? fmt(9.99 * multiplier, cur, comma) : null;
+  const m45 = cur && RATES[cur] ? fmt(45 * multiplier, cur, comma) : null;
+  const swap = (s: string) =>
+    s.replace(/\$?\s?(3[.,]75|9[.,]99|45)(\s?USD)?/g, (whole: string, num: string) => {
+      if (cur && RATES[cur]) return num[0] === "3" ? m375! : num[0] === "9" ? m999! : m45!;
+      // No currency resolved: keep the raw copy's own dressing ($ prefix or
+      // "USD" suffix) by swapping only the numeral inside the full match.
+      const usd = num[0] === "3" ? 3.75 : num[0] === "9" ? 9.99 : 45;
+      return whole.replace(num, localAnchor(usd));
+    });
+  return {
+    yearlyPrice: swap(baseCopy.yearlyPrice),
+    monthlyPrice: swap(baseCopy.monthlyPrice),
+    yearlyBilling: swap(baseCopy.yearlyBilling),
+    monthlyBilling: swap(baseCopy.monthlyBilling),
   };
 }

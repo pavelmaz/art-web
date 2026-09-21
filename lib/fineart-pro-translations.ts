@@ -22,6 +22,9 @@ export type FineArtProCopy = {
   heroSub: string;
   yearlyBadge: string;
   yearlySave: string;
+  /** 21 Sep 2026 — coupon-test additions, join page only (not on the landing page). */
+  yearlyCouponBadge: string;
+  yearlyCouponNote: string;
   valueNote: string;
   ctaNote: string;
   compareFreeTitle: string;
@@ -110,6 +113,8 @@ const en: FineArtProCopy = {
   heroSub: "Unlimited, copyright-free, and ready for any project — personal or commercial.",
   yearlyBadge: "Best value",
   yearlySave: "Save 62%",
+  yearlyCouponBadge: "-50%",
+  yearlyCouponNote: "First year only — renews at the regular price after.",
   valueNote: "Less than the price of a single stock photo — for unlimited 4K downloads of 500,000+ artworks.",
   ctaNote: "Cancel anytime · Instant access · Secure checkout",
   compareFreeTitle: "Free",
@@ -275,6 +280,8 @@ const es: FineArtProCopy = {
   heroSub: "Ilimitadas, libres de derechos y listas para cualquier proyecto, personal o comercial.",
   yearlyBadge: "Mejor valor",
   yearlySave: "Ahorra 62%",
+  yearlyCouponBadge: "-50%",
+  yearlyCouponNote: "Solo el primer año — después se renueva al precio habitual.",
   valueNote: "Menos que el precio de una sola foto de stock — por descargas 4K ilimitadas de más de 500.000 obras.",
   ctaNote: "Cancela cuando quieras · Acceso inmediato · Pago seguro",
   compareFreeTitle: "Gratis",
@@ -389,6 +396,8 @@ const pt: FineArtProCopy = {
   heroSub: "Ilimitadas, livres de direitos e prontas para qualquer projeto, pessoal ou comercial.",
   yearlyBadge: "Melhor valor",
   yearlySave: "Economize 62%",
+  yearlyCouponBadge: "-50%",
+  yearlyCouponNote: "Apenas no primeiro ano — depois renova ao preço normal.",
   valueNote: "Menos que o preço de uma única foto de banco de imagens — por downloads 4K ilimitados de mais de 500.000 obras.",
   ctaNote: "Cancele quando quiser · Acesso imediato · Pagamento seguro",
   compareFreeTitle: "Grátis",
@@ -494,6 +503,8 @@ const ja: FineArtProCopy = {
   heroSub: "無制限・著作権フリー。個人でも商用でも、あらゆるプロジェクトにすぐ使えます。",
   yearlyBadge: "おすすめ",
   yearlySave: "62%お得",
+  yearlyCouponBadge: "-50%",
+  yearlyCouponNote: "初年度のみの割引です。翌年以降は通常価格になります。",
   valueNote: "ストック写真1枚より安く、50万点以上の作品を4Kで無制限ダウンロード。",
   ctaNote: "いつでも解約可能 · 即時アクセス · 安全な決済",
   compareFreeTitle: "無料",
@@ -601,6 +612,8 @@ const fr: FineArtProCopy = {
   heroSub: "Illimités, libres de droits et prêts pour tous vos projets, personnels ou commerciaux.",
   yearlyBadge: "Meilleure offre",
   yearlySave: "Économisez 62%",
+  yearlyCouponBadge: "-50%",
+  yearlyCouponNote: "Première année seulement — puis renouvellement au prix normal.",
   valueNote: "Moins cher qu'une seule photo de banque d'images — pour des téléchargements 4K illimités de plus de 500 000 œuvres.",
   ctaNote: "Annulable à tout moment · Accès immédiat · Paiement sécurisé",
   compareFreeTitle: "Gratuit",
@@ -714,6 +727,8 @@ const de: FineArtProCopy = {
   heroSub: "Unbegrenzt, lizenzfrei und bereit für jedes Projekt – privat oder kommerziell.",
   yearlyBadge: "Bestes Angebot",
   yearlySave: "62% sparen",
+  yearlyCouponBadge: "-50%",
+  yearlyCouponNote: "Nur im ersten Jahr — danach Verlängerung zum regulären Preis.",
   valueNote: "Günstiger als ein einzelnes Stockfoto – für unbegrenzte 4K-Downloads von über 500.000 Werken.",
   ctaNote: "Jederzeit kündbar · Sofortiger Zugang · Sichere Zahlung",
   compareFreeTitle: "Kostenlos",
@@ -826,6 +841,8 @@ const it: FineArtProCopy = {
   heroSub: "Illimitati, liberi da copyright e pronti per ogni progetto, personale o commerciale.",
   yearlyBadge: "Miglior offerta",
   yearlySave: "Risparmia il 62%",
+  yearlyCouponBadge: "-50%",
+  yearlyCouponNote: "Solo il primo anno — poi si rinnova al prezzo normale.",
   valueNote: "Meno del prezzo di una sola foto stock — per download 4K illimitati di oltre 500.000 opere.",
   ctaNote: "Disdici quando vuoi · Accesso immediato · Pagamento sicuro",
   compareFreeTitle: "Gratis",
@@ -938,6 +955,8 @@ const ko: FineArtProCopy = {
   heroSub: "무제한, 저작권 무료 — 개인이든 상업이든 모든 프로젝트에 바로 사용하세요.",
   yearlyBadge: "최고 가성비",
   yearlySave: "62% 할인",
+  yearlyCouponBadge: "-50%",
+  yearlyCouponNote: "첫 해에만 적용되며, 이후에는 정가로 갱신됩니다.",
   valueNote: "스톡 사진 한 장보다 저렴하게, 50만 점 이상의 작품을 4K로 무제한 다운로드.",
   ctaNote: "언제든 해지 가능 · 즉시 이용 · 안전한 결제",
   compareFreeTitle: "무료",
@@ -1045,6 +1064,8 @@ const ru: FineArtProCopy = {
   heroSub: "Безлимитно, без авторских ограничений и готово для любого проекта — личного или коммерческого.",
   yearlyBadge: "Выгоднее всего",
   yearlySave: "Экономия 62%",
+  yearlyCouponBadge: "-50%",
+  yearlyCouponNote: "Только первый год — далее продление по обычной цене.",
   valueNote: "Дешевле одной стоковой фотографии — за безлимитные 4K-загрузки более 500 000 работ.",
   ctaNote: "Отмена в любой момент · Мгновенный доступ · Безопасная оплата",
   compareFreeTitle: "Бесплатно",
@@ -1157,6 +1178,8 @@ const zh: FineArtProCopy = {
   heroSub: "无限量、无版权限制，随时用于任何个人或商业项目。",
   yearlyBadge: "超值之选",
   yearlySave: "省 62%",
+  yearlyCouponBadge: "-50%",
+  yearlyCouponNote: "仅限首年优惠，次年起按原价续订。",
   valueNote: "比一张图库照片还便宜，即可无限下载 40 万件作品的 4K 原图。",
   ctaNote: "随时取消 · 即时访问 · 安全支付",
   compareFreeTitle: "免费",

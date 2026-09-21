@@ -5,11 +5,10 @@ import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
 
+import { PROMO_COUPON_ID } from "@/lib/fineart-pro-path";
+
 /** Pinned by `stripe` npm major; older strings fail `tsc`. */
 const STRIPE_API_VERSION = "2026-04-22.dahlia" as const;
-
-/** 21 Sep 2026 — "just today" 50%-off-once test promo, linked from the blog banner. */
-const PROMO_COUPON_ID = "pnHLwbxS" as const;
 
 type CookieRow = { name: string; value: string; options: CookieOptions };
 
