@@ -1,6 +1,6 @@
 "use client";
 
-import { track } from "@vercel/analytics";
+import { track } from "@/lib/analytics";
 import { usePathname } from "next/navigation";
 import { useCallback, useRef, useState, type MouseEvent } from "react";
 

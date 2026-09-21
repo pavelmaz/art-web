@@ -6,6 +6,7 @@ import { FineArtProJoinAuth } from "@/components/FineArtProJoinAuth";
 import { currencyForCountry, localizedProCopy, priceAnchors } from "@/lib/currency";
 import { fineArtProJoinPath, fineArtProPath, PROMO_COUPON_ID } from "@/lib/fineart-pro-path";
 import { getFineArtProT } from "@/lib/fineart-pro-translations";
+import { requestCountry } from "@/lib/request-country";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import type { Locale } from "@/lib/translations";
 
@@ -37,7 +38,7 @@ export async function FineArtProJoinPage({
   // Match the landing page: show plan prices in the visitor's local currency
   // (Stripe Adaptive Pricing charges the same currency at checkout).
   const baseT = getFineArtProT(locale);
-  const currency = currencyForCountry((await headers()).get("x-vercel-ip-country"));
+  const currency = currencyForCountry(await requestCountry());
   const c = currency ? localizedProCopy(baseT, currency, locale) : baseT;
 
   const supabase = await createSupabaseServerClient();

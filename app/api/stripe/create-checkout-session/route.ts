@@ -3,20 +3,15 @@ import type { CookieOptions } from "@supabase/ssr";
 import { createClient } from "@supabase/supabase-js";
 import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
-import Stripe from "stripe";
 
 import { PROMO_COUPON_ID } from "@/lib/fineart-pro-path";
-
-/** Pinned by `stripe` npm major; older strings fail `tsc`. */
-const STRIPE_API_VERSION = "2026-04-22.dahlia" as const;
+import { getStripe } from "@/lib/stripe";
 
 type CookieRow = { name: string; value: string; options: CookieOptions };
 
 export async function POST(req: NextRequest) {
   try {
-    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-      apiVersion: STRIPE_API_VERSION,
-    });
+    const stripe = getStripe();
 
     const cookieStore = await cookies();
 

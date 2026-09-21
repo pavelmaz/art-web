@@ -7,11 +7,6 @@ export function getPublicSiteUrl(): string {
   if (raw) {
     return raw.startsWith("http://") || raw.startsWith("https://") ? raw : `https://${raw}`;
   }
-  const vercel = process.env.VERCEL_URL?.trim();
-  if (vercel) {
-    const host = vercel.replace(/^https?:\/\//i, "");
-    return `https://${host}`;
-  }
   return "https://fineartfree.com";
 }
 

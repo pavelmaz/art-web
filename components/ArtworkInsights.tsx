@@ -1,6 +1,6 @@
 "use client";
 
-import { track } from "@vercel/analytics";
+import { track } from "@/lib/analytics";
 import { Eye, Loader2, X } from "lucide-react";
 import {
   createContext,

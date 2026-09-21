@@ -1,6 +1,6 @@
 "use client";
 
-import { track } from "@vercel/analytics";
+import { track } from "@/lib/analytics";
 import Link from "next/link";
 import { useEffect } from "react";
 import { createPortal } from "react-dom";

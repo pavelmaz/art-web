@@ -1,0 +1,38 @@
+name: IndexNow full-catalog submit
+
+# Manual only. Replaces the old /api/indexnow-bulk route (a ~1.1M-URL job that
+# ran for minutes inside one web request). Dry run by default — tick "submit"
+# to actually send to IndexNow.
+
+on:
+  workflow_dispatch:
+    inputs:
+      submit:
+        description: "Actually submit to IndexNow (unticked = dry run, counts only)"
+        type: boolean
+        default: false
+
+concurrency:
+  group: indexnow-bulk
+  cancel-in-progress: false
+
+jobs:
+  submit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+      SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+      # IndexNow key defaults to public/faf-indexnow-*.txt (it's public by design).
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+
+      - run: npm ci
+
+      - name: Build URL list and submit
+        run: npx tsx scripts/indexnow-bulk.mts ${{ inputs.submit && '--submit' || '' }}

@@ -18,7 +18,12 @@ export function getStripe(): Stripe {
     if (!key) {
       throw new Error("STRIPE_SECRET_KEY is not set");
     }
-    stripeSingleton = new Stripe(key, { apiVersion: API_VERSION });
+    // Fetch-based HTTP client instead of Node's `http`: identical on Node, and
+    // required for the Cloudflare Workers runtime (no `http` module there).
+    stripeSingleton = new Stripe(key, {
+      apiVersion: API_VERSION,
+      httpClient: Stripe.createFetchHttpClient(),
+    });
   }
   return stripeSingleton;
 }

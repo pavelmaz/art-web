@@ -39,7 +39,13 @@ export async function POST(req: NextRequest) {
 
   let event: Stripe.Event;
   try {
-    event = getStripe().webhooks.constructEvent(body, sig, process.env.STRIPE_WEBHOOK_SECRET!);
+    // Async variant: the sync `constructEvent` needs Node's crypto and throws
+    // under Stripe's worker build (SubtleCrypto is async-only). Same result on Node.
+    event = await getStripe().webhooks.constructEventAsync(
+      body,
+      sig,
+      process.env.STRIPE_WEBHOOK_SECRET!
+    );
   } catch {
     return NextResponse.json({ error: "Invalid signature" }, { status: 400 });
   }

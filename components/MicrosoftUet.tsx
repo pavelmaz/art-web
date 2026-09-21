@@ -4,6 +4,8 @@ import Script from "next/script";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 
+import { AD_CONSENT_KEY } from "@/lib/analytics";
+
 /**
  * Microsoft Advertising UET tag (site-wide) + minimal ad-cookie consent banner.
  *
@@ -15,7 +17,7 @@ import { useEffect, useState } from "react";
  * Microsoft can attribute ad-click conversions (msclkid cookie).
  */
 const UET_TAG_ID = "343261041";
-const CONSENT_KEY = "faf-ad-consent";
+const CONSENT_KEY = AD_CONSENT_KEY;
 
 declare global {
   interface Window {
@@ -61,6 +63,12 @@ export function MicrosoftUet() {
     if (state === "granted") {
       window.uetq = window.uetq ?? [];
       window.uetq.push("consent", "update", { ad_storage: "granted" });
+      window.gtag?.("consent", "update", {
+        analytics_storage: "granted",
+        ad_storage: "granted",
+        ad_user_data: "granted",
+        ad_personalization: "granted",
+      });
     }
     setShowBanner(false);
   };

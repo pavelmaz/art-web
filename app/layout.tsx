@@ -5,6 +5,7 @@ import { headers } from "next/headers";
 import { Analytics } from "@vercel/analytics/next";
 
 import Header from "@/components/Header";
+import { GoogleAnalytics } from "@/components/GoogleAnalytics";
 import { MicrosoftUet } from "@/components/MicrosoftUet";
 import { getCachedGenresForBrowse } from "@/lib/browse-genres";
 import { COMMERCIAL_USE_PATHS, COMMERCIAL_USE_FOOTER_LABEL } from "@/lib/commercial-use-landing";
@@ -133,6 +134,7 @@ export default async function RootLayout({
           </div>
         </footer>
         <Analytics />
+        <GoogleAnalytics />
         <MicrosoftUet />
       </body>
     </html>

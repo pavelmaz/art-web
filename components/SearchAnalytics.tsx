@@ -1,6 +1,6 @@
 "use client";
 
-import { track } from "@vercel/analytics";
+import { track } from "@/lib/analytics";
 import { useEffect } from "react";
 
 type SearchAnalyticsProps = {
