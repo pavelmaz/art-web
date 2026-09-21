@@ -96,7 +96,15 @@ export async function middleware(request: NextRequest) {
     return new NextResponse("Forbidden", { status: 403 });
   }
 
-  if (await shouldRateLimit(ip, userAgent)) {
+  // Rate limiting applies ONLY to visitors geolocated in China (decision 21 Sep
+  // 2026 — the scraper farms originate there; nobody else is ever limited). Router
+  // prefetches (`next-router-prefetch: 1`) never count: a link-heavy page fires
+  // dozens of them per minute from one visitor and they'd trip the budget so the
+  // visitor's next real click gets a 429.
+  const country = request.headers.get("cf-ipcountry") ?? request.headers.get("x-vercel-ip-country");
+  const isRouterPrefetch = request.headers.get("next-router-prefetch") === "1";
+
+  if (country === "CN" && !isRouterPrefetch && (await shouldRateLimit(ip, userAgent))) {
     return new NextResponse("Too Many Requests", {
       status: 429,
       headers: { "Retry-After": retryAfterSeconds() },

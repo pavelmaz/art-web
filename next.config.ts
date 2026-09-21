@@ -104,6 +104,10 @@ function buildTopicsCountriesRedirects() {
 }
 
 const nextConfig: NextConfig = {
+  // Re-use prefetched dynamic-page payloads for 30 s in the browser (Next's
+  // default is 0 s). Without it a tab whose links re-render keeps re-fetching the
+  // same `?_rsc=` payloads every second — one visitor was ~200 requests/min.
+  experimental: { staleTimes: { dynamic: 30 } },
   // Workers can't load sharp (native module); the only caller falls back to the
   // Cloudflare Images binding there, so swap in a stub for that build only.
   ...(process.env.OPEN_NEXT_CLOUDFLARE_BUILD

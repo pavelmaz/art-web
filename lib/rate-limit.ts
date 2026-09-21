@@ -1,6 +1,9 @@
 import { isVerifiedSearchCrawler } from "@/lib/verified-search-bot";
 
-/** Fixed-window counter per client IP (in-memory, per edge instance). */
+/** Fixed-window counter per client IP (in-memory, per edge instance).
+ *  Applied by middleware ONLY to visitors geolocated in China (decision
+ *  21 Sep 2026: the scraper farms come from there; everyone else is never
+ *  rate-limited). Router prefetches are excluded before this is consulted. */
 const RATE_LIMIT_MAX = 200;
 export const RATE_LIMIT_WINDOW_MS = 60_000;
 
@@ -41,5 +44,5 @@ export function _forceRateLimitedForTests(ip: string): void {
 export const RATE_LIMIT_CONFIG = {
   max: RATE_LIMIT_MAX,
   windowMs: RATE_LIMIT_WINDOW_MS,
-  previousMax: 45,
+  previousMax: 200,
 } as const;
