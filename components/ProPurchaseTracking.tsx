@@ -17,8 +17,8 @@ declare global {
 }
 
 /**
- * Fires the purchase conversion exactly once per Stripe session. Sends a Vercel
- * Analytics `purchase` event (your own funnel) and pushes a `purchase` event onto
+ * Fires the purchase conversion exactly once per Stripe session. Sends the GA4
+ * `purchase` event (your own funnel) and pushes a `purchase` event onto
  * window.dataLayer so any tag manager / ad pixel (Google Ads, Meta) can pick it up.
  * Rendered only after the payment has been verified server-side.
  */
@@ -34,11 +34,21 @@ export function ProPurchaseTracking({ value, currency, transactionId, plan }: Ve
     }
     sessionStorage.setItem(key, "1");
 
+    // GA4's recommended `purchase` shape: transaction_id + value + currency +
+    // items, so Monetization reports and the auto key event both light up.
     track("purchase", {
+      transaction_id: transactionId,
       value,
       currency,
       plan: plan ?? "unknown",
-      transaction_id: transactionId,
+      items: [
+        {
+          item_id: `fineart_pro_${plan ?? "unknown"}`,
+          item_name: `Fine Art Pro (${plan ?? "unknown"})`,
+          price: value,
+          quantity: 1,
+        },
+      ],
     });
 
     window.dataLayer = window.dataLayer ?? [];

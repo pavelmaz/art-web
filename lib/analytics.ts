@@ -1,5 +1,11 @@
-/** Event parameters: flat key → primitive (GA4 rejects nested objects). */
-type TrackProps = Record<string, string | number | boolean | null>;
+/** One GA4 e-commerce item (used by `purchase`). */
+export type TrackItem = { item_id: string; item_name: string; price: number; quantity: number };
+
+/**
+ * Event parameters: flat key → primitive, plus the standard `items` array GA4's
+ * e-commerce reports read from `purchase`. Nothing else may be nested.
+ */
+type TrackProps = Record<string, string | number | boolean | null | TrackItem[]>;
 
 /** localStorage key shared by the cookie banner (MicrosoftUet) and GA4 consent. */
 export const AD_CONSENT_KEY = "faf-ad-consent";

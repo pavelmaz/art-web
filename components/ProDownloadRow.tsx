@@ -23,8 +23,8 @@ type ProDownloadRowProps = {
 
 /**
  * The "max size / 4K" download row: the real hi-res file for Pro members, and an
- * upsell pitch for everyone else. Fires paywall analytics so conversion can be
- * measured (paywall_view on display, paywall_cta_click on click).
+ * upsell pitch for everyone else. Analytics: paywall_view on display and
+ * paywall_cta_click on click for non-members; download_pro for members.
  */
 export function ProDownloadRow({ locale, downloadHref, filename, glass = false, maxDims, maxSize }: ProDownloadRowProps) {
   const t = getT(locale);
@@ -38,9 +38,9 @@ export function ProDownloadRow({ locale, downloadHref, filename, glass = false, 
 
   useEffect(() => {
     if (resolved && !isPro) {
-      track("paywall_view", { source: "download_4k", locale });
+      track("paywall_view", { source: "download_4k", artwork: filename ?? "unknown", locale });
     }
-  }, [resolved, isPro, locale]);
+  }, [resolved, isPro, filename, locale]);
 
   if (isPro) {
     return (
@@ -51,6 +51,8 @@ export function ProDownloadRow({ locale, downloadHref, filename, glass = false, 
         </div>
         <a
           href={proDownloadHref}
+          // The hi-res counterpart of download_free: what paying members actually use.
+          onClick={() => track("download_pro", { source: "download_4k", artwork: filename ?? "unknown", locale })}
           className={
             glass
               ? "glass-primary inline-flex shrink-0 items-center justify-center rounded-md px-3 py-2 text-[13px] font-medium"
@@ -73,7 +75,7 @@ export function ProDownloadRow({ locale, downloadHref, filename, glass = false, 
         // Carry the artwork over so the Pro page's hero opens with the painting
         // the visitor was just looking at (filename = the artwork slug).
         href={filename ? `${fineArtProPath(locale)}?art=${encodeURIComponent(filename)}` : fineArtProPath(locale)}
-        onClick={() => track("paywall_cta_click", { source: "download_4k", locale })}
+        onClick={() => track("paywall_cta_click", { source: "download_4k", artwork: filename ?? "unknown", locale })}
         className="inline-flex shrink-0 items-center justify-center rounded-md bg-gradient-to-br from-[#4CAF50] to-[#1e9e57] px-3 py-2 text-[13px] font-medium text-white shadow-[0_6px_18px_rgba(76,175,80,0.4)] transition hover:brightness-110"
       >
         {t.downloadMaxCta}

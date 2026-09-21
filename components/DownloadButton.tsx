@@ -116,7 +116,13 @@ export function DownloadButton({
         imageUrl={imageUrl}
         maxWidth={maxWidth}
         locale={locale}
-        onClose={() => setShowInterstitial(false)}
+        onClose={() => {
+          // Backdrop click / Escape: the visitor walked away from both offers.
+          // Together with continue_free and upgrade_click this makes the three
+          // interstitial outcomes sum to interstitial_view.
+          setShowInterstitial(false);
+          track("interstitial_dismiss", { artwork: filename ?? "unknown", locale });
+        }}
         onContinue={() => {
           setShowInterstitial(false);
           track("interstitial_continue_free", { artwork: filename ?? "unknown", locale });
