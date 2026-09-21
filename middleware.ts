@@ -93,9 +93,21 @@ export async function middleware(request: NextRequest) {
 
   const { pathname } = request.nextUrl;
 
+  // The Cloudflare staging deployment lives on *.workers.dev and must never be
+  // indexed — a public mirror of ~500k pages would be duplicate content. Keyed on
+  // the host, so the production domain (Vercel today, Cloudflare later) is untouched.
+  const isStagingHost = (request.headers.get("host") ?? "").endsWith(".workers.dev");
+  if (isStagingHost && pathname === "/robots.txt") {
+    return new NextResponse("User-agent: *\nDisallow: /\n", {
+      headers: { "Content-Type": "text/plain" },
+    });
+  }
+
   // Sitemaps must stay fast and must not get hreflang Link headers (e.g. /es/sitemap/...).
   if (pathname === "/sitemap.xml" || pathname.startsWith("/sitemap/")) {
-    return NextResponse.next();
+    const sitemapResponse = NextResponse.next();
+    if (isStagingHost) sitemapResponse.headers.set("X-Robots-Tag", "noindex, nofollow");
+    return sitemapResponse;
   }
 
   // ---- Locale: honor ?lang override, then auto-redirect English URLs by browser language ----
@@ -222,6 +234,8 @@ export async function middleware(request: NextRequest) {
       response.headers.set("Link", linkHeader);
     }
   }
+
+  if (isStagingHost) response.headers.set("X-Robots-Tag", "noindex, nofollow");
 
   return response;
 }
