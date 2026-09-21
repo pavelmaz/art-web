@@ -18,13 +18,19 @@ import {
 import { SectionCtaLink } from "@/components/SectionCtaLink";
 import { ArtistChip } from "@/components/ArtistChip";
 import { supabase } from "@/lib/supabase";
-import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { getT } from "@/lib/translations";
 import { parseArtworkDeathYear } from "@/lib/artwork-death-year";
 import { absoluteUrl, artworkDetailImageUrl, artworkGridImageUrl, artworkImageUrl, artworkMaxSize, artworkMaxSpecs, artworkMediumKind, artworkOgImageUrl, artworkOriginalUrl, artworkStandardSize, artworkStandardSpecs, generateAltText, slugify } from "@/lib/utils";
 import type { Artwork } from "@/types/artwork";
 
 export const revalidate = 86400;
+
+// Empty list on purpose: nothing is prerendered at build time, but exporting this
+// is what lets Next cache each slug on first request (ISR). Without it a dynamic
+// route renders on every hit — which is why these pages were never cached.
+export async function generateStaticParams(): Promise<{ slug: string }[]> {
+  return [];
+}
 
 type ArtworkRow = {
   id: string;
@@ -283,19 +289,6 @@ export default async function ArtworkDetailPage({ params }: ArtworkPageProps) {
     notFound();
   }
 
-  const sessionSupabase = await createSupabaseServerClient();
-  const {
-    data: { user },
-  } = await sessionSupabase.auth.getUser();
-  let isPro = false;
-  if (user) {
-    const { data: profile } = await sessionSupabase
-      .from("profiles")
-      .select("subscription_status")
-      .eq("id", user.id)
-      .maybeSingle();
-    isPro = profile?.subscription_status === "active";
-  }
 
   const t = getT("en");
   const imageUrl = artworkDetailImageUrl(artwork);
@@ -502,7 +495,7 @@ export default async function ArtworkDetailPage({ params }: ArtworkPageProps) {
                   <DownloadButton imageUrl={downloadImageUrl} filename={artwork.slug} title={artwork.title} maxWidth={artwork.img_width ?? null} variant="glass" />
                 </div>
 
-                <ProDownloadRow locale="en" isPro={isPro} downloadHref={maxDownloadHref} filename={artwork.slug} glass maxDims={artworkMaxSpecs(artwork)} maxSize={artworkMaxSize(artwork)} />
+                <ProDownloadRow locale="en" downloadHref={maxDownloadHref} filename={artwork.slug} glass maxDims={artworkMaxSpecs(artwork)} maxSize={artworkMaxSize(artwork)} />
               </div>
 
               <div className="my-4 border-t border-[#e8e6e1]" />
@@ -588,7 +581,7 @@ export default async function ArtworkDetailPage({ params }: ArtworkPageProps) {
             </div>
           </aside>
 
-          <ArtworkInsightsProvider artwork={artwork} locale="en" isPro={isPro}>
+          <ArtworkInsightsProvider artwork={artwork} locale="en">
             <div className="order-1 flex-1 space-y-4">
               <div>
                 {imageUrl ? (

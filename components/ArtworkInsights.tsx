@@ -1,6 +1,7 @@
 "use client";
 
 import { track } from "@/lib/analytics";
+import { useIsPro } from "@/lib/use-is-pro";
 import { Eye, Loader2, X } from "lucide-react";
 import {
   createContext,
@@ -149,14 +150,18 @@ function markFreeInsightUsed(): void {
 export function ArtworkInsightsProvider({
   artwork,
   locale,
-  isPro = false,
+  isPro: isProOverride,
   children,
 }: {
   artwork: ArtworkRow;
   locale: Locale;
+  /** Explicit value (personalised pages like guides); omitted on cacheable
+   *  artwork pages, which detect it client-side instead. */
   isPro?: boolean;
   children: ReactNode;
 }) {
+  const detected = useIsPro();
+  const isPro = isProOverride ?? detected.isPro;
   const labels = getT(locale);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);

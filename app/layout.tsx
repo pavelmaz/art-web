@@ -1,15 +1,14 @@
 import type { Metadata } from "next";
 import { Urbanist } from "next/font/google";
 import Link from "next/link";
-import { headers } from "next/headers";
 import { Analytics } from "@vercel/analytics/next";
 
 import Header from "@/components/Header";
+import { FooterCommercialLink, FooterContactLink } from "@/components/FooterLocaleLinks";
 import { GoogleAnalytics } from "@/components/GoogleAnalytics";
+import { HtmlLang } from "@/components/HtmlLang";
 import { MicrosoftUet } from "@/components/MicrosoftUet";
 import { getCachedGenresForBrowse } from "@/lib/browse-genres";
-import { COMMERCIAL_USE_PATHS, COMMERCIAL_USE_FOOTER_LABEL } from "@/lib/commercial-use-landing";
-import type { SiteLocale } from "@/lib/locale-routes";
 
 import "./globals.css";
 
@@ -43,35 +42,14 @@ export const metadata: Metadata = {
   },
 };
 
-function htmlLangFromPathname(pathname: string): string {
-  const segment = pathname.split("/")[1];
-  if (segment === "fr") return "fr";
-  if (segment === "de") return "de";
-  if (segment === "it") return "it";
-  if (segment === "ko") return "ko";
-  if (segment === "ru") return "ru";
-  if (segment === "zh") return "zh";
-  if (segment === "es") return "es";
-  if (segment === "pt") return "pt";
-  if (segment === "ja") return "ja";
-  return "en";
-}
-
+// No request-time reads (headers/cookies) in this layout: one such read here
+// makes EVERY route dynamic and uncacheable. Locale-dependent bits (html lang,
+// footer links) are derived from the path in small client components instead.
 export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const pathname = (await headers()).get("x-pathname") ?? "";
-  const htmlLang = htmlLangFromPathname(pathname);
-  const localeSeg = pathname.split("/")[1] ?? "";
-  const contactHref = ["es", "pt", "de", "fr", "it", "ja", "ko", "ru", "zh"].includes(localeSeg)
-    ? `/${localeSeg}/contact`
-    : "/contact";
-  const footerLocale = htmlLang as SiteLocale;
-  const commercialHref = COMMERCIAL_USE_PATHS[footerLocale];
-  const commercialLabel = COMMERCIAL_USE_FOOTER_LABEL[footerLocale];
-
   let browseGenres = [] as Awaited<ReturnType<typeof getCachedGenresForBrowse>>;
   try {
     browseGenres = await getCachedGenresForBrowse();
@@ -80,8 +58,9 @@ export default async function RootLayout({
   }
 
   return (
-    <html lang={htmlLang} className={`${urbanist.variable} h-full antialiased`}>
+    <html lang="en" className={`${urbanist.variable} h-full antialiased`}>
       <body className="flex min-h-full flex-col">
+        <HtmlLang />
         <Header browseGenres={browseGenres} />
         {children}
         <footer className="mt-auto bg-black text-[#a3a3a3]">
@@ -96,12 +75,7 @@ export default async function RootLayout({
               <span className="mx-2 text-[#404040]" aria-hidden>
                 |
               </span>
-              <Link
-                href={commercialHref}
-                className="text-[#a3a3a3] transition-colors hover:text-white"
-              >
-                {commercialLabel}
-              </Link>
+              <FooterCommercialLink />
               <span className="mx-2 text-[#404040]" aria-hidden>
                 |
               </span>
@@ -123,9 +97,7 @@ export default async function RootLayout({
               <span className="mx-2 text-[#404040]" aria-hidden>
                 |
               </span>
-              <Link href={contactHref} className="text-[#a3a3a3] transition-colors hover:text-white">
-                Contact
-              </Link>
+              <FooterContactLink />
             </nav>
             <hr className="mt-6 border-0 border-t border-[#262626]" />
             <p className="mt-5 text-xs leading-relaxed text-[#737373]">

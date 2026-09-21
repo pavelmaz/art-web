@@ -6,10 +6,10 @@ import { useEffect } from "react";
 
 import { fineArtProPath } from "@/lib/fineart-pro-path";
 import { getT, type Locale } from "@/lib/translations";
+import { useIsPro } from "@/lib/use-is-pro";
 
 type ProDownloadRowProps = {
   locale: Locale;
-  isPro: boolean;
   downloadHref: string;
   /** Nice download filename (e.g. the artwork slug). */
   filename?: string;
@@ -26,8 +26,10 @@ type ProDownloadRowProps = {
  * upsell pitch for everyone else. Fires paywall analytics so conversion can be
  * measured (paywall_view on display, paywall_cta_click on click).
  */
-export function ProDownloadRow({ locale, isPro, downloadHref, filename, glass = false, maxDims, maxSize }: ProDownloadRowProps) {
+export function ProDownloadRow({ locale, downloadHref, filename, glass = false, maxDims, maxSize }: ProDownloadRowProps) {
   const t = getT(locale);
+  // Resolved client-side so the artwork page itself stays cacheable (see lib/use-is-pro).
+  const { isPro, resolved } = useIsPro();
   // Route the real file through the same-origin /api/download proxy so it saves
   // instead of opening (a cross-origin <a download> is ignored by browsers).
   const proDownloadHref = downloadHref
@@ -35,10 +37,10 @@ export function ProDownloadRow({ locale, isPro, downloadHref, filename, glass = 
     : "#";
 
   useEffect(() => {
-    if (!isPro) {
+    if (resolved && !isPro) {
       track("paywall_view", { source: "download_4k", locale });
     }
-  }, [isPro, locale]);
+  }, [resolved, isPro, locale]);
 
   if (isPro) {
     return (
