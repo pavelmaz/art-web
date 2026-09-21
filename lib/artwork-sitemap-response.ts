@@ -209,10 +209,7 @@ export async function buildArtworkSitemapPageResponse(
     const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
     if (!supabaseUrl?.trim() || !supabaseKey?.trim()) {
       console.error(`[sitemap/${label}]`, page, "missing Supabase env");
-      return new Response(emptyUrlset(), {
-        status: 503,
-        headers: ARTWORK_SITEMAP_XML_HEADERS,
-      });
+      throw new Error(`[sitemap/${label}] failed for page ${rawPage} (not cached)`);
     }
 
     const supabase = makeSitemapClient(supabaseUrl, supabaseKey);
@@ -227,7 +224,7 @@ export async function buildArtworkSitemapPageResponse(
       cursor = c.cursor;
     } catch (cursorErr) {
       console.error(`[sitemap/${label}]`, page, cursorErr);
-      return new Response(emptyUrlset(), { status: 503, headers: ARTWORK_SITEMAP_XML_HEADERS });
+      throw new Error(`[sitemap/${label}] failed for page ${rawPage} (not cached)`);
     }
 
     let rows: { id: string; slug: string | null }[];
@@ -235,10 +232,7 @@ export async function buildArtworkSitemapPageResponse(
       rows = await fetchSitemapRows(supabase, "id, slug", cursor);
     } catch (rowsErr) {
       console.error(`[sitemap/${label}]`, page, rowsErr);
-      return new Response(emptyUrlset(), {
-        status: 503,
-        headers: ARTWORK_SITEMAP_XML_HEADERS,
-      });
+      throw new Error(`[sitemap/${label}] failed for page ${rawPage} (not cached)`);
     }
 
     const base = getPublicSiteUrl();
@@ -248,10 +242,7 @@ export async function buildArtworkSitemapPageResponse(
 
     if (!entries.length && page === 0) {
       console.error(`[sitemap/${label}]`, page, "no URLs returned");
-      return new Response(emptyUrlset(), {
-        status: 503,
-        headers: ARTWORK_SITEMAP_XML_HEADERS,
-      });
+      throw new Error(`[sitemap/${label}] failed for page ${rawPage} (not cached)`);
     }
 
     return new Response(buildUrlset(entries), {
@@ -260,10 +251,7 @@ export async function buildArtworkSitemapPageResponse(
     });
   } catch (err) {
     console.error(`[sitemap/${label}] fatal`, err);
-    return new Response(emptyUrlset(), {
-      status: 503,
-      headers: ARTWORK_SITEMAP_XML_HEADERS,
-    });
+    throw new Error(`[sitemap/${label}] failed for page ${rawPage} (not cached)`);
   }
 }
 
@@ -288,10 +276,7 @@ export async function buildArtworkImageSitemapPageResponse(
     const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
     if (!supabaseUrl?.trim() || !supabaseKey?.trim()) {
       console.error(`[sitemap/${label}]`, page, "missing Supabase env");
-      return new Response(emptyImageUrlset(), {
-        status: 503,
-        headers: ARTWORK_SITEMAP_XML_HEADERS,
-      });
+      throw new Error(`[sitemap/${label}] failed for page ${rawPage} (not cached)`);
     }
 
     const supabase = makeSitemapClient(supabaseUrl, supabaseKey);
@@ -306,7 +291,7 @@ export async function buildArtworkImageSitemapPageResponse(
       cursor = c.cursor;
     } catch (cursorErr) {
       console.error(`[sitemap/${label}]`, page, cursorErr);
-      return new Response(emptyImageUrlset(), { status: 503, headers: ARTWORK_SITEMAP_XML_HEADERS });
+      throw new Error(`[sitemap/${label}] failed for page ${rawPage} (not cached)`);
     }
 
     let rows: Array<{
@@ -320,10 +305,7 @@ export async function buildArtworkImageSitemapPageResponse(
       rows = await fetchSitemapRows(supabase, "id, slug, title, artist_display, image_id", cursor);
     } catch (rowsErr) {
       console.error(`[sitemap/${label}]`, page, rowsErr);
-      return new Response(emptyImageUrlset(), {
-        status: 503,
-        headers: ARTWORK_SITEMAP_XML_HEADERS,
-      });
+      throw new Error(`[sitemap/${label}] failed for page ${rawPage} (not cached)`);
     }
 
     const base = getPublicSiteUrl();
@@ -354,10 +336,7 @@ export async function buildArtworkImageSitemapPageResponse(
 
     if (!entries.length && page === 0) {
       console.error(`[sitemap/${label}]`, page, "no URLs returned");
-      return new Response(emptyImageUrlset(), {
-        status: 503,
-        headers: ARTWORK_SITEMAP_XML_HEADERS,
-      });
+      throw new Error(`[sitemap/${label}] failed for page ${rawPage} (not cached)`);
     }
 
     return new Response(buildImageUrlset(entries), {
@@ -366,9 +345,6 @@ export async function buildArtworkImageSitemapPageResponse(
     });
   } catch (err) {
     console.error(`[sitemap/${label}] fatal`, err);
-    return new Response(emptyImageUrlset(), {
-      status: 503,
-      headers: ARTWORK_SITEMAP_XML_HEADERS,
-    });
+    throw new Error(`[sitemap/${label}] failed for page ${rawPage} (not cached)`);
   }
 }

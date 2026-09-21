@@ -1,6 +1,6 @@
 import { escapeXml, getPublicSiteUrl } from "@/lib/sitemap-xml";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 86400;
 
 const XML_HEADERS = {
   "Content-Type": "application/xml; charset=utf-8",

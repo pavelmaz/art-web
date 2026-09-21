@@ -11,20 +11,13 @@ import { supabase as blogSupabase } from "@/lib/supabase";
 import type { Locale } from "@/lib/translations";
 import { slugify } from "@/lib/utils";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 86400;
 
 
 const XML_HEADERS = {
   "Content-Type": "application/xml; charset=utf-8",
   "Cache-Control": "public, max-age=0, s-maxage=86400, stale-while-revalidate=604800",
 } as const;
-
-function emptyUrlset(): string {
-  return `<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-</urlset>
-`;
-}
 
 type SitemapEntry = {
   loc: string;
@@ -58,7 +51,7 @@ export async function GET() {
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
     const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
     if (!supabaseUrl?.trim() || !supabaseKey?.trim()) {
-      return new Response(emptyUrlset(), { status: 200, headers: XML_HEADERS });
+      throw new Error("[sitemap/static] missing Supabase env");
     }
 
     const supabase = createClient(supabaseUrl, supabaseKey);
@@ -71,7 +64,7 @@ export async function GET() {
     const { data: facets, error: facetsError } = await supabase.rpc("sitemap_facets");
     if (facetsError) {
       console.error("[sitemap/static] facets", facetsError);
-      return new Response(emptyUrlset(), { status: 200, headers: XML_HEADERS });
+      throw facetsError;
     }
 
     const f = (facets ?? {}) as {
@@ -271,7 +264,8 @@ export async function GET() {
 
     return new Response(buildUrlset(entries), { status: 200, headers: XML_HEADERS });
   } catch (err) {
+    // Throw rather than serve an empty urlset: an ISR route would cache it for 24h.
     console.error("[sitemap/static] fatal", err);
-    return new Response(emptyUrlset(), { status: 200, headers: XML_HEADERS });
+    throw err;
   }
 }

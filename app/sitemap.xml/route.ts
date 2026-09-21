@@ -2,18 +2,11 @@ import { artworkSitemapPageCount } from "@/lib/artwork-sitemap-response";
 import { getPublicSiteUrl, escapeXml } from "@/lib/sitemap-xml";
 import { supabase } from "@/lib/supabase";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 86400;
 
 // No <lastmod> on index entries. The old value was one constant stamped on all
 // 2,419 children; Google uses lastmod only when "consistently and verifiably
 // accurate", and an identical date across the board is the opposite signal.
-
-function emptySitemapIndex(): string {
-  return `<?xml version="1.0" encoding="UTF-8"?>
-<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-</sitemapindex>
-`;
-}
 
 export async function GET() {
   try {
@@ -60,13 +53,9 @@ export async function GET() {
         "Cache-Control": "public, max-age=0, s-maxage=86400, stale-while-revalidate=604800",
       },
     });
-  } catch {
-    return new Response(emptySitemapIndex(), {
-      status: 200,
-      headers: {
-        "Content-Type": "application/xml; charset=utf-8",
-        "Cache-Control": "public, max-age=0, s-maxage=86400, stale-while-revalidate=604800",
-      },
-    });
+  } catch (err) {
+    // Throw rather than serve an empty index: an ISR route would cache it for 24h.
+    console.error("[sitemap.xml]", err);
+    throw err;
   }
 }

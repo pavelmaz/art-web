@@ -4,7 +4,7 @@ import {
   LOCALE_HUB_SITEMAP_XML_HEADERS,
 } from "@/lib/locale-hub-sitemap";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 86400;
 
 export async function GET() {
   return new Response(buildUrlset(localeHubSitemapEntries("it")), {
