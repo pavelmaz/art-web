@@ -25,7 +25,9 @@ export async function GET() {
     for (let i = 0; i < pageCount; i++) {
       locs.push(`${base}/sitemap/ja/artworks/${i}`);
     }
-    for (const loc of ["fr", "de", "it", "ko", "ru", "zh"] as const) {
+    // No "zh": that locale is deliberately offline (403 in middleware.ts), so
+    // its sitemaps are not advertised.
+    for (const loc of ["fr", "de", "it", "ko", "ru"] as const) {
       for (let i = 0; i < pageCount; i++) {
         locs.push(`${base}/sitemap/${loc}/artworks/${i}`);
       }

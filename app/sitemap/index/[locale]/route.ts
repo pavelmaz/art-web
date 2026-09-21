@@ -24,7 +24,8 @@ export async function generateStaticParams(): Promise<{ locale: string }[]> {
  * en additionally carries /sitemap/static (hubs + artists + blog, EN-only
  * today) and the image sitemaps; non-EN locales carry their small hub file.
  */
-const LOCALES = ["en", "es", "pt", "ja", "fr", "de", "it", "ko", "ru", "zh"] as const;
+// No "zh": that locale is deliberately offline (403 in middleware.ts); its index 404s.
+const LOCALES = ["en", "es", "pt", "ja", "fr", "de", "it", "ko", "ru"] as const;
 type IndexLocale = (typeof LOCALES)[number];
 
 const XML_HEADERS = {

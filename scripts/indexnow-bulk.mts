@@ -18,6 +18,8 @@ import { slugify } from "../lib/utils";
 
 const BASE = "https://fineartfree.com";
 const SUBMIT = process.argv.includes("--submit");
+// /zh is deliberately offline (403) — never submit it.
+const SUBMIT_LOCALES = HREFLANG_LOCALES.filter((l) => l !== "zh");
 const BATCH = 10000; // IndexNow's per-request cap
 
 const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -50,7 +52,7 @@ function detailLoc(locale: SiteLocale, kind: "artworks" | "artists", slug: strin
 
 const allUrls: string[] = [];
 
-for (const locale of HREFLANG_LOCALES) {
+for (const locale of SUBMIT_LOCALES) {
   if (locale === "en") {
     allUrls.push(BASE, `${BASE}/artworks`, `${BASE}/artists`, `${BASE}/museums`, `${BASE}/genres`, `${BASE}/styles`);
     continue;
@@ -83,7 +85,7 @@ for (;;) {
   for (const row of data as Array<{ id: number; slug: string | null; artist_display: string | null }>) {
     if (row.slug) {
       artworkCount++;
-      for (const locale of HREFLANG_LOCALES) allUrls.push(detailLoc(locale, "artworks", row.slug));
+      for (const locale of SUBMIT_LOCALES) allUrls.push(detailLoc(locale, "artworks", row.slug));
     }
     const artist = row.artist_display?.trim();
     if (artist && !/^https?:\/\//i.test(artist)) {
@@ -96,7 +98,7 @@ for (;;) {
 }
 
 for (const seg of artistSlugs) {
-  for (const locale of HREFLANG_LOCALES) allUrls.push(detailLoc(locale, "artists", seg));
+  for (const locale of SUBMIT_LOCALES) allUrls.push(detailLoc(locale, "artists", seg));
 }
 
 console.log(`artworks=${artworkCount} artists=${artistSlugs.size} urls=${allUrls.length}`);

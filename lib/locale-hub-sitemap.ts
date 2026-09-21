@@ -1,7 +1,7 @@
 import { LOCALE_ROUTE_CONFIG } from "@/lib/locale-routes";
 import { escapeXml, getPublicSiteUrl } from "@/lib/sitemap-xml";
 
-export const ENGLISH_PATH_LOCALE_SITEMAPS = ["fr", "de", "it", "ko", "ru", "zh"] as const;
+export const ENGLISH_PATH_LOCALE_SITEMAPS = ["fr", "de", "it", "ko", "ru"] as const;
 export type EnglishPathLocaleSitemap = (typeof ENGLISH_PATH_LOCALE_SITEMAPS)[number];
 
 export type SitemapEntry = {

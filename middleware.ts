@@ -19,8 +19,10 @@ type CookieRow = { name: string; value: string; options: CookieOptions };
 // name ignores those stale cookies; going forward only an explicit ?lang override writes it.
 const LOCALE_COOKIE = "faf_lang";
 const LOCALE_COOKIE_MAX_AGE = 60 * 60 * 24 * 365; // 1 year
+// No "zh": the Chinese locale is deliberately offline (see the /zh block below),
+// so Chinese-language browsers must not be auto-redirected into a 403.
 const SUPPORTED_LOCALES = new Set<SiteLocale>([
-  "en", "es", "pt", "ja", "fr", "de", "it", "ko", "ru", "zh",
+  "en", "es", "pt", "ja", "fr", "de", "it", "ko", "ru",
 ]);
 
 // Only these English paths have a localized twin in EVERY locale. Redirecting anything
@@ -92,6 +94,14 @@ export async function middleware(request: NextRequest) {
   }
 
   const { pathname } = request.nextUrl;
+
+  // /zh is intentionally offline (decision 21 Sep 2026): a scraper farm targeted it
+  // and the Vercel firewall has answered 403 since July. Kept in code so the same
+  // behaviour holds on any host; its sitemaps are gone as well. A platform WAF rule
+  // can sit in front of this to stop the requests before they reach the app.
+  if (pathname === "/zh" || pathname.startsWith("/zh/")) {
+    return new NextResponse("Forbidden", { status: 403 });
+  }
 
   // The Cloudflare staging deployment lives on *.workers.dev and must never be
   // indexed — a public mirror of ~500k pages would be duplicate content. Keyed on
