@@ -79,6 +79,10 @@ export type FineArtProCopy = {
   successH1: string;
   successBody: string;
   successBrowse: string;
+  /** Shown instead of the H1/body above when payment succeeded but the visitor
+   *  hasn't signed in yet — the "pay first, register after" guest-checkout flow. */
+  successRegisterH1: string;
+  successRegisterBody: string;
 };
 
 const en: FineArtProCopy = {
@@ -247,6 +251,9 @@ const en: FineArtProCopy = {
   successBody:
     "Your subscription is now active. You can now download all artworks in maximum resolution.",
   successBrowse: "Browse Artworks",
+  successRegisterH1: "One last step — create your account",
+  successRegisterBody:
+    "Your payment is confirmed. Sign in below to activate Fine Art Pro on your account.",
 };
 
 const es: FineArtProCopy = {
@@ -368,6 +375,9 @@ const es: FineArtProCopy = {
   successBody:
     "Tu suscripción está activa. Ya puedes descargar todas las obras en resolución máxima.",
   successBrowse: "Explorar obras",
+  successRegisterH1: "Un último paso — crea tu cuenta",
+  successRegisterBody:
+    "Tu pago está confirmado. Inicia sesión abajo para activar Fine Art Pro en tu cuenta.",
 };
 
 const pt: FineArtProCopy = {
@@ -475,6 +485,9 @@ const pt: FineArtProCopy = {
   successBody:
     "Sua assinatura está ativa. Agora você pode baixar todas as obras em resolução máxima.",
   successBrowse: "Explorar obras",
+  successRegisterH1: "Um último passo — crie sua conta",
+  successRegisterBody:
+    "Seu pagamento foi confirmado. Faça login abaixo para ativar o Fine Art Pro na sua conta.",
 };
 
 const ja: FineArtProCopy = {
@@ -584,6 +597,9 @@ const ja: FineArtProCopy = {
   successH1: "Fine Art Proへようこそ！",
   successBody: "サブスクリプションが有効になりました。すべての作品を最大解像度でダウンロードできます。",
   successBrowse: "作品を見る",
+  successRegisterH1: "最後のステップ — アカウントを作成",
+  successRegisterBody:
+    "お支払いは確認されました。下記からサインインしてFine Art Proをアカウントで有効化してください。",
 };
 
 const fr: FineArtProCopy = {
@@ -699,6 +715,9 @@ const fr: FineArtProCopy = {
   successBody:
     "Votre abonnement est actif. Vous pouvez télécharger toutes les œuvres en résolution maximale.",
   successBrowse: "Parcourir les œuvres",
+  successRegisterH1: "Dernière étape — créez votre compte",
+  successRegisterBody:
+    "Votre paiement est confirmé. Connectez-vous ci-dessous pour activer Fine Art Pro sur votre compte.",
 };
 
 const de: FineArtProCopy = {
@@ -813,6 +832,9 @@ const de: FineArtProCopy = {
   successBody:
     "Ihr Abo ist aktiv. Sie können alle Werke in maximaler Auflösung herunterladen.",
   successBrowse: "Werke durchstöbern",
+  successRegisterH1: "Letzter Schritt — Konto erstellen",
+  successRegisterBody:
+    "Ihre Zahlung ist bestätigt. Melden Sie sich unten an, um Fine Art Pro für Ihr Konto zu aktivieren.",
 };
 
 const it: FineArtProCopy = {
@@ -927,6 +949,9 @@ const it: FineArtProCopy = {
   successBody:
     "Il tuo abbonamento è attivo. Puoi scaricare tutte le opere alla massima risoluzione.",
   successBrowse: "Sfoglia opere",
+  successRegisterH1: "Ultimo passaggio — crea il tuo account",
+  successRegisterBody:
+    "Il tuo pagamento è confermato. Accedi qui sotto per attivare Fine Art Pro sul tuo account.",
 };
 
 const ko: FineArtProCopy = {
@@ -1036,6 +1061,8 @@ const ko: FineArtProCopy = {
   successH1: "Fine Art Pro에 오신 것을 환영합니다!",
   successBody: "구독이 활성화되었습니다. 모든 작품을 최대 해상도로 다운로드할 수 있습니다.",
   successBrowse: "작품 둘러보기",
+  successRegisterH1: "마지막 단계 — 계정 만들기",
+  successRegisterBody: "결제가 확인되었습니다. 아래에서 로그인하여 계정에서 Fine Art Pro를 활성화하세요.",
 };
 
 const ru: FineArtProCopy = {
@@ -1150,6 +1177,9 @@ const ru: FineArtProCopy = {
   successBody:
     "Подписка активна. Теперь можно скачивать все произведения в максимальном разрешении.",
   successBrowse: "Смотреть произведения",
+  successRegisterH1: "Последний шаг — создайте аккаунт",
+  successRegisterBody:
+    "Ваш платёж подтверждён. Войдите ниже, чтобы активировать Fine Art Pro в своём аккаунте.",
 };
 
 const zh: FineArtProCopy = {
@@ -1259,6 +1289,8 @@ const zh: FineArtProCopy = {
   successH1: "欢迎使用 Fine Art Pro！",
   successBody: "订阅已激活。现在可以以最高分辨率下载所有作品。",
   successBrowse: "浏览作品",
+  successRegisterH1: "最后一步 — 创建账户",
+  successRegisterBody: "您的付款已确认。请在下方登录以在您的账户中激活 Fine Art Pro。",
 };
 
 const FINE_ART_PRO_COPY: Record<Locale, FineArtProCopy> = {

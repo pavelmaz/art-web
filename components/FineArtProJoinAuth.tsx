@@ -129,7 +129,23 @@ export function FineArtProJoinAuth({ nextPath, plan, coupon, isLoggedIn, copy }:
         </div>
       ) : (
         <>
-          {/* Primary path: Google is one tap and never leaves the site. */}
+          {/* Primary path: pay first, register after — checkout no longer
+              requires an account, so this goes straight to Stripe. Signing in
+              up front remains available below for anyone who prefers it. */}
+          {plan ? (
+            <button
+              type="button"
+              disabled={busy}
+              onClick={() => void startCheckout()}
+              className="w-full rounded-lg bg-[#1a1a1a] px-4 py-3 text-sm font-medium text-white transition-colors hover:bg-black disabled:opacity-60"
+            >
+              {copy.continueCheckout}
+            </button>
+          ) : null}
+
+          {plan ? <hr className="border-t border-[#e3e0d9]" /> : null}
+
+          {/* Google is one tap and never leaves the site. */}
           <button
             type="button"
             onClick={() => void signInWithGoogle()}

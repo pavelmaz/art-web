@@ -39,9 +39,10 @@ export async function POST(req: NextRequest) {
       data: { user },
     } = await supabase.auth.getUser();
 
-    if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    // Signing in is no longer required to check out: a visitor can pay as a
+    // guest (Stripe collects the email itself) and claim/create their account
+    // afterward on the success page. A logged-in visitor keeps today's flow
+    // unchanged (Stripe Customer pre-linked via metadata.supabase_user_id).
 
     const { plan, coupon } = await req.json();
 
@@ -55,35 +56,45 @@ export async function POST(req: NextRequest) {
     // find (including ones never meant for public self-service) to a real charge.
     const appliedCoupon = coupon === PROMO_COUPON_ID ? PROMO_COUPON_ID : undefined;
 
-    const supabaseAdmin = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!,
-      { auth: { persistSession: false } }
-    );
+    let customerId: string | null | undefined;
 
-    const { data: profile } = await supabaseAdmin
-      .from("profiles")
-      .select("stripe_customer_id")
-      .eq("id", user.id)
-      .maybeSingle();
+    if (user) {
+      const supabaseAdmin = createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.SUPABASE_SERVICE_ROLE_KEY!,
+        { auth: { persistSession: false } }
+      );
 
-    let customerId = profile?.stripe_customer_id;
+      const { data: profile } = await supabaseAdmin
+        .from("profiles")
+        .select("stripe_customer_id")
+        .eq("id", user.id)
+        .maybeSingle();
 
-    if (!customerId) {
-      const customer = await stripe.customers.create({
-        email: user.email!,
-        metadata: { supabase_user_id: user.id },
-      });
-      customerId = customer.id;
-      await supabaseAdmin.from("profiles").update({ stripe_customer_id: customerId }).eq("id", user.id);
+      customerId = profile?.stripe_customer_id;
+
+      if (!customerId) {
+        const customer = await stripe.customers.create({
+          email: user.email!,
+          metadata: { supabase_user_id: user.id },
+        });
+        customerId = customer.id;
+        await supabaseAdmin.from("profiles").update({ stripe_customer_id: customerId }).eq("id", user.id);
+      }
     }
 
     const session = await stripe.checkout.sessions.create({
-      customer: customerId,
       mode: "subscription",
       line_items: [{ price: priceId, quantity: 1 }],
       ...(appliedCoupon ? { discounts: [{ coupon: appliedCoupon }] } : {}),
-      metadata: { supabase_user_id: user.id, plan: plan === "yearly" ? "yearly" : "monthly" },
+      // Guest checkout: no pre-linked customer, so Stripe Checkout itself
+      // collects the email (its default behaviour for subscription mode
+      // when no customer/customer_email is supplied).
+      ...(customerId ? { customer: customerId } : {}),
+      metadata: {
+        ...(user ? { supabase_user_id: user.id } : {}),
+        plan: plan === "yearly" ? "yearly" : "monthly",
+      },
       success_url: `${process.env.NEXT_PUBLIC_SITE_URL}/fineart-pro/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${process.env.NEXT_PUBLIC_SITE_URL}/fineart-pro`,
     });
