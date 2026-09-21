@@ -9,7 +9,7 @@ import { getFineArtProT } from "@/lib/fineart-pro-translations";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import type { Locale } from "@/lib/translations";
 
-type SearchParams = Promise<{ plan?: string; error?: string }>;
+type SearchParams = Promise<{ plan?: string; error?: string; coupon?: string }>;
 
 /** Universities whose libraries list Fine Art Free — real, verifiable social proof
  *  (unlike the placeholder testimonials, which must not be used on a paid page). */
@@ -33,6 +33,7 @@ export async function FineArtProJoinPage({
   const sp = await searchParams;
   const plan = sp.plan === "yearly" || sp.plan === "monthly" ? sp.plan : null;
   const authError = sp.error;
+  const coupon = sp.coupon ?? null;
   // Match the landing page: show plan prices in the visitor's local currency
   // (Stripe Adaptive Pricing charges the same currency at checkout).
   const baseT = getFineArtProT(locale);
@@ -61,7 +62,7 @@ export async function FineArtProJoinPage({
         "Content-Type": "application/json",
         ...(cookieHeader ? { Cookie: cookieHeader } : {}),
       },
-      body: JSON.stringify({ plan }),
+      body: JSON.stringify({ plan, coupon }),
     });
 
     const payload = (await res.json()) as { url?: string };
@@ -70,7 +71,7 @@ export async function FineArtProJoinPage({
     }
   }
 
-  const nextPath = fineArtProJoinPath(locale, plan);
+  const nextPath = fineArtProJoinPath(locale, plan, coupon);
 
   // Resolve the locale's interpolating copy server-side: functions can't be passed
   // to a Client Component, so the client receives plain strings instead.
@@ -178,6 +179,7 @@ export async function FineArtProJoinPage({
           <FineArtProJoinAuth
             nextPath={nextPath}
             plan={plan}
+            coupon={coupon}
             isLoggedIn={!!user}
             copy={joinAuthCopy}
           />

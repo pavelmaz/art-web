@@ -7,13 +7,16 @@ export function fineArtProPath(locale: Locale): string {
 
 export function fineArtProJoinPath(
   locale: Locale,
-  plan?: "monthly" | "yearly" | null
+  plan?: "monthly" | "yearly" | null,
+  coupon?: string | null
 ): string {
   const base = locale === "en" ? "/fineart-pro/join" : `/${locale}/fineart-pro/join`;
-  if (plan === "monthly" || plan === "yearly") {
-    return `${base}?plan=${plan}`;
+  if (plan !== "monthly" && plan !== "yearly") {
+    return base;
   }
-  return base;
+  const params = new URLSearchParams({ plan });
+  if (coupon) params.set("coupon", coupon);
+  return `${base}?${params.toString()}`;
 }
 
 export function fineArtProSuccessPath(locale: Locale): string {

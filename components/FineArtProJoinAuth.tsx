@@ -19,11 +19,12 @@ type JoinAuthCopy = Omit<FineArtProCopy["joinAuth"], "selectedPlan" | "signedInA
 type FineArtProJoinAuthProps = {
   nextPath: string;
   plan: "monthly" | "yearly" | null;
+  coupon?: string | null;
   isLoggedIn: boolean;
   copy: JoinAuthCopy;
 };
 
-export function FineArtProJoinAuth({ nextPath, plan, isLoggedIn, copy }: FineArtProJoinAuthProps) {
+export function FineArtProJoinAuth({ nextPath, plan, coupon, isLoggedIn, copy }: FineArtProJoinAuthProps) {
   const [otpEmail, setOtpEmail] = useState("");
   const [busy, setBusy] = useState(false);
   const [showEmail, setShowEmail] = useState(false);
@@ -39,7 +40,7 @@ export function FineArtProJoinAuth({ nextPath, plan, isLoggedIn, copy }: FineArt
     const res = await fetch("/api/stripe/create-checkout-session", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ plan }),
+      body: JSON.stringify({ plan, coupon }),
     });
     let data: { url?: string; error?: string } = {};
     try {
