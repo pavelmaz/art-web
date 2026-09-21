@@ -10,6 +10,12 @@
     "binding": "ASSETS"
   },
   "services": [{ "binding": "WORKER_SELF_REFERENCE", "service": "fineartfree" }],
+  // Production hostnames (cutover 21 Sep 2026). Cloudflare manages their DNS +
+  // certificates; the *.workers.dev URL stays available as a noindex staging host.
+  "routes": [
+    { "pattern": "fineartfree.com", "custom_domain": true },
+    { "pattern": "www.fineartfree.com", "custom_domain": true }
+  ],
   // ISR / Data Cache lives in R2 (≈33× cheaper than KV). Separate bucket from
   // the image bucket. Local preview emulates R2 — no account needed.
   "r2_buckets": [{ "binding": "NEXT_INC_CACHE_R2_BUCKET", "bucket_name": "fineartfree-next-cache" }],
