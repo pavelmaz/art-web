@@ -51,3 +51,7 @@ yarn-error.log*
 next-env.d.ts
 imports/
 scripts/aic-hotlink-revert.jsonl
+.open-next
+.dev.vars
+.wrangler
+cloudflare-env.d.ts

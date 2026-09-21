@@ -1,0 +1,27 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "fineartfree",
+  "main": ".open-next/worker.js",
+  // ≥ 2026-08-04 makes Node.js compatibility the default (Supabase + Stripe SDKs need it).
+  "compatibility_date": "2026-08-04",
+  "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
+  "assets": {
+    "directory": ".open-next/assets",
+    "binding": "ASSETS"
+  },
+  "services": [{ "binding": "WORKER_SELF_REFERENCE", "service": "fineartfree" }],
+  // ISR / Data Cache lives in R2 (≈33× cheaper than KV). Separate bucket from
+  // the image bucket. Local preview emulates R2 — no account needed.
+  "r2_buckets": [{ "binding": "NEXT_INC_CACHE_R2_BUCKET", "bucket_name": "fineartfree-next-cache" }],
+  // Time-based ISR needs the queue; revalidatePath/revalidateTag need the tag cache.
+  "durable_objects": {
+    "bindings": [
+      { "name": "NEXT_CACHE_DO_QUEUE", "class_name": "DOQueueHandler" },
+      { "name": "NEXT_TAG_CACHE_DO_SHARDED", "class_name": "DOShardedTagCache" }
+    ]
+  },
+  "migrations": [{ "tag": "v1", "new_sqlite_classes": ["DOQueueHandler", "DOShardedTagCache"] }],
+  // next/image for the few local static assets (logos, marketing images).
+  "images": { "binding": "IMAGES" },
+  "observability": { "enabled": true }
+}

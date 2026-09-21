@@ -1,3 +1,4 @@
+import { initOpenNextCloudflareForDev } from "@opennextjs/cloudflare";
 import type { NextConfig } from "next";
 
 import {
@@ -99,6 +100,11 @@ function buildTopicsCountriesRedirects() {
 }
 
 const nextConfig: NextConfig = {
+  // Workers can't load sharp (native module); the only caller falls back to the
+  // Cloudflare Images binding there, so swap in a stub for that build only.
+  ...(process.env.OPEN_NEXT_CLOUDFLARE_BUILD
+    ? { turbopack: { resolveAlias: { sharp: "./lib/sharp-stub.ts" } } }
+    : {}),
   async redirects() {
     return [
       {
@@ -173,5 +179,10 @@ const nextConfig: NextConfig = {
     ];
   },
 };
+
+// Exposes Cloudflare bindings (R2, DOs) to `next dev`; no-op in production builds.
+if (process.env.NODE_ENV === "development") {
+  initOpenNextCloudflareForDev();
+}
 
 export default nextConfig;

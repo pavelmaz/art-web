@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import sharp from "sharp";
 
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { webpToJpeg } from "@/lib/webp-to-jpeg";
 
 /**
  * Record the download against the signed-in user so it can be listed in
@@ -97,14 +97,11 @@ export async function GET(req: NextRequest) {
   // trips some of them up. Convert WebP to JPG on the fly — display images keep
   // serving WebP straight from the CDN; only the download click pays this cost.
   if (contentType.includes("webp")) {
-    try {
-      const converted = await sharp(Buffer.from(await upstream.arrayBuffer()))
-        .jpeg({ quality: 90 })
-        .toBuffer();
-      body = new Uint8Array(converted);
+    // null = conversion unavailable/failed — serve the original WebP rather than no file.
+    const converted = await webpToJpeg(upstream);
+    if (converted) {
+      body = converted;
       contentType = "image/jpeg";
-    } catch {
-      // Conversion failed — serve the original WebP rather than no file.
     }
   }
 
