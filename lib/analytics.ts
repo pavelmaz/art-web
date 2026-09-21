@@ -1,6 +1,5 @@
-import { track as vercelTrack } from "@vercel/analytics";
-
-type TrackProps = NonNullable<Parameters<typeof vercelTrack>[1]>;
+/** Event parameters: flat key → primitive (GA4 rejects nested objects). */
+type TrackProps = Record<string, string | number | boolean | null>;
 
 /** localStorage key shared by the cookie banner (MicrosoftUet) and GA4 consent. */
 export const AD_CONSENT_KEY = "faf-ad-consent";
@@ -22,12 +21,10 @@ function gaEventName(name: string): string {
 }
 
 /**
- * Custom-event fan-out: Vercel Analytics (still mounted while the site is on
- * Vercel) and GA4 (its replacement after the Cloudflare move). Remove the
- * Vercel call once the site is off Vercel.
+ * Custom-event sink: GA4 only (Vercel Analytics was removed with the move to
+ * Cloudflare, 21 Sep 2026). A no-op until GoogleAnalytics has mounted gtag.
  */
 export function track(name: string, props?: TrackProps): void {
-  vercelTrack(name, props);
   if (typeof window !== "undefined" && typeof window.gtag === "function") {
     window.gtag("event", gaEventName(name), props ?? {});
   }

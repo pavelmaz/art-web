@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Urbanist } from "next/font/google";
 import Link from "next/link";
-import { Analytics } from "@vercel/analytics/next";
 
 import Header from "@/components/Header";
 import { FooterCommercialLink, FooterContactLink } from "@/components/FooterLocaleLinks";
@@ -105,7 +104,6 @@ export default async function RootLayout({
             </p>
           </div>
         </footer>
-        <Analytics />
         <GoogleAnalytics />
         <MicrosoftUet />
       </body>

@@ -56,3 +56,6 @@ scripts/aic-hotlink-revert.jsonl
 .wrangler
 cloudflare-env.d.ts
 .env*
+
+# Public build-time values for the Cloudflare build (no secrets — NEXT_PUBLIC_* is inlined into the client bundle).
+!.env.production
