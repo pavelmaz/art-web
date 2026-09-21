@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 
 import { FineArtProJoinAuth } from "@/components/FineArtProJoinAuth";
 import { currencyForCountry, localizedProCopy, priceAnchors } from "@/lib/currency";
-import { fineArtProJoinPath, fineArtProPath, PROMO_COUPON_ID } from "@/lib/fineart-pro-path";
+import { fineArtProPath, PROMO_COUPON_ID } from "@/lib/fineart-pro-path";
 import { getFineArtProT } from "@/lib/fineart-pro-translations";
 import { requestCountry } from "@/lib/request-country";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
@@ -46,7 +46,11 @@ export async function FineArtProJoinPage({
     data: { user },
   } = await supabase.auth.getUser();
 
-  if (user && plan) {
+  // Pay first, register after: with a plan chosen, go straight to Stripe. A
+  // signed-in visitor's cookies are forwarded so their Stripe customer is
+  // reused; a guest checks out with the email Stripe collects, then creates
+  // their account on the success page.
+  if (plan) {
     const headerList = await headers();
     const cookieHeader = headerList.get("cookie") ?? "";
     const envBase = process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "");
@@ -71,8 +75,6 @@ export async function FineArtProJoinPage({
       redirect(payload.url);
     }
   }
-
-  const nextPath = fineArtProJoinPath(locale, plan, coupon);
 
   // Resolve the locale's interpolating copy server-side: functions can't be passed
   // to a Client Component, so the client receives plain strings instead.
@@ -133,30 +135,6 @@ export async function FineArtProJoinPage({
           <h1 className="mt-2 text-[1.75rem] font-bold leading-tight tracking-tight text-[#1a1a1a] sm:text-[2rem]">
             {c.joinHeadline}
           </h1>
-          <p className="mt-1.5 text-sm text-[#6b6b6b]">{c.joinH1}</p>
-
-          {/* Progress tracker: numbered nodes joined by a rail, current step in
-              gold (the Pro accent) and clearly labelled, so the sign-in reads as
-              step one of a short flow rather than an unexplained wall. */}
-          <ol className="mt-6 flex items-start" aria-label={`${c.joinStepAccount} → ${c.joinStepPayment}`}>
-            <li className="flex flex-1 flex-col items-center" aria-current="step">
-              <span className="grid size-9 place-items-center rounded-full bg-gradient-to-br from-[#F5C278] to-[#E4A23C] text-sm font-bold text-[#1a1a1a] shadow-[0_4px_12px_rgba(228,162,60,0.45)]">
-                1
-              </span>
-              <span className="mt-2 text-center text-xs font-semibold text-[#1a1a1a]">
-                {c.joinStepAccount}
-              </span>
-            </li>
-            <li aria-hidden className="mt-[18px] h-0.5 w-16 shrink-0 rounded-full bg-[#e0ddd5] sm:w-20" />
-            <li className="flex flex-1 flex-col items-center">
-              <span className="grid size-9 place-items-center rounded-full border-2 border-[#e0ddd5] bg-white text-sm font-semibold text-[#b6b2a8]">
-                2
-              </span>
-              <span className="mt-2 text-center text-xs font-medium text-[#9a9a9a]">
-                {c.joinStepPayment}
-              </span>
-            </li>
-          </ol>
 
           {/* Order summary for the plan they picked. */}
           {planCopy ? (
@@ -206,10 +184,6 @@ export async function FineArtProJoinPage({
             </div>
           ) : null}
 
-          <p className="mt-4 text-sm leading-relaxed text-[#4a4a4a]">
-            {c.joinWhyAccount}
-          </p>
-
           {authError ? (
             <p className="mt-4 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800">
               {c.joinAuthError} {c.joinNoCharge}
@@ -217,7 +191,6 @@ export async function FineArtProJoinPage({
           ) : null}
 
           <FineArtProJoinAuth
-            nextPath={nextPath}
             plan={plan}
             coupon={coupon}
             isLoggedIn={!!user}
