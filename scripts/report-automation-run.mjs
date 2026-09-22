@@ -33,7 +33,11 @@ const summary = {
   rescored: num(/rescored: (\d+)/),
   artvee: { total: num(/Artvee artists: (\d+)/), matched: num(/Matched: (\d+)/), new: num(/Confidently new: (\d+)/) },
   reupgrade: { upgraded: num(/REUP COMPLETE upgraded=(\d+)/), skip: num(/skip=(\d+)/), fail: num(/fail=(\d+)/), next_cursor: (T.match(/REUP ARTIST WALK result:.*?resumes after "([^"]+)"/) || [])[1] ?? null },
-  errors: all(/^(?:✗|Error:|\[error\]|##\[error\]).{0,160}/gm).slice(0, 12),
+  // Artists the drip could not resolve on Wikidata are routine skips, not failures.
+  skipped_artists: all(/^✗ (?:SKIPPING ARTIST )?(.+?): (?:No Wikidata artist entity|no works found)/gm).length,
+  errors: all(/^(?:✗|Error:|\[error\]|##\[error\]).{0,160}/gm)
+    .filter((l) => !/No Wikidata artist entity|no works found|Wikidata lookup failed/.test(l))
+    .slice(0, 12),
 };
 // Per-artist Wikidata counts for the plan batch
 for (const m of T.matchAll(/Wikidata (.+?) \(Q\d+\): (\d+) paintings/g)) summary.plan_batch.wikidata_works[m[1]] = Number(m[2]);
