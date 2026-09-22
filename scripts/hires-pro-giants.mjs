@@ -21,6 +21,8 @@ import { createHash } from "node:crypto";
 import { readFileSync, appendFileSync } from "node:fs";
 import { createClient } from "@supabase/supabase-js";
 import sharp from "sharp";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 
 const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY, {
   auth: { persistSession: false },
@@ -30,7 +32,7 @@ const COMMONS_API = "https://commons.wikimedia.org/w/api.php";
 const BUCKET = "art-images";
 const TARGET_WIDTH = Number(process.env.HIRES_TARGET_WIDTH || 6000);
 const SLUGS_FILE = process.env.GIANT_SLUGS_FILE;
-const DELETION_LIST = "/private/tmp/claude-502/-Users-pavelm-Desktop-art-web-main/cfb5e529-46ad-481e-9adc-49afc177a88f/scratchpad/hires-old-keys.txt";
+const DELETION_LIST = process.env.REUP_DELETION_LIST || join(tmpdir(), "hires-old-keys.txt");
 const SUPABASE_PUBLIC_BASE = `${process.env.NEXT_PUBLIC_SUPABASE_URL.replace(/\/$/, "")}/storage/v1/object/public/${BUCKET}/`;
 
 const VARIANTS = [

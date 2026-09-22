@@ -82,7 +82,7 @@ const CONCURRENCY = Number(process.env.REUP_CONCURRENCY || 2);
 const LIMIT = Number(process.env.REUP_LIMIT || 0);
 const VERBOSE = process.env.REUP_VERBOSE === "1";
 const SUPABASE_PUBLIC_BASE = `${process.env.NEXT_PUBLIC_SUPABASE_URL.replace(/\/$/, "")}/storage/v1/object/public/${BUCKET}/`;
-const DELETION_LIST = "/private/tmp/claude-502/-Users-pavelm-Desktop-art-web-main/cfb5e529-46ad-481e-9adc-49afc177a88f/scratchpad/reupgrade-old-keys.txt";
+const DELETION_LIST = process.env.REUP_DELETION_LIST || join(tmpdir(), "reupgrade-old-keys.txt");
 
 const VARIANTS = [
   { key: "w800", width: 800, quality: 75, format: "webp" },
@@ -328,9 +328,17 @@ async function reupgrade(row) {
   const oldMatch = row.image_id?.match(/\/art-images\/(artworks\/[^?]+)/);
   if (oldMatch) {
     const base = oldMatch[1].replace(/^artworks\//, "").replace(/\.[a-z0-9]+$/i, "");
-    appendFileSync(DELETION_LIST, [oldMatch[1],
-      `renditions/w800/artworks/${base}.webp`, `renditions/w1400/artworks/${base}.webp`,
-      `renditions/og1200/artworks/${base}.jpg`].join("\n") + "\n");
+    // Bookkeeping only: never let a log-file problem abort an upgrade whose new
+    // image is already in R2 (a hard-coded path did exactly that on the runner,
+    // 19–21 Sep 2026: 29 "fails" per run, cursor stuck, zero upgrades).
+    try {
+      mkdirSync(dirname(DELETION_LIST), { recursive: true });
+      appendFileSync(DELETION_LIST, [oldMatch[1],
+        `renditions/w800/artworks/${base}.webp`, `renditions/w1400/artworks/${base}.webp`,
+        `renditions/og1200/artworks/${base}.jpg`].join("\n") + "\n");
+    } catch (e) {
+      console.warn(`  (deletion list not written: ${e?.message ?? e})`);
+    }
   }
   const upd = await supabase.from("artworks").update({
     image_id: `${SUPABASE_PUBLIC_BASE}${newKey}`, img_width: meta.width, img_height: meta.height,
