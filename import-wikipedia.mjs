@@ -41,6 +41,10 @@ const INDEXNOW_KEY = "faf-indexnow-2026-xK9mP3qR";
 // this is skipped entirely (better no art than junk-res art), which also lets
 // the A→Z walk move past low-res-only artists instead of parking on them.
 const MIN_WIDTH = Number(process.env.DRIP_MIN_WIDTH || 1600);
+// wd:Artist inputs: below this many Wikidata works, also walk the Commons
+// creator categories (see the input loop). Order = most likely to be art.
+const WD_MIN_WORKS_BEFORE_CATEGORY_FALLBACK = Number(process.env.WD_MIN_WORKS || 5);
+const COMMONS_CREATOR_CATEGORIES = ["Paintings", "Drawings", "Prints", "Illustrations", "Watercolors", "Works"];
 
 if (!SUPABASE_URL || !SERVICE_KEY) {
   console.error("Missing NEXT_PUBLIC_SUPABASE_URL / SUPABASE_SERVICE_KEY (.env.local)");
@@ -625,12 +629,41 @@ if (DRIP) {
   for (const input of inputs) {
     if (/^wd:/i.test(input)) {
       const artistName = input.slice(3).trim();
+      let found = [];
       try {
         const paintings = await wikidataPaintings(artistName);
-        fileTitles.push(...paintings.map((p) => ({ ...p, artistHint: artistName })));
+        found = paintings.map((p) => ({ ...p, artistHint: artistName }));
       } catch (e) {
-        console.error(`✗ SKIPPING ARTIST ${artistName}: ${e.message}`);
+        console.error(`✗ Wikidata lookup failed for ${artistName}: ${e.message}`);
       }
+      // Wikidata only knows works that have their own item with an image. For
+      // illustrators, printmakers and most minor painters that is a handful or
+      // none (22 Sep 2026: W. W. Denslow 0, Moriz Jung 0, Helen Hyde 3 — while
+      // Commons holds dozens under "Category:Paintings by …" etc.). Fall back to
+      // the standard Commons creator categories; the licence gate in fileInfo
+      // still decides what gets imported.
+      if (found.length < WD_MIN_WORKS_BEFORE_CATEGORY_FALLBACK) {
+        const seen = new Set(found.map((f) => f.file));
+        for (const kind of COMMONS_CREATOR_CATEGORIES) {
+          const cat = `Category:${kind} by ${artistName}`;
+          let files = [];
+          try { files = await expandCategory(cat); } catch (e) { console.error(`  category ${cat}: ${e.message}`); }
+          const fresh = files.filter((f) => !seen.has(f));
+          fresh.forEach((f) => seen.add(f));
+          if (fresh.length) console.log(`  ${cat}: ${fresh.length} file(s)`);
+          found.push(...fresh.map((f) => ({ file: f, artistHint: artistName })));
+          await sleep(150);
+        }
+        console.log(`Commons categories for ${artistName}: ${found.length} candidate file(s) total`);
+      }
+      if (!found.length) console.error(`✗ SKIPPING ARTIST ${artistName}: no works found on Wikidata or Commons`);
+      // Per-artist cap (--limit=N, same knob as categories): Van Gogh alone has
+      // 570 missing works — one run must not swallow the whole day's budget.
+      if (found.length > CATEGORY_CAP) {
+        console.log(`  capping ${artistName} at ${CATEGORY_CAP} of ${found.length} candidate(s) this run`);
+        found = found.slice(0, CATEGORY_CAP);
+      }
+      fileTitles.push(...found);
       continue;
     }
     const parsed = toFileTitles(input);

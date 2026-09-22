@@ -63,12 +63,26 @@ jobs:
       - name: Import up to 200 missing artworks (A→Z drip)
         run: node import-wikipedia.mjs --drip=200 --max-artists=400
 
+      # Demand-first slice (22 Sep 2026): a few artists a day from the Wikidata
+      # plan, famous-and-missing first, then famous-but-half-covered. The A→Z
+      # drip above keeps completing the long tail.
+      - name: Plan batch (priority artists from _wiki_import_plan)
+        run: |
+          node scripts/plan-next-batch.mjs --batch-size=4 --batch-file=/tmp/plan-batch.txt
+          if [ -s /tmp/plan-batch.txt ]; then
+            node import-wikipedia.mjs --from-file=/tmp/plan-batch.txt --limit=60
+            sed 's/^wd://' /tmp/plan-batch.txt | paste -sd '|' - > /tmp/plan-batch-names.txt
+            NAMES="$(cat /tmp/plan-batch-names.txt)" node backfill-artist-portraits.mjs || true
+          else
+            echo "Plan batch empty."
+          fi
+
       # Copy the new works' images to Cloudflare R2 (never Supabase storage) and
       # generate their renditions in the same pass. Replaces the old
       # migrate-external-images edge function, which uploaded to Supabase and so
       # grew the bucket the project keeps flat (memory: storage-egress-lockdown).
       - name: Migrate new images to R2 (+ renditions)
-        run: node scripts/migrate-new-to-r2.mjs --since-hours=6 --limit=400
+        run: node scripts/migrate-new-to-r2.mjs --since-hours=6 --limit=600
 
       # migrate-new-to-r2.mjs only selects rows whose image_id is still an
       # external URL — a work whose Commons source was a large TIFF goes
@@ -77,12 +91,12 @@ jobs:
       # showing a correct original but a 404 on every grid/detail/download
       # image forever (16 Sep 2026 incident).
       - name: Rendition backfill for TIFF-sourced imports
-        run: node scripts/backfill-r2-renditions-direct.mjs --since-hours=6 --limit=200
+        run: node scripts/backfill-r2-renditions-direct.mjs --since-hours=6 --limit=300
 
       - name: Enrich (Prado-style descriptions, 10 locales)
         run: |
           BASE="${NEXT_PUBLIC_SUPABASE_URL%/}/functions/v1"
-          for i in $(seq 1 40); do
+          for i in $(seq 1 60); do
             resp=$(curl -s -m 280 -X POST "$BASE/enrich-artworks" \
               -H "Authorization: Bearer $SUPABASE_SERVICE_KEY" -H "apikey: $SUPABASE_SERVICE_KEY" \
               -H "Content-Type: application/json" -d '{}')
@@ -93,11 +107,20 @@ jobs:
             sleep 2
           done
 
+      # New imports are inserted at score 0.01 so they never outrank scored
+      # masterpieces; this gives them a real score (artist fame + image size) so
+      # good works surface and reach the core sitemap. See rescore_new_imports().
+      - name: Score new imports
+        run: |
+          curl -s -m 120 -X POST "${NEXT_PUBLIC_SUPABASE_URL%/}/rest/v1/rpc/rescore_new_imports" \
+            -H "Authorization: Bearer $SUPABASE_SERVICE_KEY" -H "apikey: $SUPABASE_SERVICE_KEY" \
+            -H "Content-Type: application/json" -d '{"max_age_days": 7}' | sed 's/^/rescored: /'; echo
+
       # Safety net: catch any image that finished importing late (renditions are
       # produced inside the migrate step, so this only mops up stragglers).
       - name: Migrate stragglers to R2 (second pass)
         if: always()
-        run: node scripts/migrate-new-to-r2.mjs --since-hours=6 --limit=400
+        run: node scripts/migrate-new-to-r2.mjs --since-hours=6 --limit=600
 
       # Push the advanced cursor. Runs even if a later step failed, as long as the
       # import step itself produced a new cursor value worth keeping.
