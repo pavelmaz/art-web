@@ -67,6 +67,9 @@ const ARTIST_MERGE_REDIRECTS: { from: string; to: string }[] = [
   { from: "adolphe-joseph-thomas-monticelli", to: "adolphe-monticelli" },
   // 29 Aug 2026 — patronymic form folded into the common name (7 works + page).
   { from: "rembrandt-harmensz-van-rijn", to: "rembrandt-van-rijn" },
+  // 22 Sep 2026 — plan-batch import created the common-name twin; the 2 works
+  // and bio were folded into it, the patronymic slug retired.
+  { from: "ilya-efimovich-repin", to: "ilya-repin" },
 ];
 
 function buildArtistMergeRedirects() {
