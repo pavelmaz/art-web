@@ -5,9 +5,12 @@ name: Image renditions
 # have renditions, so each scheduled run only processes what's new.
 
 on:
-  schedule:
-    - cron: "0 3 * * *" # daily at 03:00 UTC
-  workflow_dispatch: {} # allow manual runs from the Actions tab
+  # Schedule removed 22 Sep 2026: renditions are produced by the import jobs
+  # straight to R2 (migrate-new-to-r2.mjs), and this job's full listing of the
+  # Supabase bucket (514k objects) now exceeds the 30 s statement timeout. Its
+  # last successful run produced 11 renditions out of 128k. Kept for manual
+  # regeneration of a batch if ever needed.
+  workflow_dispatch: {} # manual runs only, from the Actions tab
 
 # Never let two runs overlap (a long run shouldn't collide with the next schedule).
 concurrency:
