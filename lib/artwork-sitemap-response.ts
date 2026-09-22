@@ -111,7 +111,7 @@ function encodeArtworkSlug(slug: string): string {
   return encodeURIComponent(slug);
 }
 
-function artworkLoc(base: string, locale: SiteLocale, slug: string): string {
+export function artworkLoc(base: string, locale: SiteLocale, slug: string): string {
   const encoded = encodeArtworkSlug(slug);
   if (locale === "en") {
     return `${base}/artworks/${encoded}`;

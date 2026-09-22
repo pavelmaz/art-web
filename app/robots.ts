@@ -91,6 +91,10 @@ export default function robots(): MetadataRoute.Robots {
         disallow: ["/"],
       },
     ],
-    sitemap: `${baseUrl}/sitemap.xml`,
+    // Only the CORE index is advertised (2026-09-22): Google was keeping ~3k of
+    // the 1.05M URLs the full sitemaps listed, so the crawl budget now goes to
+    // the pages worth indexing. /sitemap.xml (full catalogue) still exists and
+    // is submitted by hand in Bing Webmaster Tools; IndexNow covers the rest.
+    sitemap: `${baseUrl}/sitemap-core.xml`,
   };
 }
