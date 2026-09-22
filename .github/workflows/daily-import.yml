@@ -61,16 +61,16 @@ jobs:
       # "Abraham Hulk" for 13 days before (fixed by raising 25→75) and, combined
       # with the Supabase write failure, on "Albrecht Altdorfer" for 7 weeks.
       - name: Import up to 200 missing artworks (A→Z drip)
-        run: node import-wikipedia.mjs --drip=200 --max-artists=400
+        run: node import-wikipedia.mjs --drip=200 --max-artists=400 2>&1 | tee /tmp/drip.log
 
       # Demand-first slice (22 Sep 2026): a few artists a day from the Wikidata
       # plan, famous-and-missing first, then famous-but-half-covered. The A→Z
       # drip above keeps completing the long tail.
       - name: Plan batch (priority artists from _wiki_import_plan)
         run: |
-          node scripts/plan-next-batch.mjs --batch-size=4 --batch-file=/tmp/plan-batch.txt
+          node scripts/plan-next-batch.mjs --batch-size=4 --batch-file=/tmp/plan-batch.txt 2>&1 | tee /tmp/plan.log
           if [ -s /tmp/plan-batch.txt ]; then
-            node import-wikipedia.mjs --from-file=/tmp/plan-batch.txt --limit=60
+            node import-wikipedia.mjs --from-file=/tmp/plan-batch.txt --limit=60 2>&1 | tee /tmp/plan-import.log
             sed 's/^wd://' /tmp/plan-batch.txt | paste -sd '|' - > /tmp/plan-batch-names.txt
             NAMES="$(cat /tmp/plan-batch-names.txt)" node backfill-artist-portraits.mjs || true
           else
@@ -82,7 +82,7 @@ jobs:
       # migrate-external-images edge function, which uploaded to Supabase and so
       # grew the bucket the project keeps flat (memory: storage-egress-lockdown).
       - name: Migrate new images to R2 (+ renditions)
-        run: node scripts/migrate-new-to-r2.mjs --since-hours=6 --limit=600
+        run: node scripts/migrate-new-to-r2.mjs --since-hours=6 --limit=600 2>&1 | tee /tmp/migrate.log
 
       # migrate-new-to-r2.mjs only selects rows whose image_id is still an
       # external URL — a work whose Commons source was a large TIFF goes
@@ -100,7 +100,7 @@ jobs:
             resp=$(curl -s -m 280 -X POST "$BASE/enrich-artworks" \
               -H "Authorization: Bearer $SUPABASE_SERVICE_KEY" -H "apikey: $SUPABASE_SERVICE_KEY" \
               -H "Content-Type: application/json" -d '{}')
-            echo "enrich #$i: $(echo "$resp" | head -c 200)"
+            echo "enrich #$i: $(echo "$resp" | head -c 200)" | tee -a /tmp/enrich.log
             echo "$resp" | grep -q 'need enrichment' && break
             remaining=$(echo "$resp" | grep -oE '"remaining":[0-9]+' | grep -oE '[0-9]+' || echo "")
             [ "$remaining" = "0" ] && break
@@ -114,7 +114,7 @@ jobs:
         run: |
           curl -s -m 120 -X POST "${NEXT_PUBLIC_SUPABASE_URL%/}/rest/v1/rpc/rescore_new_imports" \
             -H "Authorization: Bearer $SUPABASE_SERVICE_KEY" -H "apikey: $SUPABASE_SERVICE_KEY" \
-            -H "Content-Type: application/json" -d '{"max_age_days": 7}' | sed 's/^/rescored: /'; echo
+            -H "Content-Type: application/json" -d '{"max_age_days": 7}' | sed 's/^/rescored: /' | tee /tmp/score.log; echo
 
       # Safety net: catch any image that finished importing late (renditions are
       # produced inside the migrate step, so this only mops up stragglers).
@@ -137,3 +137,10 @@ jobs:
           git commit -m "chore: advance drip cursor [skip ci]"
           git pull --rebase origin main
           git push
+
+      # Post a compact result row to _automation_runs so the run can be judged
+      # without reading Actions logs (22 Sep 2026). Never fails the job.
+      - name: Report run to DB
+        if: always()
+        run: |
+          node scripts/report-automation-run.mjs "daily-import" "${{ job.status }}" /tmp/drip.log /tmp/plan.log /tmp/plan-import.log /tmp/migrate.log /tmp/enrich.log /tmp/score.log || true

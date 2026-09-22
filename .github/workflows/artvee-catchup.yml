@@ -64,13 +64,13 @@ jobs:
         run: |
           node scripts/diff-artvee-artists.mjs \
             --batch-size=${{ github.event.inputs.batch_size || '8' }} \
-            --batch-file=/tmp/artvee-batch.txt
+            --batch-file=/tmp/artvee-batch.txt 2>&1 | tee /tmp/artvee-diff.log
 
       - name: Import today's batch (new artists + their artworks)
         id: import
         run: |
           if [ -s /tmp/artvee-batch.txt ]; then
-            node import-wikipedia.mjs --from-file=/tmp/artvee-batch.txt
+            node import-wikipedia.mjs --from-file=/tmp/artvee-batch.txt 2>&1 | tee /tmp/artvee-import.log
             # Bare names (no "wd:" prefix) for the portrait backfill's NAMES filter.
             sed 's/^wd://' /tmp/artvee-batch.txt | paste -sd '|' - > /tmp/artvee-batch-names.txt
           else
@@ -131,3 +131,10 @@ jobs:
               sleep 2
             done
           done
+
+      # Post a compact result row to _automation_runs so the run can be judged
+      # without reading Actions logs (22 Sep 2026). Never fails the job.
+      - name: Report run to DB
+        if: always()
+        run: |
+          node scripts/report-automation-run.mjs "artvee-catchup" "${{ job.status }}" /tmp/artvee-diff.log /tmp/artvee-import.log || true
