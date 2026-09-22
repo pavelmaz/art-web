@@ -32,7 +32,7 @@ const H = { apikey: SERVICE_KEY, Authorization: `Bearer ${SERVICE_KEY}`, "Conten
 const since = new Date(Date.now() - 60 * 864e5).toISOString();
 const url = `${SUPABASE_URL}/rest/v1/_wiki_import_plan?select=qid,name,wd_works,db_works,db_artist,sitelinks,priority` +
   `&status=eq.planned&wd_works=gte.${MIN_WD_WORKS}&or=(imported_at.is.null,imported_at.lt.${since})` +
-  `&order=priority.desc.nullslast&limit=${BATCH_SIZE * 4}`;
+  `&order=priority.desc.nullslast&limit=300`;
 const res = await fetch(url, { headers: H });
 if (!res.ok) { console.error("plan query failed:", res.status, await res.text()); process.exit(1); }
 const rows = await res.json();
