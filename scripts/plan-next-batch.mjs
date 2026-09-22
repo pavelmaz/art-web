@@ -48,6 +48,31 @@ if (names.length) {
   }
 }
 
+// Resolve each candidate to the catalogue's exact artist name (accent/case-
+// insensitive) so the importer attaches works to the existing artist instead
+// of creating a spelling twin (22 Sep 2026: "Ilya Repin" was created next to
+// "Ilya Efimovich Repin"). Also refreshes the plan's stale db_artist/db_works.
+const norm = (s) => s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+async function findCatalogueArtist(name) {
+  const pattern = `%${name.replace(/[%_]/g, "").split(/\s+/).join("%")}%`;
+  const r = await fetch(`${SUPABASE_URL}/rest/v1/artists?select=name,artwork_count&name=ilike.${encodeURIComponent(pattern)}&limit=10`, { headers: H });
+  if (!r.ok) return null;
+  const hits = await r.json();
+  const n = norm(name);
+  const words = n.split(" ").filter((w) => w.length > 2);
+  // exact normalized match first, then a hit that contains every significant word
+  return hits.find((a) => norm(a.name) === n)
+      ?? hits.find((a) => words.every((w) => norm(a.name).includes(w)))
+      ?? null;
+}
+for (const r of rows) {
+  const hit = r.db_artist ? { name: r.db_artist, artwork_count: r.db_works } : await findCatalogueArtist(r.name);
+  if (hit && !r.db_artist) {
+    r.db_artist = hit.name; r.db_works = hit.artwork_count ?? 0;
+    await fetch(`${SUPABASE_URL}/rest/v1/_wiki_import_plan?qid=eq.${r.qid}`, { method: "PATCH", headers: { ...H, Prefer: "return=minimal" }, body: JSON.stringify({ db_artist: hit.name, db_works: hit.artwork_count ?? 0, match_type: "normalized" }) });
+  }
+}
+
 const batch = [];
 for (const r of rows) {
   const missing = r.db_artist == null;
@@ -58,8 +83,9 @@ for (const r of rows) {
 }
 
 console.log(`Plan batch (${batch.length} artist(s), priority desc):`);
-for (const b of batch) console.log(`  ${String(b.priority ?? 0).padStart(8)}  ${b.name}  (${b.sitelinks} langs, ${b.wd_works} works) — ${b.why}`);
-writeFileSync(BATCH_FILE, batch.map((b) => `wd:${b.name}`).join("\n") + (batch.length ? "\n" : ""));
+for (const b of batch) console.log(`  ${String(b.priority ?? 0).padStart(8)}  ${b.name}${b.db_artist && b.db_artist !== b.name ? ` → ${b.db_artist}` : ""}  (${b.sitelinks} langs, ${b.wd_works} works) — ${b.why}`);
+// The catalogue name goes to the importer (its artist match is exact), never a Wikidata label that may differ.
+writeFileSync(BATCH_FILE, batch.map((b) => `wd:${b.db_artist ?? b.name}`).join("\n") + (batch.length ? "\n" : ""));
 console.log(`Batch file -> ${BATCH_FILE}`);
 
 if (!DRY && batch.length) {
