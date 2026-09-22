@@ -8,7 +8,7 @@ import { localeFromPathname } from "@/lib/pathname-locale";
 
 const LINK_CLASS = "text-[#a3a3a3] transition-colors hover:text-white";
 
-/** Footer links whose target depends on the current locale (read from the path client-side, see HtmlLang). */
+/** Footer links whose target depends on the current locale (read from the path client-side). */
 export function FooterCommercialLink() {
   const locale = localeFromPathname(usePathname());
   return (

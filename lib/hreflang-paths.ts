@@ -62,7 +62,7 @@ function mapSegmentPath(
   to: LocaleSegments,
   extra?: { fromTopics?: string; toTopics?: string; fromCountries?: string; toCountries?: string }
 ): string {
-  let path = rest;
+  const path = rest;
   const pairs: Array<[keyof LocaleSegments, string]> = [
     ["artworks", from.artworks],
     ["artists", from.artists],
@@ -200,48 +200,47 @@ function isHomePathname(pathname: string): boolean {
   return /^\/(es|pt|ja|fr|de|it|ko|ru|zh)$/.test(pathname);
 }
 
-function topicsCountriesLinkHeader(pathname: string): string | null {
-  const route = parseTopicsCountriesPathname(pathname);
-  if (!route) return null;
-  return languageAlternatesToLinkHeader(
-    buildTopicsCountriesLanguageAlternates(route.kind, route.slug)
-  );
-}
-
-export function buildHreflangLinkHeader(pathname: string, page?: string): string {
+/**
+ * Every language version of a page as hreflang → absolute URL (incl. x-default),
+ * or null for paginated list pages, which carry no alternates. Single source for
+ * the HTTP Link header (middleware) and the footer language links.
+ */
+export function buildLanguageAlternates(pathname: string, page?: string): Record<string, string> | null {
   if (isPaginatedListPage(page)) {
-    return "";
+    return null;
   }
 
   if (isEnOnlyPathname(pathname)) {
-    return languageAlternatesToLinkHeader(buildEnOnlyLanguageAlternates(pathname));
+    return buildEnOnlyLanguageAlternates(pathname);
   }
 
   if (isHomePathname(pathname)) {
-    return languageAlternatesToLinkHeader(buildHomeLanguageAlternates());
+    return buildHomeLanguageAlternates();
   }
 
-  const topicsCountries = topicsCountriesLinkHeader(pathname);
+  const topicsCountries = parseTopicsCountriesPathname(pathname);
   if (topicsCountries) {
-    return topicsCountries;
+    return buildTopicsCountriesLanguageAlternates(topicsCountries.kind, topicsCountries.slug);
   }
 
   const hub = detectHubFromPathname(pathname);
   if (hub) {
-    return languageAlternatesToLinkHeader(buildHubLanguageAlternates(hub));
+    return buildHubLanguageAlternates(hub);
   }
 
   const current = detectLocaleFromPathname(pathname);
   const enPath = localizedPathToEn(pathname, current);
 
-  const parts = HREFLANG_LOCALES.map((loc) => {
+  const languages: Record<string, string> = {};
+  for (const loc of HREFLANG_LOCALES) {
     const localized = enPathToLocalized(enPath, loc);
-    const url = `${SITE}${localized === "/" ? "" : localized}`;
-    return `<${url}>; rel="alternate"; hreflang="${loc}"`;
-  });
+    languages[loc] = `${SITE}${localized === "/" ? "" : localized}`;
+  }
+  languages["x-default"] = `${SITE}${enPath === "/" ? "" : enPath}`;
+  return languages;
+}
 
-  const enUrl = `${SITE}${enPath === "/" ? "" : enPath}`;
-  parts.push(`<${enUrl}>; rel="alternate"; hreflang="x-default"`);
-
-  return parts.join(", ");
+export function buildHreflangLinkHeader(pathname: string, page?: string): string {
+  const languages = buildLanguageAlternates(pathname, page);
+  return languages ? languageAlternatesToLinkHeader(languages) : "";
 }

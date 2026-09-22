@@ -1,15 +1,17 @@
-import type { Metadata } from "next";
 import { Urbanist } from "next/font/google";
 import Link from "next/link";
+import type { ReactNode } from "react";
 
 import Header from "@/components/Header";
 import { FooterCommercialLink, FooterContactLink } from "@/components/FooterLocaleLinks";
+import { FooterLanguageLinks } from "@/components/FooterLanguageLinks";
 import { GoogleAnalytics } from "@/components/GoogleAnalytics";
-import { HtmlLang } from "@/components/HtmlLang";
+import { LocaleSuggestBanner } from "@/components/LocaleSuggestBanner";
 import { MicrosoftUet } from "@/components/MicrosoftUet";
 import { getCachedGenresForBrowse } from "@/lib/browse-genres";
+import type { SiteLocale } from "@/lib/locale-routes";
 
-import "./globals.css";
+import "../app/globals.css";
 
 const urbanist = Urbanist({
   subsets: ["latin"],
@@ -18,37 +20,14 @@ const urbanist = Urbanist({
   display: "swap",
 });
 
-export const metadata: Metadata = {
-  title: {
-    default: 'Fine Art Free — Download 500,000+ Public Domain Paintings & Art',
-    template: '%s | Fine Art Free',
-  },
-  description: 'Browse and download 500,000+ classic paintings, prints and illustrations free. Public domain art from the world\'s top museums. Free for personal and commercial use.',
-  openGraph: {
-    title: 'Fine Art Free — Download 500,000+ Public Domain Paintings & Art',
-    description: 'Browse and download 500,000+ classic paintings free. Public domain art from top museums. Free for any use.',
-    url: 'https://fineartfree.com',
-    siteName: 'Fine Art Free',
-    type: 'website',
-  },
-  alternates: {
-    types: {
-      'application/rss+xml': 'https://fineartfree.com/feed',
-    },
-  },
-  other: {
-    'p:domain_verify': '70b1748da69f5a53b4c7c07dc21b12ef',
-  },
-};
-
-// No request-time reads (headers/cookies) in this layout: one such read here
-// makes EVERY route dynamic and uncacheable. Locale-dependent bits (html lang,
-// footer links) are derived from the path in small client components instead.
-export default async function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+/**
+ * The <html>/<body> shell every root layout renders. There is one root layout
+ * per locale (app/(en)/layout.tsx, app/es/layout.tsx, …) purely so the server
+ * can emit the right `<html lang>`: a single root layout cannot know the path
+ * without `headers()`, and that read made every route dynamic (uncacheable).
+ * No request-time reads happen here for the same reason.
+ */
+export async function SiteShell({ lang, children }: { lang: SiteLocale; children: ReactNode }) {
   let browseGenres = [] as Awaited<ReturnType<typeof getCachedGenresForBrowse>>;
   try {
     browseGenres = await getCachedGenresForBrowse();
@@ -57,9 +36,9 @@ export default async function RootLayout({
   }
 
   return (
-    <html lang="en" className={`${urbanist.variable} h-full antialiased`}>
+    <html lang={lang} className={`${urbanist.variable} h-full antialiased`}>
       <body className="flex min-h-full flex-col">
-        <HtmlLang />
+        <LocaleSuggestBanner />
         <Header browseGenres={browseGenres} />
         {children}
         <footer className="mt-auto bg-black text-[#a3a3a3]">
@@ -98,6 +77,7 @@ export default async function RootLayout({
               </span>
               <FooterContactLink />
             </nav>
+            <FooterLanguageLinks />
             <hr className="mt-6 border-0 border-t border-[#262626]" />
             <p className="mt-5 text-xs leading-relaxed text-[#737373]">
               Fine Art Free © 2026 All Rights Reserved
