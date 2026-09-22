@@ -45,6 +45,8 @@ const MIN_WIDTH = Number(process.env.DRIP_MIN_WIDTH || 1600);
 // creator categories (see the input loop). Order = most likely to be art.
 const WD_MIN_WORKS_BEFORE_CATEGORY_FALLBACK = Number(process.env.WD_MIN_WORKS || 5);
 const COMMONS_CREATOR_CATEGORIES = ["Paintings", "Drawings", "Prints", "Illustrations", "Watercolors", "Works"];
+/** artistName → "Category:…" from Wikidata P373, filled while resolving the entity. */
+const COMMONS_CREATOR_CATEGORY = new Map();
 
 if (!SUPABASE_URL || !SERVICE_KEY) {
   console.error("Missing NEXT_PUBLIC_SUPABASE_URL / SUPABASE_SERVICE_KEY (.env.local)");
@@ -195,6 +197,16 @@ async function wikidataPaintings(artistName) {
     await sleep(100);
   }
   if (!qid) throw new Error(`No Wikidata artist entity found for "${artistName}"`);
+  // Creator category on Commons (P373) — the reliable entry point for artists
+  // whose works have no Wikidata items (illustrators, printmakers).
+  try {
+    const cat = await (await fetch(
+      `https://www.wikidata.org/w/api.php?action=wbgetclaims&entity=${qid}&property=P373&format=json&origin=*`,
+      { headers: { "User-Agent": UA } }
+    )).json();
+    const name = cat?.claims?.P373?.[0]?.mainsnak?.datavalue?.value;
+    if (name) COMMONS_CREATOR_CATEGORY.set(artistName, `Category:${name}`);
+  } catch {}
 
   // Multilingual labels + English aliases feed the dedupe: our catalog holds
   // titles in several languages (Artvee-era French/Spanish titles etc.), so
@@ -284,6 +296,30 @@ async function expandCategory(cat) {
     for (const m of data?.query?.categorymembers ?? []) files.push(m.title);
     cmcontinue = data?.continue?.cmcontinue;
     if (!cmcontinue) break;
+    await sleep(150);
+  }
+  return files.slice(0, CATEGORY_CAP);
+}
+
+/** Files directly in `cat` plus those in its first-level subcategories that look
+ *  like groups of works (book series, "Paintings by …"), skipping the usual
+ *  non-work subcats (portraits of the artist, photographs, graves, exhibitions). */
+async function expandCreatorCategory(cat) {
+  const files = [];
+  const seen = new Set();
+  const add = (list) => { for (const f of list) if (!seen.has(f)) { seen.add(f); files.push(f); } };
+  add(await expandCategory(cat));
+  let cmcontinue;
+  const subcats = [];
+  do {
+    const data = await commons({ action: "query", list: "categorymembers", cmtitle: cat, cmtype: "subcat", cmlimit: "100", ...(cmcontinue ? { cmcontinue } : {}) });
+    for (const m of data?.query?.categorymembers ?? []) subcats.push(m.title);
+    cmcontinue = data?.continue?.cmcontinue;
+  } while (cmcontinue && subcats.length < 60);
+  for (const sub of subcats) {
+    if (files.length >= CATEGORY_CAP) break;
+    if (/portrait|photograph|grave|tomb|monument|document|signature|exhibition|museum|house|studio|family|letters|autograph|medal|stamp/i.test(sub)) continue;
+    try { add(await expandCategory(sub)); } catch (e) { console.error(`  ${sub}: ${e.message}`); }
     await sleep(150);
   }
   return files.slice(0, CATEGORY_CAP);
@@ -644,7 +680,17 @@ if (DRIP) {
       // still decides what gets imported.
       if (found.length < WD_MIN_WORKS_BEFORE_CATEGORY_FALLBACK) {
         const seen = new Set(found.map((f) => f.file));
+        const creatorCat = COMMONS_CREATOR_CATEGORY.get(artistName);
+        if (creatorCat) {
+          let files = [];
+          try { files = await expandCreatorCategory(creatorCat); } catch (e) { console.error(`  ${creatorCat}: ${e.message}`); }
+          const fresh = files.filter((f) => !seen.has(f));
+          fresh.forEach((f) => seen.add(f));
+          if (fresh.length) console.log(`  ${creatorCat} (+ work subcategories): ${fresh.length} file(s)`);
+          found.push(...fresh.map((f) => ({ file: f, artistHint: artistName })));
+        }
         for (const kind of COMMONS_CREATOR_CATEGORIES) {
+          if (found.length >= CATEGORY_CAP) break;
           const cat = `Category:${kind} by ${artistName}`;
           let files = [];
           try { files = await expandCategory(cat); } catch (e) { console.error(`  category ${cat}: ${e.message}`); }
