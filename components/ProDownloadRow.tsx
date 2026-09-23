@@ -24,7 +24,9 @@ type ProDownloadRowProps = {
 /**
  * The "max size / 4K" download row: the real hi-res file for Pro members, and an
  * upsell pitch for everyone else. Analytics: paywall_view on display and
- * paywall_cta_click on click for non-members; download_pro for members.
+ * paywall_cta_click on click for non-members; download (resolution: "high_res")
+ * for members — the counterpart to DownloadButton's low_res download event, so
+ * both can be compared as one dimension in GA4 or counted separately by name.
  */
 export function ProDownloadRow({ locale, downloadHref, filename, glass = false, maxDims, maxSize }: ProDownloadRowProps) {
   const t = getT(locale);
@@ -51,8 +53,15 @@ export function ProDownloadRow({ locale, downloadHref, filename, glass = false, 
         </div>
         <a
           href={proDownloadHref}
-          // The hi-res counterpart of download_free: what paying members actually use.
-          onClick={() => track("download_pro", { source: "download_4k", artwork: filename ?? "unknown", locale })}
+          // The hi-res counterpart of the low_res download event: what paying members actually use.
+          onClick={() =>
+            track("download", {
+              resolution: "high_res",
+              source: "download_4k",
+              artwork: filename ?? "unknown",
+              locale,
+            })
+          }
           className={
             glass
               ? "glass-primary inline-flex shrink-0 items-center justify-center rounded-md px-3 py-2 text-[13px] font-medium"

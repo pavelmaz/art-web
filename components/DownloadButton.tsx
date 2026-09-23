@@ -28,9 +28,9 @@ const SEEN_KEY = "faf_dl_interstitial_seen";
  * to the device (desktop + mobile) instead of opening — a cross-origin `<a download>`
  * to the CDN is ignored by browsers.
  *
- * Client component so the free download can be measured: `download_free` is the
- * counterpart to `paywall_view` / `paywall_cta_click`, giving the ratio of visitors
- * who take the free file versus those who click through to Pro.
+ * Client component so the free download can be measured: `download` (resolution:
+ * "low_res") is the counterpart to `paywall_view` / `paywall_cta_click`, giving the
+ * ratio of visitors who take the free file versus those who click through to Pro.
  */
 export function DownloadButton({
   imageUrl,
@@ -87,7 +87,7 @@ export function DownloadButton({
         return;
       }
 
-      track("download_free", { artwork: filename ?? "unknown", locale });
+      track("download", { resolution: "low_res", artwork: filename ?? "unknown", locale });
 
       // Skip when there is no larger file to sell: on those works the download
       // panel behind the modal shows Max Size at the same 1400px, so an upgrade
@@ -97,7 +97,7 @@ export function DownloadButton({
 
       e.preventDefault();
       markSeen();
-      track("interstitial_view", { artwork: filename ?? "unknown", locale });
+      track("interstitial_view", { resolution: "low_res", artwork: filename ?? "unknown", locale });
       setShowInterstitial(true);
     },
     [filename, locale, maxWidth]
@@ -121,11 +121,11 @@ export function DownloadButton({
           // Together with continue_free and upgrade_click this makes the three
           // interstitial outcomes sum to interstitial_view.
           setShowInterstitial(false);
-          track("interstitial_dismiss", { artwork: filename ?? "unknown", locale });
+          track("interstitial_dismiss", { resolution: "low_res", artwork: filename ?? "unknown", locale });
         }}
         onContinue={() => {
           setShowInterstitial(false);
-          track("interstitial_continue_free", { artwork: filename ?? "unknown", locale });
+          track("interstitial_continue_free", { resolution: "low_res", artwork: filename ?? "unknown", locale });
           resumingRef.current = true;
           anchorRef.current?.click(); // resumes the download without re-counting
         }}

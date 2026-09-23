@@ -126,7 +126,7 @@ export function DownloadInterstitial({
             the separate dlMaxCta key. */}
         <Link
           href={slug ? `${fineArtProPath(locale)}?art=${encodeURIComponent(slug)}` : fineArtProPath(locale)}
-          onClick={() => track("interstitial_upgrade_click", { artwork: title, locale })}
+          onClick={() => track("interstitial_upgrade_click", { resolution: "low_res", artwork: title, locale })}
           className="mt-3 flex h-[38px] w-full items-center justify-center gap-1.5 rounded-md bg-gradient-to-br from-[#4CAF50] to-[#1e9e57] text-sm font-medium text-white shadow-[0_6px_18px_rgba(76,175,80,0.4)] transition hover:brightness-110"
         >
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
