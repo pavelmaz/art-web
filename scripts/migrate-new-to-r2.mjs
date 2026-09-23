@@ -2,8 +2,10 @@
 // (Wikimedia, museum sites) into Cloudflare R2, then repoint image_id at the
 // R2-backed CDN path. Replaces the old migrate-external-images edge function,
 // which uploaded to Supabase storage and so grew the bucket the project is
-// trying to keep flat (memory: storage-egress-lockdown). Originals capped at
-// MIGRATE_MAX_WIDTH; renditions match the rest of the pipeline.
+// trying to keep flat (memory: storage-egress-lockdown). Originals are stored
+// at full source resolution by default (no cap — even a 14000px scan is kept
+// as-is); set MIGRATE_MAX_WIDTH to re-impose a ceiling if ever needed.
+// Renditions (w800/w1400/og1200) are unaffected either way.
 //
 // Run: node --env-file=.env.local scripts/migrate-new-to-r2.mjs [--since-hours=3] [--limit=200]
 import { createHash } from "node:crypto";
@@ -27,7 +29,7 @@ const supabase = createClient(URL_BASE, KEY, { auth: { persistSession: false } }
 const args = process.argv.slice(2);
 const SINCE_HOURS = Number(args.find((a) => a.startsWith("--since-hours="))?.split("=")[1] ?? 3);
 const LIMIT = Number(args.find((a) => a.startsWith("--limit="))?.split("=")[1] ?? 200);
-const MAX_WIDTH = Number(process.env.MIGRATE_MAX_WIDTH || 6000);
+const MAX_WIDTH = process.env.MIGRATE_MAX_WIDTH ? Number(process.env.MIGRATE_MAX_WIDTH) : null;
 const UA = "FineArtFree-migrate/1.0 (https://fineartfree.com; pavelmazuelas@gmail.com)";
 const BUCKET = "art-images";
 
@@ -67,8 +69,9 @@ for (const row of rows ?? []) {
     const orig = Buffer.from(
       await (await fetch(row.image_id, { headers: { "User-Agent": UA }, signal: AbortSignal.timeout(60000) })).arrayBuffer()
     );
-    const jpeg = await sharp(orig, { limitInputPixels: false, failOn: "none" })
-      .rotate().resize({ width: MAX_WIDTH, withoutEnlargement: true }).jpeg({ quality: 88 }).toBuffer();
+    let pipeline = sharp(orig, { limitInputPixels: false, failOn: "none" }).rotate();
+    if (MAX_WIDTH) pipeline = pipeline.resize({ width: MAX_WIDTH, withoutEnlargement: true });
+    const jpeg = await pipeline.jpeg({ quality: 88 }).toBuffer();
     const meta = await sharp(jpeg).metadata();
     const sha = createHash("sha256").update(jpeg).digest("hex");
     const objectPath = `artworks/${sha}.jpg`;

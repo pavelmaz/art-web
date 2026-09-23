@@ -103,8 +103,9 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 /** Full-original rule: when Commons only serves a TIFF (browsers can't show it),
  *  don't settle for the 1920px JPEG preview — download the full TIFF, convert to
- *  JPEG (≤6000px, q92) and store it directly. Returns null on any failure so the
- *  caller falls back to the preview. */
+ *  JPEG at full resolution (q92, no downsize — even a 14000px scan is kept as-is)
+ *  and store it directly. Returns null on any failure so the caller falls back
+ *  to the preview. */
 async function storeTiffOriginal(origUrl) {
   try {
     const [{ default: sharp }, { createHash }] = await Promise.all([import("sharp"), import("node:crypto")]);
@@ -112,7 +113,7 @@ async function storeTiffOriginal(origUrl) {
     if (!res.ok) throw new Error(`tiff fetch ${res.status}`);
     const src = Buffer.from(await res.arrayBuffer());
     const jpeg = await sharp(src, { limitInputPixels: false })
-      .rotate().resize({ width: 6000, withoutEnlargement: true }).jpeg({ quality: 92, mozjpeg: true }).toBuffer();
+      .rotate().jpeg({ quality: 92, mozjpeg: true }).toBuffer();
     const meta = await sharp(jpeg).metadata();
     const sha = createHash("sha256").update(jpeg).digest("hex");
     const key = `artworks/${sha}.jpg`;
