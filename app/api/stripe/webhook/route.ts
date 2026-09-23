@@ -30,6 +30,26 @@ async function getUserIdByCustomerId(customerId: string): Promise<string | undef
   return data?.id;
 }
 
+/**
+ * Get-or-create a Supabase auth user for a guest checkout's email, without
+ * emailing them anything: `generateLink` creates the account (or, if one
+ * already exists under that email, just resolves it) and returns the raw
+ * link/OTP instead of sending it, unlike `inviteUserByEmail`. The visitor
+ * later signs in the normal way — magic link, same email — and lands on the
+ * account this created, already marked active.
+ */
+async function getOrCreateUserIdByEmail(email: string): Promise<string | undefined> {
+  const { data, error } = await getSupabaseAdmin().auth.admin.generateLink({
+    type: "magiclink",
+    email,
+  });
+  if (error) {
+    console.error("generateLink for guest checkout failed:", error.message);
+    return undefined;
+  }
+  return data.user?.id;
+}
+
 export async function POST(req: NextRequest) {
   const body = await req.text();
   const sig = req.headers.get("stripe-signature");
@@ -57,9 +77,20 @@ export async function POST(req: NextRequest) {
       const customerId =
         typeof session.customer === "string" ? session.customer : session.customer?.id ?? null;
 
-      const userId =
+      let userId =
         (typeof metaUserId === "string" && metaUserId.length > 0 ? metaUserId : null) ??
         (customerId ? await getUserIdByCustomerId(customerId) : undefined);
+
+      // Guest checkout, still unclaimed: don't strand a paid subscription on
+      // nobody. The success page normally links this the moment the visitor
+      // returns and signs in, but that depends on the browser round-tripping
+      // back — this is the guarantee for the visitor who pays and never does.
+      if (!userId) {
+        const guestEmail = session.customer_details?.email;
+        if (guestEmail) {
+          userId = await getOrCreateUserIdByEmail(guestEmail);
+        }
+      }
 
       if (userId) {
         await getSupabaseAdmin()

@@ -10,11 +10,7 @@ export type VerifiedPurchase = {
   plan: string | null;
 };
 
-declare global {
-  interface Window {
-    dataLayer?: Record<string, unknown>[];
-  }
-}
+// `window.dataLayer`'s type is declared once, in lib/analytics.ts.
 
 /**
  * Fires the purchase conversion exactly once per Stripe session. Sends the GA4
