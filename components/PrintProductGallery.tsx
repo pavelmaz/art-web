@@ -49,6 +49,21 @@ function StyledArtwork({
   );
 }
 
+/** Real Prodigi product photography (their public downloadable asset
+ *  library, prodigi.com/downloads — not stock photography, not composited)
+ *  showing the actual canvas construction: stretcher bar depth, corner
+ *  fold, fabric texture. Static, no artwork overlay — the point is to show
+ *  the physical product itself, the same way a "materials" detail shot
+ *  works on a real e-commerce listing. */
+const CANVAS_DETAIL_SHOT = { imageUrl: "/images/print-mockups/canvas-detail.jpg", label: "Canvas detail" };
+
+function DetailShot({ imageUrl, label }: { imageUrl: string; label: string }) {
+  return (
+    // eslint-disable-next-line @next/next/no-img-element
+    <img src={imageUrl} alt={label} className="w-full rounded-lg object-cover" />
+  );
+}
+
 function RoomMockup({
   category,
   imageUrl,
@@ -90,10 +105,15 @@ export function PrintProductGallery({ imageUrl, title, category, orientation }: 
   // Cards & Stationery additionally gets the plain fold-mockup as its first
   // "room" slide (no real photo needed for that one — it's just the flat
   // artwork styled with a center fold line), ahead of the card-on-a-table photo.
+  const detailSlide = category === "wall-art" ? [{ kind: "detail" as const }] : [];
   const slides =
     category === "cards-stationery"
       ? [{ kind: "flat" as const }, { kind: "flat" as const }, ...roomTemplates.map((t) => ({ kind: "room" as const, template: t }))]
-      : [{ kind: "flat" as const }, ...roomTemplates.map((t) => ({ kind: "room" as const, template: t }))];
+      : [
+          { kind: "flat" as const },
+          ...roomTemplates.map((t) => ({ kind: "room" as const, template: t })),
+          ...detailSlide,
+        ];
 
   const [activeIndex, setActiveIndex] = useState(0);
 
@@ -117,6 +137,8 @@ export function PrintProductGallery({ imageUrl, title, category, orientation }: 
           <div className="w-full">
             <RoomMockup category={category} imageUrl={imageUrl} template={active.template} />
           </div>
+        ) : active.kind === "detail" ? (
+          <DetailShot imageUrl={CANVAS_DETAIL_SHOT.imageUrl} label={CANVAS_DETAIL_SHOT.label} />
         ) : (
           <StyledArtwork category={category} imageUrl={imageUrl} />
         )}
@@ -131,11 +153,16 @@ export function PrintProductGallery({ imageUrl, title, category, orientation }: 
             className={`aspect-square overflow-hidden rounded-md border bg-[#f1efea] transition-colors ${
               i === activeIndex ? "border-[#1a1a1a]" : "border-[#e8e6e1] hover:border-[#b8b5af]"
             }`}
-            aria-label={slide.kind === "room" ? slide.template.label : `${title} — full view`}
+            aria-label={
+              slide.kind === "room" ? slide.template.label : slide.kind === "detail" ? CANVAS_DETAIL_SHOT.label : `${title} — full view`
+            }
           >
             {slide.kind === "room" ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img src={slide.template.imageUrl} alt="" className="h-full w-full object-cover" />
+            ) : slide.kind === "detail" ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={CANVAS_DETAIL_SHOT.imageUrl} alt="" className="h-full w-full object-cover" />
             ) : (
               // eslint-disable-next-line @next/next/no-img-element
               <img src={imageUrl} alt="" className="h-full w-full object-cover" />

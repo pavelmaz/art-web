@@ -28,6 +28,11 @@ export function PrintProductPurchasePanel({
   const products = categoryDef.productKeys.map((key) => ({ key, ...PRINT_PRODUCTS[key] }));
   const selected = PRINT_PRODUCTS[productKey];
 
+  // Prints & Posters and Cards & Stationery are hidden for now (wall art
+  // only, until that's dialed in) — the categories and checkout logic stay
+  // intact so re-enabling them later is just removing this filter.
+  const enabledCategories = PRODUCT_CATEGORIES.filter((c) => c.key === "wall-art");
+
   const handleOrder = async () => {
     setBusy(true);
     setError(null);
@@ -71,31 +76,33 @@ export function PrintProductPurchasePanel({
         ${selected ? (selected.retailCents / 100).toFixed(0) : ""}
       </p>
 
-      <div className="mt-5">
-        <p className="mb-2 text-xs font-medium uppercase tracking-wide text-[#999]">Format</p>
-        <div className="flex flex-wrap gap-2">
-          {PRODUCT_CATEGORIES.map((c) => {
-            const isSelected = c.key === category;
-            return (
-              <button
-                key={c.key}
-                type="button"
-                onClick={() => {
-                  onCategoryChange(c.key);
-                  onProductChange(c.productKeys[0]);
-                }}
-                className={`rounded-md border px-3 py-2 text-sm transition-colors ${
-                  isSelected
-                    ? "border-[#1a1a1a] bg-[#1a1a1a] text-white"
-                    : "border-[#d8d5cf] bg-white text-[#4a4a4a] hover:border-[#1a1a1a]"
-                }`}
-              >
-                {c.label}
-              </button>
-            );
-          })}
+      {enabledCategories.length > 1 ? (
+        <div className="mt-5">
+          <p className="mb-2 text-xs font-medium uppercase tracking-wide text-[#999]">Format</p>
+          <div className="flex flex-wrap gap-2">
+            {enabledCategories.map((c) => {
+              const isSelected = c.key === category;
+              return (
+                <button
+                  key={c.key}
+                  type="button"
+                  onClick={() => {
+                    onCategoryChange(c.key);
+                    onProductChange(c.productKeys[0]);
+                  }}
+                  className={`rounded-md border px-3 py-2 text-sm transition-colors ${
+                    isSelected
+                      ? "border-[#1a1a1a] bg-[#1a1a1a] text-white"
+                      : "border-[#d8d5cf] bg-white text-[#4a4a4a] hover:border-[#1a1a1a]"
+                  }`}
+                >
+                  {c.label}
+                </button>
+              );
+            })}
+          </div>
         </div>
-      </div>
+      ) : null}
 
       {products.length > 1 ? (
         <div className="mt-4">
