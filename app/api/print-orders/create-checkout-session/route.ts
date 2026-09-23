@@ -3,28 +3,32 @@ import type { CookieOptions } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 
-import { CANVAS_SIZES, type CanvasSize } from "@/lib/prodigi";
+import { PRINT_PRODUCTS, PRODUCT_CATEGORIES } from "@/lib/prodigi";
 import { getStripe } from "@/lib/stripe";
 import { supabase } from "@/lib/supabase";
 
 type CookieRow = { name: string; value: string; options: CookieOptions };
 
 /**
- * One-time canvas-print checkout — a separate mode from the Fine Art Pro
+ * One-time print-order checkout — a separate mode from the Fine Art Pro
  * subscription route (`/api/stripe/create-checkout-session`), which this
  * mirrors the shape of but never touches: `mode: "payment"`, a dynamic
- * `price_data` line item (retail price depends on size), and shipping
- * address collection instead of a persisted Stripe Customer. The webhook
- * (`/api/stripe/webhook`) tells the two apart via `metadata.type`.
+ * `price_data` line item (retail price depends on the chosen product), and
+ * shipping address collection instead of a persisted Stripe Customer. The
+ * webhook (`/api/stripe/webhook`) tells the two apart via `metadata.type`.
  */
 export async function POST(req: NextRequest) {
   try {
-    const { artworkSlug, size } = (await req.json()) as { artworkSlug?: string; size?: string };
+    const { artworkSlug, productKey } = (await req.json()) as {
+      artworkSlug?: string;
+      productKey?: string;
+    };
 
-    if (!artworkSlug || !size || !(size in CANVAS_SIZES)) {
-      return NextResponse.json({ error: "Invalid artwork or size" }, { status: 400 });
+    const product = productKey ? PRINT_PRODUCTS[productKey] : undefined;
+    if (!artworkSlug || !product) {
+      return NextResponse.json({ error: "Invalid artwork or product" }, { status: 400 });
     }
-    const canvasSize = CANVAS_SIZES[size as CanvasSize];
+    const categoryLabel = PRODUCT_CATEGORIES.find((c) => c.key === product.category)?.label ?? "Print";
 
     // Van-Gogh-only for this test, enforced server-side too — the UI only
     // renders this option on Van Gogh pages, but nothing stops a direct POST.
@@ -63,8 +67,8 @@ export async function POST(req: NextRequest) {
         {
           price_data: {
             currency: "usd",
-            unit_amount: canvasSize.retailCents,
-            product_data: { name: `${artwork.title} — Canvas Print (${canvasSize.label})` },
+            unit_amount: product.retailCents,
+            product_data: { name: `${artwork.title} — ${categoryLabel} (${product.label})` },
           },
           quantity: 1,
         },
@@ -73,7 +77,8 @@ export async function POST(req: NextRequest) {
       metadata: {
         type: "print_order",
         artwork_slug: artworkSlug,
-        sku: canvasSize.sku,
+        product_key: productKey!,
+        sku: product.sku,
         ...(user ? { supabase_user_id: user.id } : {}),
       },
       success_url: `${process.env.NEXT_PUBLIC_SITE_URL}/artworks/${artworkSlug}?print_order=success`,

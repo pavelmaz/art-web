@@ -2,7 +2,7 @@ import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { NextResponse, type NextRequest } from "next/server";
 import type Stripe from "stripe";
 
-import { createProdigiOrder } from "@/lib/prodigi";
+import { createProdigiOrder, PRINT_PRODUCTS } from "@/lib/prodigi";
 import { getStripe } from "@/lib/stripe";
 import type { StripeRoutesDatabase } from "@/lib/supabase/stripe-routes-db";
 import { artworkOriginalUrl } from "@/lib/utils";
@@ -61,14 +61,17 @@ async function getOrCreateUserIdByEmail(email: string): Promise<string | undefin
 async function handlePrintOrderCheckout(session: Stripe.Checkout.Session): Promise<void> {
   const artworkSlug = session.metadata?.artwork_slug;
   const sku = session.metadata?.sku;
+  const productKey = session.metadata?.product_key;
+  const product = productKey ? PRINT_PRODUCTS[productKey] : undefined;
   const shipping = session.collected_information?.shipping_details;
   const email = session.customer_details?.email;
 
-  if (!artworkSlug || !sku || !shipping || !email) {
+  if (!artworkSlug || !sku || !product || !shipping || !email) {
     console.error("Print-order checkout missing required fields", {
       sessionId: session.id,
       artworkSlug,
       sku,
+      productKey,
       hasShipping: !!shipping,
       hasEmail: !!email,
     });
@@ -117,6 +120,8 @@ async function handlePrintOrderCheckout(session: Stripe.Checkout.Session): Promi
   try {
     const { vendorOrderId } = await createProdigiOrder({
       sku,
+      copies: product.copies,
+      attributes: product.attributes,
       imageUrl,
       idempotencyKey: session.id,
       recipient: {
