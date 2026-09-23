@@ -499,7 +499,7 @@ export default async function ArtworkDetailPage({ params }: ArtworkPageProps) {
                 <ProDownloadRow locale="en" downloadHref={maxDownloadHref} filename={artwork.slug} glass maxDims={artworkMaxSpecs(artwork)} maxSize={artworkMaxSize(artwork)} />
 
                 {artwork.artist_display === "Vincent van Gogh" && artworkMeetsCanvasMinRes(artwork) ? (
-                  <BuyCanvasRow artworkSlug={artwork.slug} title={artwork.title} imageUrl={imageUrl} glass />
+                  <BuyCanvasRow artworkSlug={artwork.slug} glass />
                 ) : null}
               </div>
 
