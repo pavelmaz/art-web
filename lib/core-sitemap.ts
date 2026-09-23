@@ -148,7 +148,11 @@ export async function coreHubLocs(): Promise<string[]> {
   }
   locs.push(`${base}/about`, `${base}/blog`, `${base}/topics`, `${base}/countries`);
 
-  const { data, error } = await coreSupabase().rpc("sitemap_facets");
+  // Narrower than app/sitemap/static's sitemap_facets() RPC — this route never
+  // used the `artists` field, which was the single most expensive part of that
+  // function (11k+ distinct artist_display values vs. dozens for genres/styles/
+  // museums combined). See the sitemap_facets_core migration for details.
+  const { data, error } = await coreSupabase().rpc("sitemap_facets_core");
   if (error) throw error;
   const f = (data ?? {}) as { genres?: string[]; styles?: string[]; museums?: string[] };
   const seen = new Set<string>();
