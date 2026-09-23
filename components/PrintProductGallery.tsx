@@ -1,34 +1,20 @@
 "use client";
 
-import { useState } from "react";
-
-import { MOCKUP_TEMPLATES } from "@/lib/print-mockup-templates";
 import type { ProductCategory } from "@/lib/prodigi";
 
 type PrintProductGalleryProps = {
   imageUrl: string;
   title: string;
   category: ProductCategory;
-  orientation: "portrait" | "landscape";
 };
 
-/** The artwork itself, styled to read as the chosen category — same
- *  treatments as the original modal (canvas shadow / print mat / card fold),
- *  just reusable at any size so it can sit inside a room photo's wallRect
- *  or stand alone as a flat product shot. */
-function StyledArtwork({
-  category,
-  imageUrl,
-  fill = false,
-}: {
-  category: ProductCategory;
-  imageUrl: string;
-  fill?: boolean;
-}) {
+/** The artwork itself, styled to read as the chosen category — canvas
+ *  shadow / print mat / card fold, matching the original modal's treatment. */
+function StyledArtwork({ category, imageUrl }: { category: ProductCategory; imageUrl: string }) {
   const tile: React.CSSProperties = imageUrl
     ? { backgroundImage: `url("${imageUrl}")`, backgroundSize: "cover", backgroundPosition: "center" }
     : {};
-  const base = fill ? "h-full w-full" : "aspect-[4/5] w-full max-w-xs";
+  const base = "aspect-[4/5] w-full max-w-xs";
 
   if (category === "wall-art") {
     return <div className={`${base} rounded-[2px] shadow-[0_10px_24px_-6px_rgba(0,0,0,0.5)]`} style={tile} aria-hidden />;
@@ -49,127 +35,10 @@ function StyledArtwork({
   );
 }
 
-/** Real Prodigi product photography (their public downloadable asset
- *  library, prodigi.com/downloads — not stock photography, not composited)
- *  showing the actual canvas construction: stretcher bar depth, corner
- *  fold, fabric texture. Static, no artwork overlay — the point is to show
- *  the physical product itself, the same way a "materials" detail shot
- *  works on a real e-commerce listing. */
-const CANVAS_DETAIL_SHOT = { imageUrl: "/images/print-mockups/canvas-detail.jpg", label: "Canvas detail" };
-
-function DetailShot({ imageUrl, label }: { imageUrl: string; label: string }) {
+export function PrintProductGallery({ imageUrl, category }: PrintProductGalleryProps) {
   return (
-    // eslint-disable-next-line @next/next/no-img-element
-    <img src={imageUrl} alt={label} className="w-full rounded-lg object-cover" />
-  );
-}
-
-function RoomMockup({
-  category,
-  imageUrl,
-  template,
-}: {
-  category: ProductCategory;
-  imageUrl: string;
-  template: (typeof MOCKUP_TEMPLATES)[number];
-}) {
-  return (
-    <div className="relative w-full overflow-hidden rounded-lg bg-[#f1efea]">
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src={template.imageUrl} alt="" className="block w-full" aria-hidden />
-      <div
-        className="absolute"
-        style={{
-          top: `${template.wallRect.top}%`,
-          left: `${template.wallRect.left}%`,
-          width: `${template.wallRect.width}%`,
-          height: `${template.wallRect.height}%`,
-        }}
-      >
-        <StyledArtwork category={category} imageUrl={imageUrl} fill />
-      </div>
-    </div>
-  );
-}
-
-export function PrintProductGallery({ imageUrl, title, category, orientation }: PrintProductGalleryProps) {
-  // Prefer templates matching the artwork's own orientation; fall back to
-  // any template in the category when that category has no template shot
-  // in this orientation yet (e.g. Prints & Posters has no landscape scene
-  // this round) — degrades gracefully instead of rendering an empty gallery.
-  // Cards & Stationery has one template regardless of orientation (a card
-  // has its own fixed shape), so this resolves to it either way.
-  const categoryTemplates = MOCKUP_TEMPLATES.filter((t) => t.category === category);
-  const matchingTemplates = categoryTemplates.filter((t) => t.orientation === orientation);
-  const roomTemplates = matchingTemplates.length > 0 ? matchingTemplates : categoryTemplates;
-  // Cards & Stationery additionally gets the plain fold-mockup as its first
-  // "room" slide (no real photo needed for that one — it's just the flat
-  // artwork styled with a center fold line), ahead of the card-on-a-table photo.
-  const detailSlide = category === "wall-art" ? [{ kind: "detail" as const }] : [];
-  const slides =
-    category === "cards-stationery"
-      ? [{ kind: "flat" as const }, { kind: "flat" as const }, ...roomTemplates.map((t) => ({ kind: "room" as const, template: t }))]
-      : [
-          { kind: "flat" as const },
-          ...roomTemplates.map((t) => ({ kind: "room" as const, template: t })),
-          ...detailSlide,
-        ];
-
-  const [activeIndex, setActiveIndex] = useState(0);
-
-  // The category's visual treatment differs enough (canvas/poster/card) that
-  // an index from a previous category's slide set may point at the wrong
-  // kind of thumbnail — reset to the flat shot whenever category changes.
-  // Adjusted during render (React's recommended pattern for this) rather
-  // than in an effect, which would cause an extra cascading render.
-  const [prevCategory, setPrevCategory] = useState(category);
-  if (category !== prevCategory) {
-    setPrevCategory(category);
-    setActiveIndex(0);
-  }
-
-  const active = slides[activeIndex] ?? slides[0];
-
-  return (
-    <div>
-      <div className="flex aspect-square w-full items-center justify-center rounded-lg bg-[#f1efea] p-6">
-        {active.kind === "room" ? (
-          <div className="w-full">
-            <RoomMockup category={category} imageUrl={imageUrl} template={active.template} />
-          </div>
-        ) : active.kind === "detail" ? (
-          <DetailShot imageUrl={CANVAS_DETAIL_SHOT.imageUrl} label={CANVAS_DETAIL_SHOT.label} />
-        ) : (
-          <StyledArtwork category={category} imageUrl={imageUrl} />
-        )}
-      </div>
-
-      <div className="mt-3 grid grid-cols-4 gap-2">
-        {slides.map((slide, i) => (
-          <button
-            key={i}
-            type="button"
-            onClick={() => setActiveIndex(i)}
-            className={`aspect-square overflow-hidden rounded-md border bg-[#f1efea] transition-colors ${
-              i === activeIndex ? "border-[#1a1a1a]" : "border-[#e8e6e1] hover:border-[#b8b5af]"
-            }`}
-            aria-label={
-              slide.kind === "room" ? slide.template.label : slide.kind === "detail" ? CANVAS_DETAIL_SHOT.label : `${title} — full view`
-            }
-          >
-            {slide.kind === "room" ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={slide.template.imageUrl} alt="" className="h-full w-full object-cover" />
-            ) : slide.kind === "detail" ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={CANVAS_DETAIL_SHOT.imageUrl} alt="" className="h-full w-full object-cover" />
-            ) : (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={imageUrl} alt="" className="h-full w-full object-cover" />
-            )}
-          </button>
-        ))}
-      </div>
+    <div className="flex aspect-square w-full items-center justify-center rounded-lg bg-[#f1efea] p-6">
+      <StyledArtwork category={category} imageUrl={imageUrl} />
     </div>
   );
 }

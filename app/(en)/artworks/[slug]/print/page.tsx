@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 
 import { PrintProductPage } from "@/components/PrintProductPage";
 import { supabase } from "@/lib/supabase";
-import { artworkDetailImageUrl, artworkMeetsCanvasMinRes, artworkOrientation } from "@/lib/utils";
+import { artworkDetailImageUrl, artworkMeetsCanvasMinRes } from "@/lib/utils";
 
 export const revalidate = 86400;
 
@@ -47,12 +47,5 @@ export default async function ArtworkPrintPage({ params }: PrintPageProps) {
 
   const imageUrl = artworkDetailImageUrl(artwork);
 
-  return (
-    <PrintProductPage
-      artworkSlug={artwork.slug}
-      title={artwork.title}
-      imageUrl={imageUrl}
-      orientation={artworkOrientation(artwork)}
-    />
-  );
+  return <PrintProductPage artworkSlug={artwork.slug} title={artwork.title} imageUrl={imageUrl} />;
 }
