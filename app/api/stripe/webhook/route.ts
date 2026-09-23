@@ -2,8 +2,10 @@ import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { NextResponse, type NextRequest } from "next/server";
 import type Stripe from "stripe";
 
+import { createProdigiOrder } from "@/lib/prodigi";
 import { getStripe } from "@/lib/stripe";
 import type { StripeRoutesDatabase } from "@/lib/supabase/stripe-routes-db";
+import { artworkOriginalUrl } from "@/lib/utils";
 
 let supabaseAdminSingleton: SupabaseClient<StripeRoutesDatabase> | undefined;
 
@@ -50,6 +52,96 @@ async function getOrCreateUserIdByEmail(email: string): Promise<string | undefin
   return data.user?.id;
 }
 
+/**
+ * Places the real Prodigi order for a completed canvas-print checkout and
+ * records the result. Stripe already captured payment by the time this runs,
+ * so a Prodigi failure is recorded as `status: "failed"` rather than thrown —
+ * silently losing track of a paid-for order would be worse than a loud log.
+ */
+async function handlePrintOrderCheckout(session: Stripe.Checkout.Session): Promise<void> {
+  const artworkSlug = session.metadata?.artwork_slug;
+  const sku = session.metadata?.sku;
+  const shipping = session.collected_information?.shipping_details;
+  const email = session.customer_details?.email;
+
+  if (!artworkSlug || !sku || !shipping || !email) {
+    console.error("Print-order checkout missing required fields", {
+      sessionId: session.id,
+      artworkSlug,
+      sku,
+      hasShipping: !!shipping,
+      hasEmail: !!email,
+    });
+    return;
+  }
+
+  const supabaseAdmin = getSupabaseAdmin();
+
+  // Idempotency backstop: Stripe redelivers webhooks at-least-once, and
+  // createProdigiOrder's own idempotencyKey only prevents a *duplicate real
+  // order* — this also skips the redundant Prodigi call and insert attempt
+  // entirely once the first delivery already recorded this session.
+  const { data: existing } = await supabaseAdmin
+    .from("print_orders")
+    .select("id")
+    .eq("stripe_session_id", session.id)
+    .maybeSingle();
+  if (existing) return;
+
+  const { data: artwork } = await supabaseAdmin
+    .from("artworks")
+    .select("url, image_id")
+    .eq("id", artworkSlug)
+    .maybeSingle();
+  const imageUrl = artwork ? artworkOriginalUrl(artwork) : "";
+
+  const metaUserId = session.metadata?.supabase_user_id;
+  const userId = typeof metaUserId === "string" && metaUserId.length > 0 ? metaUserId : null;
+
+  const baseRow = {
+    user_id: userId,
+    artwork_id: artworkSlug,
+    stripe_session_id: session.id,
+    sku,
+    amount_total: session.amount_total,
+    currency: session.currency,
+    recipient_email: email,
+  };
+
+  if (!imageUrl) {
+    console.error("Print-order: no image URL for artwork", artworkSlug, session.id);
+    await supabaseAdmin.from("print_orders").insert({ ...baseRow, status: "failed" });
+    return;
+  }
+
+  try {
+    const { vendorOrderId } = await createProdigiOrder({
+      sku,
+      imageUrl,
+      idempotencyKey: session.id,
+      recipient: {
+        name: shipping.name,
+        email,
+        address: {
+          line1: shipping.address.line1 ?? "",
+          line2: shipping.address.line2 ?? undefined,
+          postalOrZipCode: shipping.address.postal_code ?? "",
+          countryCode: shipping.address.country ?? "US",
+          townOrCity: shipping.address.city ?? "",
+          stateOrCounty: shipping.address.state ?? undefined,
+        },
+      },
+    });
+    await supabaseAdmin
+      .from("print_orders")
+      .insert({ ...baseRow, status: "submitted", vendor_order_id: vendorOrderId });
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : String(error);
+    console.error("Prodigi order failed for paid session", session.id, message);
+    await supabaseAdmin.from("print_orders").insert({ ...baseRow, status: "failed" });
+  }
+}
+
 export async function POST(req: NextRequest) {
   const body = await req.text();
   const sig = req.headers.get("stripe-signature");
@@ -73,6 +165,12 @@ export async function POST(req: NextRequest) {
   switch (event.type) {
     case "checkout.session.completed": {
       const session = event.data.object as Stripe.Checkout.Session;
+
+      if (session.metadata?.type === "print_order") {
+        await handlePrintOrderCheckout(session);
+        break;
+      }
+
       const metaUserId = session.metadata?.supabase_user_id;
       const customerId =
         typeof session.customer === "string" ? session.customer : session.customer?.id ?? null;
