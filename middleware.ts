@@ -121,10 +121,15 @@ export async function middleware(request: NextRequest) {
     return new NextResponse("Forbidden", { status: 403 });
   }
 
-  // The Cloudflare staging deployment lives on *.workers.dev and must never be
-  // indexed — a public mirror of ~500k pages would be duplicate content. Keyed on
-  // the host, so the production domain (Vercel today, Cloudflare later) is untouched.
-  const isStagingHost = (request.headers.get("host") ?? "").endsWith(".workers.dev");
+  // Any host other than the canonical domain must never be indexed — a public
+  // mirror of ~500k pages is duplicate content. Covers the Cloudflare staging
+  // deployment (*.workers.dev) AND Vercel's own auto-generated project domains
+  // (e.g. art-web-mauve.vercel.app), which stayed live and fully crawlable after
+  // the Cloudflare cutover (23 Sep 2026) — a search bot found it independently and
+  // was walking the whole catalog through it, generating real Vercel usage/cost
+  // for a domain nobody links to on purpose. www already redirected above, so by
+  // this point "not canonical" just means "not fineartfree.com".
+  const isStagingHost = (request.headers.get("host") ?? "") !== "fineartfree.com";
   if (isStagingHost && pathname === "/robots.txt") {
     return new NextResponse("User-agent: *\nDisallow: /\n", {
       headers: { "Content-Type": "text/plain" },
