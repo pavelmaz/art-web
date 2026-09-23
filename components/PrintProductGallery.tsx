@@ -9,6 +9,7 @@ type PrintProductGalleryProps = {
   imageUrl: string;
   title: string;
   category: ProductCategory;
+  orientation: "portrait" | "landscape";
 };
 
 /** The artwork itself, styled to read as the chosen category — same
@@ -76,11 +77,23 @@ function RoomMockup({
   );
 }
 
-export function PrintProductGallery({ imageUrl, title, category }: PrintProductGalleryProps) {
-  const showRoomMockups = category !== "cards-stationery";
-  const slides = showRoomMockups
-    ? [{ kind: "flat" as const }, ...MOCKUP_TEMPLATES.map((t) => ({ kind: "room" as const, template: t }))]
-    : [{ kind: "flat" as const }, { kind: "flat" as const }];
+export function PrintProductGallery({ imageUrl, title, category, orientation }: PrintProductGalleryProps) {
+  // Prefer templates matching the artwork's own orientation; fall back to
+  // any template in the category when that category has no template shot
+  // in this orientation yet (e.g. Prints & Posters has no landscape scene
+  // this round) — degrades gracefully instead of rendering an empty gallery.
+  // Cards & Stationery has one template regardless of orientation (a card
+  // has its own fixed shape), so this resolves to it either way.
+  const categoryTemplates = MOCKUP_TEMPLATES.filter((t) => t.category === category);
+  const matchingTemplates = categoryTemplates.filter((t) => t.orientation === orientation);
+  const roomTemplates = matchingTemplates.length > 0 ? matchingTemplates : categoryTemplates;
+  // Cards & Stationery additionally gets the plain fold-mockup as its first
+  // "room" slide (no real photo needed for that one — it's just the flat
+  // artwork styled with a center fold line), ahead of the card-on-a-table photo.
+  const slides =
+    category === "cards-stationery"
+      ? [{ kind: "flat" as const }, { kind: "flat" as const }, ...roomTemplates.map((t) => ({ kind: "room" as const, template: t }))]
+      : [{ kind: "flat" as const }, ...roomTemplates.map((t) => ({ kind: "room" as const, template: t }))];
 
   const [activeIndex, setActiveIndex] = useState(0);
 
