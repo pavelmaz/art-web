@@ -41,13 +41,22 @@ const MIN_SIZE_CHOICES = 4;
 type PriceRow = { wholesale: number | null; printPx: number[] | null };
 const PRICE_TABLE = prices.sizes as Record<string, PriceRow>;
 
+/** Classic frame (Prodigi spec sheet): 20mm moulding face whose 5mm rebate
+ *  overlaps the glass, so the frame adds 15mm per side beyond the listed size. */
+export const FRAME_FACE_IN = 20 / 25.4;
+export const FRAME_REBATE_IN = 5 / 25.4;
+
 export type PrintSize = {
-  /** Prodigi frame size code, short side first, e.g. "16X20". */
+  /** Prodigi size code, short side first, e.g. "16X20". */
   code: string;
-  /** Frame (outer) size in inches, oriented like the artwork. */
+  /** Listed (glass) size in inches, oriented like the artwork — excludes the moulding. */
   widthIn: number;
   heightIn: number;
-  /** The artwork as printed (fitted inside the mount window), in inches, oriented like the artwork. */
+  /** Mount window (print area) in inches, oriented like the artwork. */
+  windowWidthIn: number;
+  windowHeightIn: number;
+  /** The artwork as printed, fitted inside the window, in inches. Any leftover
+   *  window space shows as white paper on two sides. */
   imageWidthIn: number;
   imageHeightIn: number;
   label: string;
@@ -112,6 +121,8 @@ export function sizesForArtwork(imgWidth: number | null, imgHeight: number | nul
         code: s.code,
         widthIn,
         heightIn,
+        windowWidthIn: landscape ? s.imageLong : s.imageShort,
+        windowHeightIn: landscape ? s.imageShort : s.imageLong,
         imageWidthIn: round1(landscape ? s.fitLong : s.fitShort),
         imageHeightIn: round1(landscape ? s.fitShort : s.fitLong),
         label: `${cm(widthIn)}x${cm(heightIn)}cm – ${widthIn}"x${heightIn}"`,

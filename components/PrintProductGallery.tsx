@@ -2,15 +2,15 @@
 
 import { useState } from "react";
 
-import { ProductShot, WallMockup } from "@/components/WallMockup";
+import { ProductShot, WallMockup, type PrintGeometry } from "@/components/WallMockup";
 import type { FrameKey } from "@/lib/print-catalog";
 import { WALL_SCENES } from "@/lib/wall-scenes";
 
 type PrintProductGalleryProps = {
   imageUrl: string;
   title: string;
-  /** Artwork width / height — the mockups never change with the chosen size. */
-  aspect: number;
+  /** Real proportions of the size on show: frame, mount, window, fitted artwork. */
+  geometry: PrintGeometry;
   frame: FrameKey;
 };
 
@@ -24,15 +24,15 @@ const SLIDES: Slide[] = [
 function SlideView({
   slide,
   imageUrl,
-  aspect,
+  geometry,
   frame,
   thumb,
 }: { slide: Slide; thumb?: boolean } & Omit<PrintProductGalleryProps, "title">) {
   const scene = WALL_SCENES.find((s) => s.id === slide.key);
   return scene ? (
-    <WallMockup scene={scene} artUrl={imageUrl} aspect={aspect} frame={frame} thumb={thumb} />
+    <WallMockup scene={scene} artUrl={imageUrl} geometry={geometry} frame={frame} thumb={thumb} />
   ) : (
-    <ProductShot artUrl={imageUrl} aspect={aspect} frame={frame} />
+    <ProductShot artUrl={imageUrl} geometry={geometry} frame={frame} />
   );
 }
 

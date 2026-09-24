@@ -1,13 +1,7 @@
 import type { CSSProperties } from "react";
 
-import type { FrameKey } from "@/lib/print-catalog";
+import { FRAME_FACE_IN, FRAME_REBATE_IN, type FrameKey, type PrintSize } from "@/lib/print-catalog";
 import { sceneImageUrl, type WallScene } from "@/lib/wall-scenes";
-
-/** Classic framed print proportions, as fractions of the piece's long side:
- *  wooden moulding + white mount around the printed image (≈ 2" mount on 24"). */
-const FRAME_FACE = 0.03;
-const MOUNT = 0.085;
-const BORDER = FRAME_FACE + MOUNT;
 
 const FRAME_FINISH: Record<FrameKey, string> = {
   black: "linear-gradient(135deg,#2c2c2c,#101010 55%,#222)",
@@ -20,35 +14,36 @@ const FRAME_FINISH: Record<FrameKey, string> = {
   lightgrey: "linear-gradient(135deg,#c9cbcd,#aeb1b4 55%,#c2c4c6)",
 };
 
+/** The physical product in inches, straight from the selected Prodigi size:
+ *  moulding outside the listed (glass) size, white mount, window, fitted artwork. */
+export type PrintGeometry = Pick<
+  PrintSize,
+  "widthIn" | "heightIn" | "windowWidthIn" | "windowHeightIn" | "imageWidthIn" | "imageHeightIn"
+>;
+
 type Box = { x: number; y: number; w: number; h: number };
 
-/** Outer size of the framed piece fitted in a box, with the printed image
- *  inside the mount keeping the artwork's exact aspect ratio. */
-function fitPiece(boxW: number, boxH: number, aspect: number): { w: number; h: number } {
-  if (aspect >= 1) {
-    const hOverW = (1 - 2 * BORDER) / aspect + 2 * BORDER;
-    const w = Math.min(boxW, boxH / hOverW);
-    return { w, h: w * hOverW };
-  }
-  const wOverH = (1 - 2 * BORDER) * aspect + 2 * BORDER;
-  const h = Math.min(boxH, boxW / wOverH);
-  return { w: h * wOverH, h };
+function outerInches(g: PrintGeometry) {
+  const extra = 2 * (FRAME_FACE_IN - FRAME_REBATE_IN);
+  return { w: g.widthIn + extra, h: g.heightIn + extra };
 }
 
-/** The framed print, filling its parent. `piece` is in the square's 0–100 units,
- *  so `cqw` shadows scale with the picture. */
-function FramedPrint({ piece, frame, artUrl }: { piece: Box; frame: FrameKey; artUrl: string }) {
-  const long = Math.max(piece.w, piece.h);
-  const pctX = (v: number) => `${(v / piece.w) * 100}%`;
-  const pctY = (v: number) => `${(v / piece.h) * 100}%`;
-  const cq = (fractionOfLong: number) => `${fractionOfLong * long}cqw`;
-  const inset = (v: number): CSSProperties => ({
+/** The framed print drawn at its real proportions, filling its parent. `piece`
+ *  is in the square's 0–100 units, so `cqw` shadows scale with the picture. */
+function FramedPrint({ piece, g, frame, artUrl }: { piece: Box; g: PrintGeometry; frame: FrameKey; artUrl: string }) {
+  const outer = outerInches(g);
+  const unit = piece.w / outer.w; // square units per inch
+  const pctX = (inches: number) => `${(inches / outer.w) * 100}%`;
+  const pctY = (inches: number) => `${(inches / outer.h) * 100}%`;
+  const cq = (inches: number) => `${inches * unit}cqw`;
+  const rect = (w: number, h: number): CSSProperties => ({
     position: "absolute",
-    left: pctX(v),
-    right: pctX(v),
-    top: pctY(v),
-    bottom: pctY(v),
+    left: pctX((outer.w - w) / 2),
+    top: pctY((outer.h - h) / 2),
+    width: pctX(w),
+    height: pctY(h),
   });
+  const insideFrame = { w: outer.w - 2 * FRAME_FACE_IN, h: outer.h - 2 * FRAME_FACE_IN };
 
   return (
     <div
@@ -57,25 +52,26 @@ function FramedPrint({ piece, frame, artUrl }: { piece: Box; frame: FrameKey; ar
         position: "absolute",
         inset: 0,
         background: FRAME_FINISH[frame],
-        boxShadow: `${cq(0.006)} ${cq(0.02)} ${cq(0.05)} rgba(0,0,0,0.32), 0 ${cq(0.003)} ${cq(0.008)} rgba(0,0,0,0.3)`,
+        boxShadow: `${cq(0.15)} ${cq(0.5)} ${cq(1.2)} rgba(0,0,0,0.32), 0 ${cq(0.08)} ${cq(0.2)} rgba(0,0,0,0.3)`,
       }}
     >
-      {/* White mount, slightly shaded by the frame's inner edge. */}
+      {/* Snow-white mount, shaded by the moulding's inner edge. */}
       <div
         style={{
-          ...inset(FRAME_FACE * long),
+          ...rect(insideFrame.w, insideFrame.h),
           background: "#f6f4ef",
-          boxShadow: `inset ${cq(0.003)} ${cq(0.004)} ${cq(0.008)} rgba(0,0,0,0.28)`,
+          boxShadow: `inset ${cq(0.06)} ${cq(0.1)} ${cq(0.2)} rgba(0,0,0,0.28)`,
         }}
       />
-      {/* The printed image, with the mount's bevel cut around it. */}
+      {/* Window: white paper, with the mount's bevelled cut around it. */}
+      <div style={{ ...rect(g.windowWidthIn, g.windowHeightIn), background: "#fbfaf7", boxShadow: `0 0 0 ${cq(0.05)} #e2ded5` }} />
+      {/* The artwork, fitted inside the window exactly as Prodigi prints it. */}
       <div
         style={{
-          ...inset(BORDER * long),
+          ...rect(g.imageWidthIn, g.imageHeightIn),
           backgroundImage: `url("${artUrl}")`,
           backgroundSize: "cover",
           backgroundPosition: "center",
-          boxShadow: `0 0 0 ${cq(0.002)} #e2ded5`,
         }}
       />
       {/* Acrylic glazing: a faint diagonal sheen across the whole frame. */}
@@ -91,34 +87,39 @@ function FramedPrint({ piece, frame, artUrl }: { piece: Box; frame: FrameKey; ar
   );
 }
 
-function placed(box: WallScene["artBox"], aspect: number): Box {
+/** Fits the framed piece (its real outer shape) inside a box, resting on the bottom edge. */
+function placed(box: WallScene["artBox"], g: PrintGeometry, centreVertically = false): Box {
+  const outer = outerInches(g);
   const boxW = (box.right - box.left) * 100;
   const boxH = (box.bottom - box.top) * 100;
-  const { w, h } = fitPiece(boxW, boxH, aspect);
-  return { x: box.left * 100 + (boxW - w) / 2, y: box.bottom * 100 - h, w, h };
+  const scale = Math.min(boxW / outer.w, boxH / outer.h);
+  const w = outer.w * scale;
+  const h = outer.h * scale;
+  const y = centreVertically ? box.top * 100 + (boxH - h) / 2 : box.bottom * 100 - h;
+  return { x: box.left * 100 + (boxW - w) / 2, y, w, h };
 }
 
-function PieceAt({ piece, frame, artUrl }: { piece: Box; frame: FrameKey; artUrl: string }) {
+function PieceAt({ piece, g, frame, artUrl }: { piece: Box; g: PrintGeometry; frame: FrameKey; artUrl: string }) {
   return (
     <div
       style={{ position: "absolute", left: `${piece.x}%`, top: `${piece.y}%`, width: `${piece.w}%`, height: `${piece.h}%` }}
     >
-      <FramedPrint piece={piece} frame={frame} artUrl={artUrl} />
+      <FramedPrint piece={piece} g={g} frame={frame} artUrl={artUrl} />
     </div>
   );
 }
 
-/** The framed print hanging in a room. `aspect` is the artwork's width / height. */
+/** The framed print hanging in a room. */
 export function WallMockup({
   scene,
   artUrl,
-  aspect,
+  geometry,
   frame,
   thumb = false,
 }: {
   scene: WallScene;
   artUrl: string;
-  aspect: number;
+  geometry: PrintGeometry;
   frame: FrameKey;
   thumb?: boolean;
 }) {
@@ -133,20 +134,20 @@ export function WallMockup({
         loading={thumb ? "lazy" : "eager"}
         className="absolute inset-0 h-full w-full object-cover"
       />
-      <PieceAt piece={placed(scene.artBox, aspect)} frame={frame} artUrl={artUrl} />
+      <PieceAt piece={placed(scene.artBox, geometry)} g={geometry} frame={frame} artUrl={artUrl} />
     </div>
   );
 }
 
 /** Product shot on a plain backdrop: the whole framed print, no room. */
-export function ProductShot({ artUrl, aspect, frame }: { artUrl: string; aspect: number; frame: FrameKey }) {
-  const piece = placed({ left: 0.14, top: 0.14, right: 0.86, bottom: 0.86 }, aspect);
+export function ProductShot({ artUrl, geometry, frame }: { artUrl: string; geometry: PrintGeometry; frame: FrameKey }) {
+  const piece = placed({ left: 0.14, top: 0.14, right: 0.86, bottom: 0.86 }, geometry, true);
   return (
     <div
       className="relative aspect-square w-full overflow-hidden bg-[#efece6]"
       style={{ containerType: "inline-size" }}
     >
-      <PieceAt piece={{ ...piece, y: 50 - piece.h / 2 }} frame={frame} artUrl={artUrl} />
+      <PieceAt piece={piece} g={geometry} frame={frame} artUrl={artUrl} />
     </div>
   );
 }

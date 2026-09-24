@@ -2,7 +2,15 @@
 
 import { useState } from "react";
 
-import { FRAME_OPTIONS, isFrameKey, priceUsd, type FrameKey, type PrintSize } from "@/lib/print-catalog";
+import {
+  FRAME_FACE_IN,
+  FRAME_OPTIONS,
+  FRAME_REBATE_IN,
+  isFrameKey,
+  priceUsd,
+  type FrameKey,
+  type PrintSize,
+} from "@/lib/print-catalog";
 
 type PrintProductPurchasePanelProps = {
   artworkSlug: string;
@@ -16,6 +24,8 @@ type PrintProductPurchasePanelProps = {
 };
 
 const usd = (n: number) => `$${n}`;
+/** Overall size including the moulding (it sits outside the listed glass size). */
+const overall = (glassIn: number) => Math.round((glassIn + 2 * (FRAME_FACE_IN - FRAME_REBATE_IN)) * 10) / 10;
 
 export function PrintProductPurchasePanel({
   artworkSlug,
@@ -111,8 +121,9 @@ export function PrintProductPurchasePanel({
           {showMissing && !sizeCode ? <p className="mt-1.5 text-sm text-[#b3261e]">Please select an option</p> : null}
           {selected ? (
             <p className="mt-1.5 text-sm text-[#6b6b6b]">
-              Frame {selected.widthIn}&quot; × {selected.heightIn}&quot; · printed image {selected.imageWidthIn}&quot; ×{" "}
-              {selected.imageHeightIn}&quot; inside a white mount
+              {selected.widthIn}&quot; × {selected.heightIn}&quot; glass, about {overall(selected.widthIn)}&quot; ×{" "}
+              {overall(selected.heightIn)}&quot; with the frame. Printed image {selected.imageWidthIn}&quot; ×{" "}
+              {selected.imageHeightIn}&quot; inside a white mount.
             </p>
           ) : null}
         </div>
@@ -155,7 +166,7 @@ export function PrintProductPurchasePanel({
         <h2 className="text-base font-semibold text-[#222]">Item details</h2>
         <ul className="mt-3 space-y-2.5 text-sm leading-relaxed text-[#4a4a4a]">
           <li>Giclée print on 200gsm museum-grade matte fine art paper</li>
-          <li>Classic wooden frame with a white mount around the print</li>
+          <li>Classic wooden frame (20mm moulding) with a 2.4mm snow-white mount around the print</li>
           <li>Protected by shatterproof acrylic glazing</li>
           <li>Printed from the museum&apos;s high-resolution scan of the original</li>
           <li>Arrives ready to hang</li>
