@@ -1,7 +1,7 @@
 // Refreshes lib/framed-print-prices.json from Prodigi's live API for the Classic
-// Framed Print with mount (GLOBAL-CFPM-{size}): per frame size, the printed image
-// area in pixels (smaller than the frame — the white mount surrounds it) and the
-// wholesale cost (item + Standard shipping to the US, USD). Quotes place no order.
+// Framed Print without mount (GLOBAL-CFP-{size}): per size, the print area in
+// pixels (the full glass size — the artwork runs edge to edge) and the wholesale
+// cost (item + Standard shipping to the US, USD). Quotes place no order.
 //   node scripts/refresh-print-prices.mjs
 import fs from "node:fs";
 import path from "node:path";
@@ -33,7 +33,7 @@ async function call(url, init) {
 
 const sizes = {};
 for (const size of SIZES) {
-  const sku = `GLOBAL-CFPM-${size}`;
+  const sku = `GLOBAL-CFP-${size}`;
   const product = (await call(`${BASE}/products/${sku}`)).product;
   await sleep(1_100);
   const px = product?.variants?.[0]?.printAreaSizes?.default;
@@ -60,7 +60,7 @@ fs.writeFileSync(
   path.join(ROOT, "lib/framed-print-prices.json"),
   `${JSON.stringify({
     generatedAt: new Date().toISOString().slice(0, 10),
-    note: "Prodigi GLOBAL-CFPM wholesale USD (item + Standard US shipping) and print-area px. Regenerate with scripts/refresh-print-prices.mjs",
+    note: "Prodigi GLOBAL-CFP (no mount) wholesale USD (item + Standard US shipping) and print-area px. Regenerate with scripts/refresh-print-prices.mjs",
     sizes,
   }, null, 2)}\n`,
 );

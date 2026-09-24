@@ -14,12 +14,9 @@ const FRAME_FINISH: Record<FrameKey, string> = {
   lightgrey: "linear-gradient(135deg,#c9cbcd,#aeb1b4 55%,#c2c4c6)",
 };
 
-/** The physical product in inches, straight from the selected Prodigi size:
- *  moulding outside the listed (glass) size, white mount, window, fitted artwork. */
-export type PrintGeometry = Pick<
-  PrintSize,
-  "widthIn" | "heightIn" | "windowWidthIn" | "windowHeightIn" | "imageWidthIn" | "imageHeightIn"
->;
+/** The physical product in inches, straight from the selected Prodigi size: the
+ *  artwork printed edge to edge at the glass size, moulding around the outside. */
+export type PrintGeometry = Pick<PrintSize, "widthIn" | "heightIn">;
 
 type Box = { x: number; y: number; w: number; h: number };
 
@@ -43,7 +40,7 @@ function FramedPrint({ piece, g, frame, artUrl }: { piece: Box; g: PrintGeometry
     width: pctX(w),
     height: pctY(h),
   });
-  const insideFrame = { w: outer.w - 2 * FRAME_FACE_IN, h: outer.h - 2 * FRAME_FACE_IN };
+  const visible = { w: outer.w - 2 * FRAME_FACE_IN, h: outer.h - 2 * FRAME_FACE_IN };
 
   return (
     <div
@@ -55,23 +52,15 @@ function FramedPrint({ piece, g, frame, artUrl }: { piece: Box; g: PrintGeometry
         boxShadow: `${cq(0.15)} ${cq(0.5)} ${cq(1.2)} rgba(0,0,0,0.32), 0 ${cq(0.08)} ${cq(0.2)} rgba(0,0,0,0.3)`,
       }}
     >
-      {/* Snow-white mount, shaded by the moulding's inner edge. */}
+      {/* The artwork, printed to fill the glass (the moulding's rebate hides the
+          outer 5mm), shaded by the moulding's inner edge. */}
       <div
         style={{
-          ...rect(insideFrame.w, insideFrame.h),
-          background: "#f6f4ef",
-          boxShadow: `inset ${cq(0.06)} ${cq(0.1)} ${cq(0.2)} rgba(0,0,0,0.28)`,
-        }}
-      />
-      {/* Window: white paper, with the mount's bevelled cut around it. */}
-      <div style={{ ...rect(g.windowWidthIn, g.windowHeightIn), background: "#fbfaf7", boxShadow: `0 0 0 ${cq(0.05)} #e2ded5` }} />
-      {/* The artwork, fitted inside the window exactly as Prodigi prints it. */}
-      <div
-        style={{
-          ...rect(g.imageWidthIn, g.imageHeightIn),
+          ...rect(visible.w, visible.h),
           backgroundImage: `url("${artUrl}")`,
           backgroundSize: "cover",
           backgroundPosition: "center",
+          boxShadow: `inset ${cq(0.06)} ${cq(0.1)} ${cq(0.2)} rgba(0,0,0,0.3)`,
         }}
       />
       {/* Acrylic glazing: a faint diagonal sheen across the whole frame. */}
