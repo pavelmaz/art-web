@@ -1,6 +1,6 @@
 import type { CSSProperties } from "react";
 
-import { FRAME_FACE_IN, FRAME_REBATE_IN, type FrameKey, type PrintSize } from "@/lib/print-catalog";
+import type { FrameKey, PrintSize } from "@/lib/print-catalog";
 import { sceneImageUrl, type WallScene } from "@/lib/wall-scenes";
 
 const FRAME_FINISH: Record<FrameKey, string> = {
@@ -14,19 +14,27 @@ const FRAME_FINISH: Record<FrameKey, string> = {
   lightgrey: "linear-gradient(135deg,#c9cbcd,#aeb1b4 55%,#c2c4c6)",
 };
 
-/** The physical product in inches, straight from the selected Prodigi size: the
- *  artwork printed edge to edge at the glass size, moulding around the outside. */
+/** The selected print size — only its shape is used: the mockup always shows the
+ *  piece at the same size on the wall with the same frame thickness. */
 export type PrintGeometry = Pick<PrintSize, "widthIn" | "heightIn">;
 
 type Box = { x: number; y: number; w: number; h: number };
 
+/** Drawing units: the piece's long side is always DISPLAY_LONG and the moulding
+ *  always DISPLAY_FACE of it, so the frame looks identical on every size. */
+const DISPLAY_LONG = 30;
+const DISPLAY_FACE = 0.9;
+
 function outerInches(g: PrintGeometry) {
-  const extra = 2 * (FRAME_FACE_IN - FRAME_REBATE_IN);
-  return { w: g.widthIn + extra, h: g.heightIn + extra };
+  const aspect = g.widthIn / g.heightIn;
+  const artLong = DISPLAY_LONG - 2 * DISPLAY_FACE;
+  return aspect >= 1
+    ? { w: DISPLAY_LONG, h: artLong / aspect + 2 * DISPLAY_FACE }
+    : { w: artLong * aspect + 2 * DISPLAY_FACE, h: DISPLAY_LONG };
 }
 
-/** The framed print drawn at its real proportions, filling its parent. `piece`
- *  is in the square's 0–100 units, so `cqw` shadows scale with the picture. */
+/** The framed print, filling its parent. `piece` is in the square's 0–100 units,
+ *  so `cqw` shadows scale with the picture. */
 function FramedPrint({ piece, g, frame, artUrl }: { piece: Box; g: PrintGeometry; frame: FrameKey; artUrl: string }) {
   const outer = outerInches(g);
   const unit = piece.w / outer.w; // square units per inch
@@ -40,7 +48,7 @@ function FramedPrint({ piece, g, frame, artUrl }: { piece: Box; g: PrintGeometry
     width: pctX(w),
     height: pctY(h),
   });
-  const visible = { w: outer.w - 2 * FRAME_FACE_IN, h: outer.h - 2 * FRAME_FACE_IN };
+  const visible = { w: outer.w - 2 * DISPLAY_FACE, h: outer.h - 2 * DISPLAY_FACE };
 
   return (
     <div
@@ -52,8 +60,7 @@ function FramedPrint({ piece, g, frame, artUrl }: { piece: Box; g: PrintGeometry
         boxShadow: `${cq(0.15)} ${cq(0.5)} ${cq(1.2)} rgba(0,0,0,0.32), 0 ${cq(0.08)} ${cq(0.2)} rgba(0,0,0,0.3)`,
       }}
     >
-      {/* The artwork, printed to fill the glass (the moulding's rebate hides the
-          outer 5mm), shaded by the moulding's inner edge. */}
+      {/* The artwork, printed edge to edge, shaded by the moulding's inner edge. */}
       <div
         style={{
           ...rect(visible.w, visible.h),
@@ -76,18 +83,12 @@ function FramedPrint({ piece, g, frame, artUrl }: { piece: Box; g: PrintGeometry
   );
 }
 
-/** Longest outer side the box is sized for: the biggest print on offer (40"
- *  glass + moulding ≈ 41.2") just fits, and every smaller size is drawn at the
- *  same inches-to-screen scale — so the 20mm frame looks the same on every size
- *  and a small print simply hangs smaller on the wall. */
-const REFERENCE_INCHES = 42;
-
-/** Places the framed piece at true scale inside a box, resting on the bottom edge. */
+/** Fits the framed piece inside a box, resting on the bottom edge. */
 function placed(box: WallScene["artBox"], g: PrintGeometry, centreVertically = false): Box {
   const outer = outerInches(g);
   const boxW = (box.right - box.left) * 100;
   const boxH = (box.bottom - box.top) * 100;
-  const scale = Math.min(boxW, boxH) / REFERENCE_INCHES;
+  const scale = Math.min(boxW / outer.w, boxH / outer.h);
   const w = outer.w * scale;
   const h = outer.h * scale;
   const y = centreVertically ? box.top * 100 + (boxH - h) / 2 : box.bottom * 100 - h;
