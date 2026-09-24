@@ -6,6 +6,7 @@ import { notFound } from "next/navigation";
 
 import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { BuyCanvasRow } from "@/components/BuyCanvasRow";
+import { canSellPrint } from "@/lib/print-catalog";
 import { DownloadButton } from "@/components/DownloadButton";
 import { ArtworkActions } from "@/components/ArtworkActions";
 import { ProDownloadRow } from "@/components/ProDownloadRow";
@@ -21,7 +22,7 @@ import { ArtistChip } from "@/components/ArtistChip";
 import { supabase } from "@/lib/supabase";
 import { getT } from "@/lib/translations";
 import { parseArtworkDeathYear } from "@/lib/artwork-death-year";
-import { absoluteUrl, artworkDetailImageUrl, artworkGridImageUrl, artworkImageUrl, artworkMaxSize, artworkMaxSpecs, artworkMediumKind, artworkMeetsCanvasMinRes, artworkOgImageUrl, artworkOriginalUrl, artworkStandardSize, artworkStandardSpecs, generateAltText, slugify } from "@/lib/utils";
+import { absoluteUrl, artworkDetailImageUrl, artworkGridImageUrl, artworkImageUrl, artworkMaxSize, artworkMaxSpecs, artworkMediumKind, artworkOgImageUrl, artworkOriginalUrl, artworkStandardSize, artworkStandardSpecs, generateAltText, slugify } from "@/lib/utils";
 import type { Artwork } from "@/types/artwork";
 
 export const revalidate = 86400;
@@ -498,7 +499,7 @@ export default async function ArtworkDetailPage({ params }: ArtworkPageProps) {
 
                 <ProDownloadRow locale="en" downloadHref={maxDownloadHref} filename={artwork.slug} glass maxDims={artworkMaxSpecs(artwork)} maxSize={artworkMaxSize(artwork)} />
 
-                {artwork.artist_display === "Vincent van Gogh" && artworkMeetsCanvasMinRes(artwork) ? (
+                {canSellPrint(artwork) ? (
                   <BuyCanvasRow artworkSlug={artwork.slug} glass />
                 ) : null}
               </div>

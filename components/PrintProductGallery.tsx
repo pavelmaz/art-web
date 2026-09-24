@@ -17,8 +17,8 @@ type PrintProductGalleryProps = {
 type Slide = { key: string; label: string };
 
 const SLIDES: Slide[] = [
-  ...WALL_SCENES.map((s) => ({ key: s.id, label: s.label })),
   { key: "product", label: "The print" },
+  ...WALL_SCENES.map((s) => ({ key: s.id, label: s.label })),
 ];
 
 function SlideView({

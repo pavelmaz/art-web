@@ -420,24 +420,6 @@ export function artworkMaxSize(artwork: ArtworkSpecSource): string | null {
   return formatFileSize(artwork.orig_bytes);
 }
 
-/** The largest canvas offered (24x32in) needs the source image to clear a
- *  print-quality floor — 150 DPI, the accepted minimum for wall art viewed
- *  at a normal distance (vs. ~300 DPI for close-up print). Aspect-agnostic:
- *  checks the smaller and larger source dimension against the smaller and
- *  larger canvas dimension in inches, since a Van Gogh work may be portrait
- *  or landscape. A blurry canvas would be a real physical item a customer
- *  paid for, so this gate matters more than the on-screen download specs. */
-const CANVAS_MIN_DPI = 150;
-const LARGEST_CANVAS_INCHES: [number, number] = [24, 32];
-
-export function artworkMeetsCanvasMinRes(artwork: ArtworkSpecSource): boolean {
-  const { img_width: w, img_height: h } = artwork;
-  if (!w || !h) return false;
-  const [shortIn, longIn] = [...LARGEST_CANVAS_INCHES].sort((a, b) => a - b);
-  const [shortPx, longPx] = [w, h].sort((a, b) => a - b);
-  return shortPx >= shortIn * CANVAS_MIN_DPI && longPx >= longIn * CANVAS_MIN_DPI;
-}
-
 export function generateAltText(artwork: {
   title: string | null;
   date_display: string | null;

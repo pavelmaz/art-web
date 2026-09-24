@@ -3,7 +3,7 @@ import type { CookieOptions } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 
-import { FRAME_OPTIONS, isFrameKey, priceUsd, prodigiItemFor, sizesForArtwork } from "@/lib/print-catalog";
+import { canSellPrint, FRAME_OPTIONS, isFrameKey, priceUsd, prodigiItemFor, sizesForArtwork } from "@/lib/print-catalog";
 import { getStripe } from "@/lib/stripe";
 import { supabase } from "@/lib/supabase";
 
@@ -37,7 +37,7 @@ export async function POST(req: NextRequest) {
       .eq("id", artworkSlug)
       .maybeSingle();
 
-    if (!artwork || artwork.artist_display !== "Vincent van Gogh") {
+    if (!artwork || !canSellPrint(artwork)) {
       return NextResponse.json({ error: "Not available for this artwork" }, { status: 400 });
     }
 

@@ -3,12 +3,13 @@ import { notFound } from "next/navigation";
 
 import { PrintProductPage } from "@/components/PrintProductPage";
 import { supabase } from "@/lib/supabase";
-import { artworkDetailImageUrl, artworkMeetsCanvasMinRes } from "@/lib/utils";
+import { canSellPrint } from "@/lib/print-catalog";
+import { artworkDetailImageUrl } from "@/lib/utils";
 
 export const revalidate = 86400;
 
 // Not an SEO page — purely transactional, reached only by clicking "Order
-// Canvas Print" from the artwork page. See the print-on-demand plan.
+// Framed Print" from the artwork page. See the print-on-demand plan.
 export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
@@ -37,11 +38,9 @@ export default async function ArtworkPrintPage({ params }: PrintPageProps) {
     .eq("slug", slug)
     .single<ArtworkRow>();
 
-  // Server-side enforcement of the same gate the entry point on the main
-  // artwork page already applies (Van Gogh + a resolution floor so a low-res
-  // scan can't be sold as a full-size print) — this page's URL is guessable,
-  // the entry point hiding the link isn't enough on its own.
-  if (error || !artwork || artwork.artist_display !== "Vincent van Gogh" || !artworkMeetsCanvasMinRes(artwork)) {
+  // Same gate as the button on the artwork page — this URL is guessable, so
+  // hiding the link isn't enough on its own.
+  if (error || !artwork || !canSellPrint(artwork)) {
     notFound();
   }
 

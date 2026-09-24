@@ -120,3 +120,21 @@ export function prodigiItemFor(
   const color = FRAME_OPTIONS.find((f) => f.key === frame)!.prodigiColor;
   return { sku: `GLOBAL-CFP-${code}`, attributes: { color }, sizing: "fillPrintArea" };
 }
+
+/** Print sales are a Van Gogh-only test for now. */
+const PRINT_ARTISTS = new Set(["Vincent van Gogh"]);
+
+/** Whether the artwork can be sold as a framed print: a print artist, and enough
+ *  resolution for at least one size. Used by the artwork page, the print page and
+ *  checkout, so the button, the page and the payment always agree. */
+export function canSellPrint(artwork: {
+  artist_display: string | null;
+  img_width: number | null;
+  img_height: number | null;
+}): boolean {
+  return (
+    !!artwork.artist_display &&
+    PRINT_ARTISTS.has(artwork.artist_display) &&
+    sizesForArtwork(artwork.img_width, artwork.img_height).length > 0
+  );
+}
