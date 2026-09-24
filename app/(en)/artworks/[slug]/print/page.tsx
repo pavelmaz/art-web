@@ -47,5 +47,14 @@ export default async function ArtworkPrintPage({ params }: PrintPageProps) {
 
   const imageUrl = artworkDetailImageUrl(artwork);
 
-  return <PrintProductPage artworkSlug={artwork.slug} title={artwork.title} imageUrl={imageUrl} />;
+  return (
+    <PrintProductPage
+      artworkSlug={artwork.slug}
+      title={artwork.title}
+      artist={artwork.artist_display}
+      imageUrl={imageUrl}
+      imgWidth={artwork.img_width!}
+      imgHeight={artwork.img_height!}
+    />
+  );
 }

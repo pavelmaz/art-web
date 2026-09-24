@@ -4,31 +4,40 @@ import { useState } from "react";
 
 import { PrintProductGallery } from "@/components/PrintProductGallery";
 import { PrintProductPurchasePanel } from "@/components/PrintProductPurchasePanel";
-import { PRODUCT_CATEGORIES, type ProductCategory } from "@/lib/prodigi";
+import { sizesForArtwork, type FrameKey } from "@/lib/canvas-catalog";
 
 export function PrintProductPage({
   artworkSlug,
   title,
+  artist,
   imageUrl,
+  imgWidth,
+  imgHeight,
 }: {
   artworkSlug: string;
   title: string;
+  artist: string | null;
   imageUrl: string;
+  imgWidth: number;
+  imgHeight: number;
 }) {
-  const [category, setCategory] = useState<ProductCategory>("wall-art");
-  const [productKey, setProductKey] = useState<string>(PRODUCT_CATEGORIES[0].productKeys[0]);
+  const sizes = sizesForArtwork(imgWidth, imgHeight);
+  const [sizeCode, setSizeCode] = useState("");
+  const [frame, setFrame] = useState<FrameKey | "">("");
 
   return (
-    <div className="mx-auto max-w-6xl px-5 py-8">
-      <div className="grid grid-cols-1 gap-10 lg:grid-cols-2">
-        <PrintProductGallery imageUrl={imageUrl} title={title} category={category} />
+    <div className="mx-auto w-full max-w-7xl px-4 py-6 md:px-6 md:py-10">
+      <div className="grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,1fr)_400px] lg:gap-12">
+        <PrintProductGallery imageUrl={imageUrl} title={title} aspect={imgWidth / imgHeight} frame={frame || "canvas"} />
         <PrintProductPurchasePanel
           artworkSlug={artworkSlug}
           title={title}
-          category={category}
-          productKey={productKey}
-          onCategoryChange={setCategory}
-          onProductChange={setProductKey}
+          artist={artist}
+          sizes={sizes}
+          sizeCode={sizeCode}
+          frame={frame}
+          onSizeChange={setSizeCode}
+          onFrameChange={setFrame}
         />
       </div>
     </div>

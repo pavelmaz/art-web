@@ -61,17 +61,26 @@ async function getOrCreateUserIdByEmail(email: string): Promise<string | undefin
 async function handlePrintOrderCheckout(session: Stripe.Checkout.Session): Promise<void> {
   const artworkSlug = session.metadata?.artwork_slug;
   const sku = session.metadata?.sku;
-  const productKey = session.metadata?.product_key;
-  const product = productKey ? PRINT_PRODUCTS[productKey] : undefined;
+  // Current checkouts carry the Prodigi attributes directly; older sessions
+  // (before the size/frame picker) only carry a product_key into PRINT_PRODUCTS.
+  const legacyProduct = session.metadata?.product_key ? PRINT_PRODUCTS[session.metadata.product_key] : undefined;
+  let item: { copies: number; attributes: Record<string, string> } | undefined = legacyProduct;
+  if (session.metadata?.attributes) {
+    try {
+      item = { copies: 1, attributes: JSON.parse(session.metadata.attributes) as Record<string, string> };
+    } catch {
+      item = undefined;
+    }
+  }
   const shipping = session.collected_information?.shipping_details;
   const email = session.customer_details?.email;
 
-  if (!artworkSlug || !sku || !product || !shipping || !email) {
+  if (!artworkSlug || !sku || !item || !shipping || !email) {
     console.error("Print-order checkout missing required fields", {
       sessionId: session.id,
       artworkSlug,
       sku,
-      productKey,
+      hasItem: !!item,
       hasShipping: !!shipping,
       hasEmail: !!email,
     });
@@ -120,8 +129,8 @@ async function handlePrintOrderCheckout(session: Stripe.Checkout.Session): Promi
   try {
     const { vendorOrderId } = await createProdigiOrder({
       sku,
-      copies: product.copies,
-      attributes: product.attributes,
+      copies: item.copies,
+      attributes: item.attributes,
       imageUrl,
       idempotencyKey: session.id,
       recipient: {

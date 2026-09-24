@@ -94,16 +94,6 @@ export const PRINT_PRODUCTS: Record<string, PrintProduct> = {
   },
 };
 
-export const PRODUCT_CATEGORIES: { key: ProductCategory; label: string; productKeys: string[] }[] = [
-  { key: "wall-art", label: "Wall Art", productKeys: ["canvas-12x16", "canvas-16x20", "canvas-24x32"] },
-  {
-    key: "prints-posters",
-    label: "Prints & Posters",
-    productKeys: ["poster-11x14", "poster-16x24", "poster-24x36"],
-  },
-  { key: "cards-stationery", label: "Cards & Stationery", productKeys: ["card-set-10"] },
-];
-
 export type ProdigiRecipient = {
   name: string;
   email: string;

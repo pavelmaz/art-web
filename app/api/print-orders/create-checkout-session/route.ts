@@ -3,7 +3,7 @@ import type { CookieOptions } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 
-import { PRINT_PRODUCTS, PRODUCT_CATEGORIES } from "@/lib/prodigi";
+import { FRAME_OPTIONS, isFrameKey, priceUsd, prodigiItemFor, sizesForArtwork } from "@/lib/canvas-catalog";
 import { getStripe } from "@/lib/stripe";
 import { supabase } from "@/lib/supabase";
 
@@ -19,28 +19,37 @@ type CookieRow = { name: string; value: string; options: CookieOptions };
  */
 export async function POST(req: NextRequest) {
   try {
-    const { artworkSlug, productKey } = (await req.json()) as {
+    const { artworkSlug, size, frame } = (await req.json()) as {
       artworkSlug?: string;
-      productKey?: string;
+      size?: string;
+      frame?: string;
     };
 
-    const product = productKey ? PRINT_PRODUCTS[productKey] : undefined;
-    if (!artworkSlug || !product) {
-      return NextResponse.json({ error: "Invalid artwork or product" }, { status: 400 });
+    if (!artworkSlug || !size || !isFrameKey(frame)) {
+      return NextResponse.json({ error: "Please choose a size and frame" }, { status: 400 });
     }
-    const categoryLabel = PRODUCT_CATEGORIES.find((c) => c.key === product.category)?.label ?? "Print";
 
     // Van-Gogh-only for this test, enforced server-side too — the UI only
     // renders this option on Van Gogh pages, but nothing stops a direct POST.
     const { data: artwork } = await supabase
       .from("artworks")
-      .select("id, title, artist_display")
+      .select("id, title, artist_display, img_width, img_height")
       .eq("id", artworkSlug)
       .maybeSingle();
 
     if (!artwork || artwork.artist_display !== "Vincent van Gogh") {
       return NextResponse.json({ error: "Not available for this artwork" }, { status: 400 });
     }
+
+    // The size must be one this artwork is actually offered in (shape + resolution),
+    // and the price always comes from the server-side table, never the client.
+    const chosen = sizesForArtwork(artwork.img_width, artwork.img_height).find((s) => s.code === size);
+    const retailUsd = chosen ? priceUsd(chosen.code, frame) : null;
+    if (!chosen || !retailUsd) {
+      return NextResponse.json({ error: "That size isn't available for this artwork" }, { status: 400 });
+    }
+    const { sku, attributes } = prodigiItemFor(chosen.code, frame);
+    const frameLabel = FRAME_OPTIONS.find((f) => f.key === frame)!.label;
 
     const cookieStore = await cookies();
     const supabaseAuth = createServerClient(
@@ -67,8 +76,8 @@ export async function POST(req: NextRequest) {
         {
           price_data: {
             currency: "usd",
-            unit_amount: product.retailCents,
-            product_data: { name: `${artwork.title} — ${categoryLabel} (${product.label})` },
+            unit_amount: retailUsd * 100,
+            product_data: { name: `${artwork.title} — Canvas print, ${chosen.label}, ${frameLabel}` },
           },
           quantity: 1,
         },
@@ -77,8 +86,10 @@ export async function POST(req: NextRequest) {
       metadata: {
         type: "print_order",
         artwork_slug: artworkSlug,
-        product_key: productKey!,
-        sku: product.sku,
+        sku,
+        attributes: JSON.stringify(attributes),
+        size: chosen.code,
+        frame,
         ...(user ? { supabase_user_id: user.id } : {}),
       },
       success_url: `${process.env.NEXT_PUBLIC_SITE_URL}/artworks/${artworkSlug}?print_order=success`,

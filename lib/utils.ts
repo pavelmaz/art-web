@@ -438,16 +438,6 @@ export function artworkMeetsCanvasMinRes(artwork: ArtworkSpecSource): boolean {
   return shortPx >= shortIn * CANVAS_MIN_DPI && longPx >= longIn * CANVAS_MIN_DPI;
 }
 
-/** Same >1.15 ratio used to classify the catalog for this feature (492
- *  landscape / 314 portrait / 28 square among Van Gogh works) — a work
- *  within 15% of square falls to "portrait", the smaller-crop side, since
- *  it affects only a small fraction of the catalog either way. */
-export function artworkOrientation(artwork: ArtworkSpecSource): "portrait" | "landscape" {
-  const { img_width: w, img_height: h } = artwork;
-  if (w && h && w > h * 1.15) return "landscape";
-  return "portrait";
-}
-
 export function generateAltText(artwork: {
   title: string | null;
   date_display: string | null;
