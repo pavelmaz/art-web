@@ -47,7 +47,7 @@ export async function SiteShell({ lang, children }: { lang: SiteLocale; children
               aria-label="Footer"
               className="flex flex-wrap items-center gap-x-1 gap-y-2 text-sm tracking-wide"
             >
-              <Link href="/about" className="text-[#a3a3a3] transition-colors hover:text-white">
+              <Link href="/about" prefetch={false} className="text-[#a3a3a3] transition-colors hover:text-white">
                 About
               </Link>
               <span className="mx-2 text-[#404040]" aria-hidden>
@@ -57,19 +57,19 @@ export async function SiteShell({ lang, children }: { lang: SiteLocale; children
               <span className="mx-2 text-[#404040]" aria-hidden>
                 |
               </span>
-              <Link href="/fineart-pro" className="text-[#a3a3a3] transition-colors hover:text-white">
+              <Link href="/fineart-pro" prefetch={false} className="text-[#a3a3a3] transition-colors hover:text-white">
                 Fine Art Pro
               </Link>
               <span className="mx-2 text-[#404040]" aria-hidden>
                 |
               </span>
-              <Link href="/blog" className="text-[#a3a3a3] transition-colors hover:text-white">
+              <Link href="/blog" prefetch={false} className="text-[#a3a3a3] transition-colors hover:text-white">
                 Blog
               </Link>
               <span className="mx-2 text-[#404040]" aria-hidden>
                 |
               </span>
-              <Link href="/terms" className="text-[#a3a3a3] transition-colors hover:text-white">
+              <Link href="/terms" prefetch={false} className="text-[#a3a3a3] transition-colors hover:text-white">
                 Terms
               </Link>
               <span className="mx-2 text-[#404040]" aria-hidden>

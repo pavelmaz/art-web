@@ -198,6 +198,7 @@ export default function Header({ browseGenres = [] }: HeaderProps) {
         <div className="flex w-full items-center justify-center px-3 py-3 md:px-6">
           <Link
             href={prefix || "/"}
+            prefetch={false}
             className="inline-flex shrink-0 items-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1a1a1a]/30"
           >
             <Image
@@ -226,6 +227,7 @@ export default function Header({ browseGenres = [] }: HeaderProps) {
       <div className="flex w-full items-center gap-3 px-3 py-3 md:gap-4 md:px-6">
         <Link
           href={prefix || "/"}
+          prefetch={false}
           className="-ml-1 inline-flex shrink-0 items-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:ring-offset-2 focus-visible:ring-offset-transparent"
         >
           <Image

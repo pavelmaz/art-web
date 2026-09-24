@@ -53,6 +53,7 @@ export function ProDownloadRow({ locale, downloadHref, filename, glass = false, 
         </div>
         <a
           href={proDownloadHref}
+          rel="nofollow"
           // The hi-res counterpart of the low_res download event: what paying members actually use.
           onClick={() =>
             track("download", {

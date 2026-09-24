@@ -68,6 +68,30 @@ async function logDownload(req: NextRequest, slug: string | null) {
  */
 const ALLOWED_HOSTS = new Set(["cdn.fineartfree.com", "www.artic.edu", "upload.wikimedia.org"]);
 
+// Free downloads served the w1400 WebP rendition until 15 Sep 2026; scrapers keep
+// replaying those old links, and converting each one to JPEG is a billed Cloudflare
+// Images transformation per artwork. The og1200 JPEG of the same artwork is the
+// current free download, so serve that instead of converting.
+const OLD_WEBP_RENDITION = /\/renditions\/(?:w800|w1400)\/(artworks\/[^/]+)\.webp$/i;
+
+function jpegRenditionFor(url: URL): string | null {
+  if (!OLD_WEBP_RENDITION.test(url.pathname)) return null;
+  const jpeg = new URL(url.toString());
+  jpeg.pathname = url.pathname.replace(OLD_WEBP_RENDITION, "/renditions/og1200/$1.jpg");
+  jpeg.search = "";
+  return jpeg.toString();
+}
+
+async function fetchUpstream(url: URL): Promise<Response> {
+  const jpeg = jpegRenditionFor(url);
+  if (jpeg) {
+    const res = await fetch(jpeg);
+    if (res.ok && res.body) return res;
+    await res.body?.cancel();
+  }
+  return fetch(url.toString());
+}
+
 export async function GET(req: NextRequest) {
   const src = req.nextUrl.searchParams.get("src");
   if (!src) return new NextResponse("Missing src", { status: 400 });
@@ -82,7 +106,7 @@ export async function GET(req: NextRequest) {
     return new NextResponse("Forbidden", { status: 403 });
   }
 
-  const upstream = await fetch(url.toString());
+  const upstream = await fetchUpstream(url);
   if (!upstream.ok || !upstream.body) {
     return new NextResponse("Upstream error", { status: 502 });
   }

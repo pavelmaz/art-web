@@ -12,7 +12,7 @@ const LINK_CLASS = "text-[#a3a3a3] transition-colors hover:text-white";
 export function FooterCommercialLink() {
   const locale = localeFromPathname(usePathname());
   return (
-    <Link href={COMMERCIAL_USE_PATHS[locale]} className={LINK_CLASS}>
+    <Link href={COMMERCIAL_USE_PATHS[locale]} prefetch={false} className={LINK_CLASS}>
       {COMMERCIAL_USE_FOOTER_LABEL[locale]}
     </Link>
   );
@@ -21,7 +21,7 @@ export function FooterCommercialLink() {
 export function FooterContactLink() {
   const locale = localeFromPathname(usePathname());
   return (
-    <Link href={locale === "en" ? "/contact" : `/${locale}/contact`} className={LINK_CLASS}>
+    <Link href={locale === "en" ? "/contact" : `/${locale}/contact`} prefetch={false} className={LINK_CLASS}>
       Contact
     </Link>
   );

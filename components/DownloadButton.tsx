@@ -105,7 +105,7 @@ export function DownloadButton({
 
   return (
     <>
-      <a ref={anchorRef} href={href} className={className} onClick={handleClick}>
+      <a ref={anchorRef} href={href} rel="nofollow" className={className} onClick={handleClick}>
         {label}
       </a>
 
