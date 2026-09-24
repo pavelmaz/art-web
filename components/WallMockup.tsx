@@ -76,12 +76,18 @@ function FramedPrint({ piece, g, frame, artUrl }: { piece: Box; g: PrintGeometry
   );
 }
 
-/** Fits the framed piece (its real outer shape) inside a box, resting on the bottom edge. */
+/** Longest outer side the box is sized for: the biggest print on offer (40"
+ *  glass + moulding ≈ 41.2") just fits, and every smaller size is drawn at the
+ *  same inches-to-screen scale — so the 20mm frame looks the same on every size
+ *  and a small print simply hangs smaller on the wall. */
+const REFERENCE_INCHES = 42;
+
+/** Places the framed piece at true scale inside a box, resting on the bottom edge. */
 function placed(box: WallScene["artBox"], g: PrintGeometry, centreVertically = false): Box {
   const outer = outerInches(g);
   const boxW = (box.right - box.left) * 100;
   const boxH = (box.bottom - box.top) * 100;
-  const scale = Math.min(boxW / outer.w, boxH / outer.h);
+  const scale = Math.min(boxW, boxH) / REFERENCE_INCHES;
   const w = outer.w * scale;
   const h = outer.h * scale;
   const y = centreVertically ? box.top * 100 + (boxH - h) / 2 : box.bottom * 100 - h;
