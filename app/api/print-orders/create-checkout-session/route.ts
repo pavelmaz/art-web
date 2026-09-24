@@ -3,7 +3,7 @@ import type { CookieOptions } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 
-import { FRAME_OPTIONS, isFrameKey, priceUsd, prodigiItemFor, sizesForArtwork } from "@/lib/canvas-catalog";
+import { FRAME_OPTIONS, isFrameKey, priceUsd, prodigiItemFor, sizesForArtwork } from "@/lib/print-catalog";
 import { getStripe } from "@/lib/stripe";
 import { supabase } from "@/lib/supabase";
 
@@ -44,11 +44,11 @@ export async function POST(req: NextRequest) {
     // The size must be one this artwork is actually offered in (shape + resolution),
     // and the price always comes from the server-side table, never the client.
     const chosen = sizesForArtwork(artwork.img_width, artwork.img_height).find((s) => s.code === size);
-    const retailUsd = chosen ? priceUsd(chosen.code, frame) : null;
+    const retailUsd = chosen ? priceUsd(chosen.code) : null;
     if (!chosen || !retailUsd) {
       return NextResponse.json({ error: "That size isn't available for this artwork" }, { status: 400 });
     }
-    const { sku, attributes } = prodigiItemFor(chosen.code, frame);
+    const { sku, attributes, sizing } = prodigiItemFor(chosen.code, frame);
     const frameLabel = FRAME_OPTIONS.find((f) => f.key === frame)!.label;
 
     const cookieStore = await cookies();
@@ -77,7 +77,7 @@ export async function POST(req: NextRequest) {
           price_data: {
             currency: "usd",
             unit_amount: retailUsd * 100,
-            product_data: { name: `${artwork.title} — Canvas print, ${chosen.label}, ${frameLabel}` },
+            product_data: { name: `${artwork.title} — Framed print, ${chosen.label}, ${frameLabel}` },
           },
           quantity: 1,
         },
@@ -88,6 +88,7 @@ export async function POST(req: NextRequest) {
         artwork_slug: artworkSlug,
         sku,
         attributes: JSON.stringify(attributes),
+        sizing,
         size: chosen.code,
         frame,
         ...(user ? { supabase_user_id: user.id } : {}),

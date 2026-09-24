@@ -133,6 +133,7 @@ async function handlePrintOrderCheckout(session: Stripe.Checkout.Session): Promi
       attributes: item.attributes,
       imageUrl,
       idempotencyKey: session.id,
+      sizing: session.metadata?.sizing === "fitPrintArea" ? "fitPrintArea" : "fillPrintArea",
       recipient: {
         name: shipping.name,
         email,

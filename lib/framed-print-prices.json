@@ -1,0 +1,230 @@
+{
+  "generatedAt": "2026-09-24",
+  "note": "Prodigi GLOBAL-CFPM wholesale USD (item + Standard US shipping) and print-area px. Regenerate with scripts/refresh-print-prices.mjs",
+  "sizes": {
+    "8X8": {
+      "wholesale": 59.55,
+      "printPx": [
+        1800,
+        1800
+      ]
+    },
+    "8X10": {
+      "wholesale": 64.8,
+      "printPx": [
+        1800,
+        2400
+      ]
+    },
+    "8X12": {
+      "wholesale": 64.8,
+      "printPx": [
+        1800,
+        3000
+      ]
+    },
+    "10X20": {
+      "wholesale": 75.9,
+      "printPx": [
+        2101,
+        5101
+      ]
+    },
+    "11X14": {
+      "wholesale": 68.8,
+      "printPx": [
+        2409,
+        3295
+      ]
+    },
+    "12X12": {
+      "wholesale": 68.8,
+      "printPx": [
+        2700,
+        2700
+      ]
+    },
+    "12X16": {
+      "wholesale": 74.8,
+      "printPx": [
+        2400,
+        3600
+      ]
+    },
+    "12X18": {
+      "wholesale": 75.9,
+      "printPx": [
+        2418,
+        4218
+      ]
+    },
+    "12X24": {
+      "wholesale": 75.9,
+      "printPx": [
+        2400,
+        6000
+      ]
+    },
+    "12X36": {
+      "wholesale": 94.55,
+      "printPx": [
+        2400,
+        9600
+      ]
+    },
+    "16X16": {
+      "wholesale": 74.8,
+      "printPx": [
+        3600,
+        3600
+      ]
+    },
+    "16X20": {
+      "wholesale": 80.9,
+      "printPx": [
+        3600,
+        4800
+      ]
+    },
+    "16X24": {
+      "wholesale": 85.9,
+      "printPx": [
+        3618,
+        6018
+      ]
+    },
+    "18X18": {
+      "wholesale": null,
+      "printPx": [
+        4200,
+        4200
+      ]
+    },
+    "18X24": {
+      "wholesale": 85.9,
+      "printPx": [
+        4200,
+        6000
+      ]
+    },
+    "20X20": {
+      "wholesale": 85.9,
+      "printPx": [
+        4800,
+        4800
+      ]
+    },
+    "20X28": {
+      "wholesale": 102.35,
+      "printPx": [
+        4800,
+        7200
+      ]
+    },
+    "20X30": {
+      "wholesale": 102.35,
+      "printPx": [
+        4800,
+        7800
+      ]
+    },
+    "20X40": {
+      "wholesale": 140.75,
+      "printPx": [
+        4818,
+        10818
+      ]
+    },
+    "24X24": {
+      "wholesale": 95.9,
+      "printPx": [
+        6000,
+        6000
+      ]
+    },
+    "24X30": {
+      "wholesale": null,
+      "printPx": [
+        6000,
+        7800
+      ]
+    },
+    "24X32": {
+      "wholesale": 112.35,
+      "printPx": [
+        6000,
+        8400
+      ]
+    },
+    "24X36": {
+      "wholesale": 124.55,
+      "printPx": [
+        6000,
+        9600
+      ]
+    },
+    "28X28": {
+      "wholesale": 117.35,
+      "printPx": [
+        7200,
+        7200
+      ]
+    },
+    "28X40": {
+      "wholesale": 150.75,
+      "printPx": [
+        7200,
+        10800
+      ]
+    },
+    "30X30": {
+      "wholesale": 127.35,
+      "printPx": [
+        7800,
+        7800
+      ]
+    },
+    "30X40": {
+      "wholesale": 160.75,
+      "printPx": [
+        7800,
+        10800
+      ]
+    },
+    "30X45": {
+      "wholesale": null,
+      "printPx": [
+        7800,
+        12300
+      ]
+    },
+    "32X40": {
+      "wholesale": null,
+      "printPx": [
+        8400,
+        10800
+      ]
+    },
+    "36X36": {
+      "wholesale": 154.55,
+      "printPx": [
+        9600,
+        9600
+      ]
+    },
+    "36X48": {
+      "wholesale": null,
+      "printPx": [
+        9600,
+        13200
+      ]
+    },
+    "40X40": {
+      "wholesale": 185.75,
+      "printPx": [
+        10818,
+        10818
+      ]
+    }
+  }
+}

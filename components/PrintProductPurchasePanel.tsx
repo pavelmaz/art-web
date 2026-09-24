@@ -2,13 +2,13 @@
 
 import { useState } from "react";
 
-import { FRAME_OPTIONS, isFrameKey, priceUsd, type CanvasSize, type FrameKey } from "@/lib/canvas-catalog";
+import { FRAME_OPTIONS, isFrameKey, priceUsd, type FrameKey, type PrintSize } from "@/lib/print-catalog";
 
 type PrintProductPurchasePanelProps = {
   artworkSlug: string;
   title: string;
   artist: string | null;
-  sizes: CanvasSize[];
+  sizes: PrintSize[];
   sizeCode: string;
   frame: FrameKey | "";
   onSizeChange: (code: string) => void;
@@ -16,14 +16,6 @@ type PrintProductPurchasePanelProps = {
 };
 
 const usd = (n: number) => `$${n}`;
-
-function range(values: (number | null)[]): string {
-  const nums = values.filter((v): v is number => v !== null);
-  if (nums.length === 0) return "unavailable";
-  const lo = Math.min(...nums);
-  const hi = Math.max(...nums);
-  return lo === hi ? usd(lo) : `${usd(lo)} - ${usd(hi)}`;
-}
 
 export function PrintProductPurchasePanel({
   artworkSlug,
@@ -39,9 +31,10 @@ export function PrintProductPurchasePanel({
   const [error, setError] = useState<string | null>(null);
   const [showMissing, setShowMissing] = useState(false);
 
-  const allPrices = sizes.flatMap((s) => FRAME_OPTIONS.map((f) => priceUsd(s.code, f.key)));
-  const minPrice = Math.min(...allPrices.filter((p): p is number => p !== null));
-  const selectedPrice = sizeCode && frame ? priceUsd(sizeCode, frame) : null;
+  const prices = sizes.map((s) => priceUsd(s.code)).filter((p): p is number => p !== null);
+  const minPrice = Math.min(...prices);
+  const selected = sizes.find((s) => s.code === sizeCode);
+  const selectedPrice = selected ? priceUsd(selected.code) : null;
 
   const handleBuy = async () => {
     if (!sizeCode || !frame) {
@@ -87,12 +80,10 @@ export function PrintProductPurchasePanel({
 
   return (
     <div className="lg:pt-2">
-      <p className="text-3xl font-semibold text-[#222]">
-        {selectedPrice ? usd(selectedPrice) : `${usd(minPrice)}+`}
-      </p>
+      <p className="text-3xl font-semibold text-[#222]">{selectedPrice ? usd(selectedPrice) : `${usd(minPrice)}+`}</p>
       <p className="mt-1 text-sm font-medium text-[#2e7d32]">Free shipping within the US</p>
 
-      <h1 className="mt-4 text-lg leading-snug text-[#222]">{title} — Canvas Print, Museum-Quality Reproduction</h1>
+      <h1 className="mt-4 text-lg leading-snug text-[#222]">{title} — Framed Art Print, Museum-Quality Reproduction</h1>
       {artist ? <p className="mt-1 text-sm font-semibold text-[#222]">{artist}</p> : null}
       <p className="mt-0.5 text-sm text-[#6b6b6b]">Sold by Fine Art Free</p>
 
@@ -111,13 +102,19 @@ export function PrintProductPurchasePanel({
               <option value="">Select an option</option>
               {sizes.map((s) => (
                 <option key={s.code} value={s.code}>
-                  {s.label} ({frame ? usd(priceUsd(s.code, frame) ?? 0) : range(FRAME_OPTIONS.map((f) => priceUsd(s.code, f.key)))})
+                  {s.label} ({usd(priceUsd(s.code) ?? 0)})
                 </option>
               ))}
             </select>
             {chevron}
           </div>
           {showMissing && !sizeCode ? <p className="mt-1.5 text-sm text-[#b3261e]">Please select an option</p> : null}
+          {selected ? (
+            <p className="mt-1.5 text-sm text-[#6b6b6b]">
+              Frame {selected.widthIn}&quot; × {selected.heightIn}&quot; · printed image {selected.imageWidthIn}&quot; ×{" "}
+              {selected.imageHeightIn}&quot; inside a white mount
+            </p>
+          ) : null}
         </div>
 
         <div>
@@ -132,17 +129,11 @@ export function PrintProductPurchasePanel({
               className={selectClass(showMissing && !frame)}
             >
               <option value="">Select an option</option>
-              {FRAME_OPTIONS.map((f) => {
-                const label = sizeCode
-                  ? priceUsd(sizeCode, f.key)
-                  : null;
-                const unavailable = sizeCode !== "" && label === null;
-                return (
-                  <option key={f.key} value={f.key} disabled={unavailable}>
-                    {f.label} ({sizeCode ? (label ? usd(label) : "not available in this size") : range(sizes.map((s) => priceUsd(s.code, f.key)))})
-                  </option>
-                );
-              })}
+              {FRAME_OPTIONS.map((f) => (
+                <option key={f.key} value={f.key}>
+                  {f.label}
+                </option>
+              ))}
             </select>
             {chevron}
           </div>
@@ -163,10 +154,11 @@ export function PrintProductPurchasePanel({
       <div className="mt-8 border-t border-[#e8e6e1] pt-6">
         <h2 className="text-base font-semibold text-[#222]">Item details</h2>
         <ul className="mt-3 space-y-2.5 text-sm leading-relaxed text-[#4a4a4a]">
-          <li>Printed on 400gsm cotton canvas, wrapped around 1.5&quot; (38mm) wooden stretcher bars</li>
-          <li>Framed options sit in a float frame with a slim shadow gap around the canvas</li>
+          <li>Giclée print on 200gsm museum-grade matte fine art paper</li>
+          <li>Classic wooden frame with a white mount around the print</li>
+          <li>Protected by shatterproof acrylic glazing</li>
           <li>Printed from the museum&apos;s high-resolution scan of the original</li>
-          <li>Ready to hang</li>
+          <li>Arrives ready to hang</li>
           <li>Made to order and shipped to your door</li>
         </ul>
       </div>

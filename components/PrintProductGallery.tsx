@@ -3,7 +3,7 @@
 import { useState } from "react";
 
 import { ProductShot, WallMockup } from "@/components/WallMockup";
-import type { FrameKey } from "@/lib/canvas-catalog";
+import type { FrameKey } from "@/lib/print-catalog";
 import { WALL_SCENES } from "@/lib/wall-scenes";
 
 type PrintProductGalleryProps = {
@@ -26,11 +26,11 @@ function SlideView({
   imageUrl,
   aspect,
   frame,
-  eager,
-}: { slide: Slide; eager?: boolean } & Omit<PrintProductGalleryProps, "title">) {
+  thumb,
+}: { slide: Slide; thumb?: boolean } & Omit<PrintProductGalleryProps, "title">) {
   const scene = WALL_SCENES.find((s) => s.id === slide.key);
   return scene ? (
-    <WallMockup scene={scene} artUrl={imageUrl} aspect={aspect} frame={frame} eager={eager} />
+    <WallMockup scene={scene} artUrl={imageUrl} aspect={aspect} frame={frame} thumb={thumb} />
   ) : (
     <ProductShot artUrl={imageUrl} aspect={aspect} frame={frame} />
   );
@@ -45,7 +45,7 @@ export function PrintProductGallery({ title, ...props }: PrintProductGalleryProp
       {/* Desktop: thumbnails in a column as tall as the main image, scrolling like Etsy's. */}
       <div className="relative md:pl-[88px]">
         <div className="relative overflow-hidden rounded-xl bg-[#efece6]">
-          <SlideView slide={SLIDES[active]} eager {...props} />
+          <SlideView slide={SLIDES[active]} {...props} />
           <button
             type="button"
             onClick={() => go(-1)}
@@ -80,7 +80,7 @@ export function PrintProductGallery({ title, ...props }: PrintProductGalleryProp
                 i === active ? "border-[#222]" : "border-transparent opacity-80 hover:opacity-100"
               }`}
             >
-              <SlideView slide={slide} {...props} />
+              <SlideView slide={slide} thumb {...props} />
             </button>
           ))}
         </div>

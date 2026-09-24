@@ -133,6 +133,7 @@ export async function createProdigiOrder({
   imageUrl,
   recipient,
   idempotencyKey,
+  sizing = "fillPrintArea",
 }: {
   sku: string;
   copies: number;
@@ -140,6 +141,8 @@ export async function createProdigiOrder({
   imageUrl: string;
   recipient: ProdigiRecipient;
   idempotencyKey: string;
+  /** fitPrintArea keeps the whole image (framed prints); fillPrintArea crops to fill. */
+  sizing?: "fillPrintArea" | "fitPrintArea";
 }): Promise<{ vendorOrderId: string }> {
   const { apiKey, apiBase } = getProdigiConfig();
 
@@ -154,7 +157,7 @@ export async function createProdigiOrder({
         {
           sku,
           copies,
-          sizing: "fillPrintArea",
+          sizing,
           attributes,
           assets: [{ printArea: "default", url: imageUrl }],
         },

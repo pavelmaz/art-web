@@ -4,7 +4,7 @@ import { useState } from "react";
 
 import { PrintProductGallery } from "@/components/PrintProductGallery";
 import { PrintProductPurchasePanel } from "@/components/PrintProductPurchasePanel";
-import { sizesForArtwork, type FrameKey } from "@/lib/canvas-catalog";
+import { sizesForArtwork, type FrameKey } from "@/lib/print-catalog";
 
 export function PrintProductPage({
   artworkSlug,
@@ -28,7 +28,7 @@ export function PrintProductPage({
   return (
     <div className="mx-auto w-full max-w-7xl px-4 py-6 md:px-6 md:py-10">
       <div className="grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,1fr)_400px] lg:gap-12">
-        <PrintProductGallery imageUrl={imageUrl} title={title} aspect={imgWidth / imgHeight} frame={frame || "canvas"} />
+        <PrintProductGallery imageUrl={imageUrl} title={title} aspect={imgWidth / imgHeight} frame={frame || "black"} />
         <PrintProductPurchasePanel
           artworkSlug={artworkSlug}
           title={title}

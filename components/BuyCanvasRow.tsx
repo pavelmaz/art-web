@@ -38,14 +38,14 @@ export function BuyCanvasRow({ artworkSlug, glass = false }: BuyCanvasRowProps) 
   return (
     <div className={`flex items-center justify-between gap-2 rounded-lg p-3 ${glass ? "glass-inset" : "bg-[#eceff3]"}`}>
       <div className="min-w-0">
-        <p className="truncate text-[13px] font-medium text-[#1a1a1a]">Buy on Canvas</p>
+        <p className="truncate text-[13px] font-medium text-[#1a1a1a]">Buy as a Framed Print</p>
         <p className="text-xs text-[#999]">Printed and shipped to your door</p>
       </div>
       <Link
         href={`/artworks/${artworkSlug}/print`}
         className="inline-flex shrink-0 items-center justify-center rounded-md bg-[#4CAF50] px-3 py-2 text-[13px] font-medium text-white hover:bg-[#43A047]"
       >
-        Order Canvas Print
+        Order Framed Print
       </Link>
     </div>
   );
