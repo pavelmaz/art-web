@@ -147,6 +147,12 @@ const nextConfig: NextConfig = {
       ...buildLegacyLocalePathRedirects(),
       ...buildTopicsCountriesRedirects(),
       ...buildArtistMergeRedirects(),
+      // 24 Sep 2026: artworks with location "USA" were merged into "United States";
+      // "country"/"unknown" were import placeholders, not countries.
+      ...["/countries", "/es/paises", "/pt/paises", "/ja/countries"].flatMap((hub) => [
+        { source: `${hub}/usa`, destination: `${hub}/united-states`, permanent: true },
+        { source: `${hub}/:slug(country|countries|unknown)`, destination: hub, permanent: true },
+      ]),
       {
         source: "/genres/theatrical",
         destination: "/genres",

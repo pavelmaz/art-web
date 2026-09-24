@@ -323,14 +323,19 @@ export async function getCachedTagsHub() {
   );
 }
 
+/** Placeholder `location` values left by imports — not countries, and their
+ *  links 404 (the country page title-cases the slug). */
+const NOT_A_COUNTRY = new Set(["country", "countries", "unknown"]);
+
 export async function getCachedCountriesHub() {
   const { data, error } = await supabase.rpc("get_countries_hub");
   if (error || !data || data.length === 0) {
     console.error("get_countries_hub failed:", error?.message);
     return [];
   }
-  return (data as { display: string; count: number; image_id: string | null; url: string | null }[]).map(
-    (r) => ({
+  return (data as { display: string; count: number; image_id: string | null; url: string | null }[])
+    .filter((r) => !NOT_A_COUNTRY.has(r.display.trim().toLowerCase()))
+    .map((r) => ({
       display: r.display,
       count: r.count,
       image_id: r.image_id,
