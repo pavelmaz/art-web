@@ -33,6 +33,43 @@ export const WALL_SCENES: WallScene[] = [
   { id: "study-desk", label: "Study", artBox: { left: 0.22, top: 0.1, right: 0.66, bottom: 0.58 } },
 ];
 
+/** Scenes that read as a living room — the pool the print page draws from. */
+const LIVING_ROOM_IDS = new Set([
+  "living-sectional",
+  "living-linen",
+  "living-leather",
+  "living-boucle",
+  "living-velvet-olive",
+  "living-armchairs",
+  "living-terracotta",
+  "reading-nook",
+  "fireplace-mantel",
+  "sideboard-japandi",
+]);
+
+/**
+ * `count` living rooms for an artwork, a different mix per artwork. Seeded by the
+ * slug rather than Math.random so the server render and the browser agree (no
+ * hydration mismatch) and a given artwork always shows the same rooms.
+ */
+export function livingRoomsFor(seed: string, count = 3): WallScene[] {
+  let h = 0x811c9dc5; // FNV-1a
+  for (let i = 0; i < seed.length; i++) h = Math.imul(h ^ seed.charCodeAt(i), 0x01000193);
+  const rand = () => {
+    // mulberry32
+    h = (h + 0x6d2b79f5) | 0;
+    let t = Math.imul(h ^ (h >>> 15), 1 | h);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+  const pool = WALL_SCENES.filter((s) => LIVING_ROOM_IDS.has(s.id));
+  for (let i = pool.length - 1; i > 0; i--) {
+    const j = Math.floor(rand() * (i + 1));
+    [pool[i], pool[j]] = [pool[j], pool[i]];
+  }
+  return pool.slice(0, count);
+}
+
 export function sceneImageUrl(scene: WallScene, variant: "full" | "thumb"): string {
   return `/images/print-mockups/rooms/${scene.id}${variant === "thumb" ? "-thumb" : ""}.jpg`;
 }

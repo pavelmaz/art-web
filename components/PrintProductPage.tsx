@@ -30,7 +30,7 @@ export function PrintProductPage({
   return (
     <div className="mx-auto w-full max-w-7xl px-4 py-6 md:px-6 md:py-10">
       <div className="grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,1fr)_400px] lg:gap-12">
-        <PrintProductGallery imageUrl={imageUrl} title={title} geometry={shown} frame={frame || "black"} />
+        <PrintProductGallery artworkSlug={artworkSlug} imageUrl={imageUrl} title={title} geometry={shown} frame={frame || "black"} />
         <PrintProductPurchasePanel
           artworkSlug={artworkSlug}
           title={title}
