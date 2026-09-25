@@ -4,6 +4,9 @@ export default function robots(): MetadataRoute.Robots {
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
 
   return {
+    // AI-bot policy (25 Sep 2026): training crawlers are blocked below; search and
+    // user-fetch bots (OAI-SearchBot, ChatGPT-User, Claude-SearchBot, Claude-User,
+    // PerplexityBot, Amazonbot) are ALLOWED so the site can be cited in AI answers.
     rules: [
       {
         userAgent: "*",
@@ -15,25 +18,11 @@ export default function robots(): MetadataRoute.Robots {
         disallow: ["/"],
       },
       {
-        userAgent: "ChatGPT-User",
-        disallow: ["/"],
-      },
-      {
         userAgent: "CCBot",
         disallow: ["/"],
       },
       {
         userAgent: "anthropic-ai",
-        disallow: ["/"],
-      },
-      // Anthropic's newer crawlers (11% of all requests on 25 Sep 2026, every
-      // hit a cold render). Same policy as anthropic-ai / Claude-Web above.
-      {
-        userAgent: "Claude-SearchBot",
-        disallow: ["/"],
-      },
-      {
-        userAgent: "Claude-User",
         disallow: ["/"],
       },
       {
@@ -73,10 +62,6 @@ export default function robots(): MetadataRoute.Robots {
         disallow: ["/"],
       },
       {
-        userAgent: "PerplexityBot",
-        disallow: ["/"],
-      },
-      {
         userAgent: "meta-externalagent",
         disallow: ["/"],
       },
@@ -85,15 +70,7 @@ export default function robots(): MetadataRoute.Robots {
         disallow: ["/"],
       },
       {
-        userAgent: "Amazonbot",
-        disallow: ["/"],
-      },
-      {
         userAgent: "KeenableBot",
-        disallow: ["/"],
-      },
-      {
-        userAgent: "Amzn-SearchBot",
         disallow: ["/"],
       },
       {
