@@ -1,6 +1,10 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse, after } from "next/server";
 
 import { supabase as supabaseAdmin } from "@/lib/supabase";
+
+// IndexNow: URLs per request and pause between requests (see the submit block).
+const INDEXNOW_GROUP = 50
+const INDEXNOW_GAP_MS = 10_000
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -211,10 +215,15 @@ export async function POST(req: NextRequest) {
   // lost by dropping them — they had not worked for a long time.
 
   // Submit each day's NEW work URLs to IndexNow (Bing/Yandex) — fresh-content
-  // notification, the tool's ideal use case (NOT the 1.1M bulk dump, which stays
-  // off in /api/indexnow-bulk). ON by default from 1 Sep 2026; set
+  // notification, the tool's ideal use case (the full-catalogue dump lives in
+  // scripts/indexnow-bulk.mts and is manual). ON by default from 1 Sep 2026; set
   // INDEXNOW_ENABLED=0 to kill-switch. The IndexNow key is public by design
   // (served at the keyLocation below), so it is safe to inline.
+  //
+  // Sent in small groups a few seconds apart, after the response, rather than
+  // one request with every URL: Bing flags the single big request as "batch
+  // mode" (25 Sep 2026) and crawls all of it at once, which lands as a burst of
+  // cold renders on the Worker.
   try {
     const indexNowEnabled = process.env.INDEXNOW_ENABLED !== '0'
     const newUrls = insertedSlugs.flatMap((slug: string) => [
@@ -224,15 +233,20 @@ export async function POST(req: NextRequest) {
     ])
 
     if (indexNowEnabled && newUrls.length > 0) {
-      await fetch('https://api.indexnow.org/indexnow', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          host: 'fineartfree.com',
-          key: 'faf-indexnow-2026-xK9mP3qR',
-          keyLocation: 'https://fineartfree.com/faf-indexnow-2026-xK9mP3qR.txt',
-          urlList: newUrls
-        })
+      after(async () => {
+        for (let i = 0; i < newUrls.length; i += INDEXNOW_GROUP) {
+          if (i > 0) await new Promise((r) => setTimeout(r, INDEXNOW_GAP_MS))
+          await fetch('https://api.indexnow.org/indexnow', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              host: 'fineartfree.com',
+              key: 'faf-indexnow-2026-xK9mP3qR',
+              keyLocation: 'https://fineartfree.com/faf-indexnow-2026-xK9mP3qR.txt',
+              urlList: newUrls.slice(i, i + INDEXNOW_GROUP),
+            }),
+          }).catch(() => {})
+        }
       })
     }
   } catch (e) {
