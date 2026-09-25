@@ -1,7 +1,7 @@
 "use client";
 
 import { track } from "@/lib/analytics";
-import Link from "next/link";
+import Link from "@/components/Link";
 import type { ReactNode } from "react";
 
 import type { Locale } from "@/lib/translations";

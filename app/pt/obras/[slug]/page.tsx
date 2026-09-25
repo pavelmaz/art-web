@@ -1,7 +1,7 @@
 import { absoluteArtworkUrl, buildArtworkLanguageAlternates } from "@/lib/locale-routes";
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
-import Link from "next/link";
+import Link from "@/components/Link";
 import { notFound } from "next/navigation";
 
 import { Breadcrumbs } from "@/components/Breadcrumbs";

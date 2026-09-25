@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/components/Link";
 
 import { artworkHref, type AccountArtwork } from "@/lib/account";
 import type { Locale } from "@/lib/translations";

@@ -1,6 +1,6 @@
 import { buildHomeLanguageAlternates } from "@/lib/locale-routes";
 import type { Metadata } from "next";
-import Link from "next/link";
+import Link from "@/components/Link";
 
 import { ArtworkGrid } from "@/components/ArtworkGrid";
 import { WebSiteJsonLd } from "@/components/JsonLd";

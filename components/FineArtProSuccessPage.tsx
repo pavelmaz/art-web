@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/components/Link";
 
 import { FineArtProSuccessAuth } from "@/components/FineArtProSuccessAuth";
 import { ProPurchaseTracking, type VerifiedPurchase } from "@/components/ProPurchaseTracking";

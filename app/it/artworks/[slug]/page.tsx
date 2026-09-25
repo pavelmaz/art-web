@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { artworkDetailSelectColumns } from "@/lib/locale-query-columns";
 import { artworkDetailPath, buildArtworkLanguageAlternates } from "@/lib/locale-routes";
 import type { ReactNode } from "react";
-import Link from "next/link";
+import Link from "@/components/Link";
 import { notFound } from "next/navigation";
 
 import { Breadcrumbs } from "@/components/Breadcrumbs";

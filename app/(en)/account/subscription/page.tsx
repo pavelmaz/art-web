@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/components/Link";
 
 import { ManageSubscriptionButton } from "@/components/LoginAuth";
 import { requireUser, resolveLocale } from "@/lib/account";

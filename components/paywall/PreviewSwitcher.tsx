@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/components/Link";
 
 /** Thin top bar for the paywall PREVIEW pages (/paywall-1…4). Lets us jump
  *  between the four concepts while reviewing them. These pages are noindex and

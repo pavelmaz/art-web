@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import Link from "next/link";
+import Link from "@/components/Link";
 
 import { SiteShell } from "@/components/SiteShell";
 import { ROOT_METADATA } from "@/lib/root-metadata";

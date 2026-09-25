@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import Link from "@/components/Link";
 
 import { artworkGridImageUrl } from "@/lib/utils";
 import type { Artwork } from "@/types/artwork";

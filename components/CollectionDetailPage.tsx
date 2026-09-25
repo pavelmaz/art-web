@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/components/Link";
 import { notFound, permanentRedirect } from "next/navigation";
 
 import { ArtworkGrid } from "@/components/ArtworkGrid";

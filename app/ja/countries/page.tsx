@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { topicsCountriesPageMetadata } from "@/lib/topics-countries-seo";
 import Image from "next/image";
-import Link from "next/link";
+import Link from "@/components/Link";
 
 import { Pagination } from "@/components/Pagination";
 import { getCachedCountriesHub } from "@/lib/cached-hub-data";

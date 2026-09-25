@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import Link from "@/components/Link";
 import { usePathname } from "next/navigation";
 
 import { COMMERCIAL_USE_FOOTER_LABEL, COMMERCIAL_USE_PATHS } from "@/lib/commercial-use-landing";

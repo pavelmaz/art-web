@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/components/Link";
 
 import { AccountArtworkCard } from "@/components/account/AccountArtworkCard";
 import { EmptyState } from "@/components/account/EmptyState";

@@ -12,7 +12,7 @@ import {
   type ReactNode,
 } from "react";
 
-import Link from "next/link";
+import Link from "@/components/Link";
 
 import { fineArtProPath } from "@/lib/fineart-pro-path";
 import { getT, type Locale } from "@/lib/translations";

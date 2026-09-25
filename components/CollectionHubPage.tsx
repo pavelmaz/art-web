@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/components/Link";
 
 import { getPrintCollections, type CollectionHubKey } from "@/lib/print-collections";
 import { HUB_COPY, hubBasePath } from "@/lib/print-collections-i18n";

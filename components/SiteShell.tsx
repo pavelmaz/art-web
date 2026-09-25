@@ -1,5 +1,5 @@
 import { Urbanist } from "next/font/google";
-import Link from "next/link";
+import Link from "@/components/Link";
 import type { ReactNode } from "react";
 
 import Header from "@/components/Header";

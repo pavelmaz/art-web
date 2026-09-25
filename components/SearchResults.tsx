@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/components/Link";
 
 import { ArtworkGrid } from "@/components/ArtworkGrid";
 import { ArtistGrid } from "@/components/ArtistGrid";

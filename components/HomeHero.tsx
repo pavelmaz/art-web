@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/components/Link";
 
 import { MuseumLogoStrip } from "@/components/MuseumLogoStrip";
 import { RotatingProHero } from "@/components/RotatingProHero";
