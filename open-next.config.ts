@@ -17,6 +17,9 @@ import doShardedTagCache from "@opennextjs/cloudflare/overrides/tag-cache/do-sha
 export default defineCloudflareConfig({
   incrementalCache: withRegionalCache(r2IncrementalCache, { mode: "long-lived" }),
   queue: doQueue,
-  tagCache: doShardedTagCache({ baseShardSize: 12 }),
+  // regionalCache: each region remembers a tag lookup for 60 s instead of asking
+  // the Durable Object on every page view (~4 calls per view before, 25 Sep 2026).
+  // Cost: revalidatePath/revalidateTag can take up to 60 s to show at the edge.
+  tagCache: doShardedTagCache({ baseShardSize: 12, regionalCache: true, regionalCacheTtlSec: 60 }),
   enableCacheInterception: true,
 });
