@@ -1,5 +1,10 @@
 import { unstable_cache } from "next/cache";
 
+// Weekly, not daily: the Header renders these on EVERY page, and Next gives a
+// page the shortest revalidate of anything it renders, so a one-day cache here
+// pinned all 500k artwork pages to one day (found 25 Sep 2026). Genres are a
+// fixed taxonomy; only the per-genre counts drift, by at most a week.
+
 import { supabase } from "@/lib/supabase";
 import type { BrowseGenreRow } from "@/lib/browse-genres-helpers";
 
@@ -43,7 +48,7 @@ export const getCachedGenresForBrowse = unstable_cache(
     return BROWSE_GENRE_ORDER.map((n) => byName.get(n)).filter(Boolean) as BrowseGenreRow[];
   },
   ["genres-browse-strip", "v3-locale-genre-translations"],
-  { revalidate: 86400 }
+  { revalidate: 604800 }
 );
 
 /** Home horizontal strip: every row in `genres`, ordered by name — URLs and labels come only from Supabase. */
@@ -56,5 +61,5 @@ export const getCachedGenresForHomeStrip = unstable_cache(
     return (data as BrowseGenreRow[]) ?? [];
   },
   ["genres-home-strip", "v3-locale-genre-translations"],
-  { revalidate: 86400 }
+  { revalidate: 604800 }
 );
