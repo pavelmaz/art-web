@@ -26,6 +26,16 @@ export default function robots(): MetadataRoute.Robots {
         userAgent: "anthropic-ai",
         disallow: ["/"],
       },
+      // Anthropic's newer crawlers (11% of all requests on 25 Sep 2026, every
+      // hit a cold render). Same policy as anthropic-ai / Claude-Web above.
+      {
+        userAgent: "Claude-SearchBot",
+        disallow: ["/"],
+      },
+      {
+        userAgent: "Claude-User",
+        disallow: ["/"],
+      },
       {
         userAgent: "Claude-Web",
         disallow: ["/"],
