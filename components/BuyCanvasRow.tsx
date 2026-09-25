@@ -41,8 +41,10 @@ export function BuyCanvasRow({ artworkSlug, glass = false }: BuyCanvasRowProps) 
         <p className="truncate text-[13px] font-medium text-[#1a1a1a]">Buy as a Framed Print</p>
         <p className="text-xs text-[#999]">Printed and shipped to your door</p>
       </div>
+      {/* The print pages are noindex; nofollow keeps crawlers from spending budget on them. */}
       <Link
         href={`/artworks/${artworkSlug}/print`}
+        rel="nofollow"
         className="inline-flex shrink-0 items-center justify-center rounded-md bg-[#4CAF50] px-3 py-2 text-[13px] font-medium text-white hover:bg-[#43A047]"
       >
         Order Framed Print

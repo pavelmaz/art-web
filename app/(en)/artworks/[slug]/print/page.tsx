@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { PrintProductPage } from "@/components/PrintProductPage";
 import { supabase } from "@/lib/supabase";
 import { canSellPrint } from "@/lib/print-catalog";
+import { reviewsFor } from "@/lib/print-reviews";
 import { artworkDetailImageUrl } from "@/lib/utils";
 
 export const revalidate = 86400;
@@ -54,6 +55,7 @@ export default async function ArtworkPrintPage({ params }: PrintPageProps) {
       imageUrl={imageUrl}
       imgWidth={artwork.img_width!}
       imgHeight={artwork.img_height!}
+      reviews={reviewsFor(artwork.slug)}
     />
   );
 }

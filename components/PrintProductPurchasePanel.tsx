@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 
+import { PrintProductDetails } from "@/components/PrintProductDetails";
 import {
   FRAME_OPTIONS,
   isFrameKey,
@@ -158,17 +159,7 @@ export function PrintProductPurchasePanel({
       </button>
       {error ? <p className="mt-2 text-sm text-[#b3261e]">{error}</p> : null}
 
-      <div className="mt-8 border-t border-[#e8e6e1] pt-6">
-        <h2 className="text-base font-semibold text-[#222]">Item details</h2>
-        <ul className="mt-3 space-y-2.5 text-sm leading-relaxed text-[#4a4a4a]">
-          <li>Giclée print on 200gsm museum-grade matte fine art paper</li>
-          <li>Classic wooden frame (20mm moulding), artwork printed edge to edge — no mount</li>
-          <li>Protected by shatterproof acrylic glazing</li>
-          <li>Printed from the museum&apos;s high-resolution scan of the original</li>
-          <li>Arrives ready to hang</li>
-          <li>Made to order and shipped to your door</li>
-        </ul>
-      </div>
+      <PrintProductDetails sizes={sizes} selected={selected} />
     </div>
   );
 }
