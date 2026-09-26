@@ -15,7 +15,15 @@ import doShardedTagCache from "@opennextjs/cloudflare/overrides/tag-cache/do-sha
  *   all (no PPR in this app, so it's safe).
  */
 export default defineCloudflareConfig({
-  incrementalCache: withRegionalCache(r2IncrementalCache, { mode: "long-lived" }),
+  // shouldLazilyUpdateOnCacheHit defaults to TRUE on Next 16, i.e. every regional
+  // hit still re-reads the entry from R2 in the background: 2-2.5 R2 reads per
+  // page view (26 Sep 2026). Off, a regional copy is reused for 3 h; forced
+  // refreshes (revalidatePath) still bypass it through the tag check.
+  incrementalCache: withRegionalCache(r2IncrementalCache, {
+    mode: "long-lived",
+    shouldLazilyUpdateOnCacheHit: false,
+    defaultLongLivedTtlSec: 3 * 3600,
+  }),
   queue: doQueue,
   // regionalCache: each region remembers a tag lookup for 60 s instead of asking
   // the Durable Object on every page view (~4 calls per view before, 25 Sep 2026).
