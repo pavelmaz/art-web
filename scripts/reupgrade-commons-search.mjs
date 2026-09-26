@@ -71,6 +71,14 @@ const BUCKET = "art-images";
 const MAX_WIDTH = Number(process.env.REUP_MAX_WIDTH || 6000);
 const MIN_GAIN = Number(process.env.REUP_MIN_GAIN || 1.3);   // must be >=1.3x wider
 const ASPECT_TOL = Number(process.env.REUP_ASPECT_TOL || 0.06); // aspect within 6%
+// 26 Sep 2026 (matcher v2): a candidate up to ASPECT_TOL_STRONG off in aspect is
+// still accepted when the hash agrees very strongly (<= HASH_STRONG) — slightly
+// different crops of the same scan. Framed/wrong photos fail the hash by far more.
+const ASPECT_TOL_STRONG = Number(process.env.REUP_ASPECT_TOL_STRONG || 0.10);
+const HASH_STRONG = Number(process.env.REUP_HASH_STRONG || 10);
+const SEARCH_LIMIT = Number(process.env.REUP_SEARCH_LIMIT || 30);   // was 8: hid big scans
+const CANDIDATES = Number(process.env.REUP_CANDIDATES || 20);       // was 6
+const HASH_TRIES = Number(process.env.REUP_HASH_TRIES || 6);        // was 4
 // Hamming distance ceiling (of 64) for the perceptual-hash same-painting check.
 // Was 14 — too strict: it rejected valid bigger scans of the SAME work (a Klee
 // whose 2427px Guggenheim scan matched on identical aspect ratio scored 17 and
@@ -120,7 +128,7 @@ const hamming = (a, b) => { let d = 0; for (let i = 0; i < a.length; i++) if (a[
 
 async function commonsSearch(query) {
   const p = new URLSearchParams({ action: "query", list: "search", srsearch: query,
-    srnamespace: "6", srlimit: "8", format: "json", origin: "*" });
+    srnamespace: "6", srlimit: String(SEARCH_LIMIT), format: "json", origin: "*" });
   const d = await (await gentleFetch(`${COMMONS_API}?${p}`)).json();
   return (d?.query?.search ?? []).map((s) => s.title.replace(/^File:/, ""));
 }
@@ -134,6 +142,26 @@ async function commonsInfo(fileName, thumbWidth) {
   return { width: ii.width, height: ii.height, mime: ii.mime, url: ii.url, thumb: ii.thumburl };
 }
 
+// Sizes + thumbs for up to 50 files in ONE API call (the per-file lookup made
+// 20 candidates cost 20 requests). Missing files are simply absent from the map.
+async function commonsInfoBatch(fileNames, thumbWidth) {
+  const out = new Map();
+  for (let i = 0; i < fileNames.length; i += 50) {
+    const chunk = fileNames.slice(i, i + 50);
+    const p = new URLSearchParams({ action: "query", titles: chunk.map((n) => `File:${n}`).join("|"),
+      prop: "imageinfo", iiprop: "url|size|mime", format: "json", origin: "*", iiurlwidth: String(thumbWidth) });
+    const d = await (await gentleFetch(`${COMMONS_API}?${p}`)).json();
+    for (const pg of Object.values(d?.query?.pages ?? {})) {
+      const ii = pg?.imageinfo?.[0];
+      if (ii && pg.title) out.set(pg.title.replace(/^File:/, ""), { width: ii.width, height: ii.height, mime: ii.mime, url: ii.url, thumb: ii.thumburl });
+    }
+  }
+  return out;
+}
+// "A Lady Writing a Letter" -> "Lady Writing a Letter"; drops a trailing "(…)" too.
+function coreTitle(title) {
+  return (title || "").replace(/\s*\([^)]*\)\s*$/, "").replace(/^(a|an|the|la|le|les|el|los|las|der|die|das|il|lo|gli|une|un|una|uno)\s+/i, "").trim();
+}
 function ourCdnUrl(imageId) {
   return imageId.replace(/^https:\/\/[a-z0-9-]+\.supabase\.co\//i, CDN).split("?")[0];
 }
@@ -242,13 +270,31 @@ async function reupgrade(row) {
   // Commons candidates first — dimensions are known from the API, so the
   // gain/aspect gate is cheap and no image is fetched until one is hash-confirmed.
   const cands = [];
-  for (const name of names.slice(0, 6)) {
-    let info; try { info = await commonsInfo(name, 256); } catch { continue; }
-    if (!info || !/image\/(jpeg|png|tiff)/i.test(info.mime || "")) continue;
-    if (!info.width || info.width < ourW * MIN_GAIN) continue;
+  // Second query when the first finds nothing big enough: surname + title core
+  // ("Vermeer Lady Writing a Letter"), which surfaces museum/GAP scans the full
+  // query buries under same-named works.
+  const gate = (info) => {
+    if (!info || !/image\/(jpeg|png|tiff)/i.test(info.mime || "")) return "mime";
+    if (!info.width || info.width < ourW * MIN_GAIN) return "small";
     const aspOff = Math.abs(info.width / info.height - ourAspect) / ourAspect;
-    if (aspOff > ASPECT_TOL) continue;
-    cands.push({ source: "commons", name, ...info, aspOff });
+    if (aspOff > ASPECT_TOL_STRONG) return "aspect";
+    return aspOff;
+  };
+  const consider = async (list) => {
+    const infos = await commonsInfoBatch(list.slice(0, CANDIDATES), 256);
+    for (const name of list.slice(0, CANDIDATES)) {
+      const info = infos.get(name); const g = gate(info);
+      if (typeof g === "string") { if (VERBOSE) console.log(`    - ${name}  ${info?.width ?? "?"}x${info?.height ?? "?"}  dropped: ${g}`); continue; }
+      if (!cands.some((c) => c.name === name)) cands.push({ source: "commons", name, ...info, aspOff: g });
+    }
+  };
+  await consider(names);
+  if (!cands.length && !row.__forcedFile && row.artist_display && row.title) {
+    const alt = `${artistSurname(row.artist_display)} ${coreTitle(row.title)}`.trim();
+    if (alt.toLowerCase() !== `${row.artist_display} ${row.title}`.toLowerCase()) {
+      if (VERBOSE) console.log(`    ? retry search: "${alt}"`);
+      await consider(await commonsSearch(alt));
+    }
   }
   if (!row.__forcedFile) {
     let vgm = []; try { vgm = await vanGoghMuseumCandidates(row); } catch { /* source down */ }
@@ -263,11 +309,12 @@ async function reupgrade(row) {
 
   let ourHash; try { ourHash = await dhash(ourCdnUrl(row.image_id)); } catch { return { skip: "our-hash fail" }; }
   let chosen = null;
-  for (const c of cands.slice(0, 4)) {
+  for (const c of cands.slice(0, HASH_TRIES)) {
     let ch; try { ch = await dhash(c.thumb); } catch { continue; }
     const dist = hamming(ourHash, ch);
     if (VERBOSE) console.log(`    · ${c.name}  ${c.width}x${c.height}  asp${c.aspOff.toFixed(3)}  ham${dist}`);
-    if (dist <= HASH_MAX) { chosen = { ...c, dist }; break; }
+    const ok = c.aspOff <= ASPECT_TOL ? dist <= HASH_MAX : dist <= HASH_STRONG;
+    if (ok) { chosen = { ...c, dist }; break; }
   }
 
   // Fallback to extra aggregator sources only when Commons found nothing — these
