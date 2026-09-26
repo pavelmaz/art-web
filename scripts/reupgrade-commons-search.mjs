@@ -344,9 +344,9 @@ async function reupgrade(row) {
     let vgm = []; try { vgm = await vanGoghMuseumCandidates(row); } catch { /* source down */ }
     let rijks = []; try { rijks = await rijksmuseumCandidates(row); } catch { /* source down */ }
     for (const c of [...vgm, ...rijks]) {
-      if (c.width < ourW * MIN_GAIN) continue;
       const aspOff = Math.abs(c.width / c.height - ourAspect) / ourAspect;
-      if (aspOff > ASPECT_TOL) continue;
+      const why = c.width < ourW * MIN_GAIN ? "small" : aspOff > ASPECT_TOL_STRONG ? "aspect" : null;
+      if (why) { if (VERBOSE) console.log(`    - ${c.name}  ${c.width}x${c.height}  dropped: ${why}`); continue; }
       cands.push({ ...c, aspOff });
     }
   }
