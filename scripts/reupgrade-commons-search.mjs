@@ -103,12 +103,12 @@ const VARIANTS = [
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
-async function gentleFetch(url) {
+async function gentleFetch(url, extraHeaders = {}) {
   for (let attempt = 1; attempt <= 5; attempt++) {
     let res;
     try {
       // Per-request timeout so a stalled Wikimedia connection can't hang the whole run.
-      res = await fetch(url, { headers: { "User-Agent": UA }, signal: AbortSignal.timeout(30000) });
+      res = await fetch(url, { headers: { "User-Agent": UA, ...extraHeaders }, signal: AbortSignal.timeout(30000) });
     } catch (e) {
       if (attempt === 5) throw new Error(`fetch net ${e.name || e.message}`);
       await sleep(2000 * attempt); continue;
@@ -255,6 +255,47 @@ async function vanGoghMuseumCandidates(row) {
   return out;
 }
 
+/**
+ * Rijksmuseum — Linked Art API (data.rijksmuseum.nl, no key needed; the old
+ * key-based API answers 410 since 2025). object → shows (VisualItem) →
+ * digitally_shown_by (DigitalObject) → access_point = IIIF image on micr.io,
+ * which serves the full scan at /full/max (The Milkmaid: 4649x5177, 5 MB).
+ * Only for rows we already attribute to the Rijksmuseum (2,305 under 3500px on
+ * 26 Sep 2026); the usual gain/aspect/hash gates still decide the swap.
+ */
+const LD = { Accept: "application/ld+json, application/json" };
+async function rijksmuseumCandidates(row) {
+  if (!/rijks/i.test(row.museum || "") || !row.title) return [];
+  const search = async (params) => {
+    try {
+      const d = await (await gentleFetch(`https://data.rijksmuseum.nl/search/collection?${new URLSearchParams(params)}`, LD)).json();
+      return (d?.orderedItems ?? []).map((o) => o.id).filter(Boolean);
+    } catch { return []; }
+  };
+  const surname = artistSurname(row.artist_display);
+  let ids = await search({ title: coreTitle(row.title), ...(surname ? { creator: surname } : {}) });
+  if (!ids.length) ids = await search({ title: coreTitle(row.title) });
+  const out = [];
+  for (const objId of ids.slice(0, 3)) {
+    try {
+      const obj = await (await gentleFetch(objId, LD)).json();
+      const objNr = (obj?.identified_by ?? []).find((x) => x.type === "Identifier")?.content ?? objId.split("/").pop();
+      const visual = obj?.shows?.[0]?.id; if (!visual) continue;
+      const vi = await (await gentleFetch(visual, LD)).json();
+      const digital = vi?.digitally_shown_by?.[0]?.id; if (!digital) continue;
+      const dobj = await (await gentleFetch(digital, LD)).json();
+      const ap = (dobj?.access_point ?? []).map((a) => a.id).find((u) => /iiif\.micr\.io\//.test(u || ""));
+      const base = ap && ap.match(/^(https:\/\/iiif\.micr\.io\/[A-Za-z0-9]+)/)?.[1]; if (!base) continue;
+      const info = await (await gentleFetch(`${base}/info.json`)).json();
+      if (!info?.width || !info?.height) continue;
+      out.push({
+        source: "rijks", name: `Rijksmuseum ${objNr}`, width: info.width, height: info.height,
+        thumb: `${base}/full/400,/0/default.jpg`, url: `${base}/full/max/0/default.jpg`,
+      });
+    } catch { /* next candidate */ }
+  }
+  return out;
+}
 async function reupgrade(row) {
   const ourW = row.img_width, ourH = row.img_height;
   if (!ourW || !ourH) return { skip: "no dims" };
@@ -301,7 +342,8 @@ async function reupgrade(row) {
   }
   if (!row.__forcedFile) {
     let vgm = []; try { vgm = await vanGoghMuseumCandidates(row); } catch { /* source down */ }
-    for (const c of vgm) {
+    let rijks = []; try { rijks = await rijksmuseumCandidates(row); } catch { /* source down */ }
+    for (const c of [...vgm, ...rijks]) {
       if (c.width < ourW * MIN_GAIN) continue;
       const aspOff = Math.abs(c.width / c.height - ourAspect) / ourAspect;
       if (aspOff > ASPECT_TOL) continue;
@@ -408,7 +450,7 @@ async function processOne(row) {
   } catch (e) { fail++; console.log(`✗ ${row.slug}: ${e.message}`); }
 }
 
-const cols = "id, slug, title, artist_display, image_id, img_width, img_height, score";
+const cols = "id, slug, title, artist_display, image_id, img_width, img_height, score, museum";
 
 async function runBatch(rows) {
   for (let i = 0; i < rows.length; i += CONCURRENCY) {
