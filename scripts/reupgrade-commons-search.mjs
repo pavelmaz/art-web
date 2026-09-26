@@ -68,7 +68,10 @@ const UA = "FineArtFree-reupgrade/1.0 (https://fineartfree.com; pavelmazuelas@gm
 const COMMONS_API = "https://commons.wikimedia.org/w/api.php";
 const CDN = "https://cdn.fineartfree.com/";
 const BUCKET = "art-images";
-const MAX_WIDTH = Number(process.env.REUP_MAX_WIDTH || 6000);
+// No cap (26 Sep 2026, Pavel: "dont cap any image, if come is super high res is
+// fine"): 40000 is effectively unlimited, so full originals are kept whole and the
+// Commons giant path always pulls the original instead of the 3840px thumbnail.
+const MAX_WIDTH = Number(process.env.REUP_MAX_WIDTH || 40000);
 const MIN_GAIN = Number(process.env.REUP_MIN_GAIN || 1.3);   // must be >=1.3x wider
 const ASPECT_TOL = Number(process.env.REUP_ASPECT_TOL || 0.06); // aspect within 6%
 // 26 Sep 2026 (matcher v2): a candidate up to ASPECT_TOL_STRONG off in aspect is
