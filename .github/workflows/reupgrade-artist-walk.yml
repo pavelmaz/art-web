@@ -55,6 +55,9 @@ jobs:
       R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
       R2_BUCKET: ${{ secrets.R2_BUCKET }}
       REUP_ARTIST_WALK: "1"
+      # Optional second source (hundreds of European museums, full originals);
+      # the script skips it when the secret is unset. Add EUROPEANA_KEY in repo secrets.
+      EUROPEANA_KEY: ${{ secrets.EUROPEANA_KEY }}
       REUP_MAX_SRC: "3500"
       REUP_LIMIT: ${{ github.event.inputs.limit || '1500' }} # processed rows per run (~2 s each), not upgrades
       REUP_MAX_ARTISTS: ${{ github.event.inputs.max_artists || '150' }}
