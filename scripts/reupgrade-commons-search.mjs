@@ -491,6 +491,12 @@ async function processOne(row) {
     const r = await reupgrade(row);
     if (r.skip) { skip++; if (VERBOSE) console.log(`· ${row.slug} (skip: ${r.skip})`); }
     else { up++; console.log(`✓ ${row.slug}  ${r.was}px -> ${r.now}px  ham${r.ham}  [${r.file}]  (${up})`); }
+    // Stamp checked-or-upgraded either way so the walk covers the catalogue once
+    // and a restart resumes instead of re-checking the same popular works (the
+    // local Mac runner is restarted often). A thrown error (network, Commons
+    // 5xx) leaves the row unstamped so it is retried. The updated_at trigger
+    // ignores this column, so it does not mark the page as changed.
+    await supabase.from("artworks").update({ reup_checked_at: new Date().toISOString() }).eq("id", row.id);
   } catch (e) { fail++; console.log(`✗ ${row.slug}: ${e.message}`); }
 }
 
@@ -582,10 +588,7 @@ if (process.env.REUP_ARTIST_WALK) {
   }
   for (let i = 0; i < rows.length; i += CONCURRENCY) {
     const batch = rows.slice(i, i + CONCURRENCY);
-    await Promise.all(batch.map(async (row) => {
-      await processOne(row);
-      await supabase.from("artworks").update({ reup_checked_at: new Date().toISOString() }).eq("id", row.id);
-    }));
+    await Promise.all(batch.map(processOne)); // processOne stamps reup_checked_at
   }
 } else if (process.env.REUP_PAIRS) {
   // REUP_PAIRS=<json file of [slug, "File:..."] pairs> — candidate files found by
@@ -634,10 +637,13 @@ if (process.env.REUP_ARTIST_WALK) {
   console.log(`  ${scores.length} score bands`);
 
   let stop = false;
+  // Unchecked works only (26 Sep 2026): processOne stamps reup_checked_at, so a
+  // restarted runner picks up where it left off instead of re-walking the top
+  // score bands. Reset the stamps (set reup_checked_at = null) to re-check.
   const idKeyset = async (applyBand) => {
     for (let cursor = 0; !stop; ) {
       const rows = await selectRetry(() => applyBand(
-        supabase.from("artworks").select(cols).lt("img_width", MAX_SRC)
+        supabase.from("artworks").select(cols).lt("img_width", MAX_SRC).is("reup_checked_at", null)
           .gt("id", cursor).order("id", { ascending: true }).limit(200)));
       if (!rows?.length) break;
       cursor = rows[rows.length - 1].id;
