@@ -398,7 +398,10 @@ if (process.env.REUP_ARTIST_WALK) {
       scanned++;
       pageCursor = name;
       const { data: artRows, error: e2 } = await supabase.from("artworks").select(cols)
-        .eq("artist_display", name).lt("img_width", MAX_SRC).limit(500);
+        .eq("artist_display", name).lt("img_width", MAX_SRC).is("reup_checked_at", null).limit(500);
+      // reup_checked_at filter added 26 Sep 2026: REUP_LIMIT counts PROCESSED rows,
+      // so an artist with more low-res works than the cap was re-scanned from the
+      // top every night and the cursor never moved (Brooks, 23–25 Sep: 150/150 each run).
       if (e2) { console.log(`  (skip ${name}: ${e2.message})`); lastCompleted = name; continue; }
       if (artRows?.length) {
         console.log(`-- ${name}: ${artRows.length} candidate(s)`);
