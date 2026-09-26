@@ -1,3 +1,5 @@
+import { unstable_cache } from "next/cache";
+
 import { fillArtistHubPreviewImages } from "@/lib/cached-hub-data";
 import { expandSearchTerm } from "@/lib/search-expansions";
 import { supabase } from "@/lib/supabase";
@@ -14,6 +16,8 @@ export type SiteSearchArtworkRow = {
   alt_text?: string | null;
   score?: number | null;
   tags?: string[] | null;
+  /** null = painting; "print" / "book-illustration" otherwise. */
+  object_type?: string | null;
 };
 
 export type SiteSearchArtist = {
@@ -24,8 +28,13 @@ export type SiteSearchArtist = {
   url: string | null;
 };
 
+// Same shape the search_artworks RPC returns, so every result row carries
+// object_type and the page never needs a second lookup to sort out prints/books.
 const ARTWORK_SELECT =
-  "id, title, slug, artist_display, image_id, url, museum, alt_text, score, tags";
+  "id, title, slug, artist_display, image_id, url, museum, alt_text, score, tags, object_type";
+
+/** Artists tab cap (SearchResults TAB_CAPS.artists) — enrichment costs a query per artist. */
+const MAX_ARTISTS = 20;
 
 export function sanitizeSearchTerm(raw: string): string {
   return raw.replace(/[%_]/g, "").trim();
@@ -170,12 +179,12 @@ function titleCase(s: string): string {
 /**
  * Search within one object_type bucket. `objectType: null` = paintings.
  *
- * IMPORTANT: only `title`, `artist_display` (trigram GIN) and `tags` (GIN) are
- * indexed for substring/array matching — `genre_title`/`style_title`/`museum`
- * are NOT, so OR-ing an ilike on them forces a full seq-scan of 110k paintings
- * (times out on prod). So for paintings we split into index-backed queries run
- * in parallel: title/artist trigram, genre exact-match btree, tags overlap.
- * Prints/books first filter object_type (a tiny set), so a plain OR is cheap.
+ * IMPORTANT: an `.or()` of ilike filters only uses indexes when EVERY branch
+ * is indexed — one un-indexed column turns the whole thing into a full scan of
+ * ~118k rows (11 s for "water lilies" on 26 Sep 2026, when `medium_display`
+ * had no index). `title`, `artist_display`, `medium_display`, `museum`,
+ * `genre_title` and `style_title` all have trigram GIN indexes now, and `tags`
+ * a GIN index; before OR-ing any other column, index it first.
  */
 async function fetchTypedArtworks(
   rawQuery: string,
@@ -262,30 +271,47 @@ export type SegmentedSearch = {
 /**
  * Search split into the tabs the results page renders: Artworks (paintings),
  * Prints, Books, Artists. Paintings reuse runSiteSearch (FTS + typo tolerance)
- * then are enriched with object_type to drop any print/book that snuck in;
+ * minus any print/book that snuck in (every row carries object_type);
  * Prints and Books get their own typed queries so those tabs are never starved.
  */
-export async function runSegmentedSearch(rawQuery: string): Promise<SegmentedSearch> {
-  const base = await runSiteSearch(rawQuery);
-
-  const ids = base.artworks.map((a) => a.id);
-  const typeById = new Map<string, string | null>();
-  if (ids.length) {
-    const { data } = await supabase.from("artworks").select("id, object_type").in("id", ids);
-    for (const r of data ?? []) typeById.set(r.id as string, (r.object_type as string | null) ?? null);
-  }
-  const basePaintings = base.artworks.filter((a) => (typeById.get(a.id) ?? null) === null);
-
+async function segmentedSearchUncached(query: string): Promise<SegmentedSearch> {
+  // All four are independent — run them together. (26 Sep 2026: this used to
+  // be a chain of ~8 dependent round trips and results took 5–8 s.)
   // Base = RPC (FTS + typo tolerance) ranked first; typed = genre/tag/correlated
   // matches that the FTS vector misses (e.g. the Botanical genre for "botanical").
-  const [typedPaintings, prints, books] = await Promise.all([
-    fetchTypedArtworks(rawQuery, null, 100),
-    fetchTypedArtworks(rawQuery, "print"),
-    fetchTypedArtworks(rawQuery, "book-illustration"),
+  const [base, typedPaintings, prints, books] = await Promise.all([
+    runSiteSearch(query),
+    fetchTypedArtworks(query, null, 100),
+    fetchTypedArtworks(query, "print"),
+    fetchTypedArtworks(query, "book-illustration"),
   ]);
+  const basePaintings = base.artworks.filter((a) => (a.object_type ?? null) === null);
   const paintings = mergeUniqueArtworks([basePaintings, typedPaintings], 100);
 
   return { paintings, prints, books, artists: base.artists, error: base.error };
+}
+
+// Results for a query are kept for an hour (cache key = normalized query), so
+// repeat searches for the same words — most searches — skip the database.
+const cachedSegmentedSearch = unstable_cache(
+  async (query: string) => {
+    const result = await segmentedSearchUncached(query);
+    if (result.error) throw new Error(result.error); // never cache a failed search
+    return result;
+  },
+  ["site-search", "v1"],
+  { revalidate: 3600 },
+);
+
+export async function runSegmentedSearch(rawQuery: string): Promise<SegmentedSearch> {
+  // Same words, same case, same spacing → same cache entry. Every matcher below
+  // is case-insensitive, so lowercasing loses nothing.
+  const query = rawQuery.trim().replace(/\s+/g, " ").toLowerCase();
+  try {
+    return await cachedSegmentedSearch(query);
+  } catch {
+    return segmentedSearchUncached(query);
+  }
 }
 
 export async function runSiteSearch(rawQuery: string): Promise<{
@@ -301,7 +327,8 @@ export async function runSiteSearch(rawQuery: string): Promise<{
   let artworks: SiteSearchArtworkRow[] = [];
   let error: string | null = null;
 
-  const rpc = await fetchArtworksByRpc(term);
+  // Artwork and artist lookups don't depend on each other — run them together.
+  const [rpc, { data: artistRows }] = await Promise.all([fetchArtworksByRpc(term), fetchArtistsByName(term)]);
   if (rpc.error) {
     const fallback = await fetchArtworksByFilter(term);
     if (fallback.error) {
@@ -353,7 +380,6 @@ export async function runSiteSearch(rawQuery: string): Promise<{
   const artists: Omit<SiteSearchArtist, "image_id" | "url">[] = [];
   const seen = new Set<string>();
 
-  const { data: artistRows } = await fetchArtistsByName(term);
   for (const row of artistRows ?? []) {
     const name = row.name?.trim();
     const slug = row.slug?.trim();
@@ -377,7 +403,8 @@ export async function runSiteSearch(rawQuery: string): Promise<{
 
   artists.sort((a, b) => b.count - a.count || a.name.localeCompare(b.name));
 
-  const enrichedArtists = await enrichSearchArtists(artists);
+  // Only the artists the tab can show get the per-artist image lookup.
+  const enrichedArtists = await enrichSearchArtists(artists.slice(0, MAX_ARTISTS));
 
   return { artworks, artists: enrichedArtists, error };
 }
