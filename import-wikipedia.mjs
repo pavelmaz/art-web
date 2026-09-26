@@ -543,7 +543,7 @@ async function rijksmuseumImage(ext) {
   const base = ap?.match(/^(https:\/\/iiif\.micr\.io\/[A-Za-z0-9]+)/)?.[1];
   if (!base) throw new Error("no IIIF image");
   const info = await jsonLd(`${base}/info.json`);
-  return { imageUrl: `${base}/full/max/0/default.jpg`, width: info.width, height: info.height };
+  return { imageUrl: `${base}/full/max/0/default.jpg`, width: info.width, height: info.height, thumbUrl: `${base}/full/400,/0/default.jpg` };
 }
 
 /** Europeana: public-domain images whose creator is exactly this artist and
@@ -581,7 +581,60 @@ async function europeanaImage(ext) {
   const m = await sharp(buf).metadata();
   // Google returns min(requested, original): a 2000px probe that comes back
   // smaller IS the original's width; one that comes back at 2000 means "bigger".
-  return { imageUrl: ext.imageUrl, width: m.width >= 2000 ? null : m.width, height: m.width >= 2000 ? null : m.height, probeWidth: m.width };
+  return { imageUrl: ext.imageUrl, width: m.width >= 2000 ? null : m.width, height: m.width >= 2000 ? null : m.height, probeWidth: m.width, thumbUrl: `${ext.imageUrl.replace(/=s0$/, "")}=s400` };
+}
+// ---- image-hash dedupe for external items (26 Sep 2026) ----
+// Museum titles differ from ours ("The company of Captain Frans Banninck
+// Cocq…" vs "The Night Watch"), so the title check alone re-imported famous
+// works. Compare the candidate's thumbnail hash with the hashes of everything
+// the artist already has (computed once per artist per run, from our CDN).
+// 12: cross-source (museum 400px thumb vs our w800 webp) same works measure 5–10,
+// different works 25+ (calibrated 26 Sep 2026 on Rembrandt).
+const DEDUPE_HAM = Number(process.env.DEDUPE_HAM || 12);
+const CDN_BASE = process.env.CDN_BASE || "https://cdn.fineartfree.com";
+const artistHashes = new Map();
+async function dhashUrl(url) {
+  const { default: sharp } = await import("sharp");
+  const buf = Buffer.from(await (await fetch(url, { headers: { "User-Agent": UA }, signal: AbortSignal.timeout(60000) })).arrayBuffer());
+  const px = await sharp(buf).greyscale().resize(9, 8, { fit: "fill" }).raw().toBuffer();
+  let h = 0n;
+  for (let y = 0; y < 8; y++) for (let x = 0; x < 8; x++) if (px[y * 9 + x] > px[y * 9 + x + 1]) h |= 1n << BigInt(y * 8 + x);
+  return h;
+}
+const hamming = (a, b) => { let v = a ^ b, n = 0; while (v) { n += Number(v & 1n); v >>= 1n; } return n; };
+function ourThumb(imageId) {
+  return imageId.replace(/^https:\/\/[a-z0-9-]+\.supabase\.co\//i, `${CDN_BASE}/`).split("?")[0]
+    .replace("/art-images/artworks/", "/art-images/renditions/w800/artworks/").replace(/\.[a-z0-9]+$/i, ".webp");
+}
+async function hashesForArtist(canonical) {
+  if (artistHashes.has(canonical)) return artistHashes.get(canonical);
+  // PostgREST caps a response at 1,000 rows — page until a short page comes back.
+  const rows = [];
+  for (let off = 0; ; off += 1000) {
+    const page = await pgrest(`artworks?select=slug,image_id&artist_display=eq.${encodeURIComponent(canonical)}&order=id.asc&limit=1000&offset=${off}`);
+    rows.push(...page);
+    if (page.length < 1000) break;
+  }
+  const out = [];
+  const queue = rows.slice();
+  await Promise.all(Array.from({ length: 6 }, async () => {
+    while (queue.length) {
+      const r = queue.shift();
+      if (!r.image_id) continue;
+      try { out.push({ slug: r.slug, h: await dhashUrl(ourThumb(r.image_id)) }); } catch { /* no thumb yet */ }
+    }
+  }));
+  artistHashes.set(canonical, out);
+  return out;
+}
+/** Returns the slug of an existing work with a near-identical image, or null. */
+async function imageDuplicate(canonical, thumbUrl) {
+  const existing = await hashesForArtist(canonical);
+  if (!existing.length) return null;
+  let h; try { h = await dhashUrl(thumbUrl); } catch { return null; }
+  let best = null;
+  for (const e of existing) { const d = hamming(h, e.h); if (d <= DEDUPE_HAM && (!best || d < best.d)) best = { slug: e.slug, d }; }
+  return best;
 }
 async function externalWorks(artistName) {
   if (!EXTERNAL_SOURCES) return [];
@@ -604,7 +657,8 @@ async function processItem(item) {
     if (item.external) {
       // External source: title/page known; the image is resolved after dedupe.
       info = { title: normalizeTitle(item.external.title), artistRaw: item.artistHint, pageUrl: item.external.pageUrl,
-        imageUrl: item.external.imageUrl, width: item.external.width, height: item.external.height, external: item.external };
+        imageUrl: item.external.imageUrl, width: item.external.width, height: item.external.height, external: item.external,
+        license: item.source === "rijksmuseum" ? "CC0 (Rijksmuseum)" : "Public domain (Europeana)" };
     } else {
       info = await fileInfo(fileTitle, item.artistHint ?? "");
     }
@@ -658,6 +712,8 @@ async function processItem(item) {
       } catch (e) { console.log(`— SKIP  no image (${item.source}): ${e.message}`); summary.skipped++; return "skip"; }
       const known = info.width ?? info.probeWidth;
       if (known && known < MIN_WIDTH) { console.log(`— SKIP  too small: ${known}px wide (${item.source})`); summary.skipped++; return "skip"; }
+      const dup = info.thumbUrl ? await imageDuplicate(canonical, info.thumbUrl) : null;
+      if (dup) { console.log(`— SKIP  same image as "${dup.slug}" (hash ${dup.d}): "${info.title}"`); summary.skipped++; return "skip"; }
     }
     console.log(
       `${DRY ? "→ WOULD IMPORT" : "+ IMPORT"}  "${info.title}" — ${canonical}${isNew ? " (NEW ARTIST)" : ""}  [${info.width}×${info.height}, ${info.license}]`
@@ -819,7 +875,6 @@ if (DRIP) {
           found.push(...fresh.map((f) => ({ file: f, artistHint: artistName })));
         }
       }
-      found.push(...(await externalWorks(artistName)));
       {
         for (const kind of COMMONS_CREATOR_CATEGORIES) {
           if (found.length >= CATEGORY_CAP) break;
@@ -841,6 +896,9 @@ if (DRIP) {
         console.log(`  capping ${artistName} at ${CATEGORY_CAP} of ${found.length} candidate(s) this run`);
         found = found.slice(0, CATEGORY_CAP);
       }
+      // External sources (Rijksmuseum, Europeana) have their own per-artist caps and
+      // are appended AFTER the Commons cap so they are never cut off by it.
+      found.push(...(await externalWorks(artistName)));
       fileTitles.push(...found);
       continue;
     }
