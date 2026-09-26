@@ -143,6 +143,9 @@ jobs:
 
       # Post a compact result row to _automation_runs so the run can be judged
       # without reading Actions logs (22 Sep 2026). Never fails the job.
+      - name: Refresh pages of artworks changed in the last 26h (enrichment, upscales)
+        if: always()
+        run: node scripts/revalidate-changed.mjs --hours=26 2>&1 | tee /tmp/revalidate.log
       - name: Report run to DB
         if: always()
         run: |

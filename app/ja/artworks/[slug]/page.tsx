@@ -25,10 +25,11 @@ import { absoluteUrl, artworkDetailImageUrl, artworkGridImageUrl, artworkImageUr
 import { localizeAltText, localizeMedium, localizeRowTitle } from "@/lib/artwork-i18n";
 import type { Artwork } from "@/types/artwork";
 
-// Weekly: artwork content rarely changes, and every stale hit re-renders and
-// re-writes the R2 cache entry (~40% of cache writes on 25 Sep 2026). Imports
-// and edits call /api/revalidate for immediate refreshes.
-export const revalidate = 604800;
+// 90 days (26 Sep 2026): pages are refreshed on CHANGE (imports, upscales and
+// the nightly revalidate-changed step), not on a timer; scrapers re-crawl the
+// 5M-URL catalogue weekly, and a weekly expiry made every pass a paid render.
+// 90 days is only a safety net for drift (artist counts, related works).
+export const revalidate = 7776000;
 
 // Empty list on purpose: nothing is prerendered at build time, but exporting this
 // is what lets Next cache each slug on first request (ISR). Without it a dynamic

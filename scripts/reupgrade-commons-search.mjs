@@ -308,6 +308,20 @@ async function rijksmuseumCandidates(row) {
   }
   return out;
 }
+// Pages are cached long-term (26 Sep 2026), so an upgrade must refresh the
+// artwork page in every language or visitors keep seeing the old image key.
+const SITE = process.env.SITE_URL || "https://fineartfree.com";
+const ARTWORK_PATHS = (slug) => [`/artworks/${slug}`, `/es/obras/${slug}`, `/pt/obras/${slug}`,
+  ...["fr", "de", "it", "ja", "ko", "ru"].map((l) => `/${l}/artworks/${slug}`)];
+async function revalidateArtwork(slug) {
+  if (!process.env.IMPORT_API_KEY) return;
+  for (const path of ARTWORK_PATHS(slug)) {
+    try {
+      await fetch(`${SITE}/api/revalidate`, { method: "POST", headers: { "x-api-key": process.env.IMPORT_API_KEY, "Content-Type": "application/json" },
+        body: JSON.stringify({ path }), signal: AbortSignal.timeout(20000) });
+    } catch { /* best effort */ }
+  }
+}
 async function reupgrade(row) {
   const ourW = row.img_width, ourH = row.img_height;
   if (!ourW || !ourH) return { skip: "no dims" };
@@ -465,6 +479,7 @@ async function reupgrade(row) {
     image_id: `${SUPABASE_PUBLIC_BASE}${newKey}`, img_width: meta.width, img_height: meta.height,
     orig_bytes: jpegBuf.length, std_bytes: stdBytes,
   }).eq("id", row.id);
+  await revalidateArtwork(row.slug);
   if (upd.error) throw new Error(upd.error.message);
   return { was: ourW, now: meta.width, file: chosen.name, ham: chosen.dist };
 }

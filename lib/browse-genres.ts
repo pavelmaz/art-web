@@ -48,7 +48,7 @@ export const getCachedGenresForBrowse = unstable_cache(
     return BROWSE_GENRE_ORDER.map((n) => byName.get(n)).filter(Boolean) as BrowseGenreRow[];
   },
   ["genres-browse-strip", "v3-locale-genre-translations"],
-  { revalidate: 604800 }
+  { revalidate: 7776000 }
 );
 
 /** Home horizontal strip: every row in `genres`, ordered by name — URLs and labels come only from Supabase. */
@@ -61,5 +61,5 @@ export const getCachedGenresForHomeStrip = unstable_cache(
     return (data as BrowseGenreRow[]) ?? [];
   },
   ["genres-home-strip", "v3-locale-genre-translations"],
-  { revalidate: 604800 }
+  { revalidate: 7776000 }
 );
