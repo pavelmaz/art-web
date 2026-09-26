@@ -740,32 +740,38 @@ for (const name of summary.touchedArtists) {
   });
 }
 
-// IndexNow for the new pages (all 10 locales).
+// IndexNow for the new pages (9 locales; zh is offline by decision, 21 Sep 2026).
 //
-// OFF BY DEFAULT since 5 Aug 2026 while the effect of submitting ~250 URLs/day
-// is being tested. Set INDEXNOW_ENABLED=1 to switch it back on — no code change
-// and no deploy needed. Note IndexNow feeds Bing/Yandex/Seznam/Naver, not Google.
+// Set INDEXNOW_ENABLED=1 to enable (the workflows do). IndexNow feeds
+// Bing/Yandex/Seznam/Naver, not Google. Sent in groups of INDEXNOW_GROUP a few
+// seconds apart rather than one request with everything: Bing flagged the single
+// ~2,000-URL request as "batch mode" (25 Sep 2026) and crawls all of it at once.
 const INDEXNOW_ENABLED = process.env.INDEXNOW_ENABLED === "1";
+const INDEXNOW_GROUP = 100;
+const INDEXNOW_GAP_MS = 5000;
 
 if (INDEXNOW_ENABLED && newSlugs.length) {
   const LOCALES = [
     { p: "", seg: "artworks" }, { p: "/es", seg: "obras" }, { p: "/pt", seg: "obras" },
-    ...["de", "fr", "it", "ja", "ko", "ru", "zh"].map((l) => ({ p: `/${l}`, seg: "artworks" })),
+    ...["de", "fr", "it", "ja", "ko", "ru"].map((l) => ({ p: `/${l}`, seg: "artworks" })),
   ];
   const urls = newSlugs.flatMap((s) =>
     LOCALES.map(({ p, seg }) => `https://fineartfree.com${p}/${seg}/${encodeURIComponent(s)}`)
   );
-  await fetch("https://api.indexnow.org/indexnow", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      host: "fineartfree.com",
-      key: INDEXNOW_KEY,
-      keyLocation: `https://fineartfree.com/${INDEXNOW_KEY}.txt`,
-      urlList: urls,
-    }),
-  }).catch(() => {});
-  console.log(`\nIndexNow: submitted ${urls.length} URLs for ${newSlugs.length} new artwork(s).`);
+  for (let i = 0; i < urls.length; i += INDEXNOW_GROUP) {
+    if (i > 0) await sleep(INDEXNOW_GAP_MS);
+    await fetch("https://api.indexnow.org/indexnow", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        host: "fineartfree.com",
+        key: INDEXNOW_KEY,
+        keyLocation: `https://fineartfree.com/${INDEXNOW_KEY}.txt`,
+        urlList: urls.slice(i, i + INDEXNOW_GROUP),
+      }),
+    }).catch(() => {});
+  }
+  console.log(`\nIndexNow: submitted ${urls.length} URLs for ${newSlugs.length} new artwork(s) in ${Math.ceil(urls.length / INDEXNOW_GROUP)} groups.`);
 } else if (newSlugs.length) {
   console.log(`\nIndexNow: DISABLED — ${newSlugs.length} new artwork(s) not submitted (set INDEXNOW_ENABLED=1 to re-enable).`);
 }
