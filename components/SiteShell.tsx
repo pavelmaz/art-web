@@ -6,7 +6,6 @@ import Header from "@/components/Header";
 import { FooterCommercialLink, FooterContactLink } from "@/components/FooterLocaleLinks";
 import { FooterLanguageLinks } from "@/components/FooterLanguageLinks";
 import { GoogleAnalytics } from "@/components/GoogleAnalytics";
-import { LocaleSuggestBanner } from "@/components/LocaleSuggestBanner";
 import { MicrosoftUet } from "@/components/MicrosoftUet";
 import { getCachedGenresForBrowse } from "@/lib/browse-genres";
 import type { SiteLocale } from "@/lib/locale-routes";
@@ -38,7 +37,6 @@ export async function SiteShell({ lang, children }: { lang: SiteLocale; children
   return (
     <html lang={lang} className={`${urbanist.variable} h-full antialiased`}>
       <body className="flex min-h-full flex-col">
-        <LocaleSuggestBanner />
         <Header browseGenres={browseGenres} />
         {children}
         <footer className="mt-auto bg-black text-[#a3a3a3]">

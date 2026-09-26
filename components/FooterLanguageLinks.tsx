@@ -13,9 +13,8 @@ import { LOCALE_NATIVE_NAMES, SWITCHABLE_LOCALES, localeTwinPath } from "@/lib/l
  * already lists them in <head>).
  *
  * `?lang=xx` makes the middleware record the choice (faf_lang cookie, 1 year)
- * and land on the same page in that language. Without it a deliberate switch
- * was immediately second-guessed by LocaleSuggestBanner ("also available in
- * English…"), which reads the browser language unless that cookie is set.
+ * and land on the same page in that language, so the English-URL auto-redirect
+ * follows the visitor's pick instead of their browser language from then on.
  */
 export function FooterLanguageLinks() {
   const pathname = usePathname();
