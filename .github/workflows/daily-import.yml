@@ -37,6 +37,9 @@ jobs:
       # Re-enabled 22 Sep 2026: Bing is the converting search engine and IndexNow
       # is how it learns about new pages the same day (volume is ~200 URLs/run).
       INDEXNOW_ENABLED: "1"
+      # External sources for the A->Z drip (26 Sep 2026): Rijksmuseum needs no key;
+      # Europeana activates once EUROPEANA_KEY exists in repo secrets.
+      EUROPEANA_KEY: ${{ secrets.EUROPEANA_KEY }}
       R2_ACCOUNT_ID: ${{ secrets.R2_ACCOUNT_ID }}
       R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
       R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}

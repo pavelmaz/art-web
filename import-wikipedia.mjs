@@ -483,14 +483,131 @@ async function resolveArtist(artistRaw) {
 const summary = { imported: 0, skipped: 0, newArtists: new Set(), touchedArtists: new Set() };
 const newSlugs = [];
 
+// ---------- external sources (26 Sep 2026): more chances to find works ----------
+// Both feed the same processItem() gates (size, dedupe, insert). Kill switch:
+// EXTERNAL_SOURCES=0. Rijksmuseum needs no key; Europeana needs EUROPEANA_KEY.
+const EXTERNAL_SOURCES = process.env.EXTERNAL_SOURCES !== "0";
+const RIJKS_MAX_PER_ARTIST = Number(process.env.RIJKS_MAX_PER_ARTIST || 300);
+const EUROPEANA_MAX_PER_ARTIST = Number(process.env.EUROPEANA_MAX_PER_ARTIST || 100);
+const LD_HEADERS = { "User-Agent": UA, Accept: "application/ld+json, application/json" };
+async function jsonLd(url) {
+  const res = await fetch(url, { headers: LD_HEADERS, signal: AbortSignal.timeout(30000) });
+  if (!res.ok) throw new Error(`${res.status} ${url}`);
+  return res.json();
+}
+const yearOf = (text) => (String(text || "").match(/\b(1[0-9]{3}|20[0-2][0-9])\b/) || [])[1];
+const AAT_EN = "300388277";
+
+/** Rijksmuseum Linked Art API → object → VisualItem → DigitalObject → IIIF.
+ *  Paintings first, then drawings, then prints; every image is CC0 (the museum
+ *  only publishes public-domain works that way). */
+async function rijksmuseumWorks(artistName) {
+  const out = [];
+  for (const type of ["painting", "drawing", "print"]) {
+    let url = `https://data.rijksmuseum.nl/search/collection?${new URLSearchParams({ creator: artistName, type, imageAvailable: "true" })}`;
+    for (let page = 0; page < 8 && url && out.length < RIJKS_MAX_PER_ARTIST; page++) {
+      let d; try { d = await jsonLd(url); } catch { break; }
+      for (const it of d?.orderedItems ?? []) {
+        if (out.length >= RIJKS_MAX_PER_ARTIST) break;
+        out.push({ objectId: it.id, type });
+      }
+      url = d?.next?.id || null;
+      await sleep(150);
+    }
+  }
+  // Titles now (cheap: 1 request) — images are resolved lazily in processItem
+  // only for works that pass the dedupe, so a fully-catalogued artist costs
+  // one request per object, not four.
+  const items = [];
+  for (const { objectId, type } of out) {
+    let o; try { o = await jsonLd(objectId); } catch { continue; }
+    const names = (o?.identified_by ?? []).filter((x) => x.type === "Name");
+    const en = names.find((n) => (n.language ?? []).some((l) => (l.id || "").endsWith(AAT_EN)));
+    const title = (en ?? names[0])?.content;
+    if (!title) continue;
+    const objNr = (o.identified_by ?? []).find((x) => x.type === "Identifier")?.content;
+    const year = yearOf((o.produced_by?.timespan?.identified_by ?? [])[0]?.content);
+    items.push({
+      artistHint: artistName, year, source: "rijksmuseum", museum: "Rijksmuseum",
+      external: { title, pageUrl: objectId, visual: o.shows?.[0]?.id, objNr, type },
+    });
+    await sleep(120);
+  }
+  return items;
+}
+/** Resolve a Rijksmuseum item's image (called only for works that passed dedupe). */
+async function rijksmuseumImage(ext) {
+  const vi = await jsonLd(ext.visual);
+  const dobj = await jsonLd(vi?.digitally_shown_by?.[0]?.id);
+  const ap = (dobj?.access_point ?? []).map((a) => a.id).find((u) => /iiif\.micr\.io\//.test(u || ""));
+  const base = ap?.match(/^(https:\/\/iiif\.micr\.io\/[A-Za-z0-9]+)/)?.[1];
+  if (!base) throw new Error("no IIIF image");
+  const info = await jsonLd(`${base}/info.json`);
+  return { imageUrl: `${base}/full/max/0/default.jpg`, width: info.width, height: info.height };
+}
+
+/** Europeana: public-domain images whose creator is exactly this artist and
+ *  whose file is served by a full-resolution host (Google-hosted providers,
+ *  `=s0` = original). Size is probed before import (the API rarely knows it). */
+async function europeanaWorks(artistName) {
+  const key = process.env.EUROPEANA_KEY;
+  if (!key) return [];
+  const q = new URLSearchParams({
+    wskey: key, query: `who:"${artistName}"`, media: "true", rows: String(EUROPEANA_MAX_PER_ARTIST), profile: "rich",
+  });
+  for (const f of ["TYPE:IMAGE", "RIGHTS:*publicdomain*"]) q.append("qf", f);
+  let d; try { d = await (await fetch(`https://api.europeana.eu/record/v2/search.json?${q}`, { headers: { "User-Agent": UA } })).json(); } catch { return []; }
+  const want = artistName.toLowerCase();
+  const items = [];
+  for (const it of d?.items ?? []) {
+    const creators = [...(it.dcCreator ?? []), ...(it.dcCreatorLangAware?.en ?? [])].map((c) => String(c).toLowerCase());
+    if (!creators.some((c) => c === want || c.includes(want))) continue;
+    const shown = (it.edmIsShownBy || [])[0];
+    if (!shown || !/googleusercontent\.com/.test(shown)) continue;
+    const base = shown.replace(/=s\d+.*$/, "").replace(/=w\d+.*$/, "");
+    const title = it.dcTitleLangAware?.en?.[0] || (it.title || [])[0];
+    if (!title) continue;
+    items.push({
+      artistHint: artistName, year: yearOf((it.year || [])[0]), source: "europeana",
+      museum: (it.dataProvider || [])[0] || null,
+      external: { title, pageUrl: it.guid || `https://www.europeana.eu/item${it.id}`, probe: `${base}=s2000`, imageUrl: `${base}=s0` },
+    });
+  }
+  return items;
+}
+async function europeanaImage(ext) {
+  const { default: sharp } = await import("sharp");
+  const buf = Buffer.from(await (await fetch(ext.probe, { headers: { "User-Agent": UA }, signal: AbortSignal.timeout(60000) })).arrayBuffer());
+  const m = await sharp(buf).metadata();
+  // Google returns min(requested, original): a 2000px probe that comes back
+  // smaller IS the original's width; one that comes back at 2000 means "bigger".
+  return { imageUrl: ext.imageUrl, width: m.width >= 2000 ? null : m.width, height: m.width >= 2000 ? null : m.height, probeWidth: m.width };
+}
+async function externalWorks(artistName) {
+  if (!EXTERNAL_SOURCES) return [];
+  const [rijks, eur] = await Promise.all([
+    rijksmuseumWorks(artistName).catch((e) => { console.error(`  rijksmuseum ${artistName}: ${e.message}`); return []; }),
+    europeanaWorks(artistName).catch((e) => { console.error(`  europeana ${artistName}: ${e.message}`); return []; }),
+  ]);
+  if (rijks.length || eur.length) console.log(`  external sources for ${artistName}: Rijksmuseum ${rijks.length}, Europeana ${eur.length}`);
+  return [...rijks, ...eur];
+}
+
 /** Process one work item {file, titleOverride?, year?, altTitles?, artistHint?}.
  *  Returns "import" if it imported it (or WOULD, in --dry), else "skip".
  *  Mutates summary/newSlugs as a side effect. */
 async function processItem(item) {
-  const fileTitle = item.file;
+  const fileTitle = item.file ?? item.external?.pageUrl;
   await sleep(150);
   try {
-    const info = await fileInfo(fileTitle, item.artistHint ?? "");
+    let info;
+    if (item.external) {
+      // External source: title/page known; the image is resolved after dedupe.
+      info = { title: normalizeTitle(item.external.title), artistRaw: item.artistHint, pageUrl: item.external.pageUrl,
+        imageUrl: item.external.imageUrl, width: item.external.width, height: item.external.height, external: item.external };
+    } else {
+      info = await fileInfo(fileTitle, item.artistHint ?? "");
+    }
     if (info.skip) { console.log(`— SKIP  ${info.skip}`); summary.skipped++; return "skip"; }
     if (item.titleOverride) info.title = normalizeTitle(item.titleOverride);
     if (item.artistHint) info.artistRaw = item.artistHint;
@@ -534,6 +651,14 @@ async function processItem(item) {
       summary.skipped++; return "skip";
     }
 
+    if (info.external) {
+      try {
+        const img = item.source === "rijksmuseum" ? await rijksmuseumImage(info.external) : await europeanaImage(info.external);
+        Object.assign(info, img);
+      } catch (e) { console.log(`— SKIP  no image (${item.source}): ${e.message}`); summary.skipped++; return "skip"; }
+      const known = info.width ?? info.probeWidth;
+      if (known && known < MIN_WIDTH) { console.log(`— SKIP  too small: ${known}px wide (${item.source})`); summary.skipped++; return "skip"; }
+    }
     console.log(
       `${DRY ? "→ WOULD IMPORT" : "+ IMPORT"}  "${info.title}" — ${canonical}${isNew ? " (NEW ARTIST)" : ""}  [${info.width}×${info.height}, ${info.license}]`
     );
@@ -571,6 +696,8 @@ async function processItem(item) {
         artist_display: canonical,
         image_id: stored ? stored.publicUrl : info.imageUrl,
         url: info.pageUrl,
+        ...(item.source ? { source: item.source } : {}),
+        ...(item.museum ? { museum: item.museum } : {}),
         // Was 50 — the real scoring scale is 0-1 (see refresh_daily_artworks(),
         // whose "high score" bucket is score >= 0.75), so a bare 50 shot every
         // fresh import to the very top of the homepage and /artworks browse —
@@ -626,6 +753,7 @@ if (DRIP) {
       let paintings = [];
       try { paintings = await wikidataPaintings(name); }
       catch (e) { console.error(`✗ ${name}: ${e.message}`); lastCompleted = name; continue; }
+      paintings.push(...(await externalWorks(name)));
       let capMidArtist = false;
       for (const p of paintings) {
         if (imported >= DRIP) { capMidArtist = true; break; }
@@ -690,6 +818,9 @@ if (DRIP) {
           if (fresh.length) console.log(`  ${creatorCat} (+ work subcategories): ${fresh.length} file(s)`);
           found.push(...fresh.map((f) => ({ file: f, artistHint: artistName })));
         }
+      }
+      found.push(...(await externalWorks(artistName)));
+      {
         for (const kind of COMMONS_CREATOR_CATEGORIES) {
           if (found.length >= CATEGORY_CAP) break;
           const cat = `Category:${kind} by ${artistName}`;
