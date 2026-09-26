@@ -82,6 +82,18 @@ const HASH_STRONG = Number(process.env.REUP_HASH_STRONG || 10);
 const SEARCH_LIMIT = Number(process.env.REUP_SEARCH_LIMIT || 30);   // was 8: hid big scans
 const CANDIDATES = Number(process.env.REUP_CANDIDATES || 20);       // was 6
 const HASH_TRIES = Number(process.env.REUP_HASH_TRIES || 6);        // was 4
+// Prints/etchings hash at 27–31 between impressions of the SAME plate (Dürer
+// Adam and Eve, Rembrandt Ecce Homo, 26 Sep 2026), so two identity signals that
+// don't rely on the hash alone: (a) museum records found by title AND artist
+// (rijks/vgm) get a wider hash band when proportions match; (b) Commons
+// consensus — several independent files that match our proportions, each near
+// our hash, and near each other, are the same work.
+const HASH_MUSEUM = Number(process.env.REUP_HASH_MUSEUM || 32);
+const ASPECT_MUSEUM = Number(process.env.REUP_ASPECT_MUSEUM || 0.035);
+const CONSENSUS_MIN = Number(process.env.REUP_CONSENSUS_MIN || 3);
+const CONSENSUS_HAM = Number(process.env.REUP_CONSENSUS_HAM || 32);
+const CONSENSUS_MUTUAL = Number(process.env.REUP_CONSENSUS_MUTUAL || 12);
+const CONSENSUS_ASPECT = Number(process.env.REUP_CONSENSUS_ASPECT || 0.02);
 // Hamming distance ceiling (of 64) for the perceptual-hash same-painting check.
 // Was 14 — too strict: it rejected valid bigger scans of the SAME work (a Klee
 // whose 2427px Guggenheim scan matched on identical aspect ratio scored 17 and
@@ -354,12 +366,29 @@ async function reupgrade(row) {
 
   let ourHash; try { ourHash = await dhash(ourCdnUrl(row.image_id)); } catch { return { skip: "our-hash fail" }; }
   let chosen = null;
+  const hashed = [];
   for (const c of cands.slice(0, HASH_TRIES)) {
     let ch; try { ch = await dhash(c.thumb); } catch { continue; }
     const dist = hamming(ourHash, ch);
+    hashed.push({ c, ch, dist });
     if (VERBOSE) console.log(`    · ${c.name}  ${c.width}x${c.height}  asp${c.aspOff.toFixed(3)}  ham${dist}`);
-    const ok = c.aspOff <= ASPECT_TOL ? dist <= HASH_MAX : dist <= HASH_STRONG;
-    if (ok) { chosen = { ...c, dist }; break; }
+    const museum = c.source === "rijks" || c.source === "vgm";
+    const ok = c.aspOff <= ASPECT_TOL ? dist <= HASH_MAX
+      : c.aspOff <= ASPECT_TOL_STRONG ? dist <= HASH_STRONG : false;
+    const okMuseum = museum && c.aspOff <= ASPECT_MUSEUM && dist <= HASH_MUSEUM;
+    if (ok || okMuseum) { chosen = { ...c, dist, via: okMuseum && !ok ? "museum-title" : "hash" }; break; }
+  }
+  if (!chosen) {
+    // Commons consensus (see HASH_MUSEUM comment above).
+    const near = hashed.filter((h) => h.c.aspOff <= CONSENSUS_ASPECT && h.dist <= CONSENSUS_HAM);
+    if (near.length >= CONSENSUS_MIN) {
+      const agree = near.filter((a) => near.filter((b) => b !== a && hamming(a.ch, b.ch) <= CONSENSUS_MUTUAL).length >= CONSENSUS_MIN - 1);
+      if (agree.length >= CONSENSUS_MIN) {
+        const best = agree.sort((a, b) => b.c.width - a.c.width)[0];
+        chosen = { ...best.c, dist: best.dist, via: `consensus(${agree.length})` };
+        if (VERBOSE) console.log(`    = consensus of ${agree.length} files → ${best.c.name}`);
+      }
+    }
   }
 
   // Fallback to extra aggregator sources only when Commons found nothing — these
