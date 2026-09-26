@@ -488,6 +488,11 @@ const newSlugs = [];
 // EXTERNAL_SOURCES=0. Rijksmuseum needs no key; Europeana needs EUROPEANA_KEY.
 const EXTERNAL_SOURCES = process.env.EXTERNAL_SOURCES !== "0";
 const RIJKS_MAX_PER_ARTIST = Number(process.env.RIJKS_MAX_PER_ARTIST || 300);
+// Finished works only by default: the museum's "drawing" type is mostly
+// preparatory studies (red-chalk sketches such as "Saskia in Bed", 26 Sep 2026),
+// which read as unfinished on the site. RIJKS_TYPES=painting,print,drawing to widen.
+const RIJKS_TYPES = (process.env.RIJKS_TYPES || "painting,print").split(",").map((t) => t.trim()).filter(Boolean);
+const RIJKS_MEDIUM = { painting: "Painting", print: "Print", drawing: "Drawing" };
 const EUROPEANA_MAX_PER_ARTIST = Number(process.env.EUROPEANA_MAX_PER_ARTIST || 100);
 const LD_HEADERS = { "User-Agent": UA, Accept: "application/ld+json, application/json" };
 async function jsonLd(url) {
@@ -503,7 +508,7 @@ const AAT_EN = "300388277";
  *  only publishes public-domain works that way). */
 async function rijksmuseumWorks(artistName) {
   const out = [];
-  for (const type of ["painting", "drawing", "print"]) {
+  for (const type of RIJKS_TYPES) {
     let url = `https://data.rijksmuseum.nl/search/collection?${new URLSearchParams({ creator: artistName, type, imageAvailable: "true" })}`;
     for (let page = 0; page < 8 && url && out.length < RIJKS_MAX_PER_ARTIST; page++) {
       let d; try { d = await jsonLd(url); } catch { break; }
@@ -528,7 +533,7 @@ async function rijksmuseumWorks(artistName) {
     const objNr = (o.identified_by ?? []).find((x) => x.type === "Identifier")?.content;
     const year = yearOf((o.produced_by?.timespan?.identified_by ?? [])[0]?.content);
     items.push({
-      artistHint: artistName, year, source: "rijksmuseum", museum: "Rijksmuseum",
+      artistHint: artistName, year, source: "rijksmuseum", museum: "Rijksmuseum", medium: RIJKS_MEDIUM[type] ?? null,
       external: { title, pageUrl: objectId, visual: o.shows?.[0]?.id, objNr, type },
     });
     await sleep(120);
@@ -754,6 +759,7 @@ async function processItem(item) {
         url: info.pageUrl,
         ...(item.source ? { source: item.source } : {}),
         ...(item.museum ? { museum: item.museum } : {}),
+        ...(item.medium ? { medium_display: item.medium } : {}),
         // Was 50 — the real scoring scale is 0-1 (see refresh_daily_artworks(),
         // whose "high score" bucket is score >= 0.75), so a bare 50 shot every
         // fresh import to the very top of the homepage and /artworks browse —
