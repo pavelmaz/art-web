@@ -25,8 +25,8 @@ name: Reupgrade artist walk
 # enrichment step either.
 
 on:
-  schedule:
-    - cron: "0 6 * * *"
+  # Nightly schedule removed 26 Sep 2026: the reupgrade now runs continuously on
+  # Pavel's Mac (scripts/reupgrade-commons-search.mjs, see memory). Manual runs only.
   workflow_dispatch:
     inputs:
       limit:
