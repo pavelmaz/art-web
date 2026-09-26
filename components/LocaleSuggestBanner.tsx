@@ -84,7 +84,8 @@ export function LocaleSuggestBanner() {
       aria-label={copy.text}
     >
       <span>{copy.text}</span>
-      <a href={href} hrefLang={locale} className="font-medium text-white underline underline-offset-2">
+      {/* ?lang= records the choice (faf_lang cookie) so the preference sticks site-wide. */}
+      <a href={`${href}?lang=${locale}`} hrefLang={locale} className="font-medium text-white underline underline-offset-2">
         {copy.cta}
       </a>
       <button

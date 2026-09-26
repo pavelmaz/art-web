@@ -11,12 +11,20 @@ import { LOCALE_NATIVE_NAMES, SWITCHABLE_LOCALES, localeTwinPath } from "@/lib/l
  * <Link> would prefetch nine pages per view for a link almost nobody clicks.
  * Also gives crawlers real in-page links between the translations (hreflang
  * already lists them in <head>).
+ *
+ * `?lang=xx` makes the middleware record the choice (faf_lang cookie, 1 year)
+ * and land on the same page in that language. Without it a deliberate switch
+ * was immediately second-guessed by LocaleSuggestBanner ("also available in
+ * English…"), which reads the browser language unless that cookie is set.
  */
 export function FooterLanguageLinks() {
   const pathname = usePathname();
   const here = localeFromPathname(pathname);
   const links = SWITCHABLE_LOCALES.filter((loc) => loc !== here)
-    .map((loc) => ({ loc, href: localeTwinPath(pathname, loc) }))
+    .map((loc) => {
+      const twin = localeTwinPath(pathname, loc);
+      return { loc, href: twin ? `${twin}?lang=${loc}` : twin };
+    })
     .filter((l): l is { loc: (typeof SWITCHABLE_LOCALES)[number]; href: string } => !!l.href);
 
   if (links.length === 0) return null;
