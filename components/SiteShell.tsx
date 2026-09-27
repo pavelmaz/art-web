@@ -5,6 +5,7 @@ import type { ReactNode } from "react";
 import Header from "@/components/Header";
 import { FooterCommercialLink, FooterContactLink } from "@/components/FooterLocaleLinks";
 import { FooterLanguageLinks } from "@/components/FooterLanguageLinks";
+import { CloudflareInsights } from "@/components/CloudflareInsights";
 import { GoogleAnalytics } from "@/components/GoogleAnalytics";
 import { MicrosoftUet } from "@/components/MicrosoftUet";
 import { getCachedGenresForBrowse } from "@/lib/browse-genres";
@@ -83,6 +84,7 @@ export async function SiteShell({ lang, children }: { lang: SiteLocale; children
           </div>
         </footer>
         <GoogleAnalytics />
+        <CloudflareInsights />
         <MicrosoftUet />
       </body>
     </html>
