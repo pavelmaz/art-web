@@ -1,3 +1,5 @@
+import { capturePostHog } from "@/lib/posthog-client";
+
 /** One GA4 e-commerce item (used by `purchase`). */
 export type TrackItem = { item_id: string; item_name: string; price: number; quantity: number };
 
@@ -28,8 +30,9 @@ function gaEventName(name: string): string {
 }
 
 /**
- * Custom-event sink: GA4 only (Vercel Analytics was removed with the move to
- * Cloudflare, 21 Sep 2026).
+ * Custom-event sink: GA4 and PostHog (Vercel Analytics was removed with the
+ * move to Cloudflare, 21 Sep 2026; PostHog added 27 Sep 2026 as the dashboard
+ * people actually read — see lib/posthog-client.ts).
  *
  * Pushes straight to `window.dataLayer` instead of calling `window.gtag(...)`
  * directly. `gtag()` itself is nothing but `dataLayer.push(arguments)` — the
@@ -49,4 +52,5 @@ export function track(name: string, props?: TrackProps): void {
   if (typeof window === "undefined") return;
   window.dataLayer = window.dataLayer || [];
   window.dataLayer.push(["event", gaEventName(name), props ?? {}]);
+  capturePostHog(gaEventName(name), props);
 }
