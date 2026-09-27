@@ -27,6 +27,31 @@ let state: "idle" | "loading" | "off" = "idle";
 /** Events fired before the SDK finished loading (a click in the first second). */
 const queue: Array<[string, Props | undefined]> = [];
 
+/**
+ * The visitor's country, for the Countries panel. PostHog cannot work it out
+ * itself here: the project discards IP addresses and cookieless mode strips
+ * them before its GeoIP step, so events arrived with no location at all.
+ * Cloudflare already knows the country and serves it from its own edge at
+ * /cdn-cgi/trace — not a Worker request, and no IP ever reaches PostHog.
+ * The property names are the ones PostHog's own reports read.
+ */
+async function visitorCountry(): Promise<Props | null> {
+  try {
+    const res = await fetch("/cdn-cgi/trace", { signal: AbortSignal.timeout(2000) });
+    const code = /^loc=([A-Z]{2})$/m.exec(await res.text())?.[1];
+    if (!code || code === "XX" || code === "T1") return null; // unknown / Tor
+    let name = code;
+    try {
+      name = new Intl.DisplayNames(["en"], { type: "region" }).of(code) ?? code;
+    } catch {
+      // very old browser — the code alone is enough
+    }
+    return { $geoip_country_code: code, $geoip_country_name: name };
+  } catch {
+    return null;
+  }
+}
+
 export function initPostHog(): void {
   if (state !== "idle" || typeof window === "undefined") return;
   // Automation (headless scrapers, test runners) announces itself here; keep it
@@ -38,14 +63,16 @@ export function initPostHog(): void {
   state = "loading";
 
   const start = () => {
-    import("posthog-js")
-      .then(({ default: posthog }) => {
+    Promise.all([import("posthog-js"), visitorCountry()])
+      .then(([{ default: posthog }, country]) => {
         posthog.init(POSTHOG_TOKEN, {
           api_host: POSTHOG_HOST,
           defaults: "2026-08-30",
           cookieless_mode: "always",
           autocapture: false,
           loaded: (ph) => {
+            // Registered before the first page view is sent, so every event carries it.
+            if (country) ph.register(country);
             client = ph;
             for (const [name, props] of queue.splice(0)) ph.capture(name, props);
           },
