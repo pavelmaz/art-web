@@ -1,7 +1,9 @@
 "use client";
 
 import Link from "@/components/Link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+
+import { track } from "@/lib/analytics";
 
 type BuyCanvasRowProps = {
   artworkSlug: string;
@@ -24,6 +26,19 @@ export function BuyCanvasRow({ artworkSlug, glass = false }: BuyCanvasRowProps) 
     () => typeof window !== "undefined" && new URLSearchParams(window.location.search).get("print_order") === "success"
   );
 
+  // Back from Stripe with a paid order: count it once, even if the page is reloaded.
+  useEffect(() => {
+    if (!justOrdered) return;
+    const key = `faf-print-order-tracked:${artworkSlug}`;
+    try {
+      if (window.sessionStorage.getItem(key) === "1") return;
+      window.sessionStorage.setItem(key, "1");
+    } catch {
+      // storage blocked — count it anyway
+    }
+    track("print_purchase", { artwork: artworkSlug, locale: "en" });
+  }, [justOrdered, artworkSlug]);
+
   if (justOrdered) {
     return (
       <div className={`rounded-lg p-3 ${glass ? "glass-inset" : "bg-[#eceff3]"}`}>
@@ -45,6 +60,7 @@ export function BuyCanvasRow({ artworkSlug, glass = false }: BuyCanvasRowProps) 
       <Link
         href={`/artworks/${artworkSlug}/print`}
         rel="nofollow"
+        onClick={() => track("print_cta_click", { artwork: artworkSlug, locale: "en" })}
         className="inline-flex shrink-0 items-center justify-center rounded-md bg-[#4CAF50] px-3 py-2 text-[13px] font-medium text-white hover:bg-[#43A047]"
       >
         Order Framed Print

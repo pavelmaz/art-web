@@ -3,6 +3,7 @@
 import { useState } from "react";
 
 import { PrintProductDetails } from "@/components/PrintProductDetails";
+import { track } from "@/lib/analytics";
 import {
   FRAME_OPTIONS,
   isFrameKey,
@@ -47,8 +48,18 @@ export function PrintProductPurchasePanel({
   const handleBuy = async () => {
     if (!sizeCode || !frame) {
       setShowMissing(true);
+      // Pressed "buy" without choosing a size or frame — intent, but not yet a checkout.
+      track("print_checkout_incomplete", { artwork: artworkSlug, locale: "en", has_size: !!sizeCode, has_frame: !!frame });
       return;
     }
+    track("print_checkout_click", {
+      artwork: artworkSlug,
+      locale: "en",
+      size: sizeCode,
+      frame,
+      value: selectedPrice ?? 0,
+      currency: "USD",
+    });
     setBusy(true);
     setError(null);
     try {
@@ -63,7 +74,7 @@ export function PrintProductPurchasePanel({
         setBusy(false);
         return;
       }
-      window.location.href = data.url;
+      window.location.assign(data.url);
     } catch {
       setError("Something went wrong. Please try again.");
       setBusy(false);
