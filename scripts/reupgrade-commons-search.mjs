@@ -57,12 +57,18 @@ const R2TMP = mkdtempSync(join(tmpdir(), "reup-r2-"));
 function r2Put(objectKey, body, contentType) {
   const f = join(R2TMP, "up.bin");
   writeFileSync(f, body);
-  execFileSync("curl", [
-    "-s", "-f", "-m", "300", "--aws-sigv4", "aws:amz:auto:s3",
-    "--user", `${R2.key}:${R2.secret}`, "-X", "PUT",
-    "-H", `Content-Type: ${contentType}`, "--data-binary", `@${f}`,
-    `https://${R2.account}.r2.cloudflarestorage.com/${R2.bucket}/${objectKey}`,
-  ]);
+  try {
+    // Credentials go in through stdin (-K -), never argv: a failed curl used to
+    // put its whole command line, key and secret included, into the error text
+    // and so into the log file (27 Sep 2026). 600 s: full originals can be huge.
+    execFileSync("curl", [
+      "-s", "-f", "-m", "600", "--aws-sigv4", "aws:amz:auto:s3", "-K", "-", "-X", "PUT",
+      "-H", `Content-Type: ${contentType}`, "--data-binary", `@${f}`,
+      `https://${R2.account}.r2.cloudflarestorage.com/${R2.bucket}/${objectKey}`,
+    ], { input: `user = "${R2.key}:${R2.secret}"\n`, stdio: ["pipe", "ignore", "ignore"] });
+  } catch (e) {
+    throw new Error(`R2 upload failed for ${objectKey} (curl exit ${e.status ?? "?"})`);
+  }
 }
 const UA = "FineArtFree-reupgrade/1.0 (https://fineartfree.com; pavelmazuelas@gmail.com)";
 const COMMONS_API = "https://commons.wikimedia.org/w/api.php";
@@ -115,12 +121,20 @@ const VARIANTS = [
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
-async function gentleFetch(url, extraHeaders = {}) {
+// Decode options for every source image: no pixel cap (Pavel wants the full
+// super-high-res originals; sharp's default 268 MP limit rejected e.g. the
+// 15566x19363 C2RMF Castiglione) and tolerate decoder warnings, which museum
+// TIFFs trigger often, while still failing on real corruption.
+const SHARP_IN = { limitInputPixels: false, failOn: "error" };
+/** Full-size originals run to hundreds of MB; API calls keep the short default. */
+const FILE_TIMEOUT_MS = 300000;
+
+async function gentleFetch(url, extraHeaders = {}, timeoutMs = 30000) {
   for (let attempt = 1; attempt <= 5; attempt++) {
     let res;
     try {
       // Per-request timeout so a stalled Wikimedia connection can't hang the whole run.
-      res = await fetch(url, { headers: { "User-Agent": UA, ...extraHeaders }, signal: AbortSignal.timeout(30000) });
+      res = await fetch(url, { headers: { "User-Agent": UA, ...extraHeaders }, signal: AbortSignal.timeout(timeoutMs) });
     } catch (e) {
       if (attempt === 5) throw new Error(`fetch net ${e.name || e.message}`);
       await sleep(2000 * attempt); continue;
@@ -134,7 +148,7 @@ async function gentleFetch(url, extraHeaders = {}) {
 
 async function dhash(url) {
   const buf = Buffer.from(await (await gentleFetch(url)).arrayBuffer());
-  const raw = await sharp(buf, { limitInputPixels: false }).grayscale().resize(9, 8, { fit: "fill" }).raw().toBuffer();
+  const raw = await sharp(buf, SHARP_IN).grayscale().resize(9, 8, { fit: "fill" }).raw().toBuffer();
   let bits = "";
   for (let y = 0; y < 8; y++) for (let x = 0; x < 8; x++) bits += raw[y * 9 + x] > raw[y * 9 + x + 1] ? "1" : "0";
   return bits;
@@ -416,7 +430,7 @@ async function reupgrade(row) {
       const dist = hamming(ourHash, ch);
       if (dist > HASH_MAX) continue;
       let buf; try { buf = Buffer.from(await (await gentleFetch(c.url)).arrayBuffer()); } catch { continue; }
-      let meta; try { meta = await sharp(buf, { limitInputPixels: false }).metadata(); } catch { continue; }
+      let meta; try { meta = await sharp(buf, SHARP_IN).metadata(); } catch { continue; }
       if (!meta.width || meta.width < ourW * MIN_GAIN) continue;
       const aspOff = Math.abs(meta.width / meta.height - ourAspect) / ourAspect;
       if (aspOff > ASPECT_TOL) continue;
@@ -443,18 +457,18 @@ async function reupgrade(row) {
   } else {
     const useThumb = chosen.source === "commons" && !fromOriginal && chosen.width > MAX_WIDTH;
     const dlUrl = useThumb ? (await commonsInfo(chosen.name, MAX_WIDTH)).thumb : chosen.url;
-    src = Buffer.from(await (await gentleFetch(dlUrl)).arrayBuffer());
+    src = Buffer.from(await (await gentleFetch(dlUrl, {}, FILE_TIMEOUT_MS)).arrayBuffer());
   }
-  const jpegBuf = await sharp(src, { limitInputPixels: false })
+  const jpegBuf = await sharp(src, SHARP_IN)
     .rotate().resize({ width: MAX_WIDTH, withoutEnlargement: true }).jpeg({ quality: 92, mozjpeg: true }).toBuffer();
-  const meta = await sharp(jpegBuf).metadata();
+  const meta = await sharp(jpegBuf, SHARP_IN).metadata();
   const sha = createHash("sha256").update(jpegBuf).digest("hex");
   const newKey = `artworks/${sha}.jpg`;
   r2Put(newKey, jpegBuf, "image/jpeg");
 
   let stdBytes = null;
   for (const v of VARIANTS) {
-    const pipe = sharp(jpegBuf, { limitInputPixels: false }).rotate().resize({ width: v.width, withoutEnlargement: true });
+    const pipe = sharp(jpegBuf, SHARP_IN).rotate().resize({ width: v.width, withoutEnlargement: true });
     const out = await (v.format === "jpeg" ? pipe.jpeg({ quality: v.quality, mozjpeg: true }) : pipe.webp({ quality: v.quality })).toBuffer();
     if (v.key === "w1400") stdBytes = out.length;
     r2Put(`renditions/${v.key}/artworks/${sha}.${v.format === "jpeg" ? "jpg" : "webp"}`, out,
