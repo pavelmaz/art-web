@@ -3,11 +3,18 @@ import type { CookieOptions } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 
+import type Stripe from "stripe";
+
 import { canSellPrint, FRAME_OPTIONS, isFrameKey, priceUsd, prodigiItemFor, sizesForArtwork } from "@/lib/print-catalog";
+import { countryPhrase, CUSTOMS_ID, isPrintCountry, PRODUCTION_DAYS } from "@/lib/print-countries";
+import { printShipping } from "@/lib/print-shipping";
 import { getStripe } from "@/lib/stripe";
 import { supabase } from "@/lib/supabase";
 
 type CookieRow = { name: string; value: string; options: CookieOptions };
+type AllowedCountry = NonNullable<
+  NonNullable<Parameters<Stripe["checkout"]["sessions"]["create"]>[0]>["shipping_address_collection"]
+>["allowed_countries"][number];
 
 /**
  * One-time print-order checkout — a separate mode from the Fine Art Pro
@@ -19,14 +26,18 @@ type CookieRow = { name: string; value: string; options: CookieOptions };
  */
 export async function POST(req: NextRequest) {
   try {
-    const { artworkSlug, size, frame } = (await req.json()) as {
+    const { artworkSlug, size, frame, country } = (await req.json()) as {
       artworkSlug?: string;
       size?: string;
       frame?: string;
+      country?: string;
     };
 
     if (!artworkSlug || !size || !isFrameKey(frame)) {
       return NextResponse.json({ error: "Please choose a size and frame" }, { status: 400 });
+    }
+    if (!isPrintCountry(country)) {
+      return NextResponse.json({ error: "Please choose where to deliver it" }, { status: 400 });
     }
 
     // Print artists only (canSellPrint), enforced server-side too — the UI only
@@ -50,6 +61,14 @@ export async function POST(req: NextRequest) {
     }
     const { sku, attributes, sizing } = prodigiItemFor(chosen.code, frame);
     const frameLabel = FRAME_OPTIONS.find((f) => f.key === frame)!.label;
+
+    // Delivery is priced server-side from Prodigi's quote, same as the page shows.
+    const shipping = await printShipping(chosen.code, country);
+    if (!shipping) {
+      return NextResponse.json({ error: `This size can't be delivered to ${countryPhrase(country)}` }, { status: 400 });
+    }
+    const [transitMin, transitMax] = shipping.transitDays;
+    const customsId = CUSTOMS_ID[country];
 
     const cookieStore = await cookies();
     const supabaseAuth = createServerClient(
@@ -82,7 +101,36 @@ export async function POST(req: NextRequest) {
           quantity: 1,
         },
       ],
-      shipping_address_collection: { allowed_countries: ["US"] },
+      // One country per checkout: the one the shipping was priced for.
+      shipping_address_collection: {
+        allowed_countries: [country as AllowedCountry],
+      },
+      shipping_options: [
+        {
+          shipping_rate_data: {
+            type: "fixed_amount",
+            fixed_amount: { amount: shipping.surchargeUsd * 100, currency: "usd" },
+            display_name: `${shipping.surchargeUsd === 0 ? "Free delivery" : "Delivery"} to ${countryPhrase(country)}`,
+            delivery_estimate: {
+              minimum: { unit: "business_day", value: PRODUCTION_DAYS + transitMin },
+              maximum: { unit: "business_day", value: PRODUCTION_DAYS + transitMax },
+            },
+          },
+        },
+      ],
+      // Customs in some countries need the recipient's tax ID on the parcel.
+      ...(customsId
+        ? {
+            custom_fields: [
+              {
+                key: "customs_id",
+                label: { type: "custom" as const, custom: customsId.label },
+                type: "text" as const,
+                optional: customsId.optional,
+              },
+            ],
+          }
+        : {}),
       metadata: {
         type: "print_order",
         artwork_slug: artworkSlug,
@@ -91,6 +139,8 @@ export async function POST(req: NextRequest) {
         sizing,
         size: chosen.code,
         frame,
+        country,
+        shipping_usd: String(shipping.surchargeUsd),
         ...(user ? { supabase_user_id: user.id } : {}),
       },
       success_url: `${process.env.NEXT_PUBLIC_SITE_URL}/artworks/${artworkSlug}?print_order=success`,

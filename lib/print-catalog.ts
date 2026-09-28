@@ -55,6 +55,12 @@ export type PrintSize = {
   label: string;
 };
 
+/** Prodigi's cost for a size delivered in the US (item + Standard shipping) — the
+ *  cost the retail price is built on. */
+export function usWholesaleUsd(code: string): number | null {
+  return PRICE_TABLE[code]?.wholesale ?? null;
+}
+
 export function priceUsd(code: string): number | null {
   const wholesale = PRICE_TABLE[code]?.wholesale;
   return wholesale ? Math.ceil((wholesale * MARKUP) / 10) * 10 - 1 : null;

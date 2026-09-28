@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import { PrintProductDetails } from "@/components/PrintProductDetails";
 import { track } from "@/lib/analytics";
+import { countryName, countryPhrase, isPrintCountry, PRINT_COUNTRIES, type PrintShipping } from "@/lib/print-countries";
 import {
   FRAME_OPTIONS,
   isFrameKey,
@@ -26,6 +27,53 @@ type PrintProductPurchasePanelProps = {
 
 const usd = (n: number) => `$${n}`;
 
+const COUNTRY_KEY = "faf-print-country";
+
+/** The visitor's country: their last choice, else Cloudflare's view of where they
+ *  are (/cdn-cgi/trace, answered at the edge), else the US. */
+async function initialCountry(): Promise<string> {
+  try {
+    const saved = window.localStorage.getItem(COUNTRY_KEY);
+    if (isPrintCountry(saved)) return saved;
+  } catch {
+    // storage blocked
+  }
+  try {
+    const res = await fetch("/cdn-cgi/trace", { signal: AbortSignal.timeout(2000) });
+    const code = /^loc=([A-Z]{2})$/m.exec(await res.text())?.[1];
+    if (isPrintCountry(code)) return code;
+  } catch {
+    // offline or blocked — fall through
+  }
+  return "US";
+}
+
+/** One line under the price: delivery cost to the chosen country. */
+function deliveryLine(
+  country: string,
+  bySize: Record<string, PrintShipping | null> | null,
+  selectedCode: string | undefined
+): { text: string; free: boolean } {
+  const name = countryPhrase(country);
+  if (!bySize) return { text: `Checking delivery to ${name}…`, free: false };
+  if (selectedCode) {
+    const s = bySize[selectedCode];
+    if (!s) return { text: `This size can't be delivered to ${name}`, free: false };
+    return s.surchargeUsd === 0
+      ? { text: `Free delivery to ${name}`, free: true }
+      : { text: `+ ${usd(s.surchargeUsd)} delivery to ${name}`, free: false };
+  }
+  const costs = Object.values(bySize)
+    .filter((s): s is PrintShipping => !!s)
+    .map((s) => s.surchargeUsd);
+  if (costs.length === 0) return { text: `Not available for delivery to ${name}`, free: false };
+  if (costs.every((c) => c === 0)) return { text: `Free delivery to ${name}`, free: true };
+  const min = Math.min(...costs);
+  return min === 0
+    ? { text: `Free delivery to ${name} on some sizes`, free: true }
+    : { text: `Delivery to ${name} from ${usd(min)}`, free: false };
+}
+
 export function PrintProductPurchasePanel({
   artworkSlug,
   title,
@@ -40,10 +88,57 @@ export function PrintProductPurchasePanel({
   const [error, setError] = useState<string | null>(null);
   const [showMissing, setShowMissing] = useState(false);
 
+  const [country, setCountry] = useState("");
+  const [shippingBySize, setShippingBySize] = useState<Record<string, PrintShipping | null> | null>(null);
+
   const prices = sizes.map((s) => priceUsd(s.code)).filter((p): p is number => p !== null);
   const minPrice = Math.min(...prices);
   const selected = sizes.find((s) => s.code === sizeCode);
   const selectedPrice = selected ? priceUsd(selected.code) : null;
+  const sizeCodes = sizes.map((s) => s.code).join(",");
+
+  const countryOptions = useMemo(
+    () => PRINT_COUNTRIES.map((code) => ({ code, name: countryName(code) })).sort((a, b) => a.name.localeCompare(b.name)),
+    []
+  );
+
+  useEffect(() => {
+    let cancelled = false;
+    initialCountry().then((code) => {
+      if (!cancelled) setCountry((current) => current || code);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  // Delivery cost of every offered size to the chosen country (cached server-side).
+  useEffect(() => {
+    if (!country) return;
+    const controller = new AbortController();
+    fetch(`/api/print-orders/shipping?sizes=${sizeCodes}&country=${country}`, { signal: controller.signal })
+      .then((res) => (res.ok ? res.json() : Promise.reject(new Error(String(res.status)))))
+      .then((data: { shipping: Record<string, PrintShipping | null> }) => setShippingBySize(data.shipping))
+      .catch(() => {
+        if (!controller.signal.aborted) setShippingBySize({});
+      });
+    return () => controller.abort();
+  }, [country, sizeCodes]);
+
+  const chooseCountry = (code: string) => {
+    setShippingBySize(null);
+    setCountry(code);
+    try {
+      window.localStorage.setItem(COUNTRY_KEY, code);
+    } catch {
+      // storage blocked — the choice still applies to this visit
+    }
+  };
+
+  const delivery = country ? deliveryLine(country, shippingBySize, selected?.code) : null;
+  const shownShipping = shippingBySize
+    ? (selected ? shippingBySize[selected.code] : Object.values(shippingBySize).find((s) => !!s)) ?? null
+    : null;
 
   const handleBuy = async () => {
     if (!sizeCode || !frame) {
@@ -52,12 +147,18 @@ export function PrintProductPurchasePanel({
       track("print_checkout_incomplete", { artwork: artworkSlug, locale: "en", has_size: !!sizeCode, has_frame: !!frame });
       return;
     }
+    if (!country || (shippingBySize && !shippingBySize[sizeCode])) {
+      setError(country ? `This size can't be delivered to ${countryPhrase(country)}.` : "Please choose where to deliver it.");
+      return;
+    }
+    const shippingUsd = shippingBySize?.[sizeCode]?.surchargeUsd ?? 0;
     track("print_checkout_click", {
       artwork: artworkSlug,
       locale: "en",
       size: sizeCode,
       frame,
-      value: selectedPrice ?? 0,
+      country,
+      value: (selectedPrice ?? 0) + shippingUsd,
       currency: "USD",
     });
     setBusy(true);
@@ -66,7 +167,7 @@ export function PrintProductPurchasePanel({
       const res = await fetch("/api/print-orders/create-checkout-session", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ artworkSlug, size: sizeCode, frame }),
+        body: JSON.stringify({ artworkSlug, size: sizeCode, frame, country }),
       });
       const data = (await res.json().catch(() => ({}))) as { url?: string; error?: string };
       if (!res.ok || !data.url) {
@@ -100,7 +201,9 @@ export function PrintProductPurchasePanel({
   return (
     <div className="lg:pt-2">
       <p className="text-3xl font-semibold text-[#222]">{selectedPrice ? usd(selectedPrice) : `${usd(minPrice)}+`}</p>
-      <p className="mt-1 text-sm font-medium text-[#2e7d32]">Free shipping within the US</p>
+      <p className={`mt-1 min-h-[1.25rem] text-sm font-medium ${delivery?.free ? "text-[#2e7d32]" : "text-[#595959]"}`}>
+        {delivery?.text ?? ""}
+      </p>
 
       <h1 className="mt-4 text-lg leading-snug text-[#222]">{title} — Framed Art Print, Museum-Quality Reproduction</h1>
       {artist ? <p className="mt-1 text-sm font-semibold text-[#222]">{artist}</p> : null}
@@ -158,6 +261,33 @@ export function PrintProductPurchasePanel({
           </div>
           {showMissing && !frame ? <p className="mt-1.5 text-sm text-[#b3261e]">Please select an option</p> : null}
         </div>
+
+        <div>
+          <label htmlFor="print-country" className="mb-2 block text-sm font-semibold text-[#222]">
+            Deliver to
+          </label>
+          <div className="relative">
+            <select
+              id="print-country"
+              value={country}
+              onChange={(e) => chooseCountry(e.target.value)}
+              className={selectClass(false)}
+            >
+              {/* The list renders in the browser only (the country is detected there),
+                  so server and client never disagree on country names. */}
+              {country ? (
+                countryOptions.map((c) => (
+                  <option key={c.code} value={c.code}>
+                    {c.name}
+                  </option>
+                ))
+              ) : (
+                <option value="">Detecting your country…</option>
+              )}
+            </select>
+            {chevron}
+          </div>
+        </div>
       </div>
 
       <button
@@ -170,7 +300,7 @@ export function PrintProductPurchasePanel({
       </button>
       {error ? <p className="mt-2 text-sm text-[#b3261e]">{error}</p> : null}
 
-      <PrintProductDetails sizes={sizes} selected={selected} />
+      <PrintProductDetails sizes={sizes} selected={selected} country={country} shipping={shownShipping} />
     </div>
   );
 }

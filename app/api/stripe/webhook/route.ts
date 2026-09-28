@@ -126,6 +126,11 @@ async function handlePrintOrderCheckout(session: Stripe.Checkout.Session): Promi
     return;
   }
 
+  // Brazil, Mexico and the Canary Islands need the recipient's tax ID on the
+  // parcel; Prodigi asks for it in the address, so it goes on the second line.
+  const customsId = session.custom_fields?.find((f) => f.key === "customs_id")?.text?.value?.trim();
+  const line2 = [shipping.address.line2, customsId].filter(Boolean).join(", ") || undefined;
+
   try {
     const { vendorOrderId } = await createProdigiOrder({
       sku,
@@ -139,7 +144,7 @@ async function handlePrintOrderCheckout(session: Stripe.Checkout.Session): Promi
         email,
         address: {
           line1: shipping.address.line1 ?? "",
-          line2: shipping.address.line2 ?? undefined,
+          line2,
           postalOrZipCode: shipping.address.postal_code ?? "",
           countryCode: shipping.address.country ?? "US",
           townOrCity: shipping.address.city ?? "",

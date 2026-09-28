@@ -3,19 +3,21 @@
 import { useState, useSyncExternalStore, type ReactNode } from "react";
 
 import type { PrintSize } from "@/lib/print-catalog";
+import { countryPhrase, PRODUCTION_DAYS, type PrintShipping } from "@/lib/print-countries";
 
 /**
  * Etsy-style "Item details" and "Delivery and return policies" for the framed
  * print. Every claim comes from Prodigi (Products + Quotes API for GLOBAL-CFP,
- * and its Classic frames spec sheet): US orders are made in Prodigi's US lab in
- * ~72h and shipped UPS Ground; damaged or faulty items are reprinted or refunded
- * when reported within 14 days of delivery. Keep it that way — the page must
- * only promise what is delivered.
+ * and its Classic frames spec sheet, shipping FAQ and support articles): each
+ * order is made in the Prodigi lab nearest the customer (US, UK, Netherlands,
+ * Australia) and sent Standard; delivery estimates are Prodigi's published ones;
+ * damaged or faulty items are reprinted or refunded when reported within 14 days
+ * of delivery; customs charges, where they apply, are paid by the recipient.
+ * Keep it that way — the page must only promise what is delivered.
  */
 
-/** Business days to print and frame, then UPS Ground transit (contiguous US). */
-const PRODUCTION_DAYS = 3;
-const TRANSIT_DAYS = { min: 1, max: 5 };
+/** Used until the chosen country's delivery is known (Prodigi: US to US). */
+const DEFAULT_TRANSIT: [number, number] = [4, 6];
 /** Covers an order placed after the lab's daily cutoff. */
 const CUTOFF_BUFFER_DAYS = 1;
 
@@ -30,9 +32,9 @@ function addBusinessDays(from: Date, days: number): Date {
   return d;
 }
 
-function deliveryWindow(now: Date): string {
-  const first = addBusinessDays(now, PRODUCTION_DAYS + TRANSIT_DAYS.min);
-  const last = addBusinessDays(now, PRODUCTION_DAYS + TRANSIT_DAYS.max + CUTOFF_BUFFER_DAYS);
+function deliveryWindow(now: Date, [min, max]: [number, number]): string {
+  const first = addBusinessDays(now, PRODUCTION_DAYS + min);
+  const last = addBusinessDays(now, PRODUCTION_DAYS + max + CUTOFF_BUFFER_DAYS);
   const month = (d: Date) => d.toLocaleDateString("en-US", { month: "short" });
   return first.getMonth() === last.getMonth()
     ? `${month(first)} ${first.getDate()}–${last.getDate()}`
@@ -162,18 +164,33 @@ const ECO = [
   },
   {
     src: "/images/print-mockups/eco-local-fulfilment.png",
-    label: "Made locally, in the US",
+    label: "Made in the lab nearest you",
   },
 ];
 
-export function PrintProductDetails({ sizes, selected }: { sizes: PrintSize[]; selected: PrintSize | undefined }) {
+export function PrintProductDetails({
+  sizes,
+  selected,
+  country,
+  shipping,
+}: {
+  sizes: PrintSize[];
+  selected: PrintSize | undefined;
+  /** Chosen delivery country ("" while it is being detected). */
+  country: string;
+  /** Delivery of the selected (or a representative) size to that country. */
+  shipping: PrintShipping | null;
+}) {
+  const transit = shipping?.transitDays ?? DEFAULT_TRANSIT;
   // The page is cached for a day, so the dates come from the browser's clock
   // (the server renders a placeholder; the client fills it in after hydration).
   const arrival = useSyncExternalStore(
     noSubscription,
-    () => deliveryWindow(new Date()),
+    () => deliveryWindow(new Date(), transit),
     () => null,
   );
+  const labName = shipping ? countryPhrase(shipping.lab) : null;
+  const destination = country ? countryPhrase(country) : null;
 
   const smallest = sizes[0];
   const largest = sizes[sizes.length - 1];
@@ -186,7 +203,9 @@ export function PrintProductDetails({ sizes, selected }: { sizes: PrintSize[]; s
       <Section title="Item details">
         <p className="text-sm font-semibold text-[#222]">Highlights</p>
         <ul className="mt-3 space-y-3.5">
-          <Row icon={<PrinterIcon />}>Printed and framed to order in the US</Row>
+          <Row icon={<PrinterIcon />}>
+            Printed and framed to order{labName ? ` in ${labName}` : " in the lab nearest you"}
+          </Row>
           <Row icon={<LayersIcon />}>Materials: solid wood frame, acrylic glazing, fine art paper</Row>
           <Row icon={<RulerIcon />}>{dimensions}</Row>
           <Row icon={<HangIcon />}>Arrives framed and ready to hang</Row>
@@ -231,7 +250,7 @@ export function PrintProductDetails({ sizes, selected }: { sizes: PrintSize[]; s
               {arrival ? (
                 <Explained label={<strong className="font-semibold">{arrival}</strong>}>
                   Each print is made to order: about {PRODUCTION_DAYS} business days to print and frame, then{" "}
-                  {TRANSIT_DAYS.min}–{TRANSIT_DAYS.max} business days with UPS Ground.
+                  {transit[0]}–{transit[1]} business days in transit{destination ? ` to ${destination}` : ""}.
                 </Explained>
               ) : (
                 <strong className="font-semibold">…</strong>
@@ -249,10 +268,27 @@ export function PrintProductDetails({ sizes, selected }: { sizes: PrintSize[]; s
             </Explained>
           </Row>
           <Row icon={<CarIcon />}>
-            Free delivery <span className="text-[#595959]">(US addresses only for now)</span>
+            {shipping ? (
+              <>
+                {shipping.surchargeUsd === 0 ? "Free delivery" : `Delivery: $${shipping.surchargeUsd}`}
+                {destination ? <span className="text-[#595959]"> to {destination}</span> : null}
+              </>
+            ) : (
+              <>
+                Delivery worldwide <span className="text-[#595959]">(price shown once you choose where to)</span>
+              </>
+            )}
           </Row>
+          {shipping?.dutiesMayApply ? (
+            <Row icon={<BoxIcon />}>
+              <Explained label="Import duties may apply">
+                This order crosses a customs border on its way to {destination}. Any import duties or taxes charged on
+                delivery are paid by the recipient; they depend on local rules and the courier.
+              </Explained>
+            </Row>
+          ) : null}
           <Row icon={<PinIcon />}>
-            Sent from: <strong className="font-semibold">United States</strong>
+            Sent from: <strong className="font-semibold">{labName ?? "the lab nearest you"}</strong>
           </Row>
         </ul>
       </Section>
