@@ -17,10 +17,10 @@ import {
 import { SectionCtaLink } from "@/components/SectionCtaLink";
 import { ArtistChip } from "@/components/ArtistChip";
 import { ArtworkZoomImage } from "@/components/ArtworkZoomImage";
-import { getArtistCard } from "@/lib/get-artist-card";
+import { getArtworkPageExtras, type ArtworkPageExtras } from "@/lib/artwork-page-data";
 import { supabase } from "@/lib/supabase";
 import { getT } from "@/lib/translations";
-import { resolveGenreHubLink, resolveStyleHubLink } from "@/lib/resolve-genre-style-links";
+import { genreHubLinkFromRow, styleHubLinkFromRow } from "@/lib/resolve-genre-style-links";
 import { parseArtworkDeathYear } from "@/lib/artwork-death-year";
 import { artworkDetailImageUrl, artworkGridImageUrl, artworkImageUrl, artworkMaxSize, artworkMaxSpecs, artworkMediumKind, artworkOgImageUrl, artworkOriginalUrl, artworkStandardSize, artworkStandardSpecs, slugify } from "@/lib/utils";
 import { localizeAltText, localizeMedium, localizeRowTitle } from "@/lib/artwork-i18n";
@@ -67,15 +67,16 @@ type ArtworkPageProps = {
   params: Promise<{ slug: string }>;
 };
 
-async function resolveCategoryBreadcrumbPt(
-  artwork: ArtworkRow
-): Promise<{ label: string; href: string } | null> {
+function categoryBreadcrumbPt(
+  artwork: ArtworkRow,
+  extras: ArtworkPageExtras
+): { label: string; href: string } | null {
   if (artwork.genre_title?.trim()) {
-    const g = await resolveGenreHubLink(artwork.genre_title.trim(), "pt");
+    const g = genreHubLinkFromRow(extras.genre, "pt");
     if (g) return { label: g.label, href: g.href };
   }
   if (artwork.style_title?.trim()) {
-    const s = await resolveStyleHubLink(artwork.style_title.trim(), "pt");
+    const s = styleHubLinkFromRow(extras.style, "pt");
     if (s) return { label: s.label, href: s.href };
   }
   return null;
@@ -246,12 +247,7 @@ export async function generateMetadata({ params }: ArtworkPageProps): Promise<Me
   const artist = artwork.artist_display ?? "Artista desconhecido";
   const title = `${artwork.title} de ${artist} — Download Gratuito | Fine Art Free`;
 
-  const { data: ptTranslation } = await supabase
-    .from("artwork_translations")
-    .select("alt_text, seo_description")
-    .eq("artwork_id", artwork.id)
-    .eq("locale", "pt")
-    .single();
+  const { translation: ptTranslation } = await getArtworkPageExtras(artwork, "pt");
 
   const description =
     ptTranslation?.seo_description ||
@@ -297,25 +293,20 @@ export default async function ArtworkDetailPagePt({ params }: ArtworkPageProps) 
   const maxDownloadHref = artworkOriginalUrl(artwork) || imageUrl;
   const artist = artwork.artist_display ?? "Artista desconhecido";
 
-  const { data: ptTranslation } = await supabase
-    .from("artwork_translations")
-    .select("alt_text, seo_description")
-    .eq("artwork_id", artwork.id)
-    .eq("locale", "pt")
-    .single();
+  const extras = await getArtworkPageExtras(artwork, "pt");
+  const ptTranslation = extras.translation;
 
   const artistDeathYear = parseArtworkDeathYear(artwork.death_year);
   const artistSlug = artwork.artist_display?.trim() ? slugify(artwork.artist_display) : null;
   let artistArtworkCount = 0;
   let artistPortrait: string | null = null;
 
-  if (artwork.artist_display?.trim() && artistSlug) {
-    const artistCard = await getArtistCard(artwork.artist_display, artistSlug);
-    artistArtworkCount = artistCard.artworkCount;
-    artistPortrait = artistCard.portrait;
+  if (artwork.artist_display?.trim() && artistSlug && extras.artistCard) {
+    artistArtworkCount = extras.artistCard.artworkCount;
+    artistPortrait = extras.artistCard.portrait;
   }
 
-  const category = await resolveCategoryBreadcrumbPt(artwork);
+  const category = categoryBreadcrumbPt(artwork, extras);
   const breadcrumbItems = [
     { label: "Início", href: "/pt" },
     ...(category ? [category] : []),
@@ -328,67 +319,53 @@ export default async function ArtworkDetailPagePt({ params }: ArtworkPageProps) 
   let relatedArtworks: Artwork[] = [];
 
   if (artwork.artist_display?.trim()) {
-    const relatedQuery = await supabase
-      .from("artworks")
-      .select("id, title, title_pt, slug, artist_display, image_id, url, museum, style_title, genre_title, score, alt_text")
-      .eq("artist_display", artwork.artist_display)
-      .order("score", { ascending: false })
-      .limit(20);
+    const rows =
+      (extras.relatedByArtist as
+        | Array<{
+            id: string;
+            title: string;
+            slug: string;
+            artist_display: string | null;
+            image_id: string | null;
+            url: string | null;
+            museum: string | null;
+            style_title: string | null;
+            genre_title: string | null;
+            score: number | null;
+            alt_text: string | null;
+          }>
+        | null) ?? [];
 
-    if (!relatedQuery.error) {
-      const rows =
-        (relatedQuery.data as
-          | Array<{
-              id: string;
-              title: string;
-              slug: string;
-              artist_display: string | null;
-              image_id: string | null;
-              url: string | null;
-              museum: string | null;
-              style_title: string | null;
-              genre_title: string | null;
-              score: number | null;
-              alt_text: string | null;
-            }>
-          | null) ?? [];
-
-      relatedArtworks = rows
-        .filter((item) => item.slug !== artwork.slug)
-        .slice(0, 10)
-        .map((item) => ({
-          id: item.id,
-          title: localizeRowTitle(item, "pt"),
-          slug: item.slug,
-          artistName: item.artist_display ?? artist,
-          artistDisplay: item.artist_display ?? undefined,
-          imageUrl: artworkGridImageUrl(item),
-          imageId: item.image_id,
-          museum: item.museum,
-          styleTitle: item.style_title,
-          genreTitle: item.genre_title,
-          score: item.score,
-          url: item.url,
-          styleSlug: "unknown",
-          styleName: item.style_title ?? "Unknown style",
-          sourceUrl: item.url ?? undefined,
-          altText: item.alt_text ?? null,
-        }));
-    }
+    relatedArtworks = rows
+      .filter((item) => item.slug !== artwork.slug)
+      .slice(0, 10)
+      .map((item) => ({
+        id: item.id,
+        title: localizeRowTitle(item, "pt"),
+        slug: item.slug,
+        artistName: item.artist_display ?? artist,
+        artistDisplay: item.artist_display ?? undefined,
+        imageUrl: artworkGridImageUrl(item),
+        imageId: item.image_id,
+        museum: item.museum,
+        styleTitle: item.style_title,
+        genreTitle: item.genre_title,
+        score: item.score,
+        url: item.url,
+        styleSlug: "unknown",
+        styleName: item.style_title ?? "Unknown style",
+        sourceUrl: item.url ?? undefined,
+        altText: item.alt_text ?? null,
+      }));
   }
 
   const genreHubLink = artwork.genre_title?.trim()
-    ? await resolveGenreHubLink(artwork.genre_title.trim(), "pt")
+    ? genreHubLinkFromRow(extras.genre, "pt")
     : null;
 
   let relatedByGenre: Artwork[] = [];
   if (artwork.genre_title) {
-    const { data: genreData } = await supabase
-      .from("artworks")
-      .select("id, title, title_pt, slug, artist_display, image_id, url, museum, style_title, genre_title, alt_text")
-      .eq("genre_title", artwork.genre_title)
-      .neq("id", artwork.id)
-      .limit(6);
+    const genreData = extras.relatedByGenre;
 
     if (genreData) {
       relatedByGenre = (genreData as Array<{

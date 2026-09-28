@@ -19,7 +19,7 @@ import {
 } from "@/components/ArtworkInsights";
 import { SectionCtaLink } from "@/components/SectionCtaLink";
 import { ArtistChip } from "@/components/ArtistChip";
-import { getArtistCard } from "@/lib/get-artist-card";
+import { getArtworkPageExtras } from "@/lib/artwork-page-data";
 import { supabase } from "@/lib/supabase";
 import { getT } from "@/lib/translations";
 import { parseArtworkDeathYear } from "@/lib/artwork-death-year";
@@ -257,12 +257,7 @@ export async function generateMetadata({ params }: ArtworkPageProps): Promise<Me
   const artist = artwork.artist_display ?? "Unknown artist";
   const title = `${artwork.title} by ${artist} — Free Download | Fine Art Free`;
 
-  const { data: translation } = await supabase
-    .from("artwork_translations")
-    .select("seo_description")
-    .eq("artwork_id", artwork.id)
-    .eq("locale", "en")
-    .single();
+  const { translation } = await getArtworkPageExtras(artwork, "en");
 
   const description =
     translation?.seo_description ||
@@ -296,7 +291,7 @@ export default async function ArtworkDetailPage({ params }: ArtworkPageProps) {
     notFound();
   }
 
-
+  const extras = await getArtworkPageExtras(artwork, "en");
   const t = getT("en");
   const imageUrl = artworkDetailImageUrl(artwork);
   // Already JPEG (unlike the WebP `detail` rendition used for on-page display), so the
@@ -311,10 +306,9 @@ export default async function ArtworkDetailPage({ params }: ArtworkPageProps) {
   let artistArtworkCount = 0;
   let artistPortrait: string | null = null;
 
-  if (artwork.artist_display?.trim() && artistSlug) {
-    const artistCard = await getArtistCard(artwork.artist_display, artistSlug);
-    artistArtworkCount = artistCard.artworkCount;
-    artistPortrait = artistCard.portrait;
+  if (artwork.artist_display?.trim() && artistSlug && extras.artistCard) {
+    artistArtworkCount = extras.artistCard.artworkCount;
+    artistPortrait = extras.artistCard.portrait;
   }
 
   const category = getCategoryBreadcrumb(artwork);
@@ -330,53 +324,44 @@ export default async function ArtworkDetailPage({ params }: ArtworkPageProps) {
   let relatedArtworks: Artwork[] = [];
 
   if (artwork.artist_display?.trim()) {
-    const relatedQuery = await supabase
-      .from("artworks")
-      .select("id, title, slug, artist_display, image_id, url, museum, style_title, genre_title, score, alt_text")
-      .eq("artist_display", artwork.artist_display)
-      .order("score", { ascending: false })
-      .limit(20);
+    const rows =
+      (extras.relatedByArtist as
+        | Array<{
+            id: string;
+            title: string;
+            slug: string;
+            artist_display: string | null;
+            image_id: string | null;
+            url: string | null;
+            museum: string | null;
+            style_title: string | null;
+            genre_title: string | null;
+            score: number | null;
+            alt_text: string | null;
+          }>
+        | null) ?? [];
 
-    if (!relatedQuery.error) {
-      const rows =
-        (relatedQuery.data as
-          | Array<{
-              id: string;
-              title: string;
-              slug: string;
-              artist_display: string | null;
-              image_id: string | null;
-              url: string | null;
-              museum: string | null;
-              style_title: string | null;
-              genre_title: string | null;
-              score: number | null;
-              alt_text: string | null;
-            }>
-          | null) ?? [];
-
-      relatedArtworks = rows
-        .filter((item) => item.slug !== artwork.slug)
-        .slice(0, 10)
-        .map((item) => ({
-          id: item.id,
-          title: item.title,
-          slug: item.slug,
-          artistName: item.artist_display ?? artist,
-          artistDisplay: item.artist_display ?? undefined,
-          imageUrl: artworkGridImageUrl(item),
-          imageId: item.image_id,
-          museum: item.museum,
-          styleTitle: item.style_title,
-          genreTitle: item.genre_title,
-          score: item.score,
-          url: item.url,
-          styleSlug: "unknown",
-          styleName: item.style_title ?? "Unknown style",
-          sourceUrl: item.url ?? undefined,
-          altText: item.alt_text ?? null,
-        }));
-    }
+    relatedArtworks = rows
+      .filter((item) => item.slug !== artwork.slug)
+      .slice(0, 10)
+      .map((item) => ({
+        id: item.id,
+        title: item.title,
+        slug: item.slug,
+        artistName: item.artist_display ?? artist,
+        artistDisplay: item.artist_display ?? undefined,
+        imageUrl: artworkGridImageUrl(item),
+        imageId: item.image_id,
+        museum: item.museum,
+        styleTitle: item.style_title,
+        genreTitle: item.genre_title,
+        score: item.score,
+        url: item.url,
+        styleSlug: "unknown",
+        styleName: item.style_title ?? "Unknown style",
+        sourceUrl: item.url ?? undefined,
+        altText: item.alt_text ?? null,
+      }));
   }
 
   const GENRE_TO_SLUG: Record<string, string> = {
@@ -404,12 +389,7 @@ export default async function ArtworkDetailPage({ params }: ArtworkPageProps) {
 
   let relatedByGenre: Artwork[] = [];
   if (genreSlug && artwork.genre_title) {
-    const { data: genreData } = await supabase
-      .from("artworks")
-      .select("id, title, slug, artist_display, image_id, url, museum, style_title, genre_title, alt_text")
-      .eq("genre_title", artwork.genre_title)
-      .neq("id", artwork.id)
-      .limit(6);
+    const genreData = extras.relatedByGenre;
 
     if (genreData) {
       relatedByGenre = (genreData as Array<{
