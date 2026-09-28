@@ -20,12 +20,18 @@ for (let off = 0; ; off += 1000) {
   if (page.length < 1000) break;
 }
 console.log(`revalidate-changed: ${slugs.length} artwork(s) changed since ${since}`);
-let ok = 0, fail = 0;
-for (const slug of slugs) {
-  for (const path of paths(slug)) {
-    try { const r = await fetch(`${SITE}/api/revalidate`, { method: "POST", headers: { "x-api-key": API, "Content-Type": "application/json" }, body: JSON.stringify({ path }), signal: AbortSignal.timeout(20000) }); r.ok ? ok++ : fail++; }
-    catch { fail++; }
+// A few artworks at a time: one by one, a day with thousands of changes (a
+// translation backfill, a big reupgrade) would outlast the workflow's time limit.
+const WORKERS = 6;
+let ok = 0, fail = 0, next = 0;
+await Promise.all(Array.from({ length: WORKERS }, async () => {
+  while (next < slugs.length) {
+    const slug = slugs[next++];
+    for (const path of paths(slug)) {
+      try { const r = await fetch(`${SITE}/api/revalidate`, { method: "POST", headers: { "x-api-key": API, "Content-Type": "application/json" }, body: JSON.stringify({ path }), signal: AbortSignal.timeout(20000) }); r.ok ? ok++ : fail++; }
+      catch { fail++; }
+    }
+    await new Promise((r) => setTimeout(r, 50));
   }
-  await new Promise((r) => setTimeout(r, 50));
-}
+}));
 console.log(`revalidate-changed: ${ok} paths refreshed, ${fail} failed`);
