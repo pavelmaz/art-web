@@ -15,11 +15,15 @@ import {
 import Link from "@/components/Link";
 
 import { fineArtProPath } from "@/lib/fineart-pro-path";
+import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
 import { getT, type Locale } from "@/lib/translations";
 
 export type ArtworkRow = {
   title: string;
   artist_display: string | null;
+  /** Identifies the artwork to the artwork-insights function (slug on artwork pages, id on guides). */
+  slug?: string | null;
+  id?: string | null;
 };
 
 type Insight = {
@@ -40,7 +44,6 @@ type InsightsLabels = {
   insightsDiscover: string;
   insightsGenerating: string;
   insightsClose: string;
-  insightsApiKeyMissing: string;
   insightsGenerateFailed: string;
 };
 
@@ -66,72 +69,6 @@ function useArtworkInsights() {
     throw new Error("ArtworkInsights components must be used within ArtworkInsightsProvider");
   }
   return ctx;
-}
-
-const OUTPUT_LANGUAGE: Record<Locale, string> = {
-  en: "English",
-  es: "Spanish",
-  pt: "Portuguese",
-  ja: "Japanese",
-  fr: "French",
-  de: "German",
-  it: "Italian",
-  ko: "Korean",
-  ru: "Russian",
-  zh: "Chinese",
-};
-
-function buildPrompt(artwork: ArtworkRow, locale: Locale): string {
-  const artist = artwork.artist_display?.trim() || "Unknown artist";
-  const language = OUTPUT_LANGUAGE[locale];
-  return `You are a world-class museum audio guide writer and art historian. 
-For the painting "${artwork.title}" by ${artist}, generate exactly 4 insights 
-that make viewers feel like insiders — people who now see what others miss.
-
-Each insight must belong to ONE of these 4 categories (use all 4, in this order):
-
-1. THE HIDDEN SECRET — A detail most people walk past but changes everything once 
-   you see it. A symbol, hidden figure, visual trick, or disguised meaning embedded 
-   in a specific part of the painting.
-
-2. WHY IT WAS PAINTED — The real reason, commission, political motive, personal 
-   obsession, or historical moment that made the artist create this. Not "he loved 
-   beauty" — the actual documented reason or context.
-
-3. TIME CAPSULE — One element in the painting that reveals something surprising 
-   about everyday life, fashion, technology, or society in that exact era. 
-   Anchor it with a specific date or time period (e.g., "In 1665, only nobility 
-   could afford...").
-
-4. THE PAINTER'S TRICK — A deliberate technical or compositional decision the 
-   artist made — a perspective cheat, an impossible light source, a brushwork 
-   innovation, a color that shouldn't work but does — and why they did it.
-
-Rules for ALL insights:
-- Point to a SPECIFIC visible element (not "the painting overall")
-- 2 sentences max: sentence 1 = what to look at / the fact, sentence 2 = why it matters or surprises
-- Write like you're whispering a secret to a friend, not lecturing
-- NO philosophical fluff, NO vague praise ("masterful", "timeless")
-- At least 1 insight must contain a concrete data point: a year, a price, a 
-  measurement, a documented historical fact with a date
-- Write every "title" and "text" field in ${language}. Keep JSON keys and "category" values in English.
-
-Provide x/y position (0-100 percentage) for where the dot should appear on the 
-painting, placed precisely on the element being described.
-
-Return ONLY valid JSON:
-{
-  "insights": [
-    {
-      "id": 1,
-      "category": "hidden_secret",
-      "x": 45,
-      "y": 30,
-      "title": "3-4 word label",
-      "text": "Sentence one: the specific fact or observation. Sentence two: why it's surprising or what it reveals."
-    }
-  ]
-}`;
 }
 
 const FREE_INSIGHT_STORAGE_KEY = "faf-insights-free-used";
@@ -188,12 +125,6 @@ export function ArtworkInsightsProvider({
   const handleDiscover = useCallback(async () => {
     // Insights are temporarily free for everyone — the Pro gate below is disabled.
     // To re-enable: restore the `hasUsedFreeInsight()` check that showed the modal.
-    const apiKey = process.env.NEXT_PUBLIC_OPENAI_API_KEY;
-    if (!apiKey) {
-      setError(labels.insightsApiKeyMissing);
-      return;
-    }
-
     track("Artwork Insights Discover", { locale });
 
     setLoading(true);
@@ -203,32 +134,23 @@ export function ArtworkInsightsProvider({
     setOpenPopupId(null);
 
     try {
-      const response = await fetch("https://api.openai.com/v1/chat/completions", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${apiKey}`,
-        },
-        body: JSON.stringify({
-          model: "gpt-4o-mini",
-          max_tokens: 1000,
-          response_format: { type: "json_object" },
-          messages: [{ role: "user", content: buildPrompt(artwork, locale) }],
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error(`API request failed (${response.status})`);
+      // Generated server-side (OpenAI key stays a Supabase secret) and cached per
+      // artwork + language, so repeat views are instant: supabase/functions/artwork-insights.
+      if (!artwork.slug && !artwork.id) {
+        throw new Error("No artwork id");
+      }
+      const { data, error: invokeError } = await createSupabaseBrowserClient().functions.invoke<InsightsResponse>(
+        "artwork-insights",
+        { body: { slug: artwork.slug ?? undefined, artwork_id: artwork.slug ? undefined : artwork.id, locale } }
+      );
+      if (invokeError || !data) {
+        throw invokeError ?? new Error("Empty response");
       }
 
-      const data = await response.json();
-      const content = data.choices?.[0]?.message?.content;
-      if (!content) {
-        throw new Error("Empty response from API");
+      const list = Array.isArray(data.insights) ? data.insights.slice(0, 4) : [];
+      if (list.length === 0) {
+        throw new Error("No insights");
       }
-
-      const parsed = JSON.parse(content) as InsightsResponse;
-      const list = Array.isArray(parsed.insights) ? parsed.insights.slice(0, 4) : [];
       setInsights(list);
       setVisibleCount(0);
       if (!isPro) {
@@ -244,7 +166,7 @@ export function ArtworkInsightsProvider({
     } finally {
       setLoading(false);
     }
-  }, [artwork, isPro, locale, labels.insightsApiKeyMissing, labels.insightsGenerateFailed]);
+  }, [artwork, isPro, locale, labels.insightsGenerateFailed]);
 
   return (
     <ArtworkInsightsContext.Provider
@@ -256,7 +178,6 @@ export function ArtworkInsightsProvider({
           insightsDiscover: labels.insightsDiscover,
           insightsGenerating: labels.insightsGenerating,
           insightsClose: labels.insightsClose,
-          insightsApiKeyMissing: labels.insightsApiKeyMissing,
           insightsGenerateFailed: labels.insightsGenerateFailed,
         },
         loading,

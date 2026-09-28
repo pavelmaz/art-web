@@ -110,7 +110,7 @@ function StopCard({ stop, locale, copy, onOpenZoom }: StopCardProps) {
       ) : null}
 
       <ArtworkInsightsProvider
-        artwork={{ title: stop.title, artist_display: stop.artist_display }}
+        artwork={{ title: stop.title, artist_display: stop.artist_display, id: stop.artwork_id }}
         locale={locale}
       >
         <div className="mt-3 [&_button]:border-white/20 [&_button]:bg-neutral-600 [&_button]:text-white [&_button]:hover:bg-neutral-500 [&_button]:disabled:opacity-60 [&_div.rounded-lg]:border [&_div.rounded-lg]:border-white/10 [&_div.rounded-lg]:bg-white/10 [&_p]:text-white/85 [&_svg]:text-white/60">
@@ -161,7 +161,7 @@ function ZoomOverlay({ stop, locale, closeLabel, onClose }: ZoomOverlayProps) {
         onClick={(e) => e.stopPropagation()}
       >
         <ArtworkInsightsProvider
-          artwork={{ title: stop.title, artist_display: stop.artist_display }}
+          artwork={{ title: stop.title, artist_display: stop.artist_display, id: stop.artwork_id }}
           locale={locale}
         >
           <div className="relative mx-auto w-fit max-w-full">
