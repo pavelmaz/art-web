@@ -11,7 +11,7 @@ type BuyCanvasRowProps = {
 };
 
 /**
- * Van Gogh-only test (English locale only — see the print-on-demand plan):
+ * Shown for the print artists in lib/print-catalog.ts (English locale only):
  * links to a dedicated product page (`/artworks/[slug]/print`) rather than
  * opening a modal — a real product page converts better for a physical-goods
  * purchase, and lets the gallery show real room-context photos instead of a

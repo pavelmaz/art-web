@@ -29,8 +29,8 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Please choose a size and frame" }, { status: 400 });
     }
 
-    // Van-Gogh-only for this test, enforced server-side too — the UI only
-    // renders this option on Van Gogh pages, but nothing stops a direct POST.
+    // Print artists only (canSellPrint), enforced server-side too — the UI only
+    // renders this option on those artists' pages, but nothing stops a direct POST.
     const { data: artwork } = await supabase
       .from("artworks")
       .select("id, title, artist_display, img_width, img_height")

@@ -121,8 +121,9 @@ export function prodigiItemFor(
   return { sku: `GLOBAL-CFP-${code}`, attributes: { color }, sizing: "fillPrintArea" };
 }
 
-/** Print sales are a Van Gogh-only test for now. */
-const PRINT_ARTISTS = new Set(["Vincent van Gogh"]);
+/** Artists whose works are sold as framed prints (matched on artworks.artist_display).
+ *  Van Gogh first (24 Sep 2026); Rembrandt and Hiroshige added 28 Sep 2026. */
+const PRINT_ARTISTS = new Set(["Vincent van Gogh", "Rembrandt van Rijn", "Utagawa Hiroshige"]);
 
 /** Whether the artwork can be sold as a framed print: a print artist, and enough
  *  resolution for at least one size. Used by the artwork page, the print page and
