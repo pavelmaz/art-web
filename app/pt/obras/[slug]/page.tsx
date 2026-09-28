@@ -17,6 +17,7 @@ import {
 import { SectionCtaLink } from "@/components/SectionCtaLink";
 import { ArtistChip } from "@/components/ArtistChip";
 import { ArtworkZoomImage } from "@/components/ArtworkZoomImage";
+import { getArtistCard } from "@/lib/get-artist-card";
 import { supabase } from "@/lib/supabase";
 import { getT } from "@/lib/translations";
 import { resolveGenreHubLink, resolveStyleHubLink } from "@/lib/resolve-genre-style-links";
@@ -309,18 +310,9 @@ export default async function ArtworkDetailPagePt({ params }: ArtworkPageProps) 
   let artistPortrait: string | null = null;
 
   if (artwork.artist_display?.trim() && artistSlug) {
-    const countQuery = await supabase
-      .from("artworks")
-      .select("id", { count: "exact", head: true })
-      .eq("artist_display", artwork.artist_display);
-    artistArtworkCount = countQuery.count ?? 0;
-
-    const { data: artistRow } = await supabase
-      .from("artists")
-      .select("image_url")
-      .eq("slug", artistSlug)
-      .maybeSingle();
-    artistPortrait = (artistRow as { image_url?: string | null } | null)?.image_url ?? null;
+    const artistCard = await getArtistCard(artwork.artist_display, artistSlug);
+    artistArtworkCount = artistCard.artworkCount;
+    artistPortrait = artistCard.portrait;
   }
 
   const category = await resolveCategoryBreadcrumbPt(artwork);
