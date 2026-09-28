@@ -24,6 +24,10 @@ drop index concurrently if exists public.idx_artworks_artist_display_trgm;  -- t
 drop index concurrently if exists public.idx_artworks_artist_trgm;          -- twin: artworks_artist_trgm
 drop index concurrently if exists public.idx_artworks_trgm_artist_display;  -- twin: artworks_artist_trgm
 
+-- Same for the per-page translation lookup (artwork_id, locale): 91 MB copy of
+-- the UNIQUE constraint index, which stays and backs the writers' upserts.
+drop index concurrently if exists public.idx_artwork_translations_artwork_locale; -- twin: artwork_translations_artwork_id_locale_key
+
 create or replace function public.recount_artist_artworks()
 returns integer
 language sql
