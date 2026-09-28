@@ -4,37 +4,44 @@ import { useEffect, useState } from "react";
 
 import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
 
-let proStatusPromise: Promise<boolean> | null = null;
+/** The signed-in visitor, or null for an anonymous one. */
+export type Account = { email: string | null; isPro: boolean } | null;
+
+let accountPromise: Promise<Account> | null = null;
 let authListenerRegistered = false;
 
 /** One lookup per page load, shared by every component that asks; reset on login/logout. */
-function fetchIsPro(): Promise<boolean> {
-  if (!proStatusPromise) {
-    proStatusPromise = (async () => {
+export function getAccount(): Promise<Account> {
+  if (!accountPromise) {
+    accountPromise = (async () => {
       try {
         const supabase = createSupabaseBrowserClient();
         if (!authListenerRegistered) {
           authListenerRegistered = true;
           supabase.auth.onAuthStateChange(() => {
-            proStatusPromise = null;
+            accountPromise = null;
           });
         }
         const {
           data: { session },
         } = await supabase.auth.getSession();
-        if (!session?.user) return false;
+        if (!session?.user) return null;
         const { data } = await supabase
           .from("profiles")
           .select("subscription_status")
           .eq("id", session.user.id)
           .maybeSingle();
-        return data?.subscription_status === "active";
+        return { email: session.user.email ?? null, isPro: data?.subscription_status === "active" };
       } catch {
-        return false;
+        return null;
       }
     })();
   }
-  return proStatusPromise;
+  return accountPromise;
+}
+
+function fetchIsPro(): Promise<boolean> {
+  return getAccount().then((account) => account?.isPro ?? false);
 }
 
 /**

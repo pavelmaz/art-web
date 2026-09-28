@@ -52,6 +52,27 @@ async function visitorCountry(): Promise<Props | null> {
   }
 }
 
+/**
+ * Signed-in visitors: every later event carries their email and whether they are
+ * Pro, so the dashboard can show who clicked what (Pavel, 28 Sep 2026). Anonymous
+ * visitors stay anonymous — cookieless mode has nothing to identify them by.
+ * Loaded on demand so the Supabase client never delays the page.
+ */
+function tagAccount(ph: PostHogInterface): void {
+  import("@/lib/use-is-pro")
+    .then(({ getAccount }) => getAccount())
+    .then((account) =>
+      ph.register(
+        account
+          ? { signed_in: true, pro: account.isPro, user_email: account.email ?? "" }
+          : { signed_in: false, pro: false }
+      )
+    )
+    .catch(() => {
+      // no account info — events stay anonymous
+    });
+}
+
 export function initPostHog(): void {
   if (state !== "idle" || typeof window === "undefined") return;
   // Automation (headless scrapers, test runners) announces itself here; keep it
@@ -75,6 +96,7 @@ export function initPostHog(): void {
             if (country) ph.register(country);
             client = ph;
             for (const [name, props] of queue.splice(0)) ph.capture(name, props);
+            tagAccount(ph);
           },
         });
       })
