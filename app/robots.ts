@@ -77,6 +77,38 @@ export default function robots(): MetadataRoute.Robots {
         userAgent: "Reflectionbot",
         disallow: ["/"],
       },
+      // SEO-tool and data-reseller crawlers (28 Sep 2026): they crawl the whole
+      // 1M-page catalogue to sell link/keyword data to third parties and bring no
+      // visitors — DataForSeoBot + SemrushBot alone were ~17% of the site's CPU.
+      // All of these honour robots.txt. PetalBot (Huawei) is a search engine but
+      // crawls aggressively for almost no visitors here. Also the AI training /
+      // dataset crawlers listed on 25 Sep as not yet covered. AI *search* bots
+      // (Claude-SearchBot, OAI-SearchBot, Perplexity, Amazonbot, YouBot) stay allowed.
+      ...[
+        "DataForSeoBot",
+        "SemrushBot",
+        "SemrushBot-BA",
+        "SemrushBot-SI",
+        "SemrushBot-SWA",
+        "SiteAuditBot",
+        "AhrefsBot",
+        "AhrefsSiteAudit",
+        "MJ12bot",
+        "DotBot",
+        "BLEXBot",
+        "Barkrowler",
+        "serpstatbot",
+        "SeekportBot",
+        "PetalBot",
+        "img2dataset",
+        "Ai2Bot",
+        "Ai2Bot-Dolma",
+        "cohere-training-data-crawler",
+        "PanguBot",
+        "Timpibot",
+        "Webzio-Extended",
+        "TikTokSpider",
+      ].map((userAgent) => ({ userAgent, disallow: ["/"] })),
     ],
     // Only the CORE index is advertised (2026-09-22): Google was keeping ~3k of
     // the 1.05M URLs the full sitemaps listed, so the crawl budget now goes to

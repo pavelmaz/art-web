@@ -19,7 +19,18 @@
   // ISR / Data Cache lives in R2 (≈33× cheaper than KV). Separate bucket from
   // the image bucket. Local preview emulates R2 — no account needed.
   "r2_buckets": [{ "binding": "NEXT_INC_CACHE_R2_BUCKET", "bucket_name": "fineartfree-next-cache" }],
-  // Time-based ISR needs the queue; revalidatePath/revalidateTag need the tag cache.
+  // Tag cache for revalidatePath/revalidateTag (28 Sep 2026): D1 instead of the
+  // sharded Durable Object — the DO cost ~$10/month in per-page-view calls, while
+  // D1 reads fit in the Workers Paid allowance. Western Europe, next to Supabase.
+  "d1_databases": [
+    {
+      "binding": "NEXT_TAG_CACHE_D1",
+      "database_name": "fineartfree-tag-cache",
+      "database_id": "fa949dba-4852-42b3-ab62-78c90b6e7d94"
+    }
+  ],
+  // Time-based ISR needs the queue. The DOShardedTagCache binding is kept (unused
+  // since 28 Sep) so the Durable Object class isn't deleted by a migration.
   "durable_objects": {
     "bindings": [
       { "name": "NEXT_CACHE_DO_QUEUE", "class_name": "DOQueueHandler" },

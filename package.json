@@ -12,7 +12,7 @@
     "images:renditions": "node --env-file=.env.local scripts/generate-image-renditions.mjs",
     "cf:build": "NEXT_PUBLIC_SITE_URL=https://fineartfree.com OPEN_NEXT_CLOUDFLARE_BUILD=1 opennextjs-cloudflare build",
     "cf:preview": "NEXT_PUBLIC_SITE_URL=https://fineartfree.com OPEN_NEXT_CLOUDFLARE_BUILD=1 opennextjs-cloudflare build && opennextjs-cloudflare preview",
-    "cf:deploy": "NEXT_PUBLIC_SITE_URL=https://fineartfree.com OPEN_NEXT_CLOUDFLARE_BUILD=1 opennextjs-cloudflare build && opennextjs-cloudflare deploy",
+    "cf:deploy": "NEXT_PUBLIC_SITE_URL=https://fineartfree.com OPEN_NEXT_CLOUDFLARE_BUILD=1 opennextjs-cloudflare build && opennextjs-cloudflare deploy && node scripts/prune-next-cache.mjs",
     "cf:typegen": "wrangler types --env-interface CloudflareEnv cloudflare-env.d.ts"
   },
   "dependencies": {
