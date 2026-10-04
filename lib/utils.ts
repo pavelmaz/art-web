@@ -10,6 +10,19 @@ export function absoluteUrl(path: string): string {
   return new URL(path, baseUrl).toString();
 }
 
+/**
+ * `artworks.museum` says "Private collection" for ~40k works where the importer
+ * didn't know the real location, Starry Night (MoMA) and The Scream (Oslo)
+ * among them. Shown as-is it states a falsehood (to readers and, via JSON-LD,
+ * to search and AI engines) and links to a museum page that doesn't exist, so
+ * it counts as unknown until the real collection is filled in.
+ */
+export function knownMuseum(museum: string | null | undefined): string | null {
+  const name = museum?.trim();
+  if (!name || name.toLowerCase() === "private collection") return null;
+  return name;
+}
+
 export function slugify(value: string): string {
   const accentMap: Record<string, string> = {
     à: "a",

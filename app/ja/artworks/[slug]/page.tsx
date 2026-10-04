@@ -22,7 +22,7 @@ import { supabase } from "@/lib/supabase";
 import { getT } from "@/lib/translations";
 import { genreHubLinkFromRow, styleHubLinkFromRow } from "@/lib/resolve-genre-style-links";
 import { parseArtworkDeathYear } from "@/lib/artwork-death-year";
-import { absoluteUrl, artworkDetailImageUrl, artworkGridImageUrl, artworkImageUrl, artworkMaxSize, artworkMaxSpecs, artworkMediumKind, artworkOgImageUrl, artworkOriginalUrl, artworkStandardSize, artworkStandardSpecs, slugify } from "@/lib/utils";
+import { absoluteUrl, artworkDetailImageUrl, artworkGridImageUrl, artworkImageUrl, artworkMaxSize, artworkMaxSpecs, artworkMediumKind, artworkOgImageUrl, artworkOriginalUrl, artworkStandardSize, artworkStandardSpecs, knownMuseum, slugify } from "@/lib/utils";
 import { localizeAltText, localizeMedium, localizeRowTitle } from "@/lib/artwork-i18n";
 import type { Artwork } from "@/types/artwork";
 
@@ -517,7 +517,7 @@ export default async function ArtworkDetailPageJa({ params }: ArtworkPageProps) 
                   </div>
                 ) : null}
 
-                {artwork.museum?.trim() ? (
+                {artwork.museum && knownMuseum(artwork.museum) ? (
                   <div>
                     <p className="text-xs text-[#999]">{t.museum}</p>
                     <Link

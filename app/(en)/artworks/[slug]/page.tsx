@@ -23,7 +23,7 @@ import { getArtworkPageExtras } from "@/lib/artwork-page-data";
 import { supabase } from "@/lib/supabase";
 import { getT } from "@/lib/translations";
 import { parseArtworkDeathYear } from "@/lib/artwork-death-year";
-import { absoluteUrl, artworkDetailImageUrl, artworkGridImageUrl, artworkImageUrl, artworkMaxSize, artworkMaxSpecs, artworkMediumKind, artworkOgImageUrl, artworkOriginalUrl, artworkStandardSize, artworkStandardSpecs, generateAltText, slugify } from "@/lib/utils";
+import { absoluteUrl, artworkDetailImageUrl, artworkGridImageUrl, artworkImageUrl, artworkMaxSize, artworkMaxSpecs, artworkMediumKind, artworkOgImageUrl, artworkOriginalUrl, artworkStandardSize, artworkStandardSpecs, generateAltText, knownMuseum, slugify } from "@/lib/utils";
 import type { Artwork } from "@/types/artwork";
 
 // 90 days (26 Sep 2026): pages are refreshed on CHANGE (imports, upscales and
@@ -538,7 +538,7 @@ export default async function ArtworkDetailPage({ params }: ArtworkPageProps) {
                   </div>
                 ) : null}
 
-                {artwork.museum?.trim() ? (
+                {artwork.museum && knownMuseum(artwork.museum) ? (
                   <div>
                     <p className="text-xs text-[#999]">Museum</p>
                     <Link

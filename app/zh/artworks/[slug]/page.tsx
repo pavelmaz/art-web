@@ -22,7 +22,7 @@ import { getArtworkPageExtras, type ArtworkPageExtras, type HubRow } from "@/lib
 import { supabase } from "@/lib/supabase";
 import { getT } from "@/lib/translations";
 import { parseArtworkDeathYear } from "@/lib/artwork-death-year";
-import { artworkDetailImageUrl, artworkGridImageUrl, artworkImageUrl, artworkMaxSize, artworkMaxSpecs, artworkMediumKind, artworkOgImageUrl, artworkOriginalUrl, artworkStandardSize, artworkStandardSpecs, slugify } from "@/lib/utils";
+import { artworkDetailImageUrl, artworkGridImageUrl, artworkImageUrl, artworkMaxSize, artworkMaxSpecs, artworkMediumKind, artworkOgImageUrl, artworkOriginalUrl, artworkStandardSize, artworkStandardSpecs, knownMuseum, slugify } from "@/lib/utils";
 import { localizeAltText, localizeMedium, localizeRowTitle } from "@/lib/artwork-i18n";
 import type { Artwork } from "@/types/artwork";
 
@@ -530,7 +530,7 @@ export default async function ArtworkDetailPageZh({ params }: ArtworkPageProps) 
                   </div>
                 ) : null}
 
-                {artwork.museum?.trim() ? (
+                {artwork.museum && knownMuseum(artwork.museum) ? (
                   <div>
                     <p className="text-xs text-[#999]">{t.museum}</p>
                     <Link

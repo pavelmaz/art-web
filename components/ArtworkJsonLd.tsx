@@ -1,4 +1,4 @@
-import { artworkImageUrl } from "@/lib/utils";
+import { artworkImageUrl, knownMuseum } from "@/lib/utils";
 
 type ArtworkJsonLdInput = {
   title: string | null;
@@ -35,7 +35,7 @@ export function ArtworkJsonLd({ artwork, pageUrl, inLanguage }: ArtworkJsonLdPro
   const dateCreated = artwork.date_display?.trim();
   const artMedium = artwork.medium_display?.trim();
   const size = artwork.dimensions?.trim();
-  const museumName = artwork.museum?.trim();
+  const museumName = knownMuseum(artwork.museum);
   const description = artwork.description?.trim();
 
   const schema: Record<string, unknown> = {
