@@ -1,0 +1,26 @@
+name: Check Pro access
+
+# Fails (and GitHub emails the repo owner) when someone has paid for Fine Art
+# Pro but the subscription sits on an account nobody uses — the "I paid but
+# my account says Free" case. See scripts/check-pro-access.mjs.
+
+on:
+  schedule:
+    - cron: "0 8 * * *"
+  workflow_dispatch:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+      SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - run: node scripts/check-pro-access.mjs
