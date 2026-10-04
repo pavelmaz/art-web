@@ -5,6 +5,7 @@ import type { ReactNode } from "react";
 import Header from "@/components/Header";
 import { FooterCommercialLink, FooterContactLink } from "@/components/FooterLocaleLinks";
 import { FooterLanguageLinks } from "@/components/FooterLanguageLinks";
+import { AuthErrorRecovery } from "@/components/AuthErrorRecovery";
 import { CloudflareInsights } from "@/components/CloudflareInsights";
 import { GoogleAnalytics } from "@/components/GoogleAnalytics";
 import { MicrosoftUet } from "@/components/MicrosoftUet";
@@ -86,6 +87,7 @@ export async function SiteShell({ lang, children }: { lang: SiteLocale; children
         <GoogleAnalytics />
         <CloudflareInsights />
         <MicrosoftUet />
+        <AuthErrorRecovery lang={lang} />
       </body>
     </html>
   );

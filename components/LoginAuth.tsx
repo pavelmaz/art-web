@@ -33,15 +33,18 @@ export function LoginAuth({
   copy,
   consentLabel,
   consentHint,
+  initialNotice,
 }: {
   nextPath: string;
   copy: LoginAuthCopy;
   consentLabel?: string;
   consentHint?: string;
+  /** Shown on arrival, e.g. after a failed sign-in round trip (see AuthErrorRecovery). */
+  initialNotice?: string | null;
 }) {
   const [otpEmail, setOtpEmail] = useState("");
   const [busy, setBusy] = useState(false);
-  const [notice, setNotice] = useState<string | null>(null);
+  const [notice, setNotice] = useState<string | null>(initialNotice ?? null);
   const [optIn, setOptIn] = useState(false);
 
   /** Remember the marketing choice so /account can persist it post-auth. */

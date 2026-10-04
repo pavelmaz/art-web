@@ -26,15 +26,16 @@ function safeNext(next: string | undefined): string | null {
 }
 
 type LoginPageProps = {
-  searchParams: Promise<{ loc?: string; next?: string }>;
+  searchParams: Promise<{ loc?: string; next?: string; auth_error?: string }>;
 };
 
 export default async function LoginPage({ searchParams }: LoginPageProps) {
-  const { loc, next } = await searchParams;
+  const { loc, next, auth_error } = await searchParams;
   const locale = resolveLocale(loc);
   const t = getT(locale);
   const lib = getLibraryT(locale);
-  const joinAuth = getFineArtProT(locale).joinAuth;
+  const proT = getFineArtProT(locale);
+  const joinAuth = proT.joinAuth;
 
   const dest = safeNext(next);
   const accountPath = locale === "en" ? "/account" : `/account?loc=${locale}`;
@@ -69,6 +70,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
         }}
         consentLabel={lib.marketingConsent}
         consentHint={lib.marketingConsentHint}
+        initialNotice={auth_error ? proT.joinAuthError : null}
       />
 
       <p className="mt-10 text-center text-xs text-[#9a9a9a]">

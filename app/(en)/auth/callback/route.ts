@@ -76,6 +76,13 @@ export async function GET(request: Request) {
 
   const { data, error } = await supabase.auth.exchangeCodeForSession(code);
   if (error) {
+    // A replayed or double-submitted callback (Back button, double tap) carries a
+    // code that was already exchanged; if that first exchange signed them in,
+    // carry on to where they were going instead of showing a sign-in error.
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (user) return NextResponse.redirect(`${origin}${next}`);
     return NextResponse.redirect(`${origin}/fineart-pro/join?error=auth`);
   }
 
