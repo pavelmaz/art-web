@@ -90,6 +90,30 @@ function buildArtistMergeRedirects() {
   return redirects;
 }
 
+// Duplicate artwork rows merged into one (two imports added the same work under
+// slightly different titles). Delete the duplicate row in the DB, then list the
+// pair here so its URL 301s to the kept artwork in every locale.
+const ARTWORK_MERGE_REDIRECTS: { from: string; to: string }[] = [
+  // 5 Oct 2026 — Klimt's The Kiss was in twice ("The kiss" / "The kiss (lovers)").
+  { from: "the-kiss-lovers-gustav-klimt", to: "the-kiss" },
+];
+
+function buildArtworkMergeRedirects() {
+  const redirects: { source: string; destination: string; permanent: boolean }[] = [];
+  for (const { from, to } of ARTWORK_MERGE_REDIRECTS) {
+    redirects.push({ source: `/artworks/${from}`, destination: `/artworks/${to}`, permanent: true });
+    for (const config of Object.values(LOCALE_ROUTE_CONFIG)) {
+      const seg = config.segments.artworks;
+      redirects.push({
+        source: `${config.prefix}/${seg}/${from}`,
+        destination: `${config.prefix}/${seg}/${to}`,
+        permanent: true,
+      });
+    }
+  }
+  return redirects;
+}
+
 function buildTopicsCountriesRedirects() {
   const locales = ["/fr", "/de", "/it", "/ko", "/ru", "/zh"] as const;
   const redirects: { source: string; destination: string; permanent: boolean }[] = [];
@@ -147,6 +171,7 @@ const nextConfig: NextConfig = {
       ...buildLegacyLocalePathRedirects(),
       ...buildTopicsCountriesRedirects(),
       ...buildArtistMergeRedirects(),
+      ...buildArtworkMergeRedirects(),
       // 24 Sep 2026: artworks with location "USA" were merged into "United States";
       // "country"/"unknown" were import placeholders, not countries.
       ...["/countries", "/es/paises", "/pt/paises", "/ja/countries"].flatMap((hub) => [
