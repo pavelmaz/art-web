@@ -266,9 +266,17 @@ async function apply() {
   // A line is a slug, or "slug|File:…" when the slug has more than one proposal.
   const picked = proposals.filter((x) => approved.has(`${x.slug}|${x.file}`) ||
     (approved.has(x.slug) && proposals.filter((y) => y.slug === x.slug).length === 1));
+  let failed = 0;
   for (const p of picked) {
+    try { await applyOne(p, revert); } catch (e) { failed++; console.log(`  ✗ ${p.slug}: ${e.message}`); }
+  }
+  console.log(`done: ${picked.length - failed} applied, ${failed} failed`);
+}
+
+async function applyOne(p, revert) {
+  {
     const [row] = await rest(`artworks?select=slug,image_id,img_width,img_height,orig_bytes,std_bytes,url,museum&slug=eq.${encodeURIComponent(p.slug)}`);
-    if (!row) { console.log(`  ! missing ${p.slug}`); continue; }
+    if (!row) { console.log(`  ! missing ${p.slug}`); return; }
     let src = p.url;
     if (!src) {
       const d = await commons({ action: "query", titles: p.file, prop: "imageinfo", iiprop: "url|size" });
