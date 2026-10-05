@@ -155,6 +155,54 @@ async function dhash(url) {
 }
 const hamming = (a, b) => { let d = 0; for (let i = 0; i < a.length; i++) if (a[i] !== b[i]) d++; return d; };
 
+// ── No frames (Pavel, 5 Oct 2026: "make sure we don't upload artworks with frames").
+// Museum and gallery photos often show the gilt frame or the wall around the
+// painting. Three guards, cheapest first:
+//   1. Commons categories ("Framed paintings", installation/exhibition views…)
+//   2. file names that say so (frame, Rahmen, cornice, marco, cadre, lijst…)
+//   3. an image test before upload: if the candidate only lines up with our
+//      current image once its outer edge is cropped away, it has a frame/border
+//      ours doesn't. Calibrated 5 Oct on real framed photos (Legion of Honor
+//      Klimts) and clean scans + synthetic frames: clean scans peak at 0 crop,
+//      every framed one peaked at 2–20% crop.
+// (No bare "interior of …" — subject categories like "Church interiors in art" are real paintings.)
+const FRAMED_CATEGORY = /framed paintings|paintings in (their )?(original )?frames|picture frames|with (its |original )?frames?\b|installation views?|exhibition views?|in situ|paintings in museums|museum (rooms|interiors)/i;
+// (No bare "marco": it is also a first name — Marco Ricci, Marco Palmezzano.)
+const FRAMED_NAME = /\b(frames?|framed|in frame|with frame|rahmen|gerahmt|incorniciat\w*|con marco|enmarcad\w*|cadre|encadr\w*|ingelijst|in situ|installation view|exhibition view)\b/i;
+const BORDER_GAIN = Number(process.env.REUP_BORDER_GAIN || 0.02);
+async function grayVec(buf, region) {
+  let img = sharp(buf, SHARP_IN).rotate();
+  if (region) img = img.extract(region);
+  const raw = await img.resize(96, 96, { fit: "fill" }).grayscale().raw().toBuffer();
+  const a = Float64Array.from(raw);
+  const mean = a.reduce((x, y) => x + y, 0) / a.length;
+  let v = 0; for (let i = 0; i < a.length; i++) { a[i] -= mean; v += a[i] * a[i]; }
+  const sd = Math.sqrt(v) || 1; for (let i = 0; i < a.length; i++) a[i] /= sd;
+  return a;
+}
+const corr = (a, b) => { let t = 0; for (let i = 0; i < a.length; i++) t += a[i] * b[i]; return t; };
+function ourRenditionUrl(imageId) {
+  // The small w800 rendition is enough for this test (and far lighter than the original).
+  return ourCdnUrl(imageId).replace(/\/art-images\/artworks\/([^/]+)\.[a-z0-9]+$/i, "/art-images/renditions/w800/artworks/$1.webp");
+}
+async function addedBorder(row, cand) {
+  let ours;
+  try { ours = Buffer.from(await (await gentleFetch(ourRenditionUrl(row.image_id))).arrayBuffer()); }
+  catch { ours = Buffer.from(await (await gentleFetch(ourCdnUrl(row.image_id))).arrayBuffer()); }
+  const theirs = cand.__buf ?? Buffer.from(await (await gentleFetch(cand.thumb || cand.hashUrl)).arrayBuffer());
+  const A = await grayVec(ours);
+  const meta = await sharp(theirs, SHARP_IN).rotate().metadata();
+  const W = meta.autoOrient?.width ?? meta.width, H = meta.autoOrient?.height ?? meta.height;
+  let base = null, best = -2, at = 0;
+  for (const f of [0, 0.02, 0.04, 0.06, 0.08, 0.10, 0.13, 0.16, 0.20]) {
+    const l = Math.round(W * f), t = Math.round(H * f);
+    const c = corr(A, await grayVec(theirs, { left: l, top: t, width: W - 2 * l, height: H - 2 * t }));
+    if (base === null) base = c;
+    if (c > best) { best = c; at = f; }
+  }
+  return { framed: at > 0 && best - base >= BORDER_GAIN, base: +base.toFixed(3), best: +best.toFixed(3), at };
+}
+
 async function commonsSearch(query) {
   const p = new URLSearchParams({ action: "query", list: "search", srsearch: query,
     srnamespace: "6", srlimit: String(SEARCH_LIMIT), format: "json", origin: "*" });
@@ -178,11 +226,12 @@ async function commonsInfoBatch(fileNames, thumbWidth) {
   for (let i = 0; i < fileNames.length; i += 50) {
     const chunk = fileNames.slice(i, i + 50);
     const p = new URLSearchParams({ action: "query", titles: chunk.map((n) => `File:${n}`).join("|"),
-      prop: "imageinfo", iiprop: "url|size|mime", format: "json", origin: "*", iiurlwidth: String(thumbWidth) });
+      prop: "imageinfo|categories", cllimit: "max", iiprop: "url|size|mime", format: "json", origin: "*", iiurlwidth: String(thumbWidth) });
     const d = await (await gentleFetch(`${COMMONS_API}?${p}`)).json();
     for (const pg of Object.values(d?.query?.pages ?? {})) {
       const ii = pg?.imageinfo?.[0];
-      if (ii && pg.title) out.set(pg.title.replace(/^File:/, ""), { width: ii.width, height: ii.height, mime: ii.mime, url: ii.url, thumb: ii.thumburl });
+      if (ii && pg.title) out.set(pg.title.replace(/^File:/, ""), { width: ii.width, height: ii.height, mime: ii.mime, url: ii.url, thumb: ii.thumburl,
+        framed: (pg.categories ?? []).some((c) => FRAMED_CATEGORY.test(c.title)) });
     }
   }
   return out;
@@ -357,8 +406,10 @@ async function reupgrade(row) {
   // Second query when the first finds nothing big enough: surname + title core
   // ("Vermeer Lady Writing a Letter"), which surfaces museum/GAP scans the full
   // query buries under same-named works.
-  const gate = (info) => {
+  const gate = (info, name = "") => {
     if (!info || !/image\/(jpeg|png|tiff)/i.test(info.mime || "")) return "mime";
+    if (info.framed) return "framed (category)";
+    if (FRAMED_NAME.test(name)) return "framed (name)";
     if (!info.width || info.width < ourW * MIN_GAIN) return "small";
     const aspOff = Math.abs(info.width / info.height - ourAspect) / ourAspect;
     if (aspOff > ASPECT_TOL_STRONG) return "aspect";
@@ -367,7 +418,7 @@ async function reupgrade(row) {
   const consider = async (list) => {
     const infos = await commonsInfoBatch(list.slice(0, CANDIDATES), 256);
     for (const name of list.slice(0, CANDIDATES)) {
-      const info = infos.get(name); const g = gate(info);
+      const info = infos.get(name); const g = gate(info, name);
       if (typeof g === "string") { if (VERBOSE) console.log(`    - ${name}  ${info?.width ?? "?"}x${info?.height ?? "?"}  dropped: ${g}`); continue; }
       if (!cands.some((c) => c.name === name)) cands.push({ source: "commons", name, ...info, aspOff: g });
     }
@@ -404,7 +455,11 @@ async function reupgrade(row) {
     const ok = c.aspOff <= ASPECT_TOL ? dist <= HASH_MAX
       : c.aspOff <= ASPECT_TOL_STRONG ? dist <= HASH_STRONG : false;
     const okMuseum = museum && c.aspOff <= ASPECT_MUSEUM && dist <= HASH_MUSEUM;
-    if (ok || okMuseum) { chosen = { ...c, dist, via: okMuseum && !ok ? "museum-title" : "hash" }; break; }
+    if (ok || okMuseum) {
+      let fb; try { fb = await addedBorder(row, c); } catch { if (VERBOSE) console.log(`    - ${c.name}  frame test failed — skipped`); continue; }
+      if (fb.framed) { console.log(`    ✗ ${c.name}  FRAMED/border (match ${fb.base}→${fb.best} at ${fb.at * 100}% crop) — skipped`); continue; }
+      chosen = { ...c, dist, via: okMuseum && !ok ? "museum-title" : "hash" }; break;
+    }
   }
   if (!chosen) {
     // Commons consensus (see HASH_MUSEUM comment above).
@@ -412,9 +467,13 @@ async function reupgrade(row) {
     if (near.length >= CONSENSUS_MIN) {
       const agree = near.filter((a) => near.filter((b) => b !== a && hamming(a.ch, b.ch) <= CONSENSUS_MUTUAL).length >= CONSENSUS_MIN - 1);
       if (agree.length >= CONSENSUS_MIN) {
-        const best = agree.sort((a, b) => b.c.width - a.c.width)[0];
-        chosen = { ...best.c, dist: best.dist, via: `consensus(${agree.length})` };
-        if (VERBOSE) console.log(`    = consensus of ${agree.length} files → ${best.c.name}`);
+        for (const best of agree.sort((a, b) => b.c.width - a.c.width)) {
+          let fb; try { fb = await addedBorder(row, best.c); } catch { continue; }
+          if (fb.framed) { console.log(`    ✗ ${best.c.name}  FRAMED/border (match ${fb.base}→${fb.best} at ${fb.at * 100}% crop) — skipped`); continue; }
+          chosen = { ...best.c, dist: best.dist, via: `consensus(${agree.length})` };
+          if (VERBOSE) console.log(`    = consensus of ${agree.length} files → ${best.c.name}`);
+          break;
+        }
       }
     }
   }
@@ -435,7 +494,10 @@ async function reupgrade(row) {
       const aspOff = Math.abs(meta.width / meta.height - ourAspect) / ourAspect;
       if (aspOff > ASPECT_TOL) continue;
       if (VERBOSE) console.log(`    · ${c.name}  ${meta.width}x${meta.height}  asp${aspOff.toFixed(3)}  ham${dist}`);
-      chosen = { ...c, width: meta.width, height: meta.height, aspOff, dist, __buf: buf };
+      const cand = { ...c, width: meta.width, height: meta.height, aspOff, dist, __buf: buf };
+      let fb; try { fb = await addedBorder(row, cand); } catch { continue; }
+      if (fb.framed) { console.log(`    ✗ ${c.name}  FRAMED/border (match ${fb.base}→${fb.best} at ${fb.at * 100}% crop) — skipped`); continue; }
+      chosen = cand;
       break;
     }
   }
