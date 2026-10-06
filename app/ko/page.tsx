@@ -5,6 +5,7 @@ import Link from "@/components/Link";
 import { ArtworkGrid } from "@/components/ArtworkGrid";
 import { WebSiteJsonLd } from "@/components/JsonLd";
 import { HomeHero } from "@/components/HomeHero";
+import { HomePrintsStrip } from "@/components/HomePrintsStrip";
 import { supabase } from "@/lib/supabase";
 import { getT } from "@/lib/translations";
 import {
@@ -227,6 +228,8 @@ export default async function HomePageKo() {
           )}
         </div>
       </section>
+
+      <HomePrintsStrip locale="ko" />
 
       <section className="w-full bg-[#f6f4ee] py-12">
         <div className="px-5">

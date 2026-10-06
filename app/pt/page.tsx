@@ -4,6 +4,7 @@ import Link from "@/components/Link";
 import { ArtworkGrid } from "@/components/ArtworkGrid";
 import { WebSiteJsonLd } from "@/components/JsonLd";
 import { HomeHero } from "@/components/HomeHero";
+import { HomePrintsStrip } from "@/components/HomePrintsStrip";
 import { buildHomeLanguageAlternates } from "@/lib/locale-routes";
 import { supabase } from "@/lib/supabase";
 import { getT } from "@/lib/translations";
@@ -222,6 +223,8 @@ export default async function HomePagePt() {
           )}
         </div>
       </section>
+
+      <HomePrintsStrip locale="pt" />
 
       <section className="w-full bg-[#f6f4ee] py-12">
         <div className="px-5">
