@@ -6,6 +6,7 @@ import { WebSiteJsonLd } from "@/components/JsonLd";
 import { HomeHero } from "@/components/HomeHero";
 import { buildHomeLanguageAlternates } from "@/lib/locale-routes";
 import { getPrintCollections, INDIVIDUAL_PRINTS } from "@/lib/print-collections";
+import { getVintagePosterArtists } from "@/lib/vintage-posters";
 import { supabase } from "@/lib/supabase";
 import { artworkImageUrl, artworkGridImageUrl, slugify } from "@/lib/utils";
 import type { Artwork } from "@/types/artwork";
@@ -54,7 +55,12 @@ const GENRE_STRIPS = [
 export default async function HomePage() {
   // All curated sets qualify for the strip since the prints/wall-charts merge;
   // the catch-all bucket stays out — it's browsing chrome, not a "collection".
-  const printCollections = (await getPrintCollections())
+  const [allPrintCollections, posterArtists] = await Promise.all([
+    getPrintCollections(),
+    // Newest additions (Oct 2026): the advertising-poster designers lead the strip.
+    getVintagePosterArtists(),
+  ]);
+  const printCollections = allPrintCollections
     .filter((c) => c.name !== INDIVIDUAL_PRINTS)
     .slice(0, 10);
 
@@ -245,7 +251,7 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {printCollections.length > 0 ? (
+      {printCollections.length > 0 || posterArtists.length > 0 ? (
         <section className="w-full bg-[#f6f4ee] py-8">
           <div className="px-5">
             <div className="mb-8 flex items-baseline justify-between">
@@ -255,6 +261,31 @@ export default async function HomePage() {
               </Link>
             </div>
             <div className="flex gap-5 overflow-x-auto pb-2">
+              {/* Poster cards keep the posters' portrait shape at the same height
+                  as the 16:10 collection cards, so the row stays level. */}
+              {posterArtists.map((a) => {
+                const src = a.cover ? artworkGridImageUrl(a.cover) : null;
+                return (
+                  <Link key={a.slug} href={`/artists/${a.slug}`} className="group shrink-0">
+                    <div className="aspect-[3/4] h-40 overflow-hidden bg-[#e8e4de] md:h-[180px]">
+                      {src ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                          src={src}
+                          alt=""
+                          loading="lazy"
+                          decoding="async"
+                          className="h-full w-full object-cover object-top transition-transform duration-300 group-hover:scale-[1.03]"
+                        />
+                      ) : null}
+                    </div>
+                    <p className="w-[120px] pt-3 text-[15px] leading-snug text-[#1a1a1a] md:w-[135px]">{a.name}</p>
+                    <p className="mt-0.5 text-[13px] leading-snug text-[#8a8a8a]">
+                      {a.count} {a.count === 1 ? "work" : "works"}
+                    </p>
+                  </Link>
+                );
+              })}
               {printCollections.map((c) => {
                 const src = artworkGridImageUrl({ url: c.cover.url, image_id: c.cover.image_id });
                 return (
