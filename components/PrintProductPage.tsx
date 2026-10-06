@@ -26,10 +26,13 @@ export function PrintProductPage({
   reviews: { item: PrintReview[]; all: PrintReview[] };
 }) {
   const sizes = sizesForArtwork(imgWidth, imgHeight);
-  const [sizeCode, setSizeCode] = useState("");
-  const [frame, setFrame] = useState<FrameKey | "">("");
-  // Until the customer picks, show a mid-range size exactly as it would arrive.
-  const shown = sizes.find((s) => s.code === sizeCode) ?? sizes[Math.floor((sizes.length - 1) / 2)];
+  // Start on a real choice — the mid-range size in a black frame, the same
+  // product the mockup shows — so the price on screen is an exact total from the
+  // first moment instead of a "from $149+" figure.
+  const defaultSize = sizes[Math.floor((sizes.length - 1) / 2)];
+  const [sizeCode, setSizeCode] = useState(defaultSize?.code ?? "");
+  const [frame, setFrame] = useState<FrameKey | "">("black");
+  const shown = sizes.find((s) => s.code === sizeCode) ?? defaultSize;
 
   return (
     <div className="mx-auto w-full max-w-7xl px-4 py-6 md:px-6 md:py-10">

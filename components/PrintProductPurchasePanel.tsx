@@ -136,6 +136,22 @@ export function PrintProductPurchasePanel({
   };
 
   const delivery = country ? deliveryLine(country, shippingBySize, selected?.code) : null;
+
+  // The headline is what the customer will actually pay: the size's price plus
+  // delivery to the chosen country (frame colours all cost the same). Until the
+  // delivery quote arrives it shows the print price and says it's still checking.
+  const selectedShipping = selected && shippingBySize ? shippingBySize[selected.code] : undefined;
+  const total =
+    selectedPrice !== null && selectedShipping ? selectedPrice + selectedShipping.surchargeUsd : null;
+  const frameLabel = FRAME_OPTIONS.find((f) => f.key === frame)?.label.toLowerCase();
+  const totalNote =
+    total !== null && selected
+      ? `${selected.label.split(" – ")[0]}${frameLabel ? `, ${frameLabel}` : ""} · ${
+          selectedShipping!.surchargeUsd === 0
+            ? `free delivery to ${countryPhrase(country)}`
+            : `includes ${usd(selectedShipping!.surchargeUsd)} delivery to ${countryPhrase(country)}`
+        }`
+      : null;
   const shownShipping = shippingBySize
     ? (selected ? shippingBySize[selected.code] : Object.values(shippingBySize).find((s) => !!s)) ?? null
     : null;
@@ -200,9 +216,15 @@ export function PrintProductPurchasePanel({
 
   return (
     <div className="lg:pt-2">
-      <p className="text-3xl font-semibold text-[#222]">{selectedPrice ? usd(selectedPrice) : `${usd(minPrice)}+`}</p>
-      <p className={`mt-1 min-h-[1.25rem] text-sm font-medium ${delivery?.free ? "text-[#2e7d32]" : "text-[#595959]"}`}>
-        {delivery?.text ?? ""}
+      <p className="text-3xl font-semibold text-[#222]" aria-live="polite">
+        {total !== null ? usd(total) : selectedPrice ? usd(selectedPrice) : `${usd(minPrice)}+`}
+      </p>
+      <p
+        className={`mt-1 min-h-[1.25rem] text-sm font-medium ${
+          totalNote ? (selectedShipping?.surchargeUsd === 0 ? "text-[#2e7d32]" : "text-[#595959]") : delivery?.free ? "text-[#2e7d32]" : "text-[#595959]"
+        }`}
+      >
+        {totalNote ?? delivery?.text ?? ""}
       </p>
 
       <h1 className="mt-4 text-lg leading-snug text-[#222]">{title} — Framed Art Print, Museum-Quality Reproduction</h1>
