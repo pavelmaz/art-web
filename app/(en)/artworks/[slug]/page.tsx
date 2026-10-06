@@ -58,6 +58,7 @@ type ArtworkRow = {
   img_height: number | null;
   orig_bytes: number | null;
   std_bytes: number | null;
+  object_type: string | null;
 };
 
 
@@ -225,7 +226,7 @@ function ArtworkDescriptionFormatted({ description }: { description: string }) {
 
 async function getArtworkBySlug(slug: string): Promise<ArtworkRow | null> {
   const selectColumns =
-    "id, slug, title, artist_display, url, image_id, museum, style_title, genre_title, medium_display, date_display, dimensions, description, death_year, img_width, img_height, orig_bytes, std_bytes";
+    "id, slug, title, artist_display, url, image_id, museum, style_title, genre_title, medium_display, date_display, dimensions, description, death_year, img_width, img_height, orig_bytes, std_bytes, object_type";
 
   const primary = await supabase
     .from("artworks")

@@ -28,6 +28,7 @@ type ArtworkRow = {
   image_id: string | null;
   img_width: number | null;
   img_height: number | null;
+  object_type: string | null;
 };
 
 export default async function ArtworkPrintPage({ params }: PrintPageProps) {
@@ -35,7 +36,7 @@ export default async function ArtworkPrintPage({ params }: PrintPageProps) {
 
   const { data: artwork, error } = await supabase
     .from("artworks")
-    .select("id, slug, title, artist_display, url, image_id, img_width, img_height")
+    .select("id, slug, title, artist_display, url, image_id, img_width, img_height, object_type")
     .eq("slug", slug)
     .single<ArtworkRow>();
 

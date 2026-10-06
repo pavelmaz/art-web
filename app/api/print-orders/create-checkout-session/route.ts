@@ -44,7 +44,7 @@ export async function POST(req: NextRequest) {
     // renders this option on those artists' pages, but nothing stops a direct POST.
     const { data: artwork } = await supabase
       .from("artworks")
-      .select("id, title, artist_display, img_width, img_height")
+      .select("id, title, artist_display, img_width, img_height, object_type")
       .eq("id", artworkSlug)
       .maybeSingle();
 

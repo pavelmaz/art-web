@@ -128,20 +128,29 @@ export function prodigiItemFor(
 }
 
 /** Artists whose works are sold as framed prints (matched on artworks.artist_display).
- *  Van Gogh first (24 Sep 2026); Rembrandt and Hiroshige added 28 Sep 2026. */
-const PRINT_ARTISTS = new Set(["Vincent van Gogh", "Rembrandt van Rijn", "Utagawa Hiroshige"]);
+ *  Van Gogh first (24 Sep 2026); Rembrandt and Hiroshige added 28 Sep 2026; the
+ *  advertising-poster designers shown on the /prints hub added 6 Oct 2026. */
+const PRINT_ARTISTS = new Set([
+  "Vincent van Gogh", "Rembrandt van Rijn", "Utagawa Hiroshige",
+  "Leonetto Cappiello", "Alphonse Mucha", "Henri de Toulouse-Lautrec", "Jules Chéret",
+  "Théophile Alexandre Steinlen", "Roger Broders", "Eugène Grasset", "Edward Penfield",
+  "Emil Cardinaux", "Henri Privat-Livemont", "Manuel Orazi", "Ethel Reed", "Ludwig Hohlwein",
+  "Achille Mauzan", "Plinio Codognato", "Adolfo Hohenstein", "Leopoldo Metlicovitz",
+  "Alfred Roller", "Julius Klinger", "John Hassall",
+]);
 
-/** Whether the artwork can be sold as a framed print: a print artist, and enough
+/** Whether the artwork can be sold as a framed print: a print artist or anything in
+ *  the Prints & wall charts hub (object_type "print", since 6 Oct 2026), and enough
  *  resolution for at least one size. Used by the artwork page, the print page and
  *  checkout, so the button, the page and the payment always agree. */
 export function canSellPrint(artwork: {
   artist_display: string | null;
+  object_type?: string | null;
   img_width: number | null;
   img_height: number | null;
 }): boolean {
-  return (
-    !!artwork.artist_display &&
-    PRINT_ARTISTS.has(artwork.artist_display) &&
-    sizesForArtwork(artwork.img_width, artwork.img_height).length > 0
-  );
+  const eligible =
+    artwork.object_type === "print" ||
+    (!!artwork.artist_display && PRINT_ARTISTS.has(artwork.artist_display));
+  return eligible && sizesForArtwork(artwork.img_width, artwork.img_height).length > 0;
 }
