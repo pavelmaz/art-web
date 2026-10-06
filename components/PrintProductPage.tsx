@@ -37,7 +37,10 @@ export function PrintProductPage({
   return (
     <div className="mx-auto w-full max-w-7xl px-4 py-6 md:px-6 md:py-10">
       {/* Etsy layout: gallery then reviews on the left, purchase panel alongside on the right. */}
-      <div className="grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,1fr)_400px] lg:gap-x-12 lg:gap-y-10">
+      {/* Rows "auto 1fr": the first row is only as tall as the gallery, so the
+          reviews start right under the photo; the taller purchase panel (which
+          spans both rows) pushes its extra height into the second row instead. */}
+      <div className="grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,1fr)_400px] lg:grid-rows-[auto_1fr] lg:items-start lg:gap-x-12 lg:gap-y-10">
         <PrintProductGallery
           artworkSlug={artworkSlug}
           imageUrl={imageUrl}
