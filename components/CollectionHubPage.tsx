@@ -2,8 +2,9 @@ import Link from "@/components/Link";
 
 import { getPrintCollections, type CollectionHubKey } from "@/lib/print-collections";
 import { HUB_COPY, hubBasePath } from "@/lib/print-collections-i18n";
-import type { SiteLocale } from "@/lib/locale-routes";
+import { artistDetailPath, type SiteLocale } from "@/lib/locale-routes";
 import { artworkGridImageUrl, slugify } from "@/lib/utils";
+import { getVintagePosterArtists } from "@/lib/vintage-posters";
 
 /**
  * Shared body for the curated-set hubs (/prints, /book-illustrations) — one
@@ -21,7 +22,11 @@ export async function CollectionHubPage({
   const copy = HUB_COPY[locale];
   const text = hub === "print" ? copy.print : copy.book;
   const basePath = hubBasePath(hub, locale);
-  const collections = (await getPrintCollections()).filter((c) => c.objectType === hub);
+  const [allCollections, posterArtists] = await Promise.all([
+    getPrintCollections(),
+    hub === "print" ? getVintagePosterArtists() : Promise.resolve([]),
+  ]);
+  const collections = allCollections.filter((c) => c.objectType === hub);
   const totalWorks = collections.reduce((sum, c) => sum + c.count, 0);
 
   return (
@@ -33,6 +38,42 @@ export async function CollectionHubPage({
           {totalWorks ? copy.collectionsLine(collections.length, totalWorks) : ""}
         </p>
       </div>
+
+      {/* Poster designers live in the main catalogue, not in print sets, so
+          this row links straight to their artist pages. */}
+      {posterArtists.length > 0 && (
+        <section aria-labelledby="vintage-posters-heading">
+          <h2 id="vintage-posters-heading" className="text-lg font-semibold text-[#1a1a1a]">
+            {copy.posters.heading}
+          </h2>
+          <p className="mb-5 mt-1 max-w-2xl text-sm text-[#6b6b6b]">{copy.posters.intro}</p>
+          <ul className="grid grid-cols-3 gap-x-4 gap-y-6 sm:grid-cols-4 md:grid-cols-5 xl:grid-cols-10">
+            {posterArtists.map((a) => {
+              const src = a.cover ? artworkGridImageUrl(a.cover) : null;
+              return (
+                <li key={a.slug}>
+                  <Link href={artistDetailPath(locale, a.slug)} className="group block">
+                    <div className="aspect-[3/4] overflow-hidden bg-[#f1efea]">
+                      {src ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                          src={src}
+                          alt=""
+                          loading="lazy"
+                          decoding="async"
+                          className="h-full w-full object-cover object-top transition-transform duration-300 group-hover:scale-[1.03]"
+                        />
+                      ) : null}
+                    </div>
+                    <p className="pt-2 text-[13px] leading-snug text-[#1a1a1a]">{a.name}</p>
+                    <p className="text-[12px] leading-snug text-[#8a8a8a]">{copy.worksCount(a.count)}</p>
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
+        </section>
+      )}
 
       {collections.length === 0 ? (
         <p className="text-sm text-[#6b6b6b]">{copy.noCollections}</p>

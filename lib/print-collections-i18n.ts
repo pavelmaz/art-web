@@ -28,6 +28,8 @@ type HubText = { heading: string; intro: string };
 type HubCopy = {
   print: HubText;
   book: HubText;
+  /** Shortcut row of advertising-poster artists on the /prints hub */
+  posters: HubText;
   /** metaTitle suffix, e.g. "Free High-Resolution Downloads" */
   downloadsTitle: string;
   /** "free to download in high resolution" */
@@ -45,6 +47,7 @@ export const HUB_COPY: Record<SiteLocale, HubCopy> = {
   en: {
     print: { heading: "Prints & wall charts", intro: "Published print series and the educational charts that once hung in classrooms — etchings, engravings, maps and school posters, scanned at full size and free to download." },
     book: { heading: "Book illustrations", intro: "Complete plate series from illustrated books and artist portfolios, scanned at full size and free to download." },
+    posters: { heading: "Vintage advertising posters", intro: "The great poster designers of the Belle Époque and the early 20th century — Cappiello, Mucha, Toulouse-Lautrec and more, in high resolution." },
     downloadsTitle: "Free High-Resolution Downloads",
     freeHiRes: "free to download in high resolution",
     worksCount: en_worksCount,
@@ -54,6 +57,7 @@ export const HUB_COPY: Record<SiteLocale, HubCopy> = {
   es: {
     print: { heading: "Grabados y láminas murales", intro: "Series de grabados publicadas y las láminas educativas que antes colgaban en las aulas — aguafuertes, grabados, mapas y pósters escolares, escaneados a tamaño completo y gratis para descargar." },
     book: { heading: "Ilustraciones de libros", intro: "Series completas de láminas de libros ilustrados y portafolios de artistas, escaneadas a tamaño completo y gratis para descargar." },
+    posters: { heading: "Carteles publicitarios antiguos", intro: "Los grandes cartelistas de la Belle Époque y de principios del siglo XX — Cappiello, Mucha, Toulouse-Lautrec y más, en alta resolución." },
     downloadsTitle: "Descargas Gratis en Alta Resolución",
     freeHiRes: "gratis para descargar en alta resolución",
     worksCount: (n) => `${n} ${n === 1 ? "obra" : "obras"}`,
@@ -63,6 +67,7 @@ export const HUB_COPY: Record<SiteLocale, HubCopy> = {
   pt: {
     print: { heading: "Gravuras e mapas de parede", intro: "Séries de gravuras publicadas e os mapas educativos que antes decoravam as salas de aula — água-fortes, gravuras, mapas e cartazes escolares, digitalizados em tamanho completo e grátis para baixar." },
     book: { heading: "Ilustrações de livros", intro: "Séries completas de pranchas de livros ilustrados e portfólios de artistas, digitalizadas em tamanho completo e grátis para baixar." },
+    posters: { heading: "Cartazes publicitários antigos", intro: "Os grandes cartazistas da Belle Époque e do início do século XX — Cappiello, Mucha, Toulouse-Lautrec e outros, em alta resolução." },
     downloadsTitle: "Downloads Grátis em Alta Resolução",
     freeHiRes: "grátis para baixar em alta resolução",
     worksCount: (n) => `${n} ${n === 1 ? "obra" : "obras"}`,
@@ -72,6 +77,7 @@ export const HUB_COPY: Record<SiteLocale, HubCopy> = {
   fr: {
     print: { heading: "Estampes et cartes murales", intro: "Séries d'estampes publiées et les planches éducatives qui ornaient jadis les salles de classe — eaux-fortes, gravures, cartes et affiches scolaires, numérisées en pleine taille et gratuites à télécharger." },
     book: { heading: "Illustrations de livres", intro: "Séries complètes de planches de livres illustrés et de portfolios d'artistes, numérisées en pleine taille et gratuites à télécharger." },
+    posters: { heading: "Affiches publicitaires anciennes", intro: "Les grands affichistes de la Belle Époque et du début du XXe siècle — Cappiello, Mucha, Toulouse-Lautrec et d'autres, en haute résolution." },
     downloadsTitle: "Téléchargements Gratuits en Haute Résolution",
     freeHiRes: "gratuit à télécharger en haute résolution",
     worksCount: (n) => `${n} ${n === 1 ? "œuvre" : "œuvres"}`,
@@ -81,6 +87,7 @@ export const HUB_COPY: Record<SiteLocale, HubCopy> = {
   de: {
     print: { heading: "Drucke & Wandkarten", intro: "Veröffentlichte Druckserien und die Lehrtafeln, die einst in Klassenzimmern hingen — Radierungen, Stiche, Karten und Schulplakate, in voller Größe gescannt und kostenlos zum Download." },
     book: { heading: "Buchillustrationen", intro: "Vollständige Tafelserien aus illustrierten Büchern und Künstlermappen, in voller Größe gescannt und kostenlos zum Download." },
+    posters: { heading: "Historische Werbeplakate", intro: "Die großen Plakatkünstler der Belle Époque und des frühen 20. Jahrhunderts — Cappiello, Mucha, Toulouse-Lautrec und mehr, in hoher Auflösung." },
     downloadsTitle: "Kostenlose Downloads in Hoher Auflösung",
     freeHiRes: "kostenlos in hoher Auflösung herunterladbar",
     worksCount: (n) => `${n} ${n === 1 ? "Werk" : "Werke"}`,
@@ -90,6 +97,7 @@ export const HUB_COPY: Record<SiteLocale, HubCopy> = {
   it: {
     print: { heading: "Stampe e carte murali", intro: "Serie di stampe pubblicate e le tavole didattiche che un tempo ornavano le aule — acqueforti, incisioni, mappe e manifesti scolastici, digitalizzati a grandezza piena e gratis da scaricare." },
     book: { heading: "Illustrazioni di libri", intro: "Serie complete di tavole da libri illustrati e portfolio d'artista, digitalizzate a grandezza piena e gratis da scaricare." },
+    posters: { heading: "Manifesti pubblicitari d'epoca", intro: "I grandi cartellonisti della Belle Époque e del primo Novecento — Cappiello, Mucha, Toulouse-Lautrec e altri, in alta risoluzione." },
     downloadsTitle: "Download Gratis in Alta Risoluzione",
     freeHiRes: "gratis da scaricare in alta risoluzione",
     worksCount: (n) => `${n} ${n === 1 ? "opera" : "opere"}`,
@@ -99,6 +107,7 @@ export const HUB_COPY: Record<SiteLocale, HubCopy> = {
   ja: {
     print: { heading: "版画・壁掛け図版", intro: "出版された版画シリーズと、かつて教室に掛けられていた教育用図版 — エッチング、エングレービング、地図、学校用ポスターを原寸でスキャンし、無料でダウンロードできます。" },
     book: { heading: "書籍の挿絵", intro: "挿絵本や画家のポートフォリオの完全な図版シリーズを、原寸でスキャンし、無料でダウンロードできます。" },
+    posters: { heading: "ヴィンテージ広告ポスター", intro: "ベル・エポックから20世紀初頭のポスター作家たち — カッピエッロ、ミュシャ、ロートレックほか、高解像度で。" },
     downloadsTitle: "高解像度で無料ダウンロード",
     freeHiRes: "高解像度で無料ダウンロード可能",
     worksCount: (n) => `${n}点`,
@@ -108,6 +117,7 @@ export const HUB_COPY: Record<SiteLocale, HubCopy> = {
   ko: {
     print: { heading: "판화 & 벽걸이 도판", intro: "출판된 판화 시리즈와 한때 교실에 걸려 있던 교육용 도판 — 에칭, 판화, 지도, 학교 포스터를 원본 크기로 스캔하여 무료로 다운로드할 수 있습니다." },
     book: { heading: "책 삽화", intro: "삽화책과 화가 포트폴리오의 완전한 도판 시리즈를 원본 크기로 스캔하여 무료로 다운로드할 수 있습니다." },
+    posters: { heading: "빈티지 광고 포스터", intro: "벨 에포크와 20세기 초의 위대한 포스터 작가들 — 카피엘로, 무하, 툴루즈로트레크 등을 고해상도로 만나보세요." },
     downloadsTitle: "고해상도 무료 다운로드",
     freeHiRes: "고해상도로 무료 다운로드 가능",
     worksCount: (n) => `${n}점`,
@@ -117,6 +127,7 @@ export const HUB_COPY: Record<SiteLocale, HubCopy> = {
   ru: {
     print: { heading: "Гравюры и настенные карты", intro: "Опубликованные серии гравюр и учебные таблицы, что когда-то висели в классах — офорты, гравюры, карты и школьные плакаты, отсканированные в полном размере и бесплатные для скачивания." },
     book: { heading: "Книжные иллюстрации", intro: "Полные серии листов из иллюстрированных книг и художественных портфолио, отсканированные в полном размере и бесплатные для скачивания." },
+    posters: { heading: "Винтажные рекламные плакаты", intro: "Великие мастера плаката Прекрасной эпохи и начала XX века — Каппьелло, Муха, Тулуз-Лотрек и другие, в высоком разрешении." },
     downloadsTitle: "Бесплатные Загрузки в Высоком Разрешении",
     freeHiRes: "бесплатно скачать в высоком разрешении",
     worksCount: (n) => `${n} ${ruPlural(n, "работа", "работы", "работ")}`,
@@ -126,6 +137,7 @@ export const HUB_COPY: Record<SiteLocale, HubCopy> = {
   zh: {
     print: { heading: "版画与挂图", intro: "已出版的版画系列，以及曾经挂在教室里的教学挂图——蚀刻、雕版、地图与学校海报，按原尺寸扫描，免费下载。" },
     book: { heading: "书籍插图", intro: "来自插图书籍与艺术家作品集的完整图版系列，按原尺寸扫描，免费下载。" },
+    posters: { heading: "复古广告海报", intro: "美好年代与20世纪初的海报大师——卡皮耶洛、穆夏、图卢兹-罗特列克等，高清呈现。" },
     downloadsTitle: "高清免费下载",
     freeHiRes: "免费高清下载",
     worksCount: (n) => `${n} 件作品`,
