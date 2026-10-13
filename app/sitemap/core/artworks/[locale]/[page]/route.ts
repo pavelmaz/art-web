@@ -1,4 +1,5 @@
 import {
+  ALLOWLIST_ACTIVE,
   CORE_XML_HEADERS,
   buildCoreUrlset,
   coreArtworkLoc,
@@ -16,7 +17,7 @@ export async function generateStaticParams(): Promise<{ locale: string; page: st
 export async function GET(_req: Request, ctx: { params: Promise<{ locale: string; page: string }> }) {
   const { locale, page: rawPage } = await ctx.params;
   const page = parseCorePage(rawPage);
-  if (!isCoreLocale(locale) || page === null) {
+  if (!isCoreLocale(locale) || page === null || (ALLOWLIST_ACTIVE && locale !== "en")) {
     return new Response("Not found", { status: 404 });
   }
   try {

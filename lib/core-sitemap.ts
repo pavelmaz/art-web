@@ -4,6 +4,7 @@ import { artworkLoc } from "@/lib/artwork-sitemap-response";
 import { COMMERCIAL_USE_PATHS } from "@/lib/commercial-use-landing";
 import { CONTACT_PATHS } from "@/lib/contact-translations";
 import { fineArtProPath } from "@/lib/fineart-pro-path";
+import { GOOGLE_ALLOWLIST } from "@/lib/google-allowlist.generated";
 import { LOCALE_ROUTE_CONFIG, type SiteLocale } from "@/lib/locale-routes";
 import { escapeXml, getPublicSiteUrl } from "@/lib/sitemap-xml";
 import type { Locale } from "@/lib/translations";
@@ -24,6 +25,18 @@ import { artworkGridImageUrl, slugify } from "@/lib/utils";
  * json value (PostgREST caps row responses at 1,000).
  */
 export const CORE_SITEMAP_PAGE_SIZE = 10000;
+
+/**
+ * GOOGLE ALLOW-LIST (Oct 2026). Once lib/google-allowlist.generated.ts holds the
+ * approved pages, the core sitemap advertises exactly those (and middleware tells
+ * Googlebot "noindex" everywhere else). Empty list = the score-based core below.
+ */
+export const ALLOWLIST_ACTIVE = GOOGLE_ALLOWLIST.size > 0;
+const ARTWORK_PREFIX = "/artworks/";
+const ARTIST_PREFIX = "/artists/";
+function allowlistedSlugs(prefix: string): string[] {
+  return [...GOOGLE_ALLOWLIST].filter((p) => p.startsWith(prefix)).map((p) => p.slice(prefix.length));
+}
 /** Locales advertised to Google. "zh" is deliberately offline (403). */
 export const CORE_LOCALES: SiteLocale[] = ["en", "es", "pt", "fr", "de", "it", "ja", "ko", "ru"];
 export const CORE_ARTIST_MIN_WORKS = 5;
@@ -64,6 +77,7 @@ export function buildCoreSitemapIndex(locs: string[]): string {
 
 /** Number of 10k files needed for a locale's core artworks. */
 export async function coreArtworkPageCount(locale: SiteLocale): Promise<number> {
+  if (ALLOWLIST_ACTIVE) return locale === "en" ? 1 : 0;
   const { data, error } = await coreSupabase().rpc("core_sitemap_artwork_count", {
     min_score: coreMinScore(locale),
   });
@@ -73,6 +87,7 @@ export async function coreArtworkPageCount(locale: SiteLocale): Promise<number> 
 }
 
 export async function coreArtworkSlugs(locale: SiteLocale, page: number): Promise<string[]> {
+  if (ALLOWLIST_ACTIVE) return locale === "en" && page === 0 ? allowlistedSlugs(ARTWORK_PREFIX) : [];
   const { data, error } = await coreSupabase().rpc("core_sitemap_artwork_slugs", {
     min_score: coreMinScore(locale),
     lim: CORE_SITEMAP_PAGE_SIZE,
@@ -85,6 +100,20 @@ export async function coreArtworkSlugs(locale: SiteLocale, page: number): Promis
 export type CoreArtworkRow = { slug: string; image_id: string | null; title: string | null; artist: string | null };
 
 export async function coreArtworkRows(locale: SiteLocale, page: number): Promise<CoreArtworkRow[]> {
+  if (ALLOWLIST_ACTIVE) {
+    if (locale !== "en" || page !== 0) return [];
+    const slugs = allowlistedSlugs(ARTWORK_PREFIX);
+    const rows: CoreArtworkRow[] = [];
+    for (let i = 0; i < slugs.length; i += 200) {
+      const { data, error } = await coreSupabase()
+        .from("artworks")
+        .select("slug, image_id, title, artist_display")
+        .in("slug", slugs.slice(i, i + 200));
+      if (error) throw error;
+      for (const r of data ?? []) rows.push({ slug: r.slug, image_id: r.image_id, title: r.title, artist: r.artist_display });
+    }
+    return rows;
+  }
   const { data, error } = await coreSupabase().rpc("core_sitemap_artwork_rows", {
     min_score: coreMinScore(locale),
     lim: CORE_SITEMAP_PAGE_SIZE,
@@ -98,6 +127,7 @@ export async function coreArtworkRows(locale: SiteLocale, page: number): Promise
 const GENERIC_ARTIST_SLUGS = new Set(["unknown-artist", "unknown", "anonymous", "anonymous-artist", "unidentified-artist"]);
 
 export async function coreArtistSlugs(): Promise<string[]> {
+  if (ALLOWLIST_ACTIVE) return allowlistedSlugs(ARTIST_PREFIX);
   const { data, error } = await coreSupabase().rpc("core_sitemap_artist_slugs", {
     min_works: CORE_ARTIST_MIN_WORKS,
     min_bio: CORE_ARTIST_MIN_BIO_CHARS,
@@ -131,6 +161,11 @@ const GENRE_SLUGS = [
  */
 export async function coreHubLocs(): Promise<string[]> {
   const base = getPublicSiteUrl();
+  if (ALLOWLIST_ACTIVE) {
+    return [...GOOGLE_ALLOWLIST]
+      .filter((p) => !p.startsWith(ARTWORK_PREFIX) && !p.startsWith(ARTIST_PREFIX))
+      .map((p) => (p === "/" ? base : `${base}${p}`));
+  }
   const locs: string[] = [];
   for (const locale of CORE_LOCALES) {
     const cfg = locale === "en" ? null : LOCALE_ROUTE_CONFIG[locale];

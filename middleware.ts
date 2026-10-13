@@ -2,6 +2,7 @@ import { createServerClient } from "@supabase/ssr";
 import type { CookieOptions } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
+import { GOOGLE_ALLOWLIST } from "@/lib/google-allowlist.generated";
 import {
   buildHreflangLinkHeader,
   detectLocaleFromPathname,
@@ -66,6 +67,17 @@ function looksLikeCrawler(ua: string): boolean {
   return /bot|crawl|spider|slurp|mediapartners|facebookexternalhit|embedly|whatsapp|telegram|discord|slack|bingpreview|duckduck|yandex|baidu|petalbot|preview/i.test(
     ua,
   );
+}
+
+/** Allow-list key: decoded path without a trailing slash (the list is stored decoded). */
+function allowlistKey(pathname: string): string {
+  let p = pathname;
+  try {
+    p = decodeURI(pathname);
+  } catch {
+    // malformed escape — compare raw
+  }
+  return p.replace(/\/+$/, "") || "/";
 }
 
 export async function middleware(request: NextRequest) {
@@ -265,6 +277,14 @@ export async function middleware(request: NextRequest) {
     const linkHeader = buildHreflangLinkHeader(pathname, page);
     if (linkHeader) {
       response.headers.set("Link", linkHeader);
+    }
+
+    // Google-only index allow-list (Oct 2026 recovery plan): Google indexes just the
+    // approved pages (lib/google-allowlist.generated.ts); every other page tells
+    // Googlebot "noindex". The directive is googlebot-scoped, so Bing and the other
+    // engines keep indexing the full catalogue. An empty list = feature off.
+    if (!isStagingHost && GOOGLE_ALLOWLIST.size > 0 && !GOOGLE_ALLOWLIST.has(allowlistKey(pathname))) {
+      response.headers.set("X-Robots-Tag", "googlebot: noindex");
     }
   }
 
