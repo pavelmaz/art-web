@@ -43,7 +43,7 @@ async function getJson(url, tries = 5) {
       if (r.ok) return r.json();
       if (t >= tries || ![429, 500, 502, 503, 504].includes(r.status)) throw new Error(`${r.status}`);
     } catch (e) { if (t >= tries) throw e; }
-    await sleep(1500 * t);
+    await sleep(4000 * t); // Wikidata 429s under parallel load — back off generously
   }
 }
 async function dbAll(path) {
@@ -114,9 +114,12 @@ async function runArtists() {
         const labelEq = fold(e.labels?.en?.value) === fold(a.name) || (e.aliases?.en || []).some((x) => fold(x.value) === fold(a.name));
         let score = 0;
         const birthOk = a.birth_year && b && Math.abs(a.birth_year - b) <= 1;
-        if (a.birth_year && b) { if (birthOk) score += 3; else if (Math.abs(a.birth_year - b) > 3) continue; }
-        // Death dates disagree surprisingly often (Wikidata or our data); only decisive when the birth can't vouch.
-        if (a.death_year && d) { if (Math.abs(a.death_year - d) <= 1) score += 2; else if (!birthOk && Math.abs(a.death_year - d) > 3) continue; }
+        const deathOk = a.death_year && d && Math.abs(a.death_year - d) <= 1;
+        // Old masters' birth years are often uncertain (Frans Hals 1581 vs 1591, Claude Lorrain 1604 vs 1600):
+        // a birth mismatch is tolerated only when the exact name AND the death year both agree.
+        if (a.birth_year && b) { if (birthOk) score += 3; else if (Math.abs(a.birth_year - b) > 3 && !(deathOk && labelEq)) continue; }
+        // Death dates disagree surprisingly often too; only decisive when the birth can't vouch.
+        if (a.death_year && d) { if (deathOk) score += 2; else if (!birthOk && Math.abs(a.death_year - d) > 3) continue; }
         if (labelEq) score += 2;
         // Without any year on our side, demand the exact name.
         if (!a.birth_year && !a.death_year && !labelEq) continue;

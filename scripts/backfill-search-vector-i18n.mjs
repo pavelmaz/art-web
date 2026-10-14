@@ -3,7 +3,7 @@
 // Safe to re-run; stops when nothing is left. To rebuild everything (e.g. after new
 // artist names arrive): node … --reset first sets the column to NULL in batches.
 //
-// Run: node --env-file=.env.local scripts/backfill-search-vector-i18n.mjs [--batch 2000] [--reset]
+// Run: node --env-file=.env.local scripts/backfill-search-vector-i18n.mjs [--batch 300] [--reset] [--refresh]
 const BASE = (process.env.NEXT_PUBLIC_SUPABASE_URL || "").replace(/\/$/, "");
 const KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_KEY;
 if (!BASE || !KEY) throw new Error("Missing Supabase env");
@@ -28,11 +28,14 @@ if (process.argv.includes("--reset")) {
   console.log(`\nreset done: ${total} rows`);
 }
 
+// --refresh: recompute the rows queued in public._i18n_refresh_todo (after new
+// artist/museum names arrived) instead of filling empty vectors.
+const FN = process.argv.includes("--refresh") ? "search_vector_i18n_refresh" : "search_vector_i18n_backfill";
 let done = 0, t0 = Date.now(), lastSize = null, batch = BATCH, failures = 0;
 for (;;) {
   let n;
   try {
-    n = await rpc("search_vector_i18n_backfill", { n: batch });
+    n = await rpc(FN, { n: batch });
     failures = 0;
     if (batch < BATCH) batch = Math.min(BATCH, batch + 50); // creep back up after a slow patch
   } catch (e) {

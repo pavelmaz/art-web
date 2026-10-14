@@ -50,10 +50,24 @@ function localizedSelect(locale: string): string {
   return col ? `${ARTWORK_SELECT}, title_local:${col}` : ARTWORK_SELECT;
 }
 
-/** Extra `.or()` branch matching the localized title. Every title_* column has a trigram index. */
+/** Japanese / Chinese / Korean script — no word spaces, often 2-character words. */
+const CJK_RE = /[\u3040-\u30ff\u3400-\u4dbf\u4e00-\u9fff\uac00-\ud7af]/;
+
+/**
+ * "Contains" (ilike) filters only stay index-backed for terms of 3+ characters:
+ * pg_trgm can't index shorter patterns, so `title ilike '%모네%'` scans the whole
+ * table and hits the 3 s anon statement timeout. Shorter terms rely on the
+ * full-text index and, for CJK, the PGroonga branch inside search_artworks_i18n.
+ */
+function canUseContains(term: string): boolean {
+  return [...term].length >= 3;
+}
+
+/** Extra `.or()` branch matching the localized title. Every title_* column has a trigram
+ *  index; CJK titles are matched by PGroonga inside the RPC instead. */
 function localizedTitleClause(locale: string, safeTerm: string): string {
   const col = LOCALE_TITLE_COLUMN[locale];
-  return col ? `,${col}.ilike.%${safeTerm}%` : "";
+  return col && !CJK_RE.test(safeTerm) && canUseContains(safeTerm) ? `,${col}.ilike.%${safeTerm}%` : "";
 }
 
 type ArtistRow = {
@@ -89,6 +103,7 @@ async function fetchArtworksByRpc(term: string, locale: string) {
 }
 
 async function fetchArtworksByFilter(term: string, locale: string) {
+  if (!canUseContains(term)) return { data: [] as unknown[], error: null };
   const safe = escapeOrFilterValue(term);
   return supabase
     .from("artworks")
@@ -238,12 +253,17 @@ async function fetchTypedArtworks(
   const expanded = expandSearchTerm(term);
   const localCol = LOCALE_TITLE_COLUMN[locale];
 
+  const contains = canUseContains(term);
+
   if (objectType !== null) {
-    const clauses = [`title.ilike.%${primary}%`, `artist_display.ilike.%${primary}%`, `medium_display.ilike.%${primary}%`];
+    const clauses = contains
+      ? [`title.ilike.%${primary}%`, `artist_display.ilike.%${primary}%`, `medium_display.ilike.%${primary}%`]
+      : [];
     if (localCol) clauses.push(`${localCol}.ilike.%${primary}%`);
     for (const t of expanded) {
       const safe = escapeOrFilterValue(t);
-      clauses.push(`title.ilike.%${safe}%`, `tags.cs.{${safe}}`);
+      if (canUseContains(t)) clauses.push(`title.ilike.%${safe}%`);
+      clauses.push(`tags.cs.{${safe}}`);
     }
     const { data } = await supabase
       .from("artworks")
@@ -256,13 +276,15 @@ async function fetchTypedArtworks(
   }
 
   const [byText, byGenre, byTags] = await Promise.all([
-    supabase
-      .from("artworks")
-      .select(localizedSelect(locale))
-      .is("object_type", null)
-      .or(`title.ilike.%${primary}%,artist_display.ilike.%${primary}%,medium_display.ilike.%${primary}%${localizedTitleClause(locale, primary)}`)
-      .order("score", { ascending: false })
-      .limit(limit),
+    contains
+      ? supabase
+          .from("artworks")
+          .select(localizedSelect(locale))
+          .is("object_type", null)
+          .or(`title.ilike.%${primary}%,artist_display.ilike.%${primary}%,medium_display.ilike.%${primary}%${localizedTitleClause(locale, primary)}`)
+          .order("score", { ascending: false })
+          .limit(limit)
+      : Promise.resolve({ data: [] }),
     supabase
       .from("artworks")
       .select(localizedSelect(locale))
