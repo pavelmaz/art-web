@@ -42,7 +42,7 @@ function toArtwork(item: SiteSearchArtworkRow): Artwork {
   const slug = item.slug?.trim() || slugify(item.title);
   return {
     id: item.id,
-    title: item.title,
+    title: item.title_local?.trim() || item.title,
     slug,
     artistName: item.artist_display ?? "Unknown artist",
     artistDisplay: item.artist_display ?? undefined,

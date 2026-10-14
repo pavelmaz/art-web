@@ -18,6 +18,8 @@ export type SiteSearchArtworkRow = {
   tags?: string[] | null;
   /** null = painting; "print" / "book-illustration" otherwise. */
   object_type?: string | null;
+  /** Title in the visitor's language (localized search pages only). */
+  title_local?: string | null;
 };
 
 export type SiteSearchArtist = {
@@ -36,6 +38,33 @@ const ARTWORK_SELECT =
 /** Artists tab cap (SearchResults TAB_CAPS.artists) — enrichment costs a query per artist. */
 const MAX_ARTISTS = 20;
 
+/** Site locale → artworks column holding the title in that language. English has no entry. */
+export const LOCALE_TITLE_COLUMN: Record<string, string> = {
+  es: "title_sp", pt: "title_pt", fr: "title_fr", de: "title_ger", it: "title_it",
+  ja: "title_jp", ko: "title_ko", ru: "title_ru", zh: "title_ch",
+};
+
+/** Same columns, plus the localized title (aliased as title_local) on localized pages. */
+function localizedSelect(locale: string): string {
+  const col = LOCALE_TITLE_COLUMN[locale];
+  return col ? `${ARTWORK_SELECT}, title_local:${col}` : ARTWORK_SELECT;
+}
+
+/** Extra `.or()` branch matching the localized title. Every title_* column has a trigram index. */
+function localizedTitleClause(locale: string, safeTerm: string): string {
+  const col = LOCALE_TITLE_COLUMN[locale];
+  return col ? `,${col}.ilike.%${safeTerm}%` : "";
+}
+
+type ArtistRow = {
+  name: string | null;
+  slug: string | null;
+  image_url?: string | null;
+  artwork_count: number | null;
+  /** Name in the visitor's language (localized search only). */
+  name_local?: string | null;
+};
+
 export function sanitizeSearchTerm(raw: string): string {
   return raw.replace(/[%_]/g, "").trim();
 }
@@ -50,40 +79,51 @@ export function escapeOrFilterValue(value: string): string {
     .replace(/\./g, "\\.");
 }
 
-async function fetchArtworksByRpc(term: string) {
-  return supabase.rpc("search_artworks", { search_term: term });
+/** English keeps the original function. Other languages also search the
+ *  multilingual index (translated titles, artist/museum/genre/style names) and
+ *  get titles back in their own language. */
+async function fetchArtworksByRpc(term: string, locale: string) {
+  return LOCALE_TITLE_COLUMN[locale]
+    ? supabase.rpc("search_artworks_i18n", { search_term: term, locale })
+    : supabase.rpc("search_artworks", { search_term: term });
 }
 
-async function fetchArtworksByFilter(term: string) {
+async function fetchArtworksByFilter(term: string, locale: string) {
   const safe = escapeOrFilterValue(term);
   return supabase
     .from("artworks")
-    .select(ARTWORK_SELECT)
-    .or(`title.ilike.%${safe}%,artist_display.ilike.%${safe}%,museum.ilike.%${safe}%,genre_title.ilike.%${safe}%,style_title.ilike.%${safe}%,medium_display.ilike.%${safe}%,tags.cs.{${safe}}`)
+    .select(localizedSelect(locale))
+    .or(`title.ilike.%${safe}%,artist_display.ilike.%${safe}%,museum.ilike.%${safe}%,genre_title.ilike.%${safe}%,style_title.ilike.%${safe}%,medium_display.ilike.%${safe}%,tags.cs.{${safe}}${localizedTitleClause(locale, safe)}`)
     .order("score", { ascending: false })
     .limit(50);
 }
 
 /** Broaden a search across correlated concept terms — title text OR the tags array. */
-async function fetchArtworksByExpansions(terms: string[], limit: number) {
+async function fetchArtworksByExpansions(terms: string[], limit: number, locale: string) {
   const clauses = terms.flatMap((t) => {
     const safe = escapeOrFilterValue(t);
     return [`title.ilike.%${safe}%`, `tags.cs.{${safe}}`];
   });
   return supabase
     .from("artworks")
-    .select(ARTWORK_SELECT)
+    .select(localizedSelect(locale))
     .or(clauses.join(","))
     .order("score", { ascending: false })
     .limit(limit);
 }
 
-async function fetchArtistsByName(term: string) {
-  return supabase
+async function fetchArtistsByName(term: string, locale: string): Promise<{ data: ArtistRow[] | null; error: { message: string } | null }> {
+  if (LOCALE_TITLE_COLUMN[locale]) {
+    // Names and aliases in every language (Wikidata) — ゴッホ, 고흐, Ван Гог all find Van Gogh.
+    const { data, error } = await supabase.rpc("search_artists_i18n", { search_term: term, locale });
+    return { data: (data as ArtistRow[] | null) ?? null, error };
+  }
+  const { data, error } = await supabase
     .from("artists")
     .select("name, slug, image_url, artwork_count")
     .ilike("name", `%${term}%`)
     .limit(20);
+  return { data: (data as ArtistRow[] | null) ?? null, error };
 }
 
 /** Match artists hub: use `artists.image_url` first, artwork preview only as fallback. */
@@ -190,46 +230,49 @@ async function fetchTypedArtworks(
   rawQuery: string,
   objectType: "print" | "book-illustration" | null,
   limit = 60,
+  locale = "en",
 ): Promise<SiteSearchArtworkRow[]> {
   const term = sanitizeSearchTerm(rawQuery);
   if (!term) return [];
   const primary = escapeOrFilterValue(term);
   const expanded = expandSearchTerm(term);
+  const localCol = LOCALE_TITLE_COLUMN[locale];
 
   if (objectType !== null) {
     const clauses = [`title.ilike.%${primary}%`, `artist_display.ilike.%${primary}%`, `medium_display.ilike.%${primary}%`];
+    if (localCol) clauses.push(`${localCol}.ilike.%${primary}%`);
     for (const t of expanded) {
       const safe = escapeOrFilterValue(t);
       clauses.push(`title.ilike.%${safe}%`, `tags.cs.{${safe}}`);
     }
     const { data } = await supabase
       .from("artworks")
-      .select(ARTWORK_SELECT)
+      .select(localizedSelect(locale))
       .eq("object_type", objectType)
       .or(clauses.join(","))
       .order("score", { ascending: false })
       .limit(limit);
-    return (data as SiteSearchArtworkRow[] | null) ?? [];
+    return (data as unknown as SiteSearchArtworkRow[] | null) ?? [];
   }
 
   const [byText, byGenre, byTags] = await Promise.all([
     supabase
       .from("artworks")
-      .select(ARTWORK_SELECT)
+      .select(localizedSelect(locale))
       .is("object_type", null)
-      .or(`title.ilike.%${primary}%,artist_display.ilike.%${primary}%,medium_display.ilike.%${primary}%`)
+      .or(`title.ilike.%${primary}%,artist_display.ilike.%${primary}%,medium_display.ilike.%${primary}%${localizedTitleClause(locale, primary)}`)
       .order("score", { ascending: false })
       .limit(limit),
     supabase
       .from("artworks")
-      .select(ARTWORK_SELECT)
+      .select(localizedSelect(locale))
       .is("object_type", null)
       .eq("genre_title", titleCase(term))
       .order("score", { ascending: false })
       .limit(limit),
     supabase
       .from("artworks")
-      .select(ARTWORK_SELECT)
+      .select(localizedSelect(locale))
       .is("object_type", null)
       .overlaps("tags", expanded)
       .order("score", { ascending: false })
@@ -237,9 +280,9 @@ async function fetchTypedArtworks(
   ]);
   return mergeUniqueArtworks(
     [
-      (byText.data as SiteSearchArtworkRow[] | null) ?? [],
-      (byGenre.data as SiteSearchArtworkRow[] | null) ?? [],
-      (byTags.data as SiteSearchArtworkRow[] | null) ?? [],
+      (byText.data as unknown as SiteSearchArtworkRow[] | null) ?? [],
+      (byGenre.data as unknown as SiteSearchArtworkRow[] | null) ?? [],
+      (byTags.data as unknown as SiteSearchArtworkRow[] | null) ?? [],
     ],
     limit,
   );
@@ -274,16 +317,16 @@ export type SegmentedSearch = {
  * minus any print/book that snuck in (every row carries object_type);
  * Prints and Books get their own typed queries so those tabs are never starved.
  */
-async function segmentedSearchUncached(query: string): Promise<SegmentedSearch> {
+async function segmentedSearchUncached(query: string, locale: string): Promise<SegmentedSearch> {
   // All four are independent — run them together. (26 Sep 2026: this used to
   // be a chain of ~8 dependent round trips and results took 5–8 s.)
   // Base = RPC (FTS + typo tolerance) ranked first; typed = genre/tag/correlated
   // matches that the FTS vector misses (e.g. the Botanical genre for "botanical").
   const [base, typedPaintings, prints, books] = await Promise.all([
-    runSiteSearch(query),
-    fetchTypedArtworks(query, null, 100),
-    fetchTypedArtworks(query, "print"),
-    fetchTypedArtworks(query, "book-illustration"),
+    runSiteSearch(query, locale),
+    fetchTypedArtworks(query, null, 100, locale),
+    fetchTypedArtworks(query, "print", 60, locale),
+    fetchTypedArtworks(query, "book-illustration", 60, locale),
   ]);
   const basePaintings = base.artworks.filter((a) => (a.object_type ?? null) === null);
   const paintings = mergeUniqueArtworks([basePaintings, typedPaintings], 100);
@@ -294,27 +337,29 @@ async function segmentedSearchUncached(query: string): Promise<SegmentedSearch> 
 // Results for a query are kept for an hour (cache key = normalized query), so
 // repeat searches for the same words — most searches — skip the database.
 const cachedSegmentedSearch = unstable_cache(
-  async (query: string) => {
-    const result = await segmentedSearchUncached(query);
+  async (query: string, locale: string) => {
+    const result = await segmentedSearchUncached(query, locale);
     if (result.error) throw new Error(result.error); // never cache a failed search
     return result;
   },
-  ["site-search", "v1"],
+  ["site-search", "v2"],
   { revalidate: 3600 },
 );
 
-export async function runSegmentedSearch(rawQuery: string): Promise<SegmentedSearch> {
+/** `locale` = the search page's language: results come back with titles and
+ *  artist names in that language and the query is matched against them too. */
+export async function runSegmentedSearch(rawQuery: string, locale = "en"): Promise<SegmentedSearch> {
   // Same words, same case, same spacing → same cache entry. Every matcher below
   // is case-insensitive, so lowercasing loses nothing.
   const query = rawQuery.trim().replace(/\s+/g, " ").toLowerCase();
   try {
-    return await cachedSegmentedSearch(query);
+    return await cachedSegmentedSearch(query, locale);
   } catch {
-    return segmentedSearchUncached(query);
+    return segmentedSearchUncached(query, locale);
   }
 }
 
-export async function runSiteSearch(rawQuery: string): Promise<{
+export async function runSiteSearch(rawQuery: string, locale = "en"): Promise<{
   artworks: SiteSearchArtworkRow[];
   artists: SiteSearchArtist[];
   error: string | null;
@@ -328,21 +373,21 @@ export async function runSiteSearch(rawQuery: string): Promise<{
   let error: string | null = null;
 
   // Artwork and artist lookups don't depend on each other — run them together.
-  const [rpc, { data: artistRows }] = await Promise.all([fetchArtworksByRpc(term), fetchArtistsByName(term)]);
+  const [rpc, { data: artistRows }] = await Promise.all([fetchArtworksByRpc(term, locale), fetchArtistsByName(term, locale)]);
   if (rpc.error) {
-    const fallback = await fetchArtworksByFilter(term);
+    const fallback = await fetchArtworksByFilter(term, locale);
     if (fallback.error) {
       return { artworks: [], artists: [], error: fallback.error.message };
     }
-    artworks = (fallback.data as SiteSearchArtworkRow[] | null) ?? [];
+    artworks = (fallback.data as unknown as SiteSearchArtworkRow[] | null) ?? [];
     error = rpc.error.message;
   } else {
-    artworks = (rpc.data as SiteSearchArtworkRow[] | null) ?? [];
+    artworks = (rpc.data as unknown as SiteSearchArtworkRow[] | null) ?? [];
     // RPC can succeed but return no rows (e.g. FTS vs ilike mismatch). Fall back so search stays reliable.
     if (artworks.length === 0) {
-      const fallback = await fetchArtworksByFilter(term);
+      const fallback = await fetchArtworksByFilter(term, locale);
       if (!fallback.error) {
-        artworks = (fallback.data as SiteSearchArtworkRow[] | null) ?? [];
+        artworks = (fallback.data as unknown as SiteSearchArtworkRow[] | null) ?? [];
       }
     }
   }
@@ -353,9 +398,9 @@ export async function runSiteSearch(rawQuery: string): Promise<{
   const expanded = expandSearchTerm(term);
   if (expanded.length > 1 && artworks.length < 50) {
     const seenIds = new Set(artworks.map((a) => a.id));
-    const exp = await fetchArtworksByExpansions(expanded, 80);
+    const exp = await fetchArtworksByExpansions(expanded, 80, locale);
     if (!exp.error) {
-      for (const row of (exp.data as SiteSearchArtworkRow[] | null) ?? []) {
+      for (const row of (exp.data as unknown as SiteSearchArtworkRow[] | null) ?? []) {
         if (seenIds.has(row.id)) continue;
         seenIds.add(row.id);
         artworks.push(row);
@@ -379,6 +424,9 @@ export async function runSiteSearch(rawQuery: string): Promise<{
 
   const artists: Omit<SiteSearchArtist, "image_id" | "url">[] = [];
   const seen = new Set<string>();
+  // English name → name in the visitor's language, applied after enrichment
+  // (the preview-image lookup needs the English name).
+  const localName = new Map<string, string>();
 
   for (const row of artistRows ?? []) {
     const name = row.name?.trim();
@@ -387,6 +435,7 @@ export async function runSiteSearch(rawQuery: string): Promise<{
     const key = name.toLowerCase();
     if (seen.has(key)) continue;
     seen.add(key);
+    if (row.name_local?.trim()) localName.set(name, row.name_local.trim());
     artists.push({
       name,
       slug,
@@ -406,5 +455,9 @@ export async function runSiteSearch(rawQuery: string): Promise<{
   // Only the artists the tab can show get the per-artist image lookup.
   const enrichedArtists = await enrichSearchArtists(artists.slice(0, MAX_ARTISTS));
 
-  return { artworks, artists: enrichedArtists, error };
+  return {
+    artworks,
+    artists: enrichedArtists.map((a) => ({ ...a, name: localName.get(a.name) ?? a.name })),
+    error,
+  };
 }

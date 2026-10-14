@@ -35,6 +35,6 @@ export default async function SearchPage({
 }) {
   const { q: rawQ, tab } = await searchParams;
   const q = rawQ?.trim() ?? "";
-  const results = q ? await runSegmentedSearch(q) : null;
+  const results = q ? await runSegmentedSearch(q, CONFIG.locale) : null;
   return <SearchResults q={q} tab={tab} results={results} config={CONFIG} />;
 }
